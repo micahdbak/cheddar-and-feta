@@ -33,8 +33,8 @@ public:
 
     int tile_width, tile_height, cols, rows;
     std::vector<Tilesheet *> tilesheets;
-    std::vector<Tile> **bg_tiles;
-    std::vector<Tile> **fg_tiles;
+    std::vector<Tile> **bg_tiles = nullptr;
+    std::vector<Tile> **fg_tiles = nullptr;
     std::vector<std::pair<std::string, std::string>> objects;
 
     SDL_Texture *bg, *fg;

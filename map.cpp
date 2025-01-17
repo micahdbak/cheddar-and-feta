@@ -186,7 +186,6 @@ static inline void write_tile(uint8_t *buffer, Tile tile, int x, int y, char gro
 }
 
 void Map::write(const char *map_path) {
-    std::cout << "write" << std::endl;
     FILE *file = fopen(map_path, "wb");
     if (file == nullptr) CORRUPTED_EXIT;
     uint8_t buffer[1024];
@@ -248,14 +247,6 @@ void Map::clear() {
         this->fg_tiles = nullptr;
     }
     this->objects.clear();
-    if (this->bg != nullptr) {
-        SDL_DestroyTexture(this->bg);
-        this->bg = nullptr;
-    }
-    if (this->fg != nullptr) {
-        SDL_DestroyTexture(this->fg);
-        this->fg = nullptr;
-    }
 }
 
 void Map::render_tile(int x, int y) {

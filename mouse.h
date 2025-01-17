@@ -12,6 +12,7 @@ public:
     void step() override;
 
 private:
+    float x, y;
     Sprite *sprite;
 };
 

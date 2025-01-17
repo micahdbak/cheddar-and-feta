@@ -7,10 +7,13 @@ Mouse::Mouse(int x, int y) {
     this->texture = this->sprite->texture;
     this->src_rect = &this->sprite->frame;
 
-    this->dst_rect.x = float(x);
-    this->dst_rect.y = float(y);
+    this->dst_rect.x = float(SCREEN_WIDTH/2 - 12);
+    this->dst_rect.y = float(SCREEN_HEIGHT/2 - 12);
     this->dst_rect.w = 24.0f;
     this->dst_rect.h = 24.0f;
+
+    this->x = float(x);
+    this->y = float(y);
 }
 
 Mouse::~Mouse() {
@@ -30,8 +33,11 @@ void Mouse::step() {
 
     int x_dir = int(keyboard.is_down(SDLK_RIGHT)) - int(keyboard.is_down(SDLK_LEFT));
     int y_dir = int(keyboard.is_down(SDLK_DOWN)) - int(keyboard.is_down(SDLK_UP));
-    this->dst_rect.x += float(x_dir) * (y_dir != 0 ? 0.7071f : 1.0f) * mov_speed * game->delta;
-    this->dst_rect.y += float(y_dir) * (x_dir != 0 ? 0.7071f : 1.0f) * mov_speed * game->delta;
+    this->x += float(x_dir) * (y_dir != 0 ? 0.7071f : 1.0f) * mov_speed * game->delta;
+    this->y += float(y_dir) * (x_dir != 0 ? 0.7071f : 1.0f) * mov_speed * game->delta;
+
+    game->view_x = int(this->x);
+    game->view_y = int(this->y);
 
     if (x_dir != 0 || y_dir != 0) {
         this->sprite->update_frame();

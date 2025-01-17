@@ -31,7 +31,42 @@ void Game::load_map(const char *map_path) {
 
     Map map;
     map.read(map_path);
+
+    for (auto obj : map.objects)
+        this->create_object(obj.first, obj.second);
+
+    this->bg = map.bg;
+    this->fg = map.fg;
+
     map.clear();
+}
+
+void Game::make_map_rect(int x, int y, int w, int h, SDL_FRect *src_rect, SDL_FRect *dst_rect) {
+    int src_x = x - (SCREEN_WIDTH/2);
+    int src_y = y - (SCREEN_HEIGHT/2);
+
+    if (src_x < 0) {
+        dst_rect->x = float(-1 * src_x);
+        dst_rect->w = float(min(SCREEN_WIDTH, w));
+        src_rect->x = 0.0f;
+    } else {
+        dst_rect->x = 0.0f;
+        dst_rect->w = float(min(SCREEN_WIDTH, w - src_x));
+        src_rect->x = float(src_x);
+    }
+
+    if (src_y < 0) {
+        dst_rect->y = float(-1 * src_y);
+        dst_rect->h = float(min(SCREEN_HEIGHT, h));
+        src_rect->y = 0.0f;
+    } else {
+        dst_rect->y = 0.0f;
+        dst_rect->h = float(min(SCREEN_HEIGHT, h - src_y));
+        src_rect->y = float(src_y);
+    }
+
+    src_rect->w = dst_rect->w;
+    src_rect->h = dst_rect->h;
 }
 
 void Game::create_object(const std::string &obj_id, const std::string &options) {
@@ -41,9 +76,8 @@ void Game::create_object(const std::string &obj_id, const std::string &options) 
     }
 
     Object *obj = this->factories[obj_id]->create(options);
-    if (obj != nullptr) {
+    if (obj != nullptr)
         this->objects.push_back(obj);
-    }
 }
 
 void Game::draw_text(const std::string &str, int x, int y) {
@@ -63,6 +97,13 @@ void Game::step() {
     SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
     SDL_RenderClear(renderer);
 
+    // render background
+    SDL_FRect map_src, map_dst;
+    if (this->bg != nullptr) {
+        this->make_map_rect(this->view_x, this->view_y, this->bg->w, this->bg->h, &map_src, &map_dst);
+        SDL_RenderTexture(renderer, this->bg, &map_src, &map_dst);
+    }
+
     // render objects to the screen
     for (int i = 0; i < this->objects.size(); i++) {
         Object *obj = this->objects[i];
@@ -71,6 +112,10 @@ void Game::step() {
             SDL_RenderTexture(renderer, obj->texture, obj->src_rect, &obj->dst_rect);
         }
     }
+
+    // render foreground
+    if (this->fg != nullptr)
+        SDL_RenderTexture(renderer, this->fg, &map_src, &map_dst);
 
     // render all text if there is any
     while (!texts.empty()) {
@@ -101,7 +146,7 @@ void Game::step() {
         text_area.y = float(text.y);
         text_area.w = float(w * longest_line);
         text_area.h = float((h+1) * nlines);
-        SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
+        SDL_SetRenderDrawColor(renderer, 64, 64, 64, 255);
         SDL_RenderFillRect(renderer, &text_area);
 
         SDL_FRect src_rect, dst_rect;
@@ -139,5 +184,15 @@ void Game::unload() {
         }
 
         this->objects.clear();
+    }
+
+    if (this->bg != nullptr) {
+        SDL_DestroyTexture(this->bg);
+        this->bg = nullptr;
+    }
+
+    if (this->fg != nullptr) {
+        SDL_DestroyTexture(this->fg);
+        this->fg = nullptr;
     }
 }

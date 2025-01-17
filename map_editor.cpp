@@ -10,7 +10,8 @@
 enum EditorInputMode {
     INPUT_TILE,
     INPUT_SHEET,
-    INPUT_ADD_SHEET
+    INPUT_ADD_SHEET,
+    INPUT_OBJECTS
 };
 
 class Editor : public Object {
@@ -19,21 +20,23 @@ public:
     ~Editor();
 
     void step() override;
-    void render();
 
 private:
+    void input_tile();
+    void input_sheet();
     void input_add_sheet();
+    void input_objects();
+    void render();
 
     std::string map_path;
     Map map;
 
     bool fg_toggle = false;
     bool user_inputting = false;
-    EditorInputMode input_mode = INPUT_ADD_SHEET;
+    EditorInputMode input_mode;
     
     std::string text;
     int sel_x = 0, sel_y = 0, sel_tilesheet = -1, sel_ts_x = 0, sel_ts_y = 0;
-    SDL_FRect viewing;
 };
 
 class EditorFactory : public ObjectFactory {
@@ -55,6 +58,9 @@ void Game::init() {
 
     this->factories["editor"] = new EditorFactory();
     this->create_object("editor", std::string(this->argv[1]));
+
+    this->title = "Map Editor - ";
+    this->title += this->argv[1];
 }
 
 Editor::Editor(const char *map_path) {
@@ -70,6 +76,9 @@ Editor::Editor(const char *map_path) {
     } else {
         fclose(file);
         this->map.read(map_path);
+        std::string backup_path = map_path;
+        backup_path += ".backup";
+        this->map.write(backup_path.c_str());
     }
 
     this->texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -80,7 +89,6 @@ Editor::Editor(const char *map_path) {
     this->src_rect->h = this->dst_rect.h = float(SCREEN_HEIGHT);
 
     this->map_path = map_path;
-    this->map_path += ".edited"; // TEMPORARY
 
     if (!this->map.tilesheets.empty())
         this->sel_tilesheet = 0;
@@ -88,97 +96,280 @@ Editor::Editor(const char *map_path) {
 
 Editor::~Editor() {
     SDL_DestroyTexture(this->texture);
-    this->map.write(this->map_path.c_str());
     delete this->src_rect;
+    if (this->map.bg != nullptr) {
+        SDL_DestroyTexture(this->map.bg);
+        this->map.bg = nullptr;
+    }
+    if (this->map.fg != nullptr) {
+        SDL_DestroyTexture(this->map.fg);
+        this->map.fg = nullptr;
+    }
 }
 
 void Editor::step() {
-    if (this->user_inputting) {
-        switch (this->input_mode) {
-        case INPUT_ADD_SHEET:
-            this->input_add_sheet();
-            break;
-        default:
-            this->user_inputting = false;
-            break;
-        }
-    } else {
+    if (!this->user_inputting) {
         // move the selected tile on input
         this->sel_x += int(keyboard.is_hit(SDLK_RIGHT)) - int(keyboard.is_hit(SDLK_LEFT));
         this->sel_y += int(keyboard.is_hit(SDLK_DOWN)) - int(keyboard.is_hit(SDLK_UP));
         this->sel_x = clamp(this->sel_x, 0, this->map.cols - 1);
         this->sel_y = clamp(this->sel_y, 0, this->map.rows - 1);
 
-        std::vector<Tile> *vec = this->map.bg_tiles[(this->sel_y * this->map.cols) + this->sel_x];
+        std::vector<Tile> *vec;
+        if (this->fg_toggle) {
+            vec = this->map.fg_tiles[(this->sel_y * this->map.cols) + this->sel_x];
+        } else {
+            vec = this->map.bg_tiles[(this->sel_y * this->map.cols) + this->sel_x];
+        }
 
-        game->draw_text("[T]ile, [S]heet, [A]dd sheet, [F]oreground\n<Return> to push, <Backspace> to pop", 0, 0);
+        game->draw_text(" [T]ile, [S]heet, [A]dd, [F]g/bg, [W]rite, [O]bjects  ", 0, 0);
         char status_text[256];
-        snprintf(status_text, sizeof(status_text), "%s: %s %d,%d [%d]\n%s %d,%d", this->map_path.c_str(),
-            this->fg_toggle ? "fg" : "bg", this->sel_x, this->sel_y, vec == nullptr ? 0 : int(vec->size()),
-            this->sel_tilesheet >= 0 ? this->map.tilesheets[this->sel_tilesheet]->path.c_str() : "NULL", this->sel_ts_x, this->sel_ts_y);
-        game->draw_text(std::string(status_text), 0, SCREEN_HEIGHT - 22);
+        snprintf(status_text, sizeof(status_text), "%s: %s %d,%d [%d]", this->map_path.c_str(),
+            this->fg_toggle ? "fg" : "bg", this->sel_x * this->map.tile_width, this->sel_y * this->map.tile_height, vec == nullptr ? 0 : int(vec->size()));
+        game->draw_text(std::string(status_text), 0, SCREEN_HEIGHT - 11);
 
-        if (keyboard.is_hit(SDLK_RETURN) && this->sel_tilesheet >= 0) {
+        switch (keyboard.c) {
+        case 't':
+            if (this->sel_tilesheet < 0)
+                break;
+
+            this->user_inputting = true;
+            this->input_mode = INPUT_TILE;
+            this->text = "";
+            break;
+        case 's':
+            if (this->sel_tilesheet < 0)
+                break;
+
+            this->user_inputting = true;
+            this->input_mode = INPUT_SHEET;
+            this->text = "";
+            break;
+        case 'a':
+            this->user_inputting = true;
+            this->input_mode = INPUT_ADD_SHEET;
+            this->text = "";
+            break;
+        case 'f':
+            this->fg_toggle = !this->fg_toggle;
+            break;
+        case 'w':
+            this->map.write(this->map_path.c_str());
+            break;
+        case 'o':
+            this->user_inputting = true;
+            this->input_mode = INPUT_OBJECTS;
+            this->text = "";
+            break;
+        }
+        keyboard.c = NO_CHAR;
+
+        if (keyboard.is_down(SDLK_RETURN) && this->sel_tilesheet >= 0) {
+            bool should_place = true;
+
             // place a tile
             if (vec == nullptr) {
                 vec = new std::vector<Tile>();
-                this->map.bg_tiles[(this->sel_y * this->map.cols) + this->sel_x] = vec;
+                if (this->fg_toggle) {
+                    this->map.fg_tiles[(this->sel_y * this->map.cols) + this->sel_x] = vec;
+                } else {
+                    this->map.bg_tiles[(this->sel_y * this->map.cols) + this->sel_x] = vec;
+                }
+            } else {
+                Tile top_tile = vec->back();
+                if (top_tile.tilesheet == this->sel_tilesheet && top_tile.x == this->sel_ts_x && top_tile.y == this->sel_ts_y)
+                    should_place = false;
             }
-            Tile new_tile;
-            new_tile.tilesheet = this->sel_tilesheet;
-            new_tile.x = this->sel_ts_x;
-            new_tile.y = this->sel_ts_y;
-            vec->push_back(new_tile);
-            this->map.render_tile(this->sel_x, this->sel_y);
-        } else if (keyboard.is_hit(SDLK_BACKSPACE)) {
+
+            if (should_place) {
+                Tile new_tile;
+                new_tile.tilesheet = this->sel_tilesheet;
+                new_tile.x = this->sel_ts_x;
+                new_tile.y = this->sel_ts_y;
+                vec->push_back(new_tile);
+                this->map.render_tile(this->sel_x, this->sel_y);
+            }
+        } else if (keyboard.is_hit(SDLK_BACKSPACE) || keyboard.is_down(SDLK_MINUS)) {
             // remove a tile
             if (vec != nullptr) {
                 vec->pop_back();
                 if (vec->empty()) {
                     delete vec;
                     vec = nullptr;
-                    this->map.bg_tiles[(this->sel_y * this->map.cols) + this->sel_x] = nullptr;
+                    if (this->fg_toggle) {
+                        this->map.fg_tiles[(this->sel_y * this->map.cols) + this->sel_x] = nullptr;
+                    } else {
+                        this->map.bg_tiles[(this->sel_y * this->map.cols) + this->sel_x] = nullptr;
+                    }
                 }
                 this->map.render_tile(this->sel_x, this->sel_y);
             }
-        } else if (keyboard.is_hit(SDLK_A)) {
-            this->user_inputting = true;
-            this->input_mode = INPUT_ADD_SHEET;
-            this->text = "";
         }
     }
 
     this->render();
+
+    if (this->user_inputting) {
+        switch (this->input_mode) {
+        case INPUT_TILE:
+            this->input_tile();
+            break;
+        case INPUT_SHEET:
+            this->input_sheet();
+            break;
+        case INPUT_ADD_SHEET:
+            this->input_add_sheet();
+            break;
+        case INPUT_OBJECTS:
+            this->input_objects();
+            break;
+        default:
+            this->user_inputting = false;
+            break;
+        }
+    }
+}
+
+void Editor::input_tile() {
+    this->sel_ts_x += int(keyboard.is_hit(SDLK_RIGHT)) - int(keyboard.is_hit(SDLK_LEFT));
+    this->sel_ts_y += int(keyboard.is_hit(SDLK_DOWN)) - int(keyboard.is_hit(SDLK_UP));
+    this->sel_ts_x = clamp(this->sel_ts_x, 0, this->map.tilesheets[this->sel_tilesheet]->cols - 1);
+    this->sel_ts_y = clamp(this->sel_ts_y, 0, this->map.tilesheets[this->sel_tilesheet]->rows - 1);
+
+    if (keyboard.is_hit(SDLK_RETURN) || keyboard.is_hit(SDLK_ESCAPE)) {
+        this->user_inputting = false;
+    }
+
+    SDL_SetRenderTarget(renderer, this->texture);
+    SDL_FRect tilesheet_rect;
+    tilesheet_rect.x = 0.0f;
+    tilesheet_rect.y = 11.0f;
+    tilesheet_rect.w = this->map.tilesheets[this->sel_tilesheet]->texture->w;
+    tilesheet_rect.h = this->map.tilesheets[this->sel_tilesheet]->texture->h;
+    SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
+    SDL_RenderFillRect(renderer, &tilesheet_rect);
+    SDL_RenderTexture(renderer, this->map.tilesheets[this->sel_tilesheet]->texture, NULL, &tilesheet_rect);
+    SDL_FRect sel_tile_rect;
+    sel_tile_rect.w = this->map.tile_width;
+    sel_tile_rect.h = this->map.tile_height;
+    sel_tile_rect.x = this->map.tile_width * this->sel_ts_x;
+    sel_tile_rect.y = tilesheet_rect.y + this->map.tile_height * this->sel_ts_y;
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 240);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_RenderRect(renderer, &sel_tile_rect);
+    SDL_SetRenderTarget(renderer, game->screen);
+
+    game->draw_text("<Return> to place, <Escape> to close", 0, 0);
+}
+
+void Editor::input_sheet() {
+    int sel_i, nfields;
+    nfields = sscanf(this->text.c_str(), "%d", &sel_i);
+    
+    if (keyboard.is_hit(SDLK_BACKSPACE) && !text.empty())
+        this->text.pop_back();
+    else if (keyboard.c != NO_CHAR)
+        this->text.push_back(keyboard.c);
+    else if (keyboard.is_hit(SDLK_RETURN) && nfields == 1) {
+        this->sel_tilesheet = sel_i;
+    } else if (keyboard.is_hit(SDLK_ESCAPE)) {
+        // close
+        this->user_inputting = false;
+    }
+
+    std::string display_text = "Tilesheet: " + this->text + "\n<Return> to select, <Escape> to close\n\n";
+    for (int i = 0; i < this->map.tilesheets.size(); i++) {
+        char tilesheet[256];
+        char first_c, second_c, end_char = i == this->map.tilesheets.size()-1 ? ' ' : '\n';
+
+        if (nfields == 1 && i == sel_i) first_c = '*'; else first_c = ' ';
+        if (i == this->sel_tilesheet) second_c = '*'; else second_c = ' ';
+
+        snprintf(tilesheet, 256, "%c%c%d: %s%c", first_c, second_c, i, this->map.tilesheets[i]->path.c_str(), end_char);
+        display_text += tilesheet;
+    }
+    game->draw_text(display_text, 0, 0);
+}
+
+void Editor::input_add_sheet() {
+    if (keyboard.is_hit(SDLK_BACKSPACE) && !text.empty())
+        this->text.pop_back();
+    else if (keyboard.c != NO_CHAR)
+        this->text.push_back(keyboard.c);
+    else if (keyboard.is_hit(SDLK_RETURN)) {
+        // add new tilesheet
+        Tilesheet *tilesheet = new Tilesheet(this->text.c_str(), this->map.tile_width, this->map.tile_height);
+        if (tilesheet->texture != nullptr) {
+            this->map.tilesheets.push_back(tilesheet);
+            this->sel_tilesheet = this->map.tilesheets.size() - 1;
+        } else {
+            delete tilesheet;
+        }
+    } else if (keyboard.is_hit(SDLK_ESCAPE)) {
+        // close
+        this->user_inputting = false;
+    }
+
+    game->draw_text("Tilesheet path: " + this->text + "\n<Return> to add, <Escape> to close", 0, 0);
+}
+
+void Editor::input_objects() {
+    int sel_i, nfields;
+    char c, str[256];
+    str[0] = '\0';
+    nfields = sscanf(this->text.c_str(), "%d %c %[^\0]", &sel_i, &c, str);
+
+    if (keyboard.is_hit(SDLK_BACKSPACE) && !text.empty())
+        this->text.pop_back();
+    else if (keyboard.c != NO_CHAR)
+        this->text.push_back(keyboard.c);
+    else if (keyboard.is_hit(SDLK_RETURN) && nfields >= 2) {
+        if ((sel_i < 0 || sel_i >= this->map.objects.size()) && c == 'i') {
+            // new object
+            std::pair<std::string, std::string> obj;
+            obj.first = str;
+            obj.second = "";
+            this->map.objects.push_back(obj);
+        } else if (c == 'i') {
+            // change id of an existing object
+            this->map.objects[sel_i].first = str;
+        } else if (c == 'o') {
+            // change options for an existing object
+            this->map.objects[sel_i].second = str;
+        } else if (c == 'x') {
+            // delete an object from the list
+            auto it = this->map.objects.begin();
+            std::advance(it, sel_i);
+            this->map.objects.erase(it);
+        }
+        this->text = "";
+    } else if (keyboard.is_hit(SDLK_ESCAPE)) {
+        // leave menu
+        this->user_inputting = false;
+    }
+
+    std::string display_text = "<id> <i|o|x> <str>: " + this->text + "\n<Return> to enter, <Escape> to leave\n\n";
+    for (int i = 0; i < this->map.objects.size(); i++) {
+        std::pair<std::string, std::string> &obj = this->map.objects[i];
+
+        char object[256];
+        char start_char = ' ', end_char = i == this->map.objects.size()-1 ? ' ' : '\n';
+        if (nfields >= 1 && i == sel_i)
+            start_char = '*';
+
+        snprintf(object, 256, "%c %d: %s %s%c", start_char, i, obj.first.c_str(), obj.second.c_str(), end_char);
+        display_text += object;
+    }
+    game->draw_text(display_text, 0, 0);
 }
 
 void Editor::render() {
-    SDL_FRect dst_viewing;
+    SDL_FRect src, dst;
 
-    int viewing_x = ((this->sel_x*this->map.tile_width) + (this->map.tile_width/2)) - (SCREEN_WIDTH/2);
-    int viewing_y = ((this->sel_y*this->map.tile_height) + (this->map.tile_height/2)) - (SCREEN_HEIGHT/2);
+    int x = (this->sel_x*this->map.tile_width) + (this->map.tile_width/2);
+    int y = (this->sel_y*this->map.tile_height) + (this->map.tile_height/2);
 
-    if (viewing_x < 0) {
-        dst_viewing.x = float(-1 * viewing_x);
-        dst_viewing.w = float(min(SCREEN_WIDTH, this->map.tile_width * this->map.cols));
-        this->viewing.x = 0.0f;
-    } else {
-        dst_viewing.x = 0.0f;
-        dst_viewing.w = float(min(SCREEN_WIDTH, (this->map.tile_width * this->map.cols) - viewing_x));
-        this->viewing.x = float(viewing_x);
-    }
-
-    if (viewing_y < 0) {
-        dst_viewing.y = float(-1 * viewing_y);
-        dst_viewing.h = float(min(SCREEN_HEIGHT, this->map.tile_height * this->map.rows));
-        this->viewing.y = 0.0f;
-    } else {
-        dst_viewing.y = 0.0f;
-        dst_viewing.h = float(min(SCREEN_HEIGHT, (this->map.tile_height * this->map.rows) - viewing_y));
-        this->viewing.y = float(viewing_y);
-    }
-
-    this->viewing.w = dst_viewing.w;
-    this->viewing.h = dst_viewing.h;
+    game->make_map_rect(x, y, this->map.tile_width * this->map.cols, this->map.tile_height * this->map.rows, &src, &dst);
 
     SDL_FRect selected_tile_rect;
     selected_tile_rect.x = float((SCREEN_WIDTH/2) - (this->map.tile_width/2));
@@ -189,32 +380,29 @@ void Editor::render() {
     SDL_SetRenderTarget(renderer, this->texture);
     SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
     SDL_RenderClear(renderer);
-    SDL_RenderTexture(renderer, this->map.bg, &this->viewing, &dst_viewing);
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
-    SDL_RenderRect(renderer, &selected_tile_rect);
-    SDL_SetRenderTarget(renderer, game->screen);
-}
+    SDL_RenderTexture(renderer, this->map.bg, &src, &dst);
 
-void Editor::input_add_sheet() {
-    if (keyboard.is_hit(SDLK_BACKSPACE) && !text.empty())
-        this->text.pop_back();
-    else if (keyboard.c != NO_CHAR)
-        this->text.push_back(keyboard.c);
-    else if (keyboard.is_hit(SDLK_RETURN)) {
-        // add new tilesheet
-        this->user_inputting = false;
-        Tilesheet *tilesheet = new Tilesheet(this->text.c_str(), this->map.tile_width, this->map.tile_height);
-        if (tilesheet->texture != nullptr) {
-            this->map.tilesheets.push_back(tilesheet);
-            this->sel_tilesheet = this->map.tilesheets.size() - 1;
-        } else {
-            delete tilesheet;
-        }
-    } else if (keyboard.is_hit(SDLK_ESCAPE)) {
-        // cancel
-        this->user_inputting = false;
+    // only render the foreground if it is toggled on
+    if (this->fg_toggle) {
+        SDL_RenderTexture(renderer, this->map.fg, &src, &dst);
     }
 
-    game->draw_text("Tilesheet path: " + this->text, 0, 0);
-    game->draw_text("<Return> to add, <Escape> to cancel", 0, 10);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 240);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_RenderRect(renderer, &selected_tile_rect);
+
+    if (this->sel_tilesheet >= 0) {
+        selected_tile_rect.x = 0.0f;
+        selected_tile_rect.y = float(SCREEN_HEIGHT - 11 - this->map.tile_height);
+        SDL_FRect selected_tile_src_rect;
+        selected_tile_src_rect.x = float(this->sel_ts_x * this->map.tile_width);
+        selected_tile_src_rect.y = float(this->sel_ts_y * this->map.tile_height);
+        selected_tile_src_rect.w = float(this->map.tile_width);
+        selected_tile_src_rect.h = float(this->map.tile_height);
+        SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
+        SDL_RenderFillRect(renderer, &selected_tile_rect);
+        SDL_RenderTexture(renderer, this->map.tilesheets[this->sel_tilesheet]->texture, &selected_tile_src_rect, &selected_tile_rect);
+    }
+
+    SDL_SetRenderTarget(renderer, game->screen);
 }

@@ -8,6 +8,7 @@
 // externs in game.h
 SDL_Renderer *renderer;
 Game *game;
+bool _running;
 
 SDL_Window *window;
 
@@ -16,14 +17,14 @@ Keyboard keyboard;
 void cleanup();
 void scale_screen_rect(SDL_FRect *screen_rect, const int window_width, const int window_height);
 
-int main() {
+int main(int argc, const char **argv) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL_Init error: " << SDL_GetError() << std::endl;
         return 1;
     }
 
     int window_width = SCREEN_WIDTH*2, window_height = SCREEN_HEIGHT*2;
-    if (!SDL_CreateWindowAndRenderer("SDL3 Example", window_width, window_height, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
+    if (!SDL_CreateWindowAndRenderer(argv[0], window_width, window_height, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
         std::cerr << "SDL_CreateWindowAndRenderer error: " << SDL_GetError() << std::endl;
         return 1;
     }
@@ -34,14 +35,17 @@ int main() {
         return 1;
     }
 
-    game = new Game();
-
     SDL_FRect screen_rect;
     scale_screen_rect(&screen_rect, window_width, window_height);
 
-    bool running = true;
+    _running = true;
+    game = new Game();
+    game->argc = argc;
+    game->argv = argv;
+    game->init();
+    SDL_SetWindowTitle(window, game->title.c_str());
 
-    while (running) {
+    while (_running) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -61,7 +65,7 @@ int main() {
                 break;
 
             case SDL_EVENT_QUIT:
-                running = false;
+                _running = false;
                 break;
 
             default:

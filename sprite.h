@@ -10,11 +10,13 @@ public:
 
     void set_animation(int animation);
     void update_frame();
+    void set_frame(int frame_i);
+    void set_interval_ms(int interval_ms);
 
     SDL_FRect frame;
     SDL_Texture *texture;
 private:
-    int frame_w, frame_h, interval_ms, sheet_w, sheet_h;
+    int frame_w, frame_h, interval_ms, sheet_w, sheet_h, frame_i;
     Uint64 frame_last_set;
 };
 

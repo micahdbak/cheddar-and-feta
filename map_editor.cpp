@@ -1,11 +1,17 @@
-#include <iostream>
-#include <vector>
-
 #include "game.h"
 #include "keyboard.h"
 #include "map.h"
 #include "object.h"
 #include "sprite.h"
+
+#include <iostream>
+#include <vector>
+
+enum EditorSelectedLayer {
+    BACKGROUND,
+    FOREGROUND,
+    COLLISION
+};
 
 enum EditorInputMode {
     INPUT_TILE,
@@ -27,16 +33,22 @@ private:
     void input_add_sheet();
     void input_objects();
     void render();
+    void render_collision_tile(SDL_Texture *target, int x, int y, int collider);
 
     std::string map_path;
     Map map;
 
-    bool fg_toggle = false;
+    Quad collider_quads[n_MapColliders];
+    SDL_Texture *collision_texture, *collision_sheet;
+
+    EditorSelectedLayer layer = BACKGROUND;
+    int sel_x = 0, sel_y = 0;
+    int sel_tilesheet = -1, sel_ts_x = 0, sel_ts_y = 0;
+    int sel_collider = -1;
+
     bool user_inputting = false;
     EditorInputMode input_mode;
-    
     std::string text;
-    int sel_x = 0, sel_y = 0, sel_tilesheet = -1, sel_ts_x = 0, sel_ts_y = 0;
 };
 
 class EditorFactory : public ObjectFactory {
@@ -92,6 +104,30 @@ Editor::Editor(const char *map_path) {
 
     if (!this->map.tilesheets.empty())
         this->sel_tilesheet = 0;
+
+    this->collision_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->map.bg->w, this->map.bg->h);
+    this->collision_sheet = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->map.tile_width * (n_MapColliders+1), this->map.tile_height);
+
+    // assemble appropriately sized quads for each collider
+    for (int i = 0; i < n_MapColliders; i++) {
+        // a quad has four vertices
+        for (int j = 0; j < 4; j++) {
+            this->collider_quads[i].vertex[j].x = float(this->map.tile_width) * MapColliders[i][j].x;
+            this->collider_quads[i].vertex[j].y = float(this->map.tile_height) * MapColliders[i][j].y;
+        }
+    }
+
+    // render the collision texture
+    for (int i = 0; i < this->map.cols * this->map.rows; i++) {
+        int collider = this->map.collision[i];
+        this->render_collision_tile(this->collision_texture, i % this->map.cols, i / this->map.cols, collider);
+    }
+
+    // render the collision sheet for the ease of the user
+    // start at -1 for no collider, 0.. for colliders
+    for (int i = -1; i < int(n_MapColliders); i++) {
+        this->render_collision_tile(this->collision_sheet, i+1, 0, i);
+    }
 }
 
 Editor::~Editor() {
@@ -105,6 +141,18 @@ Editor::~Editor() {
         SDL_DestroyTexture(this->map.fg);
         this->map.fg = nullptr;
     }
+    if (this->map.collision != nullptr) {
+        free(this->map.collision);
+        this->map.collision = nullptr;
+    }
+    if (this->collision_texture != nullptr) {
+        SDL_DestroyTexture(this->collision_texture);
+        this->collision_texture = nullptr;
+    }
+    if (this->collision_sheet != nullptr) {
+        SDL_DestroyTexture(this->collision_sheet);
+        this->collision_sheet = nullptr;
+    }
 }
 
 void Editor::step() {
@@ -115,17 +163,32 @@ void Editor::step() {
         this->sel_x = clamp(this->sel_x, 0, this->map.cols - 1);
         this->sel_y = clamp(this->sel_y, 0, this->map.rows - 1);
 
-        std::vector<Tile> *vec;
-        if (this->fg_toggle) {
-            vec = this->map.fg_tiles[(this->sel_y * this->map.cols) + this->sel_x];
-        } else {
-            vec = this->map.bg_tiles[(this->sel_y * this->map.cols) + this->sel_x];
+        std::vector<Tile> *vec = nullptr;
+        int coord = (this->sel_y * this->map.cols) + this->sel_x;
+        switch (this->layer) {
+        case BACKGROUND: vec = this->map.bg_tiles[coord]; break;
+        case FOREGROUND: vec = this->map.fg_tiles[coord]; break;
+        default: /* pass */ break;
         }
 
-        game->draw_text(" [T]ile, [S]heet, [A]dd, [F]g/bg, [W]rite, [O]bjects  ", 0, 0);
+        game->draw_text(" [T]ile, [S]heet, [A]dd, [L]ayer, [W]rite, [O]bjects  ", 0, 0);
         char status_text[256];
-        snprintf(status_text, sizeof(status_text), "%s: %s %d,%d [%d]", this->map_path.c_str(),
-            this->fg_toggle ? "fg" : "bg", this->sel_x * this->map.tile_width, this->sel_y * this->map.tile_height, vec == nullptr ? 0 : int(vec->size()));
+        if (this->layer != COLLISION) {
+            // foreground / background status text
+            snprintf(status_text, sizeof(status_text), "%s: %s %d,%d [%d]",
+                this->map_path.c_str(),
+                this->layer == BACKGROUND ? "bg" : "fg",
+                this->sel_x * this->map.tile_width,
+                this->sel_y * this->map.tile_height,
+                vec == nullptr ? 0 : int(vec->size()));
+        } else {
+            // collision layer status text
+            snprintf(status_text, sizeof(status_text), "%s: %s %d,%d",
+                this->map_path.c_str(),
+                "collision",
+                this->sel_x * this->map.tile_width,
+                this->sel_y * this->map.tile_height);
+        }
         game->draw_text(std::string(status_text), 0, SCREEN_HEIGHT - 11);
 
         switch (keyboard.c) {
@@ -150,8 +213,12 @@ void Editor::step() {
             this->input_mode = INPUT_ADD_SHEET;
             this->text = "";
             break;
-        case 'f':
-            this->fg_toggle = !this->fg_toggle;
+        case 'l':
+            switch (this->layer) {
+            case BACKGROUND: this->layer = FOREGROUND; break;
+            case FOREGROUND: this->layer = COLLISION; break;
+            default: this->layer = BACKGROUND; break;
+            }
             break;
         case 'w':
             this->map.write(this->map_path.c_str());
@@ -165,44 +232,58 @@ void Editor::step() {
         keyboard.c = NO_CHAR;
 
         if (keyboard.is_down(SDLK_RETURN) && this->sel_tilesheet >= 0) {
-            bool should_place = true;
-
-            // place a tile
-            if (vec == nullptr) {
-                vec = new std::vector<Tile>();
-                if (this->fg_toggle) {
-                    this->map.fg_tiles[(this->sel_y * this->map.cols) + this->sel_x] = vec;
-                } else {
-                    this->map.bg_tiles[(this->sel_y * this->map.cols) + this->sel_x] = vec;
-                }
+            if (this->layer == COLLISION) {
+                this->map.collision[coord] = this->sel_collider;
+                this->render_collision_tile(this->collision_texture, this->sel_x, this->sel_y, this->sel_collider);
             } else {
-                Tile top_tile = vec->back();
-                if (top_tile.tilesheet == this->sel_tilesheet && top_tile.x == this->sel_ts_x && top_tile.y == this->sel_ts_y)
-                    should_place = false;
-            }
+                bool should_place = true;
 
-            if (should_place) {
-                Tile new_tile;
-                new_tile.tilesheet = this->sel_tilesheet;
-                new_tile.x = this->sel_ts_x;
-                new_tile.y = this->sel_ts_y;
-                vec->push_back(new_tile);
-                this->map.render_tile(this->sel_x, this->sel_y);
+                // place a tile
+                if (vec == nullptr) {
+                    vec = new std::vector<Tile>();
+                    if (this->layer == FOREGROUND) {
+                        this->map.fg_tiles[coord] = vec;
+                    } else {
+                        this->map.bg_tiles[coord] = vec;
+                    }
+                } else {
+                    // shift return should only place on empty tiles
+                    if (keyboard.is_down(SDLK_RSHIFT))
+                        should_place = false;
+
+                    Tile top_tile = vec->back();
+                    if (top_tile.tilesheet == this->sel_tilesheet && top_tile.x == this->sel_ts_x && top_tile.y == this->sel_ts_y)
+                        should_place = false;
+                }
+
+                if (should_place) {
+                    Tile new_tile;
+                    new_tile.tilesheet = this->sel_tilesheet;
+                    new_tile.x = this->sel_ts_x;
+                    new_tile.y = this->sel_ts_y;
+                    vec->push_back(new_tile);
+                    this->map.render_tile(this->sel_x, this->sel_y);
+                }
             }
         } else if (keyboard.is_hit(SDLK_BACKSPACE) || keyboard.is_down(SDLK_MINUS)) {
-            // remove a tile
-            if (vec != nullptr) {
-                vec->pop_back();
-                if (vec->empty()) {
-                    delete vec;
-                    vec = nullptr;
-                    if (this->fg_toggle) {
-                        this->map.fg_tiles[(this->sel_y * this->map.cols) + this->sel_x] = nullptr;
-                    } else {
-                        this->map.bg_tiles[(this->sel_y * this->map.cols) + this->sel_x] = nullptr;
+            if (this->layer == COLLISION) {
+                this->map.collision[coord] = -1;
+                this->render_collision_tile(this->collision_texture, this->sel_x, this->sel_y, -1);
+            } else {
+                // remove a tile
+                if (vec != nullptr) {
+                    vec->pop_back();
+                    if (vec->empty()) {
+                        delete vec;
+                        vec = nullptr;
+                        if (this->layer == FOREGROUND) {
+                            this->map.fg_tiles[coord] = nullptr;
+                        } else {
+                            this->map.bg_tiles[coord] = nullptr;
+                        }
                     }
+                    this->map.render_tile(this->sel_x, this->sel_y);
                 }
-                this->map.render_tile(this->sel_x, this->sel_y);
             }
         }
     }
@@ -231,30 +312,58 @@ void Editor::step() {
 }
 
 void Editor::input_tile() {
-    this->sel_ts_x += int(keyboard.is_hit(SDLK_RIGHT)) - int(keyboard.is_hit(SDLK_LEFT));
-    this->sel_ts_y += int(keyboard.is_hit(SDLK_DOWN)) - int(keyboard.is_hit(SDLK_UP));
-    this->sel_ts_x = clamp(this->sel_ts_x, 0, this->map.tilesheets[this->sel_tilesheet]->cols - 1);
-    this->sel_ts_y = clamp(this->sel_ts_y, 0, this->map.tilesheets[this->sel_tilesheet]->rows - 1);
-
+    // end inputting
     if (keyboard.is_hit(SDLK_RETURN) || keyboard.is_hit(SDLK_ESCAPE)) {
         this->user_inputting = false;
+        return;
+    }
+
+    // update selected collider or tile
+    if (this->layer == COLLISION) {
+        this->sel_collider += int(keyboard.is_hit(SDLK_RIGHT)) - int(keyboard.is_hit(SDLK_LEFT));
+        this->sel_collider = clamp(this->sel_collider+1, 0, n_MapColliders) - 1;
+    } else {    
+        this->sel_ts_x += int(keyboard.is_hit(SDLK_RIGHT)) - int(keyboard.is_hit(SDLK_LEFT));
+        this->sel_ts_y += int(keyboard.is_hit(SDLK_DOWN)) - int(keyboard.is_hit(SDLK_UP));
+        this->sel_ts_x = clamp(this->sel_ts_x, 0, this->map.tilesheets[this->sel_tilesheet]->cols - 1);
+        this->sel_ts_y = clamp(this->sel_ts_y, 0, this->map.tilesheets[this->sel_tilesheet]->rows - 1);
     }
 
     SDL_SetRenderTarget(renderer, this->texture);
     SDL_FRect tilesheet_rect;
     tilesheet_rect.x = 0.0f;
     tilesheet_rect.y = 11.0f;
-    tilesheet_rect.w = this->map.tilesheets[this->sel_tilesheet]->texture->w;
-    tilesheet_rect.h = this->map.tilesheets[this->sel_tilesheet]->texture->h;
+
+    if (this->layer == COLLISION) {
+        tilesheet_rect.w = this->collision_sheet->w;
+        tilesheet_rect.h = this->collision_sheet->h;
+    } else {
+        tilesheet_rect.w = this->map.tilesheets[this->sel_tilesheet]->texture->w;
+        tilesheet_rect.h = this->map.tilesheets[this->sel_tilesheet]->texture->h;
+    }
+
     SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
     SDL_RenderFillRect(renderer, &tilesheet_rect);
-    SDL_RenderTexture(renderer, this->map.tilesheets[this->sel_tilesheet]->texture, NULL, &tilesheet_rect);
+
+    if (this->layer == COLLISION) {
+        SDL_RenderTexture(renderer, this->collision_sheet, NULL, &tilesheet_rect);
+    } else {
+        SDL_RenderTexture(renderer, this->map.tilesheets[this->sel_tilesheet]->texture, NULL, &tilesheet_rect);
+    }
+
     SDL_FRect sel_tile_rect;
     sel_tile_rect.w = this->map.tile_width;
     sel_tile_rect.h = this->map.tile_height;
-    sel_tile_rect.x = this->map.tile_width * this->sel_ts_x;
-    sel_tile_rect.y = tilesheet_rect.y + this->map.tile_height * this->sel_ts_y;
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 240);
+
+    if (this->layer == COLLISION) {
+        sel_tile_rect.x = this->map.tile_width * (this->sel_collider+1);
+        sel_tile_rect.y = tilesheet_rect.y;
+    } else {
+        sel_tile_rect.x = this->map.tile_width * this->sel_ts_x;
+        sel_tile_rect.y = tilesheet_rect.y + this->map.tile_height * this->sel_ts_y;
+    }
+
+    SDL_SetRenderDrawColor(renderer, 255, 128, 255, 240);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_RenderRect(renderer, &sel_tile_rect);
     SDL_SetRenderTarget(renderer, game->screen);
@@ -382,27 +491,74 @@ void Editor::render() {
     SDL_RenderClear(renderer);
     SDL_RenderTexture(renderer, this->map.bg, &src, &dst);
 
-    // only render the foreground if it is toggled on
-    if (this->fg_toggle) {
+    // only render the foreground if not only background
+    if (this->layer != BACKGROUND)
         SDL_RenderTexture(renderer, this->map.fg, &src, &dst);
-    }
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 240);
+    // render collision layer if that mode is selected
+    if (this->layer == COLLISION)
+        SDL_RenderTexture(renderer, this->collision_texture, &src, &dst);
+
+    SDL_SetRenderDrawColor(renderer, 255, 128, 255, 240);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_RenderRect(renderer, &selected_tile_rect);
 
     if (this->sel_tilesheet >= 0) {
         selected_tile_rect.x = 0.0f;
         selected_tile_rect.y = float(SCREEN_HEIGHT - 11 - this->map.tile_height);
-        SDL_FRect selected_tile_src_rect;
-        selected_tile_src_rect.x = float(this->sel_ts_x * this->map.tile_width);
-        selected_tile_src_rect.y = float(this->sel_ts_y * this->map.tile_height);
-        selected_tile_src_rect.w = float(this->map.tile_width);
-        selected_tile_src_rect.h = float(this->map.tile_height);
         SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
         SDL_RenderFillRect(renderer, &selected_tile_rect);
-        SDL_RenderTexture(renderer, this->map.tilesheets[this->sel_tilesheet]->texture, &selected_tile_src_rect, &selected_tile_rect);
+        SDL_FRect selected_tile_src_rect;
+        selected_tile_src_rect.w = float(this->map.tile_width);
+        selected_tile_src_rect.h = float(this->map.tile_height);
+
+        if (this->layer == COLLISION) {
+            selected_tile_src_rect.x = float((this->sel_collider+1) * this->map.tile_width);
+            selected_tile_src_rect.y = 0.0f;
+            SDL_RenderTexture(renderer, this->collision_sheet, &selected_tile_src_rect, &selected_tile_rect);
+        } else {
+            selected_tile_src_rect.x = float(this->sel_ts_x * this->map.tile_width);
+            selected_tile_src_rect.y = float(this->sel_ts_y * this->map.tile_height);
+            SDL_RenderTexture(renderer, this->map.tilesheets[this->sel_tilesheet]->texture, &selected_tile_src_rect, &selected_tile_rect);
+        }
     }
 
+    SDL_SetRenderTarget(renderer, game->screen);
+}
+
+void Editor::render_collision_tile(SDL_Texture *target, int x, int y, int collider) {
+    SDL_FRect dst_rect;
+    dst_rect.x = float(this->map.tile_width * x);
+    dst_rect.y = float(this->map.tile_height * y);
+    dst_rect.w = float(this->map.tile_width);
+    dst_rect.h = float(this->map.tile_height);
+
+    // render transparency to clear the tile
+    SDL_SetRenderTarget(renderer, target);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+    SDL_RenderFillRect(renderer, &dst_rect);
+
+    if (collider < 0) {
+        SDL_SetRenderTarget(renderer, game->screen);
+        return; // all done
+    }
+
+    // render the collision quad
+    SDL_Vertex vertices[4];
+    // translate the vertices to match the destination rect
+    for (int i = 0; i < 4; i++) {
+        vertices[i].color.r = 1.0f;
+        vertices[i].color.g = 1.0f;
+        vertices[i].color.b = 1.0f;
+        vertices[i].color.a = 1.0f;
+        vertices[i].position.x = dst_rect.x + this->collider_quads[collider].vertex[i].x;
+        vertices[i].position.y = dst_rect.y + this->collider_quads[collider].vertex[i].y;
+    }
+    const int indices[6] = { 0, 1, 2, 2, 3, 0 };
+    if (!SDL_RenderGeometry(renderer, nullptr, vertices, 4, indices, 6)) {
+        std::cerr << "SDL_RenderGeometry error: " << SDL_GetError() << std::endl;
+        exit(1);
+    }
     SDL_SetRenderTarget(renderer, game->screen);
 }

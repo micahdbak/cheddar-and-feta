@@ -8,6 +8,7 @@
 
 #include <SDL3/SDL.h>
 
+#include "map.h"
 #include "object.h"
 
 #define clamp(_x, _min, _max) ((_x) < (_min) ? (_min) : ((_x) > (_max) ? (_max) : (_x)))
@@ -27,9 +28,11 @@ public:
     Game();
     ~Game();
 
+    void make_map_rect(int x, int y, int w, int h, SDL_FRect *src_rect, SDL_FRect *dst_rect) const;
+    bool point_in_collider(float x, float y) const;
+
     void init();
     void load_map(const char *map_path);
-    void make_map_rect(int x, int y, int w, int h, SDL_FRect *src_rect, SDL_FRect *dst_rect);
     void create_object(const std::string &id, const std::string &options);
     void draw_text(const std::string &str, int x, int y);
 
@@ -46,12 +49,18 @@ public:
     float delta;
 
 private:
-    std::queue<Text> texts;
     Uint64 last_ticks;
+
     SDL_Texture *bg = nullptr, *fg = nullptr;
+    int *collision = nullptr;
+    int tile_width = 32, tile_height = 32, cols = 1, rows = 1;
+    Quad colliders[n_MapColliders];
+
     std::vector<Object *> objects;
     std::unordered_map<std::string, ObjectFactory *> factories;
+
     SDL_Texture *mono_font;
+    std::queue<Text> texts;
 };
 
 extern SDL_Renderer *renderer;

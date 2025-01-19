@@ -1,6 +1,6 @@
-#include <iostream>
-
 #include "keyboard.h"
+
+#include <iostream>
 
 Keyboard::Keyboard() {}
 

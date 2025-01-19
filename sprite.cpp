@@ -1,7 +1,7 @@
-#include <iostream>
-
 #include "game.h"
 #include "sprite.h"
+
+#include <iostream>
 
 Sprite::Sprite(const char *bmp_path, int frame_w, int frame_h, int interval_ms):
     frame_w(frame_w), frame_h(frame_h), interval_ms(interval_ms) {

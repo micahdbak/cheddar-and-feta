@@ -1,9 +1,9 @@
+#include "keyboard.h"
+#include "game.h"
+
 #include <SDL3/SDL.h>
 #include <iostream>
 #include <cstdlib>
-
-#include "keyboard.h"
-#include "game.h"
 
 // externs in game.h
 SDL_Renderer *renderer;
@@ -28,6 +28,8 @@ int main(int argc, const char **argv) {
         std::cerr << "SDL_CreateWindowAndRenderer error: " << SDL_GetError() << std::endl;
         return 1;
     }
+
+    std::cout << "Renderer: " << SDL_GetRendererName(renderer) << std::endl;
 
     if (std::atexit(cleanup) != 0) {
         std::cerr << "main error: couldn't register exit function" << std::endl;

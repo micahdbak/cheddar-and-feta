@@ -8,7 +8,7 @@ Mouse::Mouse(int x, int y) {
     this->src_rect = &this->sprite->frame;
 
     this->dst_rect.x = float(SCREEN_WIDTH/2 - 12);
-    this->dst_rect.y = float(SCREEN_HEIGHT/2 - 12);
+    this->dst_rect.y = float(SCREEN_HEIGHT/2 - 20);
     this->dst_rect.w = 24.0f;
     this->dst_rect.h = 24.0f;
 
@@ -33,8 +33,14 @@ void Mouse::step() {
 
     int x_dir = int(keyboard.is_down(SDLK_RIGHT)) - int(keyboard.is_down(SDLK_LEFT));
     int y_dir = int(keyboard.is_down(SDLK_DOWN)) - int(keyboard.is_down(SDLK_UP));
-    this->x += float(x_dir) * (y_dir != 0 ? 0.7071f : 1.0f) * mov_speed * game->delta;
-    this->y += float(y_dir) * (x_dir != 0 ? 0.7071f : 1.0f) * mov_speed * game->delta;
+    float new_x = this->x + float(x_dir) * (y_dir != 0 ? 0.7071f : 1.0f) * mov_speed * game->delta;
+    float new_y = this->y + float(y_dir) * (x_dir != 0 ? 0.7071f : 1.0f) * mov_speed * game->delta;
+
+    // only move if no collision at that point
+    if (!game->point_in_collider(new_x, new_y)) {
+        this->x = new_x;
+        this->y = new_y;
+    }
 
     game->view_x = int(this->x);
     game->view_y = int(this->y);

@@ -1,7 +1,7 @@
-#include <iostream>
-
 #include "game.h"
 #include "map.h"
+
+#include <iostream>
 
 Tilesheet::Tilesheet(const char *tilesheet_path, int tile_width, int tile_height) {
     SDL_Surface *tilesheet_surface = SDL_LoadBMP(tilesheet_path);
@@ -44,10 +44,14 @@ void Map::make_empty(int tile_width, int tile_height, int cols, int rows) {
     size_t nbytes = sizeof(std::vector<Tile> *) * cols * rows;
     this->bg_tiles = (std::vector<Tile> **)malloc(nbytes);
     this->fg_tiles = (std::vector<Tile> **)malloc(nbytes);
+    this->collision = (int *)malloc(sizeof(int) * cols * rows);
 
     // zero the allocated memory
     memset(this->bg_tiles, 0, nbytes);
     memset(this->fg_tiles, 0, nbytes);
+    for (int i = 0; i < cols * rows; i++) {
+        this->collision[i] = -1;
+    }
 
     this->tile_width = tile_width;
     this->tile_height = tile_height;
@@ -124,21 +128,33 @@ void Map::read(const char *map_path) {
             break;
         } else if (nbytes < 6) CORRUPTED_EXIT
 
+        int x = int(buffer[3]);
+        int y = int(buffer[4]);
+        int coord = (y * this->cols) + x;
+        if (coord >= this->cols * this->rows) CORRUPTED_EXIT
+
+        // collider
+        if (buffer[5] == 'c') {
+            // make sure the collider actually exists
+            if (int(buffer[0]) >= n_MapColliders) CORRUPTED_EXIT
+
+            this->collision[coord] = int(buffer[0]);
+            // buffer[1] and buffer[2] are redundant
+            continue;
+        }
+
         Tile tile;
         tile.tilesheet = int(buffer[0]);
         tile.x = int(buffer[1]);
         tile.y = int(buffer[2]);
-        int x = int(buffer[3]);
-        int y = int(buffer[4]);
-        int coord = (y * this->cols) + x;
 
         // make sure nothing is corrupted
         if (tile.tilesheet >= this->tilesheets.size() ||
             tile.x >= this->tilesheets[tile.tilesheet]->cols ||
-            tile.y >= this->tilesheets[tile.tilesheet]->rows ||
-            coord >= this->cols * this->rows
+            tile.y >= this->tilesheets[tile.tilesheet]->rows
         ) CORRUPTED_EXIT
 
+        // background or foreground tile
         if (buffer[5] == 'b') {
             std::vector<Tile> *vec = this->bg_tiles[coord];
             if (vec == nullptr) {
@@ -210,17 +226,28 @@ void Map::write(const char *map_path) {
 
     // write tiles
     for (int i = 0; i < this->cols * this->rows; i++) {
+        int x = i % this->cols, y = i / this->cols;
+        // colliders
+        int c = this->collision[i];
+        if (c >= 0) {
+            buffer[0] = uint8_t(c);
+            buffer[3] = uint8_t(x);
+            buffer[4] = uint8_t(y);
+            buffer[5] = uint8_t('c');
+            fwrite(buffer, 1, 6, file);
+        }
+
         // background tiles
         std::vector<Tile> *vec = this->bg_tiles[i];
         if (vec != nullptr)
             for (auto tile : *vec)
-                write_tile(buffer, tile, i % this->cols, i / this->cols, 'b', file);
+                write_tile(buffer, tile, x, y, 'b', file);
 
         // foreground tiles
         vec = this->fg_tiles[i];
         if (vec != nullptr)
             for (auto tile : *vec)
-                write_tile(buffer, tile, i % this->cols, i / this->cols, 'f', file);
+                write_tile(buffer, tile, x, y, 'f', file);
     }
 
     // write a 255 signifying end of tiles

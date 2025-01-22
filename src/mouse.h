@@ -11,8 +11,10 @@ public:
 
     void step() override;
 
-private:
     float x, y;
+
+private:
+    SDL_FRect dst_rect;
     Sprite *sprite;
 };
 
@@ -29,5 +31,7 @@ public:
         return new Mouse(x, y);
     }
 };
+
+extern Mouse *mouse;
 
 #endif

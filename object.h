@@ -10,10 +10,6 @@ public:
     Object() = default;
     virtual ~Object() = default;
 
-    SDL_Texture *texture;
-    SDL_FRect *src_rect;
-    SDL_FRect dst_rect;
-
     virtual void step() = 0;
 };
 

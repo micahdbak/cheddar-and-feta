@@ -35,6 +35,8 @@ private:
     void render();
     void render_collision_tile(SDL_Texture *target, int x, int y, int collider);
 
+    SDL_Texture *texture = nullptr;
+
     std::string map_path;
     Map map;
 
@@ -94,11 +96,6 @@ Editor::Editor(const char *map_path) {
     }
 
     this->texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
-    this->src_rect = new SDL_FRect();
-    this->src_rect->x = this->dst_rect.x = 0.0f;
-    this->src_rect->y = this->dst_rect.y = 0.0f;
-    this->src_rect->w = this->dst_rect.w = float(SCREEN_WIDTH);
-    this->src_rect->h = this->dst_rect.h = float(SCREEN_HEIGHT);
 
     this->map_path = map_path;
 
@@ -132,7 +129,6 @@ Editor::Editor(const char *map_path) {
 
 Editor::~Editor() {
     SDL_DestroyTexture(this->texture);
-    delete this->src_rect;
     if (this->map.bg != nullptr) {
         SDL_DestroyTexture(this->map.bg);
         this->map.bg = nullptr;
@@ -171,7 +167,9 @@ void Editor::step() {
         default: /* pass */ break;
         }
 
-        game->draw_text(" [T]ile, [S]heet, [A]dd, [L]ayer, [W]rite, [O]bjects  ", 0, 0);
+        SDL_FRect black_rect = { 0.0f, 0.0f, float(SCREEN_WIDTH), 11.0f };
+        game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+        game->draw_text(" [T]ile, [S]heet, [A]dd, [L]ayer, [W]rite, [O]bjects  ", MONO_FONT, 0, 0);
         char status_text[256];
         if (this->layer != COLLISION) {
             // foreground / background status text
@@ -189,7 +187,9 @@ void Editor::step() {
                 this->sel_x * this->map.tile_width,
                 this->sel_y * this->map.tile_height);
         }
-        game->draw_text(std::string(status_text), 0, SCREEN_HEIGHT - 11);
+        black_rect = { 0.0f, float(SCREEN_HEIGHT - 11), float(SCREEN_WIDTH), 11.0f };
+        game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+        game->draw_text(std::string(status_text), MONO_FONT, 0, SCREEN_HEIGHT - 11);
 
         switch (keyboard.c) {
         case 't':
@@ -306,15 +306,19 @@ void Editor::step() {
             break;
         default:
             this->user_inputting = false;
+            game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
             break;
         }
     }
+
+    game->push_sprite(this->texture, NULL, NULL, 0);
 }
 
 void Editor::input_tile() {
     // end inputting
     if (keyboard.is_hit(SDLK_RETURN) || keyboard.is_hit(SDLK_ESCAPE)) {
         this->user_inputting = false;
+        game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
         return;
     }
 
@@ -368,7 +372,9 @@ void Editor::input_tile() {
     SDL_RenderRect(renderer, &sel_tile_rect);
     SDL_SetRenderTarget(renderer, game->screen);
 
-    game->draw_text("<Return> to place, <Escape> to close", 0, 0);
+    SDL_FRect black_rect = { 0.0f, 0.0f, float(SCREEN_WIDTH), 11.0f };
+    game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+    game->draw_text("<Return> to place, <Escape> to close", MONO_FONT, 0, 0);
 }
 
 void Editor::input_sheet() {
@@ -384,6 +390,8 @@ void Editor::input_sheet() {
     } else if (keyboard.is_hit(SDLK_ESCAPE)) {
         // close
         this->user_inputting = false;
+        game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+        return;
     }
 
     std::string display_text = "Tilesheet: " + this->text + "\n<Return> to select, <Escape> to close\n\n";
@@ -397,7 +405,9 @@ void Editor::input_sheet() {
         snprintf(tilesheet, 256, "%c%c%d: %s%c", first_c, second_c, i, this->map.tilesheets[i]->path.c_str(), end_char);
         display_text += tilesheet;
     }
-    game->draw_text(display_text, 0, 0);
+    SDL_FRect black_rect = { 0.0f, 0.0f, float(SCREEN_WIDTH), float(SCREEN_HEIGHT) };
+    game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+    game->draw_text(display_text, MONO_FONT, 0, 0);
 }
 
 void Editor::input_add_sheet() {
@@ -417,9 +427,13 @@ void Editor::input_add_sheet() {
     } else if (keyboard.is_hit(SDLK_ESCAPE)) {
         // close
         this->user_inputting = false;
+        game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+        return;
     }
 
-    game->draw_text("Tilesheet path: " + this->text + "\n<Return> to add, <Escape> to close", 0, 0);
+    SDL_FRect black_rect = { 0.0f, 0.0f, float(SCREEN_WIDTH), 22.0f };
+    game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+    game->draw_text("Tilesheet path: " + this->text + "\n<Return> to add, <Escape> to close", MONO_FONT, 0, 0);
 }
 
 void Editor::input_objects() {
@@ -455,6 +469,8 @@ void Editor::input_objects() {
     } else if (keyboard.is_hit(SDLK_ESCAPE)) {
         // leave menu
         this->user_inputting = false;
+        game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+        return;
     }
 
     std::string display_text = "<id> <i|o|x> <str>: " + this->text + "\n<Return> to enter, <Escape> to leave\n\n";
@@ -469,7 +485,9 @@ void Editor::input_objects() {
         snprintf(object, 256, "%c %d: %s %s%c", start_char, i, obj.first.c_str(), obj.second.c_str(), end_char);
         display_text += object;
     }
-    game->draw_text(display_text, 0, 0);
+    SDL_FRect black_rect = { 0.0f, 0.0f, float(SCREEN_WIDTH), float(SCREEN_HEIGHT) };
+    game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+    game->draw_text(display_text, MONO_FONT, 0, 0);
 }
 
 void Editor::render() {

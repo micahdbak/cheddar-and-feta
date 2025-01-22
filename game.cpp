@@ -1,11 +1,15 @@
 #include "game.h"
+#include "keyboard.h"
 #include "map.h"
 
 #include <SDL3/SDL.h>
-#include <iostream>
+
+#include <algorithm>
 #include <cstdlib>
+#include <iostream>
 
 Game::Game() {
+    // create screen texture
     this->screen = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
     if (!this->screen) {
         std::cerr << "SDL_CreateTexture error: " << SDL_GetError() << std::endl;
@@ -13,17 +17,43 @@ Game::Game() {
     }
     SDL_SetTextureScaleMode(this->screen, SDL_SCALEMODE_NEAREST);
 
-    SDL_Surface *mono_font_surface = SDL_LoadBMP("sprites/mono.bmp");
-    this->mono_font = SDL_CreateTextureFromSurface(renderer, mono_font_surface);
-    SDL_SetTextureScaleMode(this->mono_font, SDL_SCALEMODE_NEAREST);
-    SDL_DestroySurface(mono_font_surface);
+    // create ui texture
+    this->ui = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
+    if (!this->ui) {
+        std::cerr << "SDL_CreateTexture error: " << SDL_GetError() << std::endl;
+        exit(1);
+    }
+    this->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+
+    // mono font
+    this->fonts.push_back(new Font("fonts/mono.bmp", 6, 10, 6, {}));
+
+    // small font
+    this->fonts.push_back(new Font("fonts/small.bmp", 6, 7, 4, {
+        { ' ', 3 }, { '!', 2 }, { '#', 6 }, { '%', 5 },
+        { '&', 5 }, { '\'', 3 }, { ',', 3 }, { '.', 2 },
+        { ':', 2 }, { ';', 3 }, { '<', 6 }, { '>', 6 },
+        { '@', 5 }, { 'M', 6 }, { 'N', 5 }, { 'W', 6 },
+        { '`', 3 }, { 'i', 2 }, { 'j', 3 }, { 'l', 2 },
+        { 'm', 6 }, { 'w', 6 }, { '{', 6 }
+    }));
 }
 
 Game::~Game() {
     this->unload();
-    SDL_DestroyTexture(this->mono_font);
+
+    // free fonts
+    for (auto font : this->fonts)
+        delete font;
+    this->fonts.clear();
+
+    // destroy the screen
     SDL_DestroyTexture(this->screen);
     this->screen = nullptr;
+
+    // destroy the ui texture
+    SDL_DestroyTexture(this->ui);
+    this->ui = nullptr;
 }
 
 void Game::make_map_rect(int x, int y, int w, int h, SDL_FRect *src_rect, SDL_FRect *dst_rect) const {
@@ -144,12 +174,68 @@ void Game::create_object(const std::string &obj_id, const std::string &options) 
         this->objects.push_back(obj);
 }
 
-void Game::draw_text(const std::string &str, int x, int y) {
-    Text text;
-    text.str = str;
-    text.x = x;
-    text.y = y;
-    texts.push(text);
+void Game::set_view(int x, int y) {
+    this->view_x = x;
+    this->view_y = y;
+    this->corner_x = x - SCREEN_WIDTH/2;
+    this->corner_y = y - SCREEN_HEIGHT/2;
+}
+
+void Game::push_sprite(SDL_Texture *texture, SDL_FRect *src_rect, SDL_FRect *dst_rect, int depth_offset) {
+    int sprite_y = 0;
+    if (dst_rect != nullptr)
+        sprite_y = int(dst_rect->y) + depth_offset;
+
+    SpriteRender sprite;
+    sprite.texture = texture;
+    sprite.src_rect = src_rect;
+    sprite.dst_rect = dst_rect;
+    sprite.y = sprite_y;
+
+    // std::lower_bound performs a binary search (log n time complexity)
+    auto it = std::lower_bound(this->sprites.begin(), this->sprites.end(), sprite);
+    this->sprites.insert(it, sprite);
+}
+
+void Game::draw_rect(SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode) {
+    SDL_SetRenderTarget(renderer, this->ui);
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    SDL_SetRenderDrawBlendMode(renderer, blend_mode);
+    SDL_RenderFillRect(renderer, rect);
+    SDL_SetRenderTarget(renderer, this->screen);
+}
+
+void Game::draw_text(const std::string &str, int font, int x, int y) {
+    if (font < 0 || font >= NUM_FONTS) {
+        std::cerr << "Game::draw_text error: '" << font << "' font does not exist" << std::endl;
+        exit(1);
+    }
+
+    Font *_font = this->fonts[font];
+    int _x = x, _y = y, line_height = int(_font->src_rect[0].h) + 1;
+
+    for (char c : str) {
+        if (c >= ' ' && c <= '~') {
+            SDL_FRect *src_rect = _font->src_rect + (c - ' ');
+            SDL_FRect dst_rect;
+            dst_rect.x = float(_x);
+            dst_rect.y = float(_y);
+            dst_rect.w = src_rect->w;
+            dst_rect.h = src_rect->h;
+            SDL_SetRenderTarget(renderer, this->ui);
+            SDL_RenderTexture(renderer, _font->texture, src_rect, &dst_rect);
+            SDL_SetRenderTarget(renderer, this->screen);
+            _x += int(src_rect->w);
+        } else {
+            switch (c) {
+            case '\n':
+                _x = x;
+                _y += line_height;
+                break;
+            default: /* pass */ break;
+            }
+        }
+    }
 }
 
 void Game::step() {
@@ -157,8 +243,8 @@ void Game::step() {
     this->delta = float(current_ticks - this->last_ticks) / 1000.0f;
     this->last_ticks = current_ticks;
 
-    SDL_SetRenderTarget(renderer, screen);
-    SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
+    SDL_SetRenderTarget(renderer, this->screen);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
     // render background
@@ -168,73 +254,26 @@ void Game::step() {
         SDL_RenderTexture(renderer, this->bg, &map_src, &map_dst);
     }
 
-    // render objects to the screen
-    for (int i = 0; i < this->objects.size(); i++) {
-        Object *obj = this->objects[i];
+    // step all objects
+    for (auto &obj : this->objects)
         obj->step();
-        if (obj->texture != nullptr) {
-            SDL_RenderTexture(renderer, obj->texture, obj->src_rect, &obj->dst_rect);
-        }
-    }
+
+    // render objects to the screen
+    for (SpriteRender &sprite : this->sprites)
+        SDL_RenderTexture(renderer, sprite.texture, sprite.src_rect, sprite.dst_rect);
+    this->sprites.clear(); // clear sprites; next frame will repopulate
 
     // render foreground
     if (this->fg != nullptr)
         SDL_RenderTexture(renderer, this->fg, &map_src, &map_dst);
 
-    // render all text if there is any
-    while (!texts.empty()) {
-        Text text = texts.front();
-        texts.pop();
+    // render UI
+    SDL_RenderTexture(renderer, this->ui, NULL, NULL);
 
-        int cols = 16, w = 6, h = 10;
-
-        int longest_line = 0, nlines = 1, cur_line = 0;
-        for (auto c : text.str) {
-            if (c == '\n') {
-                if (cur_line > longest_line) {
-                    longest_line = cur_line;
-                    cur_line = 0;
-                }
-                nlines++;
-            } else {
-                cur_line++;
-            }
-        }
-
-        if (cur_line > longest_line) {
-            longest_line = cur_line;
-        }
-
-        SDL_FRect text_area;
-        text_area.x = float(text.x);
-        text_area.y = float(text.y);
-        text_area.w = float(w * longest_line);
-        text_area.h = float((h+1) * nlines);
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &text_area);
-
-        SDL_FRect src_rect, dst_rect;
-        src_rect.w = float(w);
-        src_rect.h = float(h);
-        dst_rect.y = float(text.y);
-        dst_rect.w = float(w);
-        dst_rect.h = float(h);
-        int x2 = 0, y2 = 0;
-        for (int i = 0; i < text.str.size(); i++) {
-            if (text.str[i] == '\n') {
-                y2++, x2 = 0;
-                continue;
-            }
-
-            // charsheets start at ' ', orderred same as ASCII
-            char c_index = text.str[i] - ' ';
-            src_rect.x = float((c_index % cols) * w);
-            src_rect.y = float((c_index / cols) * h);
-            dst_rect.x = float(text.x + (x2 * w));
-            dst_rect.y = float(text.y + (y2 * (h + 1)));
-            SDL_RenderTexture(renderer, this->mono_font, &src_rect, &dst_rect);
-            x2++;
-        }
+    if (keyboard.is_hit(SDLK_P)) {
+        SDL_Surface *_screen = SDL_RenderReadPixels(renderer, NULL);
+        SDL_SaveBMP(_screen, "screenshot.bmp");
+        SDL_DestroySurface(_screen);
     }
 
     SDL_SetRenderTarget(renderer, NULL);

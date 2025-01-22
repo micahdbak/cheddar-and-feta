@@ -2,10 +2,18 @@
 #include "keyboard.h"
 #include "mouse.h"
 
+#include <iostream>
+
+Mouse *mouse = nullptr;
+
 Mouse::Mouse(int x, int y) {
+    if (mouse != nullptr) {
+        std::cerr << "Mouse::Mouse error: another mouse exists..?" << std::endl;
+        exit(1);
+    }
+    mouse = this;
+
     this->sprite = new Sprite("sprites/mouse.bmp", 24, 24, 250);
-    this->texture = this->sprite->texture;
-    this->src_rect = &this->sprite->frame;
 
     this->dst_rect.x = float(SCREEN_WIDTH/2 - 12);
     this->dst_rect.y = float(SCREEN_HEIGHT/2 - 20);
@@ -19,6 +27,7 @@ Mouse::Mouse(int x, int y) {
 Mouse::~Mouse() {
     delete this->sprite;
     this->sprite = nullptr;
+    mouse = nullptr;
 }
 
 void Mouse::step() {
@@ -37,13 +46,14 @@ void Mouse::step() {
     float new_y = this->y + float(y_dir) * (x_dir != 0 ? 0.7071f : 1.0f) * mov_speed * game->delta;
 
     // only move if no collision at that point
-    if (!game->point_in_collider(new_x, new_y)) {
+    if (!game->point_in_collider(new_x+2.0f, new_y) &&
+        !game->point_in_collider(new_x-2.0f, new_y) &&
+        !game->point_in_collider(new_x, new_y-2.0f)) {
         this->x = new_x;
         this->y = new_y;
     }
 
-    game->view_x = int(this->x);
-    game->view_y = int(this->y);
+    game->set_view(this->x, this->y);
 
     if (x_dir != 0 || y_dir != 0) {
         this->sprite->update_frame();
@@ -60,4 +70,6 @@ void Mouse::step() {
     } else if (y_dir < 0) {
         this->sprite->set_animation(4);
     }
+
+    game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
 }

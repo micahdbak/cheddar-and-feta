@@ -4,10 +4,12 @@
 #include <cstdlib>
 #include <map>
 #include <queue>
+#include <string>
 #include <vector>
 
 #include <SDL3/SDL.h>
 
+#include "font.h"
 #include "map.h"
 #include "object.h"
 
@@ -17,6 +19,20 @@
 
 #define SCREEN_WIDTH  320
 #define SCREEN_HEIGHT 240
+
+#define MONO_FONT  0
+#define SMALL_FONT 1
+#define NUM_FONTS  2
+
+struct SpriteRender {
+    SDL_Texture *texture;
+    SDL_FRect *src_rect, *dst_rect;
+    int y; // for depth calculations
+
+    bool operator<(const SpriteRender &other) const {
+        return this->y < other.y;
+    }
+};
 
 struct Text {
     std::string str;
@@ -34,12 +50,20 @@ public:
     void init();
     void load_map(const char *map_path);
     void create_object(const std::string &id, const std::string &options);
-    void draw_text(const std::string &str, int x, int y);
+
+    // sprite related
+    void set_view(int x, int y);
+    void push_sprite(SDL_Texture *texture, SDL_FRect *src_rect, SDL_FRect *dst_rect, int depth_offset);
+
+    // ui related
+    void draw_rect(SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode);
+    void draw_text(const std::string &str, int font, int x, int y);
 
     void step();
     void unload();
 
-    int view_x = 128, view_y = 160;
+    int view_x = SCREEN_WIDTH/2, view_y = SCREEN_HEIGHT/2;
+    int corner_x = 0, corner_y = 0;
 
     int argc;
     const char **argv;
@@ -59,7 +83,10 @@ private:
     std::vector<Object *> objects;
     std::unordered_map<std::string, ObjectFactory *> factories;
 
-    SDL_Texture *mono_font;
+    std::vector<SpriteRender> sprites;
+
+    std::vector<Font *> fonts;
+    SDL_Texture *ui = nullptr;
     std::queue<Text> texts;
 };
 

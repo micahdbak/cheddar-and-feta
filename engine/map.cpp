@@ -68,11 +68,11 @@ void Map::make_empty(int tile_width, int tile_height, int cols, int rows) {
 
     SDL_SetRenderTarget(renderer, this->bg);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
+    SDL_RenderFillRect(renderer, NULL);
     SDL_SetRenderTarget(renderer, this->fg);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
-    SDL_RenderClear(renderer);
+    SDL_RenderFillRect(renderer, NULL);
     SDL_SetRenderTarget(renderer, game->screen);
 }
 
@@ -189,6 +189,8 @@ void Map::read(const char *map_path) {
     for (int i = 0; i < this->cols * this->rows; i++) {
         render_tile(i % this->cols, i / this->cols);
     }
+
+    SDL_SetRenderTarget(renderer, game->screen);
 }
 
 static inline void write_tile(uint8_t *buffer, Tile tile, int x, int y, char ground, FILE *file) {

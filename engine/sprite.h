@@ -15,6 +15,7 @@ public:
 
     SDL_FRect frame;
     SDL_Texture *texture;
+    int animation = 0;
 private:
     int frame_w, frame_h, interval_ms, sheet_w, sheet_h, frame_i;
     Uint64 frame_last_set;

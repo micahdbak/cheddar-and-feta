@@ -58,7 +58,7 @@ public:
     EditorFactory() {}
     ~EditorFactory() {}
 
-    Object *create(std::string options) override {
+    Object *create(const std::string &options) override {
         return new Editor(options.c_str());
     }
 };
@@ -169,7 +169,7 @@ void Editor::step() {
 
         SDL_FRect black_rect = { 0.0f, 0.0f, float(SCREEN_WIDTH), 11.0f };
         game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-        game->draw_text(" [T]ile, [S]heet, [A]dd, [L]ayer, [W]rite, [O]bjects  ", MONO_FONT, 0, 0);
+        game->draw_text(" [T]ile, [S]heet, [A]dd, [L]ayer, [W]rite, [O]bjects  ", MONO_FONT, 0, 0, 0);
         char status_text[256];
         if (this->layer != COLLISION) {
             // foreground / background status text
@@ -189,7 +189,7 @@ void Editor::step() {
         }
         black_rect = { 0.0f, float(SCREEN_HEIGHT - 11), float(SCREEN_WIDTH), 11.0f };
         game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-        game->draw_text(std::string(status_text), MONO_FONT, 0, SCREEN_HEIGHT - 11);
+        game->draw_text(std::string(status_text), MONO_FONT, 0, SCREEN_HEIGHT - 11, 0);
 
         switch (keyboard.c) {
         case 't':
@@ -374,7 +374,7 @@ void Editor::input_tile() {
 
     SDL_FRect black_rect = { 0.0f, 0.0f, float(SCREEN_WIDTH), 11.0f };
     game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-    game->draw_text("<Return> to place, <Escape> to close", MONO_FONT, 0, 0);
+    game->draw_text("<Return> to place, <Escape> to close", MONO_FONT, 0, 0, 0);
 }
 
 void Editor::input_sheet() {
@@ -407,7 +407,7 @@ void Editor::input_sheet() {
     }
     SDL_FRect black_rect = { 0.0f, 0.0f, float(SCREEN_WIDTH), float(SCREEN_HEIGHT) };
     game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-    game->draw_text(display_text, MONO_FONT, 0, 0);
+    game->draw_text(display_text, MONO_FONT, 0, 0, 0);
 }
 
 void Editor::input_add_sheet() {
@@ -433,7 +433,7 @@ void Editor::input_add_sheet() {
 
     SDL_FRect black_rect = { 0.0f, 0.0f, float(SCREEN_WIDTH), 22.0f };
     game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-    game->draw_text("Tilesheet path: " + this->text + "\n<Return> to add, <Escape> to close", MONO_FONT, 0, 0);
+    game->draw_text("Tilesheet path: " + this->text + "\n<Return> to add, <Escape> to close", MONO_FONT, 0, 0, 0);
 }
 
 void Editor::input_objects() {
@@ -487,7 +487,7 @@ void Editor::input_objects() {
     }
     SDL_FRect black_rect = { 0.0f, 0.0f, float(SCREEN_WIDTH), float(SCREEN_HEIGHT) };
     game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-    game->draw_text(display_text, MONO_FONT, 0, 0);
+    game->draw_text(display_text, MONO_FONT, 0, 0, 0);
 }
 
 void Editor::render() {

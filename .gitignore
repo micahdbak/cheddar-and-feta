@@ -1,4 +1,5 @@
 .vscode
-main
-editor
 **/*.backup
+editor
+main
+screenshot.bmp

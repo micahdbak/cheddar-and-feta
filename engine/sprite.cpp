@@ -28,7 +28,7 @@ Sprite::Sprite(const char *bmp_path, int frame_w, int frame_h, int interval_ms):
     this->frame.h = float(frame_h);
 
     this->frame_i = 0;
-    this->frame_last_set = SDL_GetTicks();
+    this->frame_last_set = game->ticks;
 }
 
 Sprite::~Sprite() {
@@ -37,19 +37,20 @@ Sprite::~Sprite() {
 }
 
 void Sprite::set_animation(int animation) {
+    if (this->animation == animation) return;
+
+    this->animation = animation;
     this->frame.y = float(this->frame_h * animation);
 }
 
 void Sprite::update_frame() {
-    Uint64 now_ticks = SDL_GetTicks();
-
-    if (now_ticks - this->frame_last_set > this->interval_ms) {
+    if (game->ticks - this->frame_last_set > this->interval_ms) {
         this->frame_i++;
         if (this->frame_i * this->frame_w >= this->sheet_w) {
             this->frame_i = 0;
         }
         this->frame.x = float(this->frame_i * this->frame_w);
-        this->frame_last_set = now_ticks;
+        this->frame_last_set = game->ticks;
     }
 }
 

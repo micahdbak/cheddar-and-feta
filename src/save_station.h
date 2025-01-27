@@ -1,5 +1,5 @@
 #ifndef SAVE_STATION_OBJ
-#define SAVE_STATION_OBJ "savestation"
+#define SAVE_STATION_OBJ "save.station"
 
 #include "object.h"
 #include "sprite.h"
@@ -15,6 +15,10 @@ private:
     SDL_FRect dst_rect;
     int x, y;
     Sprite *sprite;
+
+    std::vector<std::string> summaries;
+    bool is_displaying_ui = false, should_render = true;
+    int sel_save = 0;
 };
 
 class SaveStationFactory : public ObjectFactory {
@@ -22,7 +26,7 @@ public:
     SaveStationFactory() {}
     ~SaveStationFactory() {}
 
-    Object *create(std::string options) override {
+    Object *create(const std::string &options) override {
         int x, y;
         if (sscanf(options.c_str(), "%d,%d", &x, &y) < 2) {
             x = 0, y = 0;

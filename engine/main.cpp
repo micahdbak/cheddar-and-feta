@@ -1,7 +1,9 @@
 #include "keyboard.h"
 #include "game.h"
+#include "save_data.h"
 
 #include <SDL3/SDL.h>
+
 #include <iostream>
 #include <cstdlib>
 
@@ -39,6 +41,12 @@ int main(int argc, const char **argv) {
 
     SDL_FRect screen_rect;
     scale_screen_rect(&screen_rect, window_width, window_height);
+
+    int ret = save.load_file(0);
+    if (ret == LOAD_TAMPER) {
+        save.data["tampered"] = "true";
+        std::cout << "tampered - but ignoring" << std::endl;
+    }
 
     _running = true;
     game = new Game();

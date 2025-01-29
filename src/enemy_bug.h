@@ -14,6 +14,7 @@ public:
 private:
     Sprite *sprite;
     SDL_FRect dst_rect;
+    Uint64 dead_ticks = 0;
 };
 
 class EnemyBugFactory : public ObjectFactory {

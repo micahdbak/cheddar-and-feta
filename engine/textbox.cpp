@@ -59,7 +59,7 @@ void Textbox::step() {
             this->done = c == '\0';
             this->done_sentence = c == '\n';
             SDL_SetRenderTarget(renderer, game->ui);
-            SDL_FRect *prompt_src = game->fonts[this->font]->src_rect + '|' - ' ';
+            SDL_FRect *prompt_src = game->fonts[this->font]->src_rect + CHAR_TEXTBOX_NEXT - ' ';
             SDL_FRect prompt_dst = {
                 this->text_rect.x + this->text_rect.w - prompt_src->w,
                 this->text_rect.y + this->text_rect.h - prompt_src->h,

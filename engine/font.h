@@ -8,6 +8,12 @@
 #define NUM_DISPLAYABLE_CHARS ('~' - ' ' + 1)
 #define FONT_SHEET_COLS       16
 
+#define TEST_TEXT \
+    " !\"#$%&'()*+,-./\n"\
+    "0123456789:;<=>?@[\\]^_`|\n"\
+    "AaBbCcDdEeFfGgHhIiJjKkLlMm\n"\
+    "NnOoPpQqRrSsTtUuVvWwXxYyZz"
+
 class Font {
 public:
     Font(const char *font_path, int w, int h, int default_w, const std::unordered_map<char, int> &special_w);

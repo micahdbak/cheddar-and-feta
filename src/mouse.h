@@ -15,10 +15,14 @@ public:
     void save_data() override;
     void post_save_data() override;
 
-    bool attack();
+    bool attack(int damage);
 
     bool locked = false;
     float x, y;
+
+    int cheese = 0, max_cheese = 3;
+    int health = 10, max_health = 10;
+    int damage = 1, armour = 0;
 
 private:
     SDL_FRect dst_rect;
@@ -29,7 +33,9 @@ private:
 
     int check_enemy = 0;
     Enemy *closest_enemy = nullptr;
-    float closest_distance = 9999999.0f;
+    float closest_distance = 999999.0f;
+
+    int throw_x = 0, throw_y = 0;
 };
 
 class MouseFactory : public ObjectFactory {

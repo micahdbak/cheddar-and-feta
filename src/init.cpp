@@ -5,6 +5,7 @@
 #include "textbox.h"
 
 // objects
+#include "cheese.h"
 #include "enemy_bug.h"
 #include "mouse.h"
 #include "save_station.h"
@@ -42,6 +43,7 @@ void Game::init() {
 
     this->factories[ENEMY_BUG_OBJ] = new EnemyBugFactory();
 
+    this->factories[CHEESE_OBJ] = new CheeseFactory();
     this->factories[MOUSE_OBJ] = new MouseFactory();
     this->factories[SAVE_STATION_OBJ] = new SaveStationFactory();
 

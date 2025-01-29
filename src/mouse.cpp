@@ -50,6 +50,8 @@ static bool _is_collision(float x, float y) {
 #define ATTACKED_ANIMATION  16
 
 void Mouse::step() {
+    if (keyboard.is_hit(SDLK_C)) this->cheese = 0;
+    
     if (this->locked) {
         game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
         return;
@@ -78,8 +80,18 @@ void Mouse::step() {
 
     // if attacking or attacked, unset the animation when the interval has passed
     if (this->is_attack != FALSE) {
+        if (this->is_attack == ATTACKED) {
+            // new coordinates calculated with throw direction and diagonal multiplier
+            float new_x = this->x + float(this->throw_x) * (this->throw_y != 0 ? DIAG_MULTIPLIER : 1.0f) * 64.0f * game->delta;
+            float new_y = this->y + float(this->throw_y) * (this->throw_x != 0 ? DIAG_MULTIPLIER : 1.0f) * 64.0f * game->delta;
+
+            // only move if there isn't a collider in the way
+            if (!_is_collision(new_x, this->y)) this->x = new_x;
+            if (!_is_collision(this->x, new_y)) this->y = new_y;
+        }
+
         // 100ms cooldown when attacked, 250ms cooldown when attacking
-        if (game->ticks - this->attack_ticks > (this->is_attack == ATTACKED ? 100 : 250)) {
+        if (game->ticks - this->attack_ticks > 250) {
             this->is_attack = FALSE;
             this->sprite->set_animation(this->sprite->animation % 8);
         }
@@ -91,7 +103,11 @@ void Mouse::step() {
         this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
 
         if (this->closest_enemy != nullptr && this->closest_distance < 32.0f) {
-            this->closest_enemy->attack();
+            this->closest_enemy->attack(this->damage);
+            if (this->closest_enemy->dead) {
+                this->closest_enemy = nullptr;
+                this->closest_distance = 999999.0f;
+            }
         }
     }
 
@@ -148,7 +164,7 @@ void Mouse::step() {
 }
 
 // will be called by an enemy
-bool Mouse::attack() {
+bool Mouse::attack(int damage) {
     // don't get attacked if was already attacked
     if (this->is_attack == ATTACKED)
         return false;
@@ -156,8 +172,23 @@ bool Mouse::attack() {
     this->is_attack = ATTACKED;
     this->attack_ticks = game->ticks;
 
+    this->throw_x = SDL_rand(3) - 1; // -1,0,1
+    this->throw_y = SDL_rand(3) - 1; // -1,0,1
+
     // set animation to attacked
     this->sprite->set_animation((this->sprite->animation % 8) + ATTACKED_ANIMATION);
+
+    // apply armour to damage
+    damage -= this->armour;
+    if (damage > 0) {
+        this->health -= damage;
+    }
+
+    // if dead, just revive
+    if (this->health < 0) {
+        std::cout << "Dead; but revived!" << std::endl;
+        this->health = this->max_health;
+    }
 
     return true;
 }

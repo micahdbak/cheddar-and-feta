@@ -93,7 +93,7 @@ void Init::step() {
         const int y = (SCREEN_HEIGHT - UI_HEIGHT) / 2 - 8;
         SDL_FRect ui_rect = { float(x), float(y), UI_WIDTH, UI_HEIGHT };
         game->draw_ui_box(&ui_rect);
-        game->draw_text("~* Cheddar n' Feta *~", SMALL_FONT, x + PADDING + 2, y + PADDING, 0);
+        game->draw_text("--- Cheddar & Feta ---", SMALL_FONT, x + PADDING + 2, y + PADDING, 0);
 
         for (int i = 0; i < NUM_SAVE_FILES; i++) {
             const int save_y = y + PADDING + (16*i) + 16;

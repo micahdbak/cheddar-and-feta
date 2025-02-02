@@ -21,7 +21,7 @@ EnemyBug::EnemyBug(const std::string &options) {
 
     // Enemy::Enemy configuration
     this->sight_distance = 64.0f;
-    this->attack_distance = 16.0f;
+    this->attack_distance = 24.0f;
     this->speed = 16.0f;
     this->max_health = this->health = 2;
 }
@@ -40,10 +40,11 @@ void EnemyBug::step() {
             game->delete_object = true;
             game->push_object(ENEMY_BUG_OBJ, "256,256");
 
-            int cheese_amount = SDL_rand(64); // 0..7
+            int cheese_amount = SDL_rand(8); // 0..7
 
             // add cheese for the player to pick up
-            if (cheese_amount > 4) {
+            if (cheese_amount > 4) { // 5..7
+                cheese_amount -= 4; // 1..3
                 char cheese_opt[256];
                 snprintf(cheese_opt, sizeof(cheese_opt), "%d,%d,%d", int(this->x) + game->tile_width/2, int(this->y) + game->tile_height/2, cheese_amount);
                 game->push_object(CHEESE_OBJ, std::string(cheese_opt));

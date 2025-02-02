@@ -4,6 +4,7 @@
 #include "save_data.h"
 
 #include <iostream>
+#include <cmath>
 
 Mouse *mouse = nullptr;
 
@@ -14,12 +15,12 @@ Mouse::Mouse(int x, int y) {
     }
     mouse = this;
 
-    this->sprite = new Sprite("sprites/mouse.bmp", 24, 24, 250);
+    this->sprite = new Sprite("sprites/mouse.bmp", 32, 32, 250);
 
-    this->dst_rect.x = float(SCREEN_WIDTH/2 - 12);
-    this->dst_rect.y = float(SCREEN_HEIGHT/2 - 20);
-    this->dst_rect.w = 24.0f;
-    this->dst_rect.h = 24.0f;
+    this->dst_rect.x = float(SCREEN_WIDTH/2 - 16);
+    this->dst_rect.y = float(SCREEN_HEIGHT/2 - 24);
+    this->dst_rect.w = 32.0f;
+    this->dst_rect.h = 32.0f;
 
     this->x = float(x);
     this->y = float(y);
@@ -48,10 +49,22 @@ static bool _is_collision(float x, float y) {
 
 #define ATTACKING_ANIMATION 8
 #define ATTACKED_ANIMATION  16
+#define EATING_ANIMATION    24
+
+// counter-clockwise direction from 0 = down, 1 = down-right, ...
+int direction_from_dirs(int x_dir, int y_dir) {
+    if (x_dir < 0) {
+        return 6 + y_dir;
+    } else if (x_dir > 0) {
+        return 2 - y_dir;
+    } else if (y_dir < 0) {
+        return 4;
+    } else {
+        return 0;
+    }
+}
 
 void Mouse::step() {
-    if (keyboard.is_hit(SDLK_C)) this->cheese = 0;
-    
     if (this->locked) {
         game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
         return;
@@ -64,70 +77,147 @@ void Mouse::step() {
             this->check_enemy = 0;
 
         Enemy *enemy = enemies[this->check_enemy];
-        if (enemy == nullptr) return;
+        if (enemy != nullptr) {
+            float enemy_x = enemy->x + float(game->tile_width/2);
+            float enemy_y = enemy->y + float(game->tile_height/2);
 
-        float distance = distance_between_points(enemy->x + float(game->tile_width/2), enemy->y + float(game->tile_height/2), this->x, this->y);
+            // calculate direction to enemy
+            int x_dir, y_dir;
+            game->dir_to_point(mouse->x, mouse->y, enemy_x, enemy_y, &x_dir, &y_dir);
+            int enemy_direction = direction_from_dirs(x_dir, y_dir);
 
-        if (enemy == this->closest_enemy) {
-            // update the distance to the currently closest enemy (incase it's further)
-            this->closest_distance = distance;
-        } else if (distance < this->closest_distance) {
-            // new closets enemy; update distance and enemy pointer
-            this->closest_distance = distance;
-            this->closest_enemy = enemy;
-        }
-    }
+            // current direction that the player is facing
+            int facing_direction = this->sprite->animation % 8;
 
-    // if attacking or attacked, unset the animation when the interval has passed
-    if (this->is_attack != FALSE) {
-        if (this->is_attack == ATTACKED) {
-            // new coordinates calculated with throw direction and diagonal multiplier
-            float new_x = this->x + float(this->throw_x) * (this->throw_y != 0 ? DIAG_MULTIPLIER : 1.0f) * 64.0f * game->delta;
-            float new_y = this->y + float(this->throw_y) * (this->throw_x != 0 ? DIAG_MULTIPLIER : 1.0f) * 64.0f * game->delta;
+            // if the enemy being checked is the previously determined closest enemy
+            if (enemy == this->closest_enemy) {
+                // if no longer facing this enemy
+                if (facing_direction != enemy_direction) {
+                    // then set the closest enemy to nullptr and wait to find the next closest enemy in this direction
+                    this->closest_enemy = nullptr;
+                    this->closest_distance = ARBITRARILY_LARGE;
+                } else {
+                    // if still facing it, update its distance, incase it has moved further away
+                    this->closest_distance = distance_between_points(enemy_x, enemy_y, this->x, this->y);
+                }
+            } else if (facing_direction == enemy_direction) {
+                // this enemy is not the closest enemy; check its distance
+                float distance = distance_between_points(enemy_x, enemy_y, this->x, this->y);
 
-            // only move if there isn't a collider in the way
-            if (!_is_collision(new_x, this->y)) this->x = new_x;
-            if (!_is_collision(this->x, new_y)) this->y = new_y;
-        }
-
-        // 100ms cooldown when attacked, 250ms cooldown when attacking
-        if (game->ticks - this->attack_ticks > 250) {
-            this->is_attack = FALSE;
-            this->sprite->set_animation(this->sprite->animation % 8);
-        }
-    } else if (keyboard.is_hit(SDLK_SPACE)) {
-        this->is_attack = ATTACKING;
-        this->attack_ticks = game->ticks;
-
-        // set animation to attacking
-        this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
-
-        if (this->closest_enemy != nullptr && this->closest_distance < 32.0f) {
-            this->closest_enemy->attack(this->damage);
-            if (this->closest_enemy->dead) {
-                this->closest_enemy = nullptr;
-                this->closest_distance = 999999.0f;
+                // if it is closer than the closest enemy, update it to become the closest enemy
+                if (distance < this->closest_distance) {
+                    this->closest_enemy = enemy;
+                    this->closest_distance = distance;
+                }
             }
         }
     }
 
-    // set movement speed
-    float mov_speed;
-    if (this->is_attack == ATTACKED) {
-        mov_speed = 0.0f; // no movement when attacked - you're floored
-    } else if (this->is_attack == FALSE && keyboard.is_down(SDLK_LSHIFT)) {
-        mov_speed = 64.0f;
-        this->sprite->set_interval_ms(100);
-    } else {
+    float mov_speed = 0.0f;
+    int x_dir = 0, y_dir = 0;
+
+    switch (this->is_busy) {
+    case FALSE:
+        // move using arrow keys
+        x_dir = int(keyboard.is_down(SDLK_RIGHT)) - int(keyboard.is_down(SDLK_LEFT));
+        y_dir = int(keyboard.is_down(SDLK_DOWN)) - int(keyboard.is_down(SDLK_UP));
+
+        // update sprite frame and animation only if moving
+        if (x_dir != 0 || y_dir != 0) {
+            this->sprite->update_frame();
+            this->sprite->set_animation(direction_from_dirs(x_dir, y_dir));
+        } else {
+            // otherwise show only the first frame
+            this->sprite->set_frame(0);
+        }
+
+        // run
+        if (keyboard.is_down(SDLK_LSHIFT)) {
+            mov_speed = 64.0f;
+            this->sprite->set_interval_ms(100);
+        } else {
+            mov_speed = 32.0f;
+            this->sprite->set_interval_ms(250);
+        }
+
+        // attack
+        if (keyboard.is_hit(SDLK_SPACE)) {
+            this->is_busy = ATTACKING;
+            this->busy_ticks = game->ticks;
+
+            // set animation to attacking
+            this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
+
+            // attack the closest enemy (if close enough)
+            if (this->closest_enemy != nullptr && this->closest_distance < 32.0f) {
+                this->closest_enemy->attack(this->damage);
+
+                // check if enemy just died
+                if (this->closest_enemy->dead) {
+                    // set these accordingly so next attack is not the dead enemy
+                    this->closest_enemy = nullptr;
+                    this->closest_distance = ARBITRARILY_LARGE;
+                }
+            }
+        } else if (keyboard.is_hit(SDLK_C) && this->cheese > 0) { // eat cheese
+            this->cheese--;
+            this->is_busy = EATING;
+            this->busy_ticks = game->ticks;
+
+            // set animation to eating cheese
+            this->sprite->set_animation(EATING_ANIMATION);
+            this->sprite->set_interval_ms(75);
+        }
+
+        break;
+
+    case ATTACKING:
+        // move using arrow keys
+        x_dir = int(keyboard.is_down(SDLK_RIGHT)) - int(keyboard.is_down(SDLK_LEFT));
+        y_dir = int(keyboard.is_down(SDLK_DOWN)) - int(keyboard.is_down(SDLK_UP));
         mov_speed = 32.0f;
-        this->sprite->set_interval_ms(250);
+
+        // will return to normal after << 500 ms >>
+        if (game->ticks - this->busy_ticks > 500) {
+            this->is_busy = FALSE;
+
+            // set animation to walking/running
+            this->sprite->set_animation(this->sprite->animation % 8);
+        }
+
+        break;
+
+    case ATTACKED:
+        // move according to the random throw direction set when attacked
+        x_dir = this->throw_x;
+        y_dir = this->throw_y;
+        mov_speed = 64.0f;
+
+        // will return to normal after << 250 ms >>
+        if (game->ticks - this->busy_ticks > 250) {
+            this->is_busy = FALSE;
+
+            // set animation to walking/running
+            this->sprite->set_animation(this->sprite->animation % 8);
+        }
+
+        break;
+
+    case EATING:
+        this->sprite->update_frame();
+
+        // will return to normal after << 750 ms >>
+        if (game->ticks - this->busy_ticks > 750) {
+            this->is_busy = FALSE;
+
+            // set animation to walking/running
+            this->sprite->set_animation(this->sprite->animation % 8);
+        }
+
+        break;
     }
 
-    // move using arrow keys
-    int x_dir = int(keyboard.is_down(SDLK_RIGHT)) - int(keyboard.is_down(SDLK_LEFT));
-    int y_dir = int(keyboard.is_down(SDLK_DOWN)) - int(keyboard.is_down(SDLK_UP));
-
-    // new coordinates calculated with movement speed and diagonal multiplier
+    // new coordinates calculated with direction moving, movement speed, and diagonal multiplier (if necessary)
     float new_x = this->x + float(x_dir) * (y_dir != 0 ? DIAG_MULTIPLIER : 1.0f) * mov_speed * game->delta;
     float new_y = this->y + float(y_dir) * (x_dir != 0 ? DIAG_MULTIPLIER : 1.0f) * mov_speed * game->delta;
 
@@ -138,27 +228,6 @@ void Mouse::step() {
     // set the game's view
     game->set_view(this->x, this->y);
 
-    // if not attacking or attacked, update frame only when moving;
-    // otherwise set to first frame (standing)
-    if (this->is_attack == FALSE) {
-        if (x_dir != 0 || y_dir != 0) {
-            this->sprite->update_frame();
-        } else {
-            this->sprite->set_frame(0);
-        }
-
-        // set the current animation with respect to the current arrow keys pressed
-        if (x_dir > 0) {
-            this->sprite->set_animation(2 - y_dir);
-        } else if (x_dir < 0) {
-            this->sprite->set_animation(6 + y_dir);
-        } else if (y_dir > 0) {
-            this->sprite->set_animation(0);
-        } else if (y_dir < 0) {
-            this->sprite->set_animation(4);
-        }
-    }
-
     // display the sprite to the screen
     game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
 }
@@ -166,14 +235,11 @@ void Mouse::step() {
 // will be called by an enemy
 bool Mouse::attack(int damage) {
     // don't get attacked if was already attacked
-    if (this->is_attack == ATTACKED)
+    if (this->is_busy == ATTACKED)
         return false;
 
-    this->is_attack = ATTACKED;
-    this->attack_ticks = game->ticks;
-
-    this->throw_x = SDL_rand(3) - 1; // -1,0,1
-    this->throw_y = SDL_rand(3) - 1; // -1,0,1
+    this->is_busy = ATTACKED;
+    this->busy_ticks = game->ticks;
 
     // set animation to attacked
     this->sprite->set_animation((this->sprite->animation % 8) + ATTACKED_ANIMATION);
@@ -186,7 +252,6 @@ bool Mouse::attack(int damage) {
 
     // if dead, just revive
     if (this->health < 0) {
-        std::cout << "Dead; but revived!" << std::endl;
         this->health = this->max_health;
     }
 

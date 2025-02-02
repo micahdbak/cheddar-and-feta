@@ -22,7 +22,7 @@
 #define sign(_x)              ((_x) == 0 ? 0 : ((_x) > 0 ? 1 : -1))
 
 #define distance_between_points(x1, y1, x2, y2) \
-    (std::sqrt(std::pow((x2) - (x1), 2) + std::pow((y2) - (y1), 2)))
+    (sqrt(pow((x2) - (x1), 2) + pow((y2) - (y1), 2)))
 
 // for movement
 
@@ -71,6 +71,7 @@ public:
     bool point_in_collider(float x, float y) const;
     bool in_sight(int x0, int y0, int x1, int y1, int *next_x, int *next_y) const; // true if no colliders in way
     void random_target(int x, int y, int *next_x, int *next_y) const; // chooses a random tile to move to, with no collider
+    void dir_to_point(float x1, float y1, float x2, float y2, int *x_dir, int *y_dir) const;
 
     // game_draw.cpp
 

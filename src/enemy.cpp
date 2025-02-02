@@ -46,13 +46,20 @@ void Enemy::enemy_step() {
         this->x = this->target_x;
         this->y = this->target_y;
 
-        float distance = distance_between_points(this->x + game->tile_width/2, this->y + game->tile_height/2, mouse->x, mouse->y);
+        // coordinate of center of tile
+        float center_x = this->x + float(game->tile_width/2);
+        float center_y = this->y + float(game->tile_height/2);
+
+        float distance = distance_between_points(center_x, center_y, mouse->x, mouse->y);
 
         bool in_sight = false;
         int attack = 0;
 
         if (distance < this->attack_distance) {
-            attack = mouse->attack(this->damage) ? 8 : 0;
+            if (mouse->attack(this->damage)) {
+                attack = 8;
+                game->dir_to_point(center_x, center_y, mouse->x, mouse->y, &mouse->throw_x, &mouse->throw_y);
+            }
         } else if (distance < this->sight_distance)
             in_sight = game->in_sight(int(this->x), int(this->y), int(mouse->x), int(mouse->y), &this->target_x, &this->target_y);
 

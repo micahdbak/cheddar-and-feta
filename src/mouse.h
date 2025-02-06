@@ -2,10 +2,9 @@
 #define MOUSE_OBJ "mouse"
 
 #include "enemy.h"
+#include "game.h"
 #include "object.h"
 #include "sprite.h"
-
-#define ARBITRARILY_LARGE 999999.0f
 
 class Mouse : public Object {
 public:
@@ -19,6 +18,9 @@ public:
 
     bool attack(int damage);
 
+    int free_space() { return this->max_items - this->items.size(); }
+    void push_item(const std::string &item_id);
+
     bool locked = false;
     float x, y;
 
@@ -28,16 +30,23 @@ public:
     int health = 10, max_health = 10;
     int damage = 1, armour = 0;
 
+    std::string name = "Cheddar";
+
 private:
     SDL_FRect dst_rect;
     Sprite *sprite;
 
-    enum { FALSE, ATTACKING, ATTACKED, EATING } is_busy = FALSE;
+    enum { FALSE, ATTACKING, ATTACKED, THROWING, EATING } is_busy = FALSE;
     Uint64 busy_ticks = 0;
+    bool did_miss = false;
+    SDL_FRect miss_rect;
 
     int check_enemy = 0;
     Enemy *closest_enemy = nullptr;
-    float closest_distance = ARBITRARILY_LARGE;
+    float closest_distance = FLT_MAX;
+
+    std::vector<std::string> items;
+    int max_items = 4;
 };
 
 class MouseFactory : public ObjectFactory {

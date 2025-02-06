@@ -6,7 +6,7 @@
 
 class EnemyBug : public Enemy {
 public:
-    EnemyBug(const std::string &options);
+    EnemyBug(int x, int y);
     ~EnemyBug();
 
     void step() override;
@@ -20,7 +20,9 @@ private:
 class EnemyBugFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) override {
-        return new EnemyBug(options);
+        int x = 0, y = 0;
+        sscanf(options.c_str(), "%d,%d", &x, &y);
+        return new EnemyBug(x, y);
     }
 };
 

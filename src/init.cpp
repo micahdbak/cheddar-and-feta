@@ -7,14 +7,14 @@
 // objects
 #include "cheese.h"
 #include "enemy_bug.h"
+#include "inventory.h"
+#include "item_toothpick.h"
 #include "mouse.h"
 #include "save_station.h"
 
-#define INIT_OBJ "init"
+#include "item.h"
 
-#define PADDING   8
-#define UI_WIDTH  (128 + (2*PADDING))
-#define UI_HEIGHT ((16*(NUM_SAVE_FILES+2)) + (2*PADDING))
+#define INIT_OBJ "init"
 
 class Init : public Object {
 public:
@@ -41,15 +41,27 @@ public:
 void Game::init() {
     this->factories[INIT_OBJ] = new InitFactory();
 
-    this->factories[ENEMY_BUG_OBJ] = new EnemyBugFactory();
-
+    // objects
     this->factories[CHEESE_OBJ] = new CheeseFactory();
+    this->factories[ENEMY_BUG_OBJ] = new EnemyBugFactory();
+    this->factories[INVENTORY_OBJ] = new InventoryFactory();
+    this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
+    this->factories[ITEM_TOOTHPICK THROWN_OBJ] = new ThrownToothpickFactory();
     this->factories[MOUSE_OBJ] = new MouseFactory();
     this->factories[SAVE_STATION_OBJ] = new SaveStationFactory();
+
+    // items
+    item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Toothpick", "A toothpick."};
 
     this->create_object(INIT_OBJ, "");
     this->title = "Cheddar n' Feta";
 }
+
+// ---- init object ----
+
+#define PADDING   8
+#define UI_WIDTH  (128 + (2*PADDING))
+#define UI_HEIGHT ((16*(NUM_SAVE_FILES+2)) + (2*PADDING))
 
 Init::Init() {
     this->summaries = save.file_summaries();
@@ -92,22 +104,20 @@ void Init::step() {
         const int x = (SCREEN_WIDTH - UI_WIDTH) / 2;
         const int y = (SCREEN_HEIGHT - UI_HEIGHT) / 2 - 8;
         SDL_FRect ui_rect = { float(x), float(y), UI_WIDTH, UI_HEIGHT };
-        game->draw_ui_box(&ui_rect);
+        game->draw_ui_box(BOX_CONTAINER, &ui_rect);
         game->draw_text("--- Cheddar & Feta ---", SMALL_FONT, x + PADDING + 2, y + PADDING, 0);
 
         for (int i = 0; i < NUM_SAVE_FILES; i++) {
             const int save_y = y + PADDING + (16*i) + 16;
 
-            if (this->sel_save == i) {
-                SDL_FRect highlight_rect;
-                highlight_rect.x = float(x + PADDING);
-                highlight_rect.y = float(save_y);
-                highlight_rect.w = float(UI_WIDTH - (2*PADDING));
-                highlight_rect.h = 14.0f;
-                game->draw_rect(&highlight_rect, 255, 255, 255, 64, SDL_BLENDMODE_BLEND);
-            }
+            SDL_FRect highlight_rect;
+            highlight_rect.x = float(x + PADDING - 2);
+            highlight_rect.y = float(save_y);
+            highlight_rect.w = float(4 + UI_WIDTH - (2*PADDING));
+            highlight_rect.h = 14.0f;
 
-            game->draw_text(this->summaries[i], DEFAULT_FONT, x + PADDING + 2, save_y + 2, 0);
+            game->draw_ui_box(this->sel_save == i ? BOX_OUT_SEL : BOX_OUT, &highlight_rect);
+            game->draw_text(this->summaries[i], this->sel_save == i ? BOLD_FONT : DEFAULT_FONT, x + PADDING + 2, save_y + 2, 0);
         }
 
         game->draw_text("[^/}] to select; [Enter] to load", SMALL_FONT, x + PADDING + 2, y + UI_HEIGHT - PADDING - 8, 0);

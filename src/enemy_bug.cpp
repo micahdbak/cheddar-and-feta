@@ -5,10 +5,7 @@
 
 #include <iostream>
 
-EnemyBug::EnemyBug(const std::string &options) {
-    int x = 0, y = 0;
-    sscanf(options.c_str(), "%d,%d", &x, &y);
-
+EnemyBug::EnemyBug(int x, int y) {
     this->x = float(x);
     this->y = float(y);
     this->target_x = this->x;
@@ -58,9 +55,9 @@ void EnemyBug::step() {
     if (this->sprite->animation != this->animation) {
         this->sprite->set_animation(this->animation);
         if (this->animation > 7) {
-            this->sprite->set_interval_ms(50);
+            this->sprite->interval_ms = 50;
         } else {
-            this->sprite->set_interval_ms(100);
+            this->sprite->interval_ms = 100;
         }
     }
 

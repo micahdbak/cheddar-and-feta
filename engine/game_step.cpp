@@ -44,11 +44,23 @@ Game::Game() {
         { '@', 5 }, { 'M', 6 }, { 'N', 5 }, { 'W', 6 },
         { '^', 6 }, { '`', 3 }, { 'i', 2 }, { 'j', 3 },
         { 'l', 2 }, { 'm', 6 }, { 'w', 6 }, { '{', 6 },
-        { '|', 6 }, { '}', 6 }, { '~', 6 }
+        { '|', 6 }, { '}', 6 }, { '~', 7 }
     }));
 
     // DEFAULT_FONT = 2
     this->fonts.push_back(new Font("fonts/default.bmp", 6, 10, 5, {
+        { ' ', 3 }, { '!', 2 }, { '"', 4 }, { '#', 6 },
+        { '\'', 3 }, { '(', 4 }, { ')', 4 }, { '*', 4 },
+        { '+', 6 }, { ',', 3 }, { '.', 2 }, { '1', 4 },
+        { ':', 2 }, { ';', 3 }, { 'I', 4 }, { 'J', 4 },
+        { 'M', 6 }, { 'V', 6 }, { 'W', 6 }, { 'X', 6 },
+        { '^', 4 }, { '`', 3 }, { 'i', 2 }, { 'j', 3 },
+        { 'l', 2 }, { 'm', 6 }, { 'v', 6 }, { 'w', 6 },
+        { 'x', 6 }, { '|', 6 }
+    }));
+
+    // DEFAULT_BOLD_FONT = 3
+    this->fonts.push_back(new Font("fonts/bold.bmp", 6, 10, 5, {
         { ' ', 3 }, { '!', 2 }, { '"', 4 }, { '#', 6 },
         { '\'', 3 }, { '(', 4 }, { ')', 4 }, { '*', 4 },
         { '+', 6 }, { ',', 3 }, { '.', 2 }, { '1', 4 },
@@ -137,6 +149,12 @@ void Game::load_map(const char *map_path) {
 
     for (auto obj : map.objects)
         this->create_object(obj.first, obj.second);
+
+    while (!this->new_objects.empty()) {
+        auto obj = this->new_objects.front();
+        this->new_objects.pop();
+        this->create_object(obj.first, obj.second);
+    }
 
     this->bg = map.bg;
     this->fg = map.fg;

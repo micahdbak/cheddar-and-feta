@@ -21,56 +21,57 @@ void Game::draw_outline(SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL
     SDL_SetRenderTarget(renderer, this->screen);
 }
 
-#define UI_BOX_SIZE 8.0f
+#define UI_BOX_SIZE 4.0f
 
-void Game::draw_ui_box(SDL_FRect *rect) {
+void Game::draw_ui_box(int type, SDL_FRect *rect) {
+    int x_shift = type * (UI_BOX_SIZE * 3);
     SDL_FRect src_rect, dst_rect;
     SDL_SetRenderTarget(renderer, this->ui);
 
     // top-left corner
-    src_rect = { 0.0f, 0.0f, UI_BOX_SIZE, UI_BOX_SIZE };
+    src_rect = { float(x_shift), 0.0f, UI_BOX_SIZE, UI_BOX_SIZE };
     dst_rect = { rect->x, rect->y, UI_BOX_SIZE, UI_BOX_SIZE };
     SDL_RenderTexture(renderer, this->ui_box, &src_rect, &dst_rect);
 
     // top-right corner
-    src_rect = { UI_BOX_SIZE * 2.0f, 0.0f, UI_BOX_SIZE, UI_BOX_SIZE };
+    src_rect = { float(x_shift + 2*UI_BOX_SIZE), 0.0f, UI_BOX_SIZE, UI_BOX_SIZE };
     dst_rect = { rect->x + rect->w - UI_BOX_SIZE, rect->y, UI_BOX_SIZE, UI_BOX_SIZE };
     SDL_RenderTexture(renderer, this->ui_box, &src_rect, &dst_rect);
 
     // bottom-right corner
-    src_rect = { UI_BOX_SIZE * 2.0f, UI_BOX_SIZE * 2.0f, UI_BOX_SIZE, UI_BOX_SIZE };
+    src_rect = { float(x_shift + 2*UI_BOX_SIZE), UI_BOX_SIZE * 2.0f, UI_BOX_SIZE, UI_BOX_SIZE };
     dst_rect = { rect->x + rect->w - UI_BOX_SIZE, rect->y + rect->h - UI_BOX_SIZE, UI_BOX_SIZE, UI_BOX_SIZE };
     SDL_RenderTexture(renderer, this->ui_box, &src_rect, &dst_rect);
 
     // bottom-left corner
-    src_rect = { 0.0f, UI_BOX_SIZE * 2.0f, UI_BOX_SIZE, UI_BOX_SIZE };
+    src_rect = { float(x_shift), UI_BOX_SIZE * 2.0f, UI_BOX_SIZE, UI_BOX_SIZE };
     dst_rect = { rect->x, rect->y + rect->h - UI_BOX_SIZE, UI_BOX_SIZE, UI_BOX_SIZE };
     SDL_RenderTexture(renderer, this->ui_box, &src_rect, &dst_rect);
 
     // top edge
-    src_rect = { UI_BOX_SIZE, 0.0f, UI_BOX_SIZE, UI_BOX_SIZE };
+    src_rect = { float(x_shift + UI_BOX_SIZE), 0.0f, UI_BOX_SIZE, UI_BOX_SIZE };
     dst_rect = { rect->x + UI_BOX_SIZE, rect->y, rect->w - (UI_BOX_SIZE * 2.0f), UI_BOX_SIZE };
-    SDL_RenderTexture(renderer, this->ui_box, &src_rect, &dst_rect);
+    SDL_RenderTextureTiled(renderer, this->ui_box, &src_rect, 1.0f, &dst_rect);
 
     // right edge
-    src_rect = { UI_BOX_SIZE * 2.0f, UI_BOX_SIZE, UI_BOX_SIZE, UI_BOX_SIZE };
+    src_rect = { float(x_shift + 2*UI_BOX_SIZE), UI_BOX_SIZE, UI_BOX_SIZE, UI_BOX_SIZE };
     dst_rect = { rect->x + rect->w - UI_BOX_SIZE, rect->y + UI_BOX_SIZE, UI_BOX_SIZE, rect->h - (UI_BOX_SIZE * 2.0f) };
-    SDL_RenderTexture(renderer, this->ui_box, &src_rect, &dst_rect);
+    SDL_RenderTextureTiled(renderer, this->ui_box, &src_rect, 1.0f, &dst_rect);
 
     // bottom edge
-    src_rect = { UI_BOX_SIZE, UI_BOX_SIZE * 2.0f, UI_BOX_SIZE, UI_BOX_SIZE };
+    src_rect = { float(x_shift + UI_BOX_SIZE), UI_BOX_SIZE * 2.0f, UI_BOX_SIZE, UI_BOX_SIZE };
     dst_rect = { rect->x + UI_BOX_SIZE, rect->y + rect->h - UI_BOX_SIZE, rect->w - (UI_BOX_SIZE * 2.0f), UI_BOX_SIZE };
-    SDL_RenderTexture(renderer, this->ui_box, &src_rect, &dst_rect);
+    SDL_RenderTextureTiled(renderer, this->ui_box, &src_rect, 1.0f, &dst_rect);
 
     // left edge
-    src_rect = { 0.0f, UI_BOX_SIZE, UI_BOX_SIZE, UI_BOX_SIZE };
+    src_rect = { float(x_shift), UI_BOX_SIZE, UI_BOX_SIZE, UI_BOX_SIZE };
     dst_rect = { rect->x, rect->y + UI_BOX_SIZE, UI_BOX_SIZE, rect->h - (UI_BOX_SIZE * 2.0f) };
-    SDL_RenderTexture(renderer, this->ui_box, &src_rect, &dst_rect);
+    SDL_RenderTextureTiled(renderer, this->ui_box, &src_rect, 1.0f, &dst_rect);
 
     // middle
-    src_rect = { UI_BOX_SIZE, UI_BOX_SIZE, UI_BOX_SIZE, UI_BOX_SIZE };
+    src_rect = { float(x_shift + UI_BOX_SIZE), UI_BOX_SIZE, UI_BOX_SIZE, UI_BOX_SIZE };
     dst_rect = { rect->x + UI_BOX_SIZE, rect->y + UI_BOX_SIZE, rect->w - (UI_BOX_SIZE * 2.0f), rect->h - (UI_BOX_SIZE * 2.0f) };
-    SDL_RenderTexture(renderer, this->ui_box, &src_rect, &dst_rect);
+    SDL_RenderTextureTiled(renderer, this->ui_box, &src_rect, 1.0f, &dst_rect);
 
     SDL_SetRenderTarget(renderer, this->screen);
 }

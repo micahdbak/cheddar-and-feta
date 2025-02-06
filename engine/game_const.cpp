@@ -1,5 +1,37 @@
 #include "game.h"
 
+int direction_from_dirs(int x_dir, int y_dir) {
+    if (x_dir < 0) {
+        return 6 + y_dir;
+    } else if (x_dir > 0) {
+        return 2 - y_dir;
+    } else if (y_dir < 0) {
+        return 4;
+    } else {
+        return 0;
+    }
+}
+
+void dir_to_point(float x1, float y1, float x2, float y2, int *x_dir, int *y_dir) {
+    float angle = atan2(y2 - y1, x2 - x1); // [-M_PI,M_PI]
+    angle += M_PI; // [0,2.0*M_PI]
+    angle /= M_PI; // [0,2.0]
+    angle *= 4.0f; // [0,8.0]
+    angle += 0.5f; // [0.5,8.5] - for integer rounding
+
+    switch (int(angle)) {
+    case 0: *x_dir = -1, *y_dir = 0;  break;
+    case 1: *x_dir = -1, *y_dir = -1; break;
+    case 2: *x_dir = 0, *y_dir = -1;  break;
+    case 3: *x_dir = 1, *y_dir = -1;  break;
+    case 4: *x_dir = 1, *y_dir = 0;   break;
+    case 5: *x_dir = 1, *y_dir = 1;   break;
+    case 6: *x_dir = 0, *y_dir = 1;   break;
+    case 7: *x_dir = -1, *y_dir = 1;  break;
+    case 8: *x_dir = -1, *y_dir = 0;  break;
+    }
+}
+
 void Game::make_map_rect(int x, int y, int w, int h, SDL_FRect *src_rect, SDL_FRect *dst_rect) const {
     int src_x = x - (SCREEN_WIDTH/2);
     int src_y = y - (SCREEN_HEIGHT/2);
@@ -151,26 +183,4 @@ void Game::random_target(int x, int y, int *next_x, int *next_y) const {
     std::pair<int, int> target = candidates[SDL_rand(candidates.size())];
     *next_x = target.first * this->tile_width;
     *next_y = target.second * this->tile_height;
-}
-
-#include <iostream>
-
-void Game::dir_to_point(float x1, float y1, float x2, float y2, int *x_dir, int *y_dir) const {
-    float angle = atan2(y2 - y1, x2 - x1); // [-M_PI,M_PI]
-    angle += M_PI; // [0,2.0*M_PI]
-    angle /= M_PI; // [0,2.0]
-    angle *= 4.0f; // [0,8.0]
-    angle += 0.5f; // [0.5,8.5] - for integer rounding
-
-    switch (int(angle)) {
-    case 0: *x_dir = -1, *y_dir = 0;  break;
-    case 1: *x_dir = -1, *y_dir = -1; break;
-    case 2: *x_dir = 0, *y_dir = -1;  break;
-    case 3: *x_dir = 1, *y_dir = -1;  break;
-    case 4: *x_dir = 1, *y_dir = 0;   break;
-    case 5: *x_dir = 1, *y_dir = 1;   break;
-    case 6: *x_dir = 0, *y_dir = 1;   break;
-    case 7: *x_dir = -1, *y_dir = 1;  break;
-    case 8: *x_dir = -1, *y_dir = 0;  break;
-    }
 }

@@ -57,8 +57,5 @@ void Sprite::update_frame() {
 void Sprite::set_frame(int frame_i) {
     this->frame_i = frame_i;
     this->frame.x = float(this->frame_i * this->frame_w);
-}
-
-void Sprite::set_interval_ms(int interval_ms) {
-    this->interval_ms = interval_ms;
+    this->frame_last_set = game->ticks;
 }

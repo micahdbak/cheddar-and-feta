@@ -58,7 +58,7 @@ void Enemy::enemy_step() {
         if (distance < this->attack_distance) {
             if (mouse->attack(this->damage)) {
                 attack = 8;
-                game->dir_to_point(center_x, center_y, mouse->x, mouse->y, &mouse->throw_x, &mouse->throw_y);
+                dir_to_point(center_x, center_y, mouse->x, mouse->y, &mouse->throw_x, &mouse->throw_y);
             }
         } else if (distance < this->sight_distance)
             in_sight = game->in_sight(int(this->x), int(this->y), int(mouse->x), int(mouse->y), &this->target_x, &this->target_y);

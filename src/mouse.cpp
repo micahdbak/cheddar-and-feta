@@ -1,7 +1,10 @@
-#include "game.h"
+#include "inventory.h"
+#include "item.h"
 #include "keyboard.h"
 #include "mouse.h"
 #include "save_data.h"
+
+#include "item_toothpick.h"
 
 #include <iostream>
 #include <cmath>
@@ -14,6 +17,7 @@ Mouse::Mouse(int x, int y) {
         exit(1);
     }
     mouse = this;
+    game->push_object(INVENTORY_OBJ, "");
 
     this->sprite = new Sprite("sprites/mouse.bmp", 32, 32, 250);
 
@@ -21,6 +25,11 @@ Mouse::Mouse(int x, int y) {
     this->dst_rect.y = float(SCREEN_HEIGHT/2 - 24);
     this->dst_rect.w = 32.0f;
     this->dst_rect.h = 32.0f;
+
+    this->miss_rect.x = float(SCREEN_WIDTH/2 - ICON_SIZE/2);
+    this->miss_rect.y = float(SCREEN_HEIGHT/2 - 20 - ICON_SIZE);
+    this->miss_rect.w = float(ICON_SIZE);
+    this->miss_rect.h = float(ICON_SIZE);
 
     this->x = float(x);
     this->y = float(y);
@@ -49,20 +58,8 @@ static bool _is_collision(float x, float y) {
 
 #define ATTACKING_ANIMATION 8
 #define ATTACKED_ANIMATION  16
-#define EATING_ANIMATION    24
-
-// counter-clockwise direction from 0 = down, 1 = down-right, ...
-int direction_from_dirs(int x_dir, int y_dir) {
-    if (x_dir < 0) {
-        return 6 + y_dir;
-    } else if (x_dir > 0) {
-        return 2 - y_dir;
-    } else if (y_dir < 0) {
-        return 4;
-    } else {
-        return 0;
-    }
-}
+#define THROWING_ANIMATION  24
+#define EATING_ANIMATION    32
 
 void Mouse::step() {
     if (this->locked) {
@@ -83,7 +80,7 @@ void Mouse::step() {
 
             // calculate direction to enemy
             int x_dir, y_dir;
-            game->dir_to_point(mouse->x, mouse->y, enemy_x, enemy_y, &x_dir, &y_dir);
+            dir_to_point(mouse->x, mouse->y, enemy_x, enemy_y, &x_dir, &y_dir);
             int enemy_direction = direction_from_dirs(x_dir, y_dir);
 
             // current direction that the player is facing
@@ -95,7 +92,7 @@ void Mouse::step() {
                 if (facing_direction != enemy_direction) {
                     // then set the closest enemy to nullptr and wait to find the next closest enemy in this direction
                     this->closest_enemy = nullptr;
-                    this->closest_distance = ARBITRARILY_LARGE;
+                    this->closest_distance = FLT_MAX;
                 } else {
                     // if still facing it, update its distance, incase it has moved further away
                     this->closest_distance = distance_between_points(enemy_x, enemy_y, this->x, this->y);
@@ -134,29 +131,47 @@ void Mouse::step() {
         // run
         if (keyboard.is_down(SDLK_LSHIFT)) {
             mov_speed = 64.0f;
-            this->sprite->set_interval_ms(100);
+            this->sprite->interval_ms = 100;
         } else {
             mov_speed = 32.0f;
-            this->sprite->set_interval_ms(250);
+            this->sprite->interval_ms = 250;
         }
 
         // attack
         if (keyboard.is_hit(SDLK_SPACE)) {
-            this->is_busy = ATTACKING;
             this->busy_ticks = game->ticks;
 
-            // set animation to attacking
-            this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
+            if (true && (x_dir != 0 || y_dir != 0)) {
+                this->is_busy = THROWING;
 
-            // attack the closest enemy (if close enough)
-            if (this->closest_enemy != nullptr && this->closest_distance < 32.0f) {
-                this->closest_enemy->attack(this->damage);
+                // set animation to throwing
+                this->sprite->set_animation((this->sprite->animation % 8) + THROWING_ANIMATION);
+                this->sprite->set_frame(0);
+                this->sprite->interval_ms = 125;
 
-                // check if enemy just died
-                if (this->closest_enemy->dead) {
-                    // set these accordingly so next attack is not the dead enemy
-                    this->closest_enemy = nullptr;
-                    this->closest_distance = ARBITRARILY_LARGE;
+                // create thrown item
+                char options[256];
+                ThrownItem::MakeOptions(options, sizeof(options), this->x, this->y, x_dir, y_dir);
+                game->push_object(ITEM_TOOTHPICK THROWN_OBJ, std::string(options));
+            } else {
+                this->is_busy = ATTACKING;
+
+                // set animation to attacking
+                this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
+
+                // attack the closest enemy (if close enough)
+                if (this->closest_enemy != nullptr && this->closest_distance < 32.0f) {
+                    this->closest_enemy->attack(this->damage);
+
+                    // check if enemy just died
+                    if (this->closest_enemy->dead) {
+                        // set these accordingly so next attack is not the dead enemy
+                        this->closest_enemy = nullptr;
+                        this->closest_distance = FLT_MAX;
+                    }
+                } else if (!enemies.empty()) {
+                    this->did_miss = true;
+                    game->draw_icon(ATTACK_MISSED_ICON, &this->miss_rect);
                 }
             }
         } else if (keyboard.is_hit(SDLK_C) && this->cheese > 0) { // eat cheese
@@ -166,7 +181,7 @@ void Mouse::step() {
 
             // set animation to eating cheese
             this->sprite->set_animation(EATING_ANIMATION);
-            this->sprite->set_interval_ms(75);
+            this->sprite->interval_ms = 75;
         }
 
         break;
@@ -180,6 +195,11 @@ void Mouse::step() {
         // will return to normal after << 500 ms >>
         if (game->ticks - this->busy_ticks > 500) {
             this->is_busy = FALSE;
+
+            if (this->did_miss) {
+                this->did_miss = false;
+                game->draw_rect(&this->miss_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+            }
 
             // set animation to walking/running
             this->sprite->set_animation(this->sprite->animation % 8);
@@ -195,6 +215,19 @@ void Mouse::step() {
 
         // will return to normal after << 250 ms >>
         if (game->ticks - this->busy_ticks > 250) {
+            this->is_busy = FALSE;
+
+            // set animation to walking/running
+            this->sprite->set_animation(this->sprite->animation % 8);
+        }
+
+        break;
+
+    case THROWING:
+        this->sprite->update_frame();
+
+        // will return to normal after << 500 ms >>
+        if (game->ticks - this->busy_ticks > 500) {
             this->is_busy = FALSE;
 
             // set animation to walking/running
@@ -232,11 +265,32 @@ void Mouse::step() {
     game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
 }
 
+void Mouse::save_data() {
+    save.data["mouse_data"] = "true";
+    char buff[100];
+    float_to_str(this->x, buff, sizeof(buff));
+    save.data["mouse_x"] = buff;
+    float_to_str(this->y, buff, sizeof(buff));
+    save.data["mouse_y"] = buff;
+    snprintf(buff, sizeof(buff), "%d", int(this->sprite->animation));
+    save.data["mouse_animation"] = buff;
+}
+
+void Mouse::post_save_data() {
+    save.data["mouse_data"] = "false";
+}
+
 // will be called by an enemy
 bool Mouse::attack(int damage) {
     // don't get attacked if was already attacked
     if (this->is_busy == ATTACKED)
         return false;
+
+    // erase "MISS" icon if this attack breaks the animation
+    if (this->is_busy == ATTACKING && this->did_miss) {
+        this->did_miss = false;
+        game->draw_rect(&this->miss_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+    }
 
     this->is_busy = ATTACKED;
     this->busy_ticks = game->ticks;
@@ -258,17 +312,10 @@ bool Mouse::attack(int damage) {
     return true;
 }
 
-void Mouse::save_data() {
-    save.data["mouse_data"] = "true";
-    char buff[100];
-    float_to_str(this->x, buff, sizeof(buff));
-    save.data["mouse_x"] = buff;
-    float_to_str(this->y, buff, sizeof(buff));
-    save.data["mouse_y"] = buff;
-    snprintf(buff, sizeof(buff), "%d", int(this->sprite->animation));
-    save.data["mouse_animation"] = buff;
-}
+void Mouse::push_item(const std::string &item_id) {
+    if (this->items.size() >= this->max_items || !item_info.contains(item_id)) {
+        return;
+    }
 
-void Mouse::post_save_data() {
-    save.data["mouse_data"] = "false";
+    this->items.push_back(item_id);
 }

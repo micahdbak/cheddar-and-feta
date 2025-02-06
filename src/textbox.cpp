@@ -12,7 +12,7 @@ Textbox::Textbox(const std::string &text, const std::string &owner, int font, in
     this->text_rect = { 80.0f, 176.0f, 160.0f, 48.0f };
     this->font = font;
     this->interval_ms = interval_ms;
-    game->draw_ui_box(&this->box_rect);
+    game->draw_ui_box(BOX_CONTAINER, &this->box_rect);
 }
 
 Textbox::~Textbox() {

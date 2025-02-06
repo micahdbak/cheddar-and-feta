@@ -12,7 +12,13 @@ void Keyboard::clear_hits() {
 }
 
 bool Keyboard::is_hit(SDL_Keycode key) {
-    return this->is_hit_map.contains(key);
+    if (this->is_hit_map.contains(key)) {
+        bool hit = this->is_hit_map[key];
+        this->is_hit_map[key] = false;
+        return hit;
+    } else {
+        return false;
+    }
 }
 
 bool Keyboard::is_down(SDL_Keycode key) {

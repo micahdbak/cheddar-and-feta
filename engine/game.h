@@ -1,6 +1,7 @@
 #ifndef GAME_DATA_H
 #define GAME_DATA_H
 
+#include <cfloat>
 #include <cmath>
 #include <cstdlib>
 #include <map>
@@ -38,12 +39,21 @@
 #define MONO_FONT    0
 #define SMALL_FONT   1
 #define DEFAULT_FONT 2
-#define NUM_FONTS    3
+#define BOLD_FONT    3
+#define NUM_FONTS    4
 
 // special chars in SMALL_FONT
 #define CHAR_EQUIP        '{'
 #define CHAR_TEXTBOX_NEXT '|'
 #define CHAR_DOWN_ARROW   '}'
+
+// ui box related things
+
+#define BOX_CONTAINER 0
+#define BOX_OUT       1
+#define BOX_OUT_SEL   2
+#define BOX_UNDER     3
+#define BOX_UNDER_SEL 4
 
 // icon related things
 
@@ -51,6 +61,12 @@
 
 // icons
 #define SKULL_AND_BONES_ICON 0
+#define ATTACK_MISSED_ICON   1
+
+// game_const.cpp
+
+int direction_from_dirs(int x_dir, int y_dir);
+void dir_to_point(float x1, float y1, float x2, float y2, int *x_dir, int *y_dir);
 
 class Game {
 public:
@@ -71,13 +87,12 @@ public:
     bool point_in_collider(float x, float y) const;
     bool in_sight(int x0, int y0, int x1, int y1, int *next_x, int *next_y) const; // true if no colliders in way
     void random_target(int x, int y, int *next_x, int *next_y) const; // chooses a random tile to move to, with no collider
-    void dir_to_point(float x1, float y1, float x2, float y2, int *x_dir, int *y_dir) const;
 
     // game_draw.cpp
 
     void draw_rect(SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode);
     void draw_outline(SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode);
-    void draw_ui_box(SDL_FRect *rect);
+    void draw_ui_box(int type, SDL_FRect *rect);
     void draw_text(const std::string &str, int font, int x, int y, int w);
     void draw_icon(int icon, SDL_FRect *dst_rect);
 

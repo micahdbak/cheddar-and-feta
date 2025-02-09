@@ -3,8 +3,6 @@
 #include <algorithm> // std::lower_bound
 
 void Game::set_view(int x, int y) {
-    this->view_x = x;
-    this->view_y = y;
     this->corner_x = x - SCREEN_WIDTH/2;
     this->corner_y = y - SCREEN_HEIGHT/2;
 }

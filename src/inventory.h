@@ -15,11 +15,14 @@ public:
     void post_save_data() override;
 
     bool push_item(const std::string &item_id);
+    bool remove_item(const std::string &item_id);
     int add_cheese(int amount);
 
     std::string attack_item = "";
 
 private:
+    int n_attack_items();
+    void render_cycle_attack_item();
     void render_status_menu();
     void render_bag_menu();
     void render_item_menu();
@@ -29,10 +32,13 @@ private:
     int max_items = 4;
     std::string equipped_weapon = NOTHING_EQUIPPED, equipped_armour = NOTHING_EQUIPPED;
 
-    enum { NOT_DISPLAYING, BAG, ITEM } menu = NOT_DISPLAYING;
+    enum { NOT_DISPLAYING, CYCLE_ATTACK_ITEM, BAG, ITEM } menu = NOT_DISPLAYING;
+    int sel_attack_item = 0;
     int sel_item = 0;
     #define NUM_ACTION_OPTIONS 3
     int sel_action = 0;
+
+    Uint64 cycle_attack_item_ticks = 0;
 };
 
 class InventoryFactory : public ObjectFactory {

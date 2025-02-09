@@ -33,6 +33,8 @@ int main(int argc, const char **argv) {
 
     std::cout << "Renderer: " << SDL_GetRendererName(renderer) << std::endl;
 
+    SDL_SetRenderVSync(renderer, 1);
+
     if (std::atexit(cleanup) != 0) {
         std::cerr << "main error: couldn't register exit function" << std::endl;
         cleanup();
@@ -57,6 +59,7 @@ int main(int argc, const char **argv) {
 
     while (_running) {
         SDL_Event event;
+
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_EVENT_WINDOW_RESIZED:

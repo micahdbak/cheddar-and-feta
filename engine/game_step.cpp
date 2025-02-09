@@ -33,60 +33,20 @@ Game::Game() {
     }
     SDL_SetTextureScaleMode(this->ui_box, SDL_SCALEMODE_NEAREST);
 
-    // MONO_FONT = 0
-    this->fonts.push_back(new Font("fonts/mono.bmp", 6, 10, 6, {}));
-
-    // SMALL_FONT = 1
-    this->fonts.push_back(new Font("fonts/small.bmp", 6, 7, 4, {
-        { ' ', 3 }, { '!', 2 }, { '#', 6 }, { '%', 5 },
-        { '&', 5 }, { '\'', 3 }, { ',', 3 }, { '.', 2 },
-        { ':', 2 }, { ';', 3 }, { '<', 6 }, { '>', 6 },
-        { '@', 5 }, { 'M', 6 }, { 'N', 5 }, { 'W', 6 },
-        { '^', 6 }, { '`', 3 }, { 'i', 2 }, { 'j', 3 },
-        { 'l', 2 }, { 'm', 6 }, { 'w', 6 }, { '{', 6 },
-        { '|', 6 }, { '}', 6 }, { '~', 7 }
-    }));
-
-    // DEFAULT_FONT = 2
-    this->fonts.push_back(new Font("fonts/default.bmp", 6, 10, 5, {
-        { ' ', 3 }, { '!', 2 }, { '"', 4 }, { '#', 6 },
-        { '\'', 3 }, { '(', 4 }, { ')', 4 }, { '*', 4 },
-        { '+', 6 }, { ',', 3 }, { '.', 2 }, { '1', 4 },
-        { ':', 2 }, { ';', 3 }, { 'I', 4 }, { 'J', 4 },
-        { 'M', 6 }, { 'V', 6 }, { 'W', 6 }, { 'X', 6 },
-        { '^', 4 }, { '`', 3 }, { 'i', 2 }, { 'j', 3 },
-        { 'l', 2 }, { 'm', 6 }, { 'v', 6 }, { 'w', 6 },
-        { 'x', 6 }, { '|', 6 }
-    }));
-
-    // DEFAULT_BOLD_FONT = 3
-    this->fonts.push_back(new Font("fonts/bold.bmp", 6, 10, 5, {
-        { ' ', 3 }, { '!', 2 }, { '"', 4 }, { '#', 6 },
-        { '\'', 3 }, { '(', 4 }, { ')', 4 }, { '*', 4 },
-        { '+', 6 }, { ',', 3 }, { '.', 2 }, { '1', 4 },
-        { ':', 2 }, { ';', 3 }, { 'I', 4 }, { 'J', 4 },
-        { 'M', 6 }, { 'V', 6 }, { 'W', 6 }, { 'X', 6 },
-        { '^', 4 }, { '`', 3 }, { 'i', 2 }, { 'j', 3 },
-        { 'l', 2 }, { 'm', 6 }, { 'v', 6 }, { 'w', 6 },
-        { 'x', 6 }, { '|', 6 }
-    }));
-
-    this->ticks = SDL_GetTicks();
-    this->last_ticks = this->ticks;
-    this->frame_ticks = this->ticks;
-
     // load icons
     SDL_Surface *icons_surface = SDL_LoadBMP("sprites/icons.bmp");
     if (icons_surface == nullptr) {
         std::cerr << "SDL_LoadBMP error: " << SDL_GetError() << std::endl;
         exit(1);
     }
-
     this->icons = SDL_CreateTextureFromSurface(renderer, icons_surface);
     if (this->icons == nullptr) {
         std::cerr << "SDL_CreateTextureFromSurface error: " << SDL_GetError() << std::endl;
         exit(1);
     }
+
+    this->ticks = SDL_GetTicks();
+    Font::load_fonts(this->fonts);
 }
 
 Game::~Game() {
@@ -202,6 +162,7 @@ void Game::post_save_objects() {
 }
 
 void Game::step() {
+    // create new map
     if (this->map != "") {
         // clear the window
         SDL_SetRenderTarget(renderer, NULL);
@@ -215,16 +176,10 @@ void Game::step() {
         return;
     }
 
-    this->ticks = SDL_GetTicks();
-    float delta2 = float(this->ticks - this->last_ticks) / 1000.0f;
-    this->delta = (2.0f*this->delta + delta2) / 3.0f;
-    this->last_ticks = this->ticks;
-
-    if (this->ticks - this->frame_ticks > 20 * 1000) {
-        std::cout << "Avg FPS: " << this->frames / 20 << std::endl;
-        this->frames = 0;
-        this->frame_ticks = this->ticks;
-    } else this->frames++;
+    // get ticks and calculate delta
+    Uint64 new_ticks = SDL_GetTicks();
+    this->delta = float(new_ticks - this->ticks) / 1000.0f;
+    this->ticks = new_ticks;
 
     // step all objects
     for (auto it = this->objects.begin(); it != this->objects.end();) {
@@ -252,7 +207,7 @@ void Game::step() {
     // render background
     SDL_FRect map_src, map_dst;
     if (this->bg != nullptr) {
-        this->make_map_rect(this->view_x, this->view_y, this->bg->w, this->bg->h, &map_src, &map_dst);
+        this->make_map_rect(this->corner_x, this->corner_y, this->bg->w, this->bg->h, &map_src, &map_dst);
         SDL_RenderTexture(renderer, this->bg, &map_src, &map_dst);
     }
 

@@ -24,7 +24,7 @@ public:
         return "Who needs a toothpick anyways.";
     }
 
-    std::pair<bool, std::string> take_text() override {
+    std::pair<bool, std::string> take() override {
         if (!inventory->push_item(ITEM_TOOTHPICK)) {
             return { false, "Your inventory is full." };
         }

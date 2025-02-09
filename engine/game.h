@@ -34,26 +34,14 @@
 #define SCREEN_WIDTH  320
 #define SCREEN_HEIGHT 240
 
-// fonts and text related things
-
-#define MONO_FONT    0
-#define SMALL_FONT   1
-#define DEFAULT_FONT 2
-#define BOLD_FONT    3
-#define NUM_FONTS    4
-
-// special chars in SMALL_FONT
-#define CHAR_EQUIP        '{'
-#define CHAR_TEXTBOX_NEXT '|'
-#define CHAR_DOWN_ARROW   '}'
-
 // ui box related things
 
 #define BOX_CONTAINER 0
 #define BOX_OUT       1
 #define BOX_OUT_SEL   2
-#define BOX_UNDER     3
-#define BOX_UNDER_SEL 4
+#define BOX_MENU_CONT 3
+#define BOX_UNDER     4
+#define BOX_UNDER_SEL 5
 
 // icon related things
 
@@ -105,18 +93,17 @@ public:
 
     void init();
 
+    std::string title = "SDL3 Game";
     int argc;
     const char **argv;
 
+    Uint64 ticks = 0;
     float delta = 0;
 
-    std::string title = "SDL3 Game";
     SDL_Texture *screen, *ui;
+
     std::vector<Font *> fonts;
 
-    Uint64 ticks = 0;
-
-    int view_x = SCREEN_WIDTH/2, view_y = SCREEN_HEIGHT/2;
     int corner_x = 0, corner_y = 0; // set in Game::step
     int tile_width = 32, tile_height = 32, cols = 1, rows = 1;
 
@@ -127,9 +114,9 @@ public:
 private:
     // for Game::sprites
     struct SpriteRender {
-        SDL_Texture *texture;
+        SDL_Texture *texture = nullptr;
         SDL_FRect *src_rect, *dst_rect;
-        int y; // for depth calculations
+        int y;
 
         bool operator<(const SpriteRender &other) const {
             return this->y < other.y;
@@ -146,10 +133,6 @@ private:
 
     void unload();
     void load_map(const char *map_path);
-
-    // for calculating delta time and fps
-    Uint64 last_ticks = 0, frame_ticks = 0;
-    int frames;
 
     // map things
     SDL_Texture *bg = nullptr, *fg = nullptr;

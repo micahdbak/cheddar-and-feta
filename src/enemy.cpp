@@ -33,6 +33,9 @@ void Enemy::enemy_step() {
         return;
     }
 
+    if (mouse->locked)
+        return;
+
     int dx = sign(this->target_x - int(this->x));
     int dy = sign(this->target_y - int(this->y));
 

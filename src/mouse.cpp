@@ -141,7 +141,7 @@ void Mouse::step() {
         if (keyboard.is_hit(SDLK_SPACE)) {
             this->busy_ticks = game->ticks;
 
-            if (true && (x_dir != 0 || y_dir != 0)) {
+            if (!inventory->attack_item.empty() && (x_dir != 0 || y_dir != 0)) {
                 this->is_busy = THROWING;
 
                 // set animation to throwing
@@ -152,7 +152,9 @@ void Mouse::step() {
                 // create thrown item
                 char options[256];
                 ThrownItem::MakeOptions(options, sizeof(options), this->x, this->y, x_dir, y_dir);
-                game->push_object(ITEM_TOOTHPICK THROWN_OBJ, std::string(options));
+                game->push_object(inventory->attack_item + THROWN_OBJ, std::string(options));
+                inventory->remove_item(inventory->attack_item);
+                inventory->attack_item = "";
             } else {
                 this->is_busy = ATTACKING;
 

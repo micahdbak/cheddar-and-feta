@@ -496,7 +496,7 @@ void Editor::render() {
     int x = (this->sel_x*this->map.tile_width) + (this->map.tile_width/2);
     int y = (this->sel_y*this->map.tile_height) + (this->map.tile_height/2);
 
-    game->make_map_rect(x, y, this->map.tile_width * this->map.cols, this->map.tile_height * this->map.rows, &src, &dst);
+    game->make_map_rect(x - SCREEN_WIDTH/2, y - SCREEN_HEIGHT/2, this->map.tile_width * this->map.cols, this->map.tile_height * this->map.rows, &src, &dst);
 
     SDL_FRect selected_tile_rect;
     selected_tile_rect.x = float((SCREEN_WIDTH/2) - (this->map.tile_width/2));

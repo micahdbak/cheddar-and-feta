@@ -51,6 +51,7 @@ void DroppedItem::step() {
         float distance = distance_between_points(_x, _y, mouse->x, mouse->y);
         
         if (distance < 32.0f && keyboard.is_hit(SDLK_RETURN)) {
+            game->draw_rect(0, 0, 0, 0, 0, SDL_BLENDMODE_NONE); // clear ui
             textbox = new Textbox(this->prompt_text(), this->unique_id, DEFAULT_FONT, 50);
             this->state = PROMPT;
             mouse->locked = true;
@@ -79,7 +80,7 @@ void DroppedItem::step() {
             std::string result_text;
 
             if (this->choice == TAKE) {
-                std::pair<bool, std::string> result = this->take_text();
+                std::pair<bool, std::string> result = this->take();
                 if (!result.first) {
                     this->choice = LEAVE;
                 }
@@ -119,10 +120,10 @@ void DroppedItem::render_choice() {
 
     game->draw_rect(&text_arrow_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
 
-    game->draw_ui_box(this->choice == TAKE ? BOX_OUT_SEL : BOX_UNDER, &take_rect);
+    game->draw_ui_box(this->choice == TAKE ? BOX_OUT_SEL : BOX_OUT, &take_rect);
     game->draw_text("Take it", SMALL_FONT, 130, 216, 0);
 
-    game->draw_ui_box(this->choice == LEAVE ? BOX_OUT_SEL : BOX_UNDER, &leave_rect);
+    game->draw_ui_box(this->choice == LEAVE ? BOX_OUT_SEL : BOX_OUT, &leave_rect);
     game->draw_text("Leave it", SMALL_FONT, 164, 216, 0);
 }
 

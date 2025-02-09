@@ -105,6 +105,7 @@ void SaveStation::step() {
         this->sprite->set_animation(1);
 
         if (keyboard.is_hit(SDLK_RETURN)) {
+            game->draw_rect(0, 0, 0, 0, 0, SDL_BLENDMODE_NONE); // clear ui
             this->summaries = save.file_summaries();
             this->is_displaying_ui = true;
             this->should_render = true;

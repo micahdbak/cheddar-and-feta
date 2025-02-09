@@ -27,6 +27,9 @@ void ThrownToothpick::step() {
 
 void ThrownToothpick::on_hit(Enemy *enemy) {
     enemy->attack(1);
+    char options[256];
+    snprintf(options, sizeof(options), "%d,%d", int(this->x), int(this->y));
+    game->push_object(ITEM_TOOTHPICK DROPPED_OBJ, std::string(options));
 }
 
 void ThrownToothpick::on_miss() {

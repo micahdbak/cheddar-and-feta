@@ -33,27 +33,24 @@ void dir_to_point(float x1, float y1, float x2, float y2, int *x_dir, int *y_dir
 }
 
 void Game::make_map_rect(int x, int y, int w, int h, SDL_FRect *src_rect, SDL_FRect *dst_rect) const {
-    int src_x = x - (SCREEN_WIDTH/2);
-    int src_y = y - (SCREEN_HEIGHT/2);
-
-    if (src_x < 0) {
-        dst_rect->x = float(-1 * src_x);
+    if (x < 0) {
+        dst_rect->x = float(-1 * x);
         dst_rect->w = float(min(SCREEN_WIDTH, w));
         src_rect->x = 0.0f;
     } else {
         dst_rect->x = 0.0f;
-        dst_rect->w = float(min(SCREEN_WIDTH, w - src_x));
-        src_rect->x = float(src_x);
+        dst_rect->w = float(min(SCREEN_WIDTH, w - x));
+        src_rect->x = float(x);
     }
 
-    if (src_y < 0) {
-        dst_rect->y = float(-1 * src_y);
+    if (y < 0) {
+        dst_rect->y = float(-1 * y);
         dst_rect->h = float(min(SCREEN_HEIGHT, h));
         src_rect->y = 0.0f;
     } else {
         dst_rect->y = 0.0f;
-        dst_rect->h = float(min(SCREEN_HEIGHT, h - src_y));
-        src_rect->y = float(src_y);
+        dst_rect->h = float(min(SCREEN_HEIGHT, h - y));
+        src_rect->y = float(y);
     }
 
     src_rect->w = dst_rect->w;

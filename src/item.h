@@ -38,7 +38,7 @@ public:
 
     virtual std::string prompt_text() = 0;
     virtual std::string leave_text() = 0;
-    virtual std::pair<bool, std::string> take_text() = 0;
+    virtual std::pair<bool, std::string> take() = 0;
 
     Sprite *sprite;
 

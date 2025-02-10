@@ -3,6 +3,8 @@
 
 #include "object.h"
 
+#include <vector>
+
 class Enemy : public Object {
 public:
     Enemy();

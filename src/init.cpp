@@ -94,7 +94,7 @@ void Init::step() {
     int diff = keyboard.is_hit(SDLK_DOWN) - keyboard.is_hit(SDLK_UP);
     if (diff != 0) {
         this->sel_save += diff;
-        this->sel_save = clamp(this->sel_save, 0, NUM_SAVE_FILES - 1);
+        this->sel_save = cnf_clamp(this->sel_save, 0, NUM_SAVE_FILES - 1);
         this->render = true;
     }
 

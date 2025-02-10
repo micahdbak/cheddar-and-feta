@@ -35,21 +35,21 @@ void dir_to_point(float x1, float y1, float x2, float y2, int *x_dir, int *y_dir
 void Game::make_map_rect(int x, int y, int w, int h, SDL_FRect *src_rect, SDL_FRect *dst_rect) const {
     if (x < 0) {
         dst_rect->x = float(-1 * x);
-        dst_rect->w = float(min(SCREEN_WIDTH, w));
+        dst_rect->w = float(cnf_min(SCREEN_WIDTH, w));
         src_rect->x = 0.0f;
     } else {
         dst_rect->x = 0.0f;
-        dst_rect->w = float(min(SCREEN_WIDTH, w - x));
+        dst_rect->w = float(cnf_min(SCREEN_WIDTH, w - x));
         src_rect->x = float(x);
     }
 
     if (y < 0) {
         dst_rect->y = float(-1 * y);
-        dst_rect->h = float(min(SCREEN_HEIGHT, h));
+        dst_rect->h = float(cnf_min(SCREEN_HEIGHT, h));
         src_rect->y = 0.0f;
     } else {
         dst_rect->y = 0.0f;
-        dst_rect->h = float(min(SCREEN_HEIGHT, h - y));
+        dst_rect->h = float(cnf_min(SCREEN_HEIGHT, h - y));
         src_rect->y = float(y);
     }
 
@@ -162,10 +162,10 @@ void Game::random_target(int x, int y, int *next_x, int *next_y) const {
     
     std::vector<std::pair<int, int>> candidates;
 
-    int start_x = clamp(x-1, 0, this->cols-1);
-    int start_y = clamp(y-1, 0, this->rows-1);
-    int end_x = clamp(x+1, 0, this->cols-1);
-    int end_y = clamp(y+1, 0, this->rows-1);
+    int start_x = cnf_clamp(x-1, 0, this->cols-1);
+    int start_y = cnf_clamp(y-1, 0, this->rows-1);
+    int end_x = cnf_clamp(x+1, 0, this->cols-1);
+    int end_y = cnf_clamp(y+1, 0, this->rows-1);
 
     for (int _x = start_x; _x <= end_x; _x++) {
         for (int _y = start_y; _y <= end_y; _y++) {

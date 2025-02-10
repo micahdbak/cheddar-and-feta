@@ -36,8 +36,8 @@ void Enemy::enemy_step() {
     if (mouse->locked)
         return;
 
-    int dx = sign(this->target_x - int(this->x));
-    int dy = sign(this->target_y - int(this->y));
+    int dx = cnf_sign(this->target_x - int(this->x));
+    int dy = cnf_sign(this->target_y - int(this->y));
 
     if (this->animation > 15) {
         game->draw_rect(&this->draw_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
@@ -72,8 +72,8 @@ void Enemy::enemy_step() {
 
         this->_speed = (in_sight ? this->speed : (this->speed / 2.0f)) + (4.0f * SDL_randf());
 
-        dx = sign(this->target_x - int(this->x));
-        dy = sign(this->target_y - int(this->y));
+        dx = cnf_sign(this->target_x - int(this->x));
+        dy = cnf_sign(this->target_y - int(this->y));
         if (dx > 0) {
             this->animation = 2 - dy + attack;
         } else if (dx < 0) {

@@ -13,7 +13,7 @@ Game::Game() {
     SDL_SetTextureScaleMode(this->screen, SDL_SCALEMODE_NEAREST);
 
     // create ui texture
-    this->ui = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
+    this->ui = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
     if (this->ui == nullptr) {
         std::cerr << "SDL_CreateTexture error: " << SDL_GetError() << std::endl;
         exit(1);

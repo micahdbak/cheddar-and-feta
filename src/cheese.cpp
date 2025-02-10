@@ -79,7 +79,7 @@ void Cheese::render_cheese() {
         _amount -= 4;
         _y -= 6;
         _x += SDL_rand(2) ? 1 : -1;
-        if (_x != clamp(_x, 0, 2)) _x = 1;
+        if (_x != cnf_clamp(_x, 0, 2)) _x = 1;
     } while (_amount > 0);
     SDL_SetRenderTarget(renderer, game->screen);
 }

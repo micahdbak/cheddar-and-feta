@@ -156,8 +156,8 @@ void Editor::step() {
         // move the selected tile on input
         this->sel_x += int(keyboard.is_hit(SDLK_RIGHT)) - int(keyboard.is_hit(SDLK_LEFT));
         this->sel_y += int(keyboard.is_hit(SDLK_DOWN)) - int(keyboard.is_hit(SDLK_UP));
-        this->sel_x = clamp(this->sel_x, 0, this->map.cols - 1);
-        this->sel_y = clamp(this->sel_y, 0, this->map.rows - 1);
+        this->sel_x = cnf_clamp(this->sel_x, 0, this->map.cols - 1);
+        this->sel_y = cnf_clamp(this->sel_y, 0, this->map.rows - 1);
 
         std::vector<Tile> *vec = nullptr;
         int coord = (this->sel_y * this->map.cols) + this->sel_x;
@@ -325,12 +325,12 @@ void Editor::input_tile() {
     // update selected collider or tile
     if (this->layer == COLLISION) {
         this->sel_collider += int(keyboard.is_hit(SDLK_RIGHT)) - int(keyboard.is_hit(SDLK_LEFT));
-        this->sel_collider = clamp(this->sel_collider+1, 0, n_MapColliders) - 1;
+        this->sel_collider = cnf_clamp(this->sel_collider+1, 0, n_MapColliders) - 1;
     } else {    
         this->sel_ts_x += int(keyboard.is_hit(SDLK_RIGHT)) - int(keyboard.is_hit(SDLK_LEFT));
         this->sel_ts_y += int(keyboard.is_hit(SDLK_DOWN)) - int(keyboard.is_hit(SDLK_UP));
-        this->sel_ts_x = clamp(this->sel_ts_x, 0, this->map.tilesheets[this->sel_tilesheet]->cols - 1);
-        this->sel_ts_y = clamp(this->sel_ts_y, 0, this->map.tilesheets[this->sel_tilesheet]->rows - 1);
+        this->sel_ts_x = cnf_clamp(this->sel_ts_x, 0, this->map.tilesheets[this->sel_tilesheet]->cols - 1);
+        this->sel_ts_y = cnf_clamp(this->sel_ts_y, 0, this->map.tilesheets[this->sel_tilesheet]->rows - 1);
     }
 
     SDL_SetRenderTarget(renderer, this->texture);

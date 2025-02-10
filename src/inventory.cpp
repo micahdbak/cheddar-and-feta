@@ -101,7 +101,7 @@ void Inventory::step() {
 
         int y_change = keyboard.is_hit(SDLK_DOWN) - keyboard.is_hit(SDLK_UP);
         if (y_change != 0 && !this->items.empty()) {
-            this->sel_item = clamp(this->sel_item + y_change, 0, this->items.size()-1);
+            this->sel_item = cnf_clamp(this->sel_item + y_change, 0, this->items.size()-1);
             this->render_bag_menu();
         }
     } break;
@@ -172,7 +172,7 @@ void Inventory::step() {
                     snprintf(buff, sizeof(buff), "Threw the %s away.", item_info[item].name.c_str());
                     action_text = buff;
 
-                    this->sel_item = clamp(this->sel_item, 0, this->items.size()-1);
+                    this->sel_item = cnf_clamp(this->sel_item, 0, this->items.size()-1);
                 }
 
                 break;
@@ -183,7 +183,7 @@ void Inventory::step() {
 
         int y_change = keyboard.is_hit(SDLK_DOWN) - keyboard.is_hit(SDLK_UP);
         if (y_change != 0) {
-            this->sel_action = clamp(this->sel_action + y_change, 0, NUM_ACTION_OPTIONS-1);
+            this->sel_action = cnf_clamp(this->sel_action + y_change, 0, NUM_ACTION_OPTIONS-1);
             this->render_item_menu();
         }
     } break;
@@ -216,11 +216,13 @@ bool Inventory::push_item(const std::string &item_id) {
 }
 
 bool Inventory::remove_item(const std::string &item_id) {
-    auto it = std::find(this->items.begin(), this->items.end(), item_id);
-    if (it != this->items.end()) {
-        this->items.erase(it);
-        return true;
+    for (auto it = this->items.begin(); it != this->items.end(); ++it) {
+        if (*it == item_id) {
+            this->items.erase(it);
+            return true;
+        }
     }
+
     return false;
 }
 

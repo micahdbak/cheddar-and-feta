@@ -2,6 +2,7 @@
 
 #include <cerrno>
 #include <cstdio>
+#include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <sys/stat.h>
@@ -17,6 +18,9 @@ static void _mkdir_if_not_exists(char *save_root, size_t save_root_size) {
         exit(1);
     }
     snprintf(save_root, save_root_size, "%s/Library/Application Support/CheddarAndFeta", home);
+
+    if (mkdir(save_root, 0755) == 0)
+        return;
 // windows
 #elif defined(_WIN32)
     // use getenv("AppData") to get that dir
@@ -26,10 +30,10 @@ static void _mkdir_if_not_exists(char *save_root, size_t save_root_size) {
         exit(1);
     }
     snprintf(save_root, save_root_size, "%s/CheddarAndFeta", app_data);
-#endif
 
-    if (mkdir(save_root, 0755) == 0)
+    if (mkdir(save_root) == 0)
         return;
+#endif
 
     // if directory already exists, that's okay
     if (errno != EEXIST) {
@@ -45,8 +49,6 @@ static void _mkdir_if_not_exists(char *save_root, size_t save_root_size) {
 }
 
 #define MAX_LINE_LENGTH 1024
-
-__sFILE file;
 
 std::vector<std::string> SaveData::file_summaries() {
     char save_root[1024], save_file_name[1024];

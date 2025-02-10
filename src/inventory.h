@@ -3,6 +3,9 @@
 
 #include "object.h"
 
+#include <vector>
+#include <string>
+
 #define NOTHING_EQUIPPED "---"
 
 class Inventory : public Object {

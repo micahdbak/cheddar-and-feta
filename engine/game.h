@@ -4,7 +4,7 @@
 #include <cfloat>
 #include <cmath>
 #include <cstdlib>
-#include <map>
+#include <unordered_map>
 #include <queue>
 #include <string>
 #include <vector>
@@ -19,7 +19,6 @@
 
 #define clamp(_x, _min, _max) ((_x) < (_min) ? (_min) : ((_x) > (_max) ? (_max) : (_x)))
 #define min(_a, _b)           ((_b) < (_a) ? (_b) : (_a))
-#define max(_a, _b)           ((_b) > (_a) ? (_b) : (_a))
 #define sign(_x)              ((_x) == 0 ? 0 : ((_x) > 0 ? 1 : -1))
 
 #define distance_between_points(x1, y1, x2, y2) \

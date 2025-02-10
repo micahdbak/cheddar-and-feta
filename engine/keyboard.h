@@ -1,7 +1,7 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
-#include <map>
+#include <unordered_map>
 #include <queue>
 
 #include <SDL3/SDL.h>

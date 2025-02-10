@@ -6,7 +6,7 @@
 #include "object.h"
 #include "sprite.h"
 
-#include <map>
+#include <unordered_map>
 #include <string>
 
 enum ItemType {

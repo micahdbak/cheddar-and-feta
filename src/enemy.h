@@ -29,7 +29,6 @@ protected:
     int target_x, target_y; // must be set to int(x), int(y) in enemy constructor
 
 private:
-    void _draw_health_bar();
     void _draw_skull_and_bones();
 
     float _speed;

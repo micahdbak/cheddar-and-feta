@@ -1,4 +1,4 @@
-#include "keyboard.h"
+#include "controller.h"
 #include "game.h"
 
 #include <iostream>
@@ -226,7 +226,7 @@ void Game::step() {
     // render ui
     SDL_RenderTexture(renderer, this->ui, NULL, NULL);
 
-    if (keyboard.is_hit(SDLK_P)) {
+    if (controller1.is_hit(L1)) {
         SDL_Surface *_screen = SDL_RenderReadPixels(renderer, NULL);
         SDL_SaveBMP(_screen, "screenshot.bmp");
         SDL_DestroySurface(_screen);

@@ -42,17 +42,17 @@
 #define BOX_UNDER     4
 #define BOX_UNDER_SEL 5
 
-// icon related things
-
-#define ICON_SIZE 16
-
 // icons
-#define SKULL_AND_BONES_ICON 0
-#define ATTACK_MISSED_ICON   1
+#define SKULL_AND_BONES_ICON SDL_FRect{0.0f, 0.0f, 16.0f, 16.0f}
+#define ATTACK_MISSED_ICON   SDL_FRect{16.0f, 0.0f, 16.0f, 8.0f}
+#define ESCAPE_ICON          SDL_FRect{24.0f, 8.0f, 8.0f, 8.0f}
+#define TAB_ICON             SDL_FRect{32.0f, 0.0f, 8.0f, 8.0f}
+#define SHIFT_ICON           SDL_FRect{32,0f, 8.0f, 8.0f, 8.0f}
 
 // game_const.cpp
 
 int direction_from_dirs(int x_dir, int y_dir);
+void dirs_from_direction(int direction, int *x_dir, int *y_dir);
 void dir_to_point(float x1, float y1, float x2, float y2, int *x_dir, int *y_dir);
 
 class Game {
@@ -81,7 +81,8 @@ public:
     void draw_outline(SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode);
     void draw_ui_box(int type, SDL_FRect *rect);
     void draw_text(const std::string &str, int font, int x, int y, int w);
-    void draw_icon(int icon, SDL_FRect *dst_rect);
+    void draw_icon(SDL_FRect src_rect, SDL_FRect *dst_rect);
+    SDL_FRect draw_health_bar(int health, int max_health, int x, int y);
 
     // game_sprite.cpp
 

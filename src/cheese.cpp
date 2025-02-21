@@ -1,5 +1,6 @@
 #include "cheese.h"
 #include "game.h"
+#include "inventory.h"
 #include "mouse.h"
 
 #include <iostream>
@@ -86,16 +87,12 @@ void Cheese::render_cheese() {
 
 void Cheese::step() {
     if (distance_between_points(this->x, this->y, mouse->x, mouse->y) < 8.0f) {
-        int available_amount = mouse->max_cheese - mouse->cheese;
-        if (available_amount >= this->amount) {
-            mouse->cheese += this->amount;
+        this->amount -= inventory->add_cheese(this->amount);
+        if (this->amount == 0) {
             game->delete_object = true;
-            return;
-        } else if (available_amount > 0) {
-            mouse->cheese += available_amount;
-            this->amount -= available_amount;
+        } else {
             this->render_cheese();
-        } // else, do nothing
+        }
     }
 
     this->dst_rect.x = float(this->x - game->corner_x - 9);

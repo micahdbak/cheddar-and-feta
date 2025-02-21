@@ -44,7 +44,13 @@ void Enemy::enemy_step() {
 
         if (game->ticks - this->attack_ticks > 500) {
             this->animation = this->animation % 8;
-        } else this->_draw_health_bar();
+        } else {
+            this->draw_rect = game->draw_health_bar(
+                this->health, this->max_health,
+                int(this->x) + (game->tile_width/2) - game->corner_x,
+                int(this->y) + game->tile_height - this->height - 4 - game->corner_y
+            );
+        }
     } else if (dx == 0 && dy == 0) {
         this->x = this->target_x;
         this->y = this->target_y;
@@ -114,31 +120,18 @@ bool Enemy::attack(int damage) {
         return true;
     }
 
-    this->_draw_health_bar();
+    this->draw_rect = game->draw_health_bar(
+        this->health, this->max_health,
+        int(this->x) + (game->tile_width/2) - game->corner_x,
+        int(this->y) + game->tile_height - this->height - 4 - game->corner_y
+    );
 
     return true;
 }
 
-void Enemy::_draw_health_bar() {
-    int w_mul = 2;
-    if (max_health < 4) {
-        w_mul = 3;
-    }
-
-    int health_w = (this->max_health*w_mul) + 2;
-    int health_x = int(this->x) + (game->tile_width/2) - (health_w/2) - game->corner_x;
-    int health_y = int(this->y) + game->tile_height - this->height - 9 - game->corner_y;
-    this->draw_rect = { float(health_x), float(health_y), float(health_w), 5.0f };
-    game->draw_rect(&this->draw_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-    this->draw_rect.w = float((this->health*w_mul) + 1);
-    game->draw_rect(&this->draw_rect, 255, 128, 96, 255, SDL_BLENDMODE_NONE);
-    this->draw_rect.w = float(health_w);
-    game->draw_outline(&this->draw_rect, 255, 255, 255, 255, SDL_BLENDMODE_NONE);
-}
-
 void Enemy::_draw_skull_and_bones() {
-    int icon_x = int(this->x) + (game->tile_width/2) - (ICON_SIZE/2) - game->corner_x;
-    int icon_y = int(this->y) + game->tile_height - ICON_SIZE - this->height - 2 - game->corner_y;
-    this->draw_rect = { float(icon_x), float(icon_y), float(ICON_SIZE), float(ICON_SIZE) };
+    int icon_x = int(this->x) + (game->tile_width/2) - 8 - game->corner_x;
+    int icon_y = int(this->y) + game->tile_height - 16 - this->height - 2 - game->corner_y;
+    this->draw_rect = { float(icon_x), float(icon_y), 16.0f, 16.0f };
     game->draw_icon(SKULL_AND_BONES_ICON, &this->draw_rect);
 }

@@ -1,4 +1,4 @@
-#include "keyboard.h"
+#include "controller.h"
 #include "game.h"
 #include "save_data.h"
 
@@ -7,20 +7,19 @@
 #include <iostream>
 #include <cstdlib>
 
-// externs in game.h
-SDL_Renderer *renderer;
-Game *game;
-bool _running;
-
 SDL_Window *window;
+SDL_Renderer *renderer;
+std::unordered_map<SDL_JoystickID, SDL_Gamepad *> gamepads;
 
-Keyboard keyboard;
+bool _running;
+Controller controller1, controller2;
+Game *game;
 
 void cleanup();
 void scale_screen_rect(SDL_FRect *screen_rect, const int window_width, const int window_height);
 
 int main(int argc, const char **argv) {
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
+    if (!SDL_Init(SDL_INIT_VIDEO|SDL_INIT_GAMEPAD)) {
         std::cerr << "SDL_Init error: " << SDL_GetError() << std::endl;
         return 1;
     }
@@ -68,13 +67,36 @@ int main(int argc, const char **argv) {
                 break;
 
             case SDL_EVENT_KEY_DOWN:
-                if (!event.key.repeat) {
-                    keyboard.handle_down(event.key.key);
-                }
+                if (!event.key.repeat)
+                    controller1.handle_key_down(event.key.key);
                 break;
 
             case SDL_EVENT_KEY_UP:
-                keyboard.handle_up(event.key.key);
+                controller1.handle_key_up(event.key.key);
+                break;
+
+            case SDL_EVENT_GAMEPAD_ADDED: {
+                SDL_Gamepad *gamepad = SDL_OpenGamepad(event.gdevice.which);
+                gamepads[event.gdevice.which] = gamepad;
+            } break;
+
+            case SDL_EVENT_GAMEPAD_REMOVED:
+                if (gamepads.contains(event.gdevice.which)) {
+                    SDL_CloseGamepad(gamepads[event.gdevice.which]);
+                    gamepads.erase(event.gdevice.which);
+                }
+                break;
+
+            case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+                controller1.handle_gamepad_down(SDL_GamepadButton(event.gbutton.button));
+                break;
+
+            case SDL_EVENT_GAMEPAD_BUTTON_UP:
+                controller1.handle_gamepad_up(SDL_GamepadButton(event.gbutton.button));
+                break;
+
+            case SDL_EVENT_GAMEPAD_AXIS_MOTION:
+                controller1.handle_gamepad_axis(SDL_GamepadAxis(event.gaxis.axis), event.gaxis.value);
                 break;
 
             case SDL_EVENT_QUIT:
@@ -88,7 +110,8 @@ int main(int argc, const char **argv) {
         }
 
         game->step();
-        keyboard.clear_hits();
+        controller1.clear_hits();
+        controller2.clear_hits();
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);

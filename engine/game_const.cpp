@@ -12,6 +12,20 @@ int direction_from_dirs(int x_dir, int y_dir) {
     }
 }
 
+void dirs_from_direction(int direction, int *x_dir, int *y_dir) {
+    switch (direction) {
+    case 0: *x_dir = 0, *y_dir = 1; break;
+    case 1: *x_dir = 1, *y_dir = 1; break;
+    case 2: *x_dir = 1, *y_dir = 0; break;
+    case 3: *x_dir = 1, *y_dir = -1; break;
+    case 4: *x_dir = 0, *y_dir = -1; break;
+    case 5: *x_dir = -1, *y_dir = -1; break;
+    case 6: *x_dir = -1, *y_dir = 0; break;
+    case 7: *x_dir = -1, *y_dir = 1; break;
+    default: break;
+    }
+}
+
 void dir_to_point(float x1, float y1, float x2, float y2, int *x_dir, int *y_dir) {
     float angle = atan2(y2 - y1, x2 - x1); // [-M_PI,M_PI]
     angle += M_PI; // [0,2.0*M_PI]

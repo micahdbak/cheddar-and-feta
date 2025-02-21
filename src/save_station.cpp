@@ -1,5 +1,5 @@
 #include "game.h"
-#include "keyboard.h"
+#include "controller.h"
 #include "mouse.h"
 #include "save_data.h"
 #include "save_station.h"
@@ -30,7 +30,7 @@ void SaveStation::step() {
 
     if (textbox != nullptr && textbox->owner == SAVE_STATION_OBJ) {
         textbox->step();
-        if (textbox->done && keyboard.is_hit(SDLK_RETURN)) {
+        if (textbox->done && controller1.is_hit(PRIMARY)) {
             delete textbox;
             textbox = nullptr;
             mouse->locked = false;
@@ -40,7 +40,7 @@ void SaveStation::step() {
     }
 
     if (this->is_displaying_ui) {
-        if (keyboard.is_hit(SDLK_ESCAPE)) {
+        if (controller1.is_hit(SECONDARY)) {
             this->is_displaying_ui = false;
             this->should_render = false;
             mouse->locked = false;
@@ -49,7 +49,7 @@ void SaveStation::step() {
             return;
         }
         
-        if (keyboard.is_hit(SDLK_RETURN)) {
+        if (controller1.is_hit(PRIMARY)) {
             game->save_objects();
             save.write_file(this->sel_save);
             game->post_save_objects();
@@ -60,7 +60,7 @@ void SaveStation::step() {
             return;
         }
 
-        int diff = keyboard.is_hit(SDLK_DOWN) - keyboard.is_hit(SDLK_UP);
+        int diff = controller1.is_hit(DOWN) - controller1.is_hit(UP);
         if (diff != 0) {
             this->sel_save += diff;
             this->sel_save = cnf_clamp(this->sel_save, 0, NUM_SAVE_FILES - 1);
@@ -104,7 +104,7 @@ void SaveStation::step() {
     if (distance < 32) {
         this->sprite->set_animation(1);
 
-        if (keyboard.is_hit(SDLK_RETURN)) {
+        if (controller1.is_hit(PRIMARY)) {
             game->draw_rect(0, 0, 0, 0, 0, SDL_BLENDMODE_NONE); // clear ui
             this->summaries = save.file_summaries();
             this->is_displaying_ui = true;

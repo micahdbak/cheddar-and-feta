@@ -163,12 +163,37 @@ void Game::draw_text(const std::string &str, int font, int x, int y, int w) {
     SDL_SetRenderTarget(renderer, this->screen);
 }
 
-void Game::draw_icon(int icon, SDL_FRect *dst_rect) {
+void Game::draw_icon(SDL_FRect icon, SDL_FRect *dst_rect) {
     SDL_SetRenderTarget(renderer, this->ui);
 
-    SDL_FRect src_rect;
-    src_rect = { float(icon * ICON_SIZE), 0.0f, float(ICON_SIZE), float(ICON_SIZE) };
-    SDL_RenderTexture(renderer, this->icons, &src_rect, dst_rect);
+    SDL_RenderTexture(renderer, this->icons, &icon, dst_rect);
 
     SDL_SetRenderTarget(renderer, this->screen);
+}
+
+SDL_FRect Game::draw_health_bar(int health, int max_health, int x, int y) {
+    SDL_SetRenderTarget(renderer, this->ui);
+
+    int w_mul = 2;
+    if (max_health < 4) {
+        w_mul = 3;
+    }
+
+    int health_w = (max_health*w_mul) + 2;
+    int health_x = x - (health_w/2);
+    int health_y = y - 5;
+
+    SDL_FRect draw_rect = { float(health_x), float(health_y), float(health_w), 5.0f };
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &draw_rect);
+    draw_rect.w = float((health*w_mul) + 1);
+    SDL_SetRenderDrawColor(renderer, 255, 128, 96, 255);
+    SDL_RenderFillRect(renderer, &draw_rect);
+    draw_rect.w = float(health_w);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderRect(renderer, &draw_rect);
+
+    SDL_SetRenderTarget(renderer, this->screen);
+
+    return draw_rect;
 }

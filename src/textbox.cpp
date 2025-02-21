@@ -1,5 +1,5 @@
 #include "game.h"
-#include "keyboard.h"
+#include "controller.h"
 #include "textbox.h"
 
 Textbox *textbox;
@@ -25,7 +25,7 @@ void Textbox::step() {
         return;
 
     if (this->done_sentence) {
-        if (keyboard.is_hit(SDLK_RETURN)) {
+        if (controller1.is_hit(PRIMARY)) {
             this->done_sentence = false;
             this->running_text = "";
         }
@@ -33,7 +33,7 @@ void Textbox::step() {
         return;
     }
 
-    if (keyboard.is_hit(SDLK_RETURN)) {
+    if (controller1.is_hit(PRIMARY)) {
         int j;
         for (j = this->i; j < text.size() && text[j] != '\n'; j++) {
             this->running_text += text[j];

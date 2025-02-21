@@ -15,7 +15,7 @@ set(ENGINE_SRC
     engine/game_draw.cpp
     engine/game_sprite.cpp
     engine/game_step.cpp
-    engine/keyboard.cpp
+    engine/controller.cpp
     engine/main.cpp
     engine/map.cpp
     engine/save_data.cpp

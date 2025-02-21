@@ -1,5 +1,5 @@
 #include "item.h"
-#include "keyboard.h"
+#include "controller.h"
 #include "mouse.h"
 #include "textbox.h"
 
@@ -50,7 +50,7 @@ void DroppedItem::step() {
 
         float distance = distance_between_points(_x, _y, mouse->x, mouse->y);
         
-        if (distance < 32.0f && keyboard.is_hit(SDLK_RETURN)) {
+        if (distance < 32.0f && controller1.is_hit(PRIMARY)) {
             game->draw_rect(0, 0, 0, 0, 0, SDL_BLENDMODE_NONE); // clear ui
             textbox = new Textbox(this->prompt_text(), this->unique_id, DEFAULT_FONT, 50);
             this->state = PROMPT;
@@ -70,12 +70,12 @@ void DroppedItem::step() {
         break;
 
     case CHOICE:
-        if (keyboard.is_hit(SDLK_LEFT) || keyboard.is_hit(SDLK_RIGHT)) {
+        if (controller1.is_hit(LEFT) || controller1.is_hit(RIGHT)) {
             this->choice = this->choice == TAKE ? LEAVE : TAKE;
             this->render_choice();
         }
 
-        if (keyboard.is_hit(SDLK_RETURN)) {
+        if (controller1.is_hit(PRIMARY)) {
             delete textbox;
             std::string result_text;
 
@@ -99,7 +99,7 @@ void DroppedItem::step() {
     case RESULT:
         textbox->step();
 
-        if (textbox->done && keyboard.is_hit(SDLK_RETURN)) {
+        if (textbox->done && controller1.is_hit(PRIMARY)) {
             delete textbox;
             textbox = nullptr;
             mouse->locked = false;

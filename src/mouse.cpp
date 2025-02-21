@@ -1,6 +1,6 @@
 #include "inventory.h"
 #include "item.h"
-#include "keyboard.h"
+#include "controller.h"
 #include "mouse.h"
 #include "save_data.h"
 
@@ -26,10 +26,10 @@ Mouse::Mouse(int x, int y) {
     this->dst_rect.w = 32.0f;
     this->dst_rect.h = 32.0f;
 
-    this->miss_rect.x = float(SCREEN_WIDTH/2 - ICON_SIZE/2);
-    this->miss_rect.y = float(SCREEN_HEIGHT/2 - 20 - ICON_SIZE);
-    this->miss_rect.w = float(ICON_SIZE);
-    this->miss_rect.h = float(ICON_SIZE);
+    this->miss_rect.x = float(SCREEN_WIDTH/2 - 8);
+    this->miss_rect.y = float(SCREEN_HEIGHT/2 - 32);
+    this->miss_rect.w = 16.0f;
+    this->miss_rect.h = 8.0f;
 
     this->x = float(x);
     this->y = float(y);
@@ -60,6 +60,7 @@ static bool _is_collision(float x, float y) {
 #define ATTACKED_ANIMATION  16
 #define THROWING_ANIMATION  24
 #define EATING_ANIMATION    32
+#define DANCING_ANIMATION   33
 
 void Mouse::step() {
     if (this->locked) {
@@ -115,33 +116,47 @@ void Mouse::step() {
 
     switch (this->is_busy) {
     case FALSE:
+        // dancing
+        if (controller1.is_down(R2)) {
+            this->sprite->set_animation(DANCING_ANIMATION);
+            this->sprite->update_frame();
+            this->sprite->interval_ms = 200;
+
+            break; // don't do anything but dance
+        } else if (this->sprite->animation == DANCING_ANIMATION) {
+            this->sprite->set_animation(0); // facing down
+        }
+
         // move using arrow keys
-        x_dir = int(keyboard.is_down(SDLK_RIGHT)) - int(keyboard.is_down(SDLK_LEFT));
-        y_dir = int(keyboard.is_down(SDLK_DOWN)) - int(keyboard.is_down(SDLK_UP));
+        x_dir = int(controller1.is_down(RIGHT)) - int(controller1.is_down(LEFT));
+        y_dir = int(controller1.is_down(DOWN)) - int(controller1.is_down(UP));
 
         // update sprite frame and animation only if moving
         if (x_dir != 0 || y_dir != 0) {
-            this->sprite->update_frame();
             this->sprite->set_animation(direction_from_dirs(x_dir, y_dir));
+            this->sprite->update_frame();
         } else {
             // otherwise show only the first frame
             this->sprite->set_frame(0);
         }
 
+        mov_speed = 32.0f;
+        this->sprite->interval_ms = 250;
+
         // run
-        if (keyboard.is_down(SDLK_LSHIFT)) {
+        if (controller1.is_down(L2)) {
             mov_speed = 64.0f;
             this->sprite->interval_ms = 100;
-        } else {
-            mov_speed = 32.0f;
-            this->sprite->interval_ms = 250;
         }
 
         // attack
-        if (keyboard.is_hit(SDLK_SPACE)) {
+        if (controller1.is_hit(ACTION1)) {
             this->busy_ticks = game->ticks;
 
-            if (!inventory->attack_item.empty() && (x_dir != 0 || y_dir != 0)) {
+            if (!inventory->attack_item.empty()) {
+                if (x_dir == 0 && y_dir == 0)
+                    dirs_from_direction(this->sprite->animation % 8, &x_dir, &y_dir);
+                
                 this->is_busy = THROWING;
 
                 // set animation to throwing
@@ -153,6 +168,8 @@ void Mouse::step() {
                 char options[256];
                 ThrownItem::MakeOptions(options, sizeof(options), this->x, this->y, x_dir, y_dir);
                 game->push_object(inventory->attack_item + THROWN_OBJ, std::string(options));
+
+                // remove the attack item from inventory
                 inventory->remove_item(inventory->attack_item);
                 inventory->attack_item = "";
             } else {
@@ -176,22 +193,29 @@ void Mouse::step() {
                     game->draw_icon(ATTACK_MISSED_ICON, &this->miss_rect);
                 }
             }
-        } else if (keyboard.is_hit(SDLK_C) && this->cheese > 0) { // eat cheese
-            this->cheese--;
+
+            break;
+        }
+
+        // eat cheese
+        if (controller1.is_hit(R1) && inventory->cheese > 0) {
+            inventory->cheese--;
             this->is_busy = EATING;
             this->busy_ticks = game->ticks;
 
             // set animation to eating cheese
             this->sprite->set_animation(EATING_ANIMATION);
             this->sprite->interval_ms = 75;
+
+            break;
         }
 
         break;
 
     case ATTACKING:
         // move using arrow keys
-        x_dir = int(keyboard.is_down(SDLK_RIGHT)) - int(keyboard.is_down(SDLK_LEFT));
-        y_dir = int(keyboard.is_down(SDLK_DOWN)) - int(keyboard.is_down(SDLK_UP));
+        x_dir = int(controller1.is_down(RIGHT)) - int(controller1.is_down(LEFT));
+        y_dir = int(controller1.is_down(DOWN)) - int(controller1.is_down(UP));
         mov_speed = 32.0f;
 
         // will return to normal after << 500 ms >>

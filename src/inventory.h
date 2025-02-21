@@ -22,6 +22,7 @@ public:
     int add_cheese(int amount);
 
     std::string attack_item = "";
+    int cheese = 0, max_cheese = 3;
 
 private:
     int n_attack_items();
@@ -30,12 +31,11 @@ private:
     void render_bag_menu();
     void render_item_menu();
 
-    int cheese = 0, max_cheese = 3;
     std::vector<std::string> items;
     int max_items = 4;
     std::string equipped_weapon = NOTHING_EQUIPPED, equipped_armour = NOTHING_EQUIPPED;
 
-    enum { NOT_DISPLAYING, CYCLE_ATTACK_ITEM, BAG, ITEM } menu = NOT_DISPLAYING;
+    enum { NOT_DISPLAYING, BAG, ITEM } menu = NOT_DISPLAYING;
     int sel_attack_item = 0;
     int sel_item = 0;
     #define NUM_ACTION_OPTIONS 3

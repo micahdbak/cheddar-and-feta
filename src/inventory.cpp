@@ -1,7 +1,7 @@
 #include "game.h"
 #include "inventory.h"
 #include "item.h"
-#include "keyboard.h"
+#include "controller.h"
 #include "mouse.h"
 #include "textbox.h"
 
@@ -25,7 +25,7 @@ void Inventory::step() {
     if (this->menu != NOT_DISPLAYING) {
         if (textbox != nullptr && textbox->owner == INVENTORY_OBJ) {
             textbox->step();
-            if (textbox->done && keyboard.is_hit(SDLK_RETURN)) {
+            if (textbox->done && controller1.is_hit(PRIMARY)) {
                 delete textbox;
                 textbox = nullptr;
                 this->menu = BAG;
@@ -36,7 +36,7 @@ void Inventory::step() {
             return; // don't do any logic while textbox is running
         }
 
-        if (keyboard.is_hit(SDLK_TAB) && textbox == nullptr) {
+        if (controller1.is_hit(MENU) && textbox == nullptr) {
             this->menu = NOT_DISPLAYING;
             mouse->locked = false;
             game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
@@ -50,12 +50,12 @@ void Inventory::step() {
         if (mouse->locked)
             return;
 
-        if (keyboard.is_hit(SDLK_TAB)) {
+        if (controller1.is_hit(MENU)) {
             this->menu = BAG;
             mouse->locked = true;
             this->render_status_menu();
             this->render_bag_menu();
-        } else if (keyboard.is_hit(SDLK_T) && this->n_attack_items() > 0) {
+        } else if (controller1.is_hit(ACTION2) && this->n_attack_items() > 0) {
             // attack item was probably used; let's set the selection back to zero
             if (this->sel_attack_item != 0 && this->attack_item == "")
                 this->sel_attack_item = 0;
@@ -92,14 +92,22 @@ void Inventory::step() {
     } break;
 
     case BAG: {
-        if (keyboard.is_hit(SDLK_RETURN) && !this->items.empty()) {
+        // go back
+        if (controller1.is_hit(SECONDARY)) {
+            this->menu = NOT_DISPLAYING;
+            mouse->locked = false;
+            game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+            return;
+        }
+
+        if (controller1.is_hit(PRIMARY) && !this->items.empty()) {
             this->menu = ITEM;
             this->sel_action = 0;
             this->render_item_menu();
             return;
         }
 
-        int y_change = keyboard.is_hit(SDLK_DOWN) - keyboard.is_hit(SDLK_UP);
+        int y_change = controller1.is_hit(DOWN) - controller1.is_hit(UP);
         if (y_change != 0 && !this->items.empty()) {
             this->sel_item = cnf_clamp(this->sel_item + y_change, 0, this->items.size()-1);
             this->render_bag_menu();
@@ -108,7 +116,7 @@ void Inventory::step() {
 
     case ITEM: {
         // go back
-        if (keyboard.is_hit(SDLK_BACKSPACE)) {
+        if (controller1.is_hit(SECONDARY)) {
             this->menu = BAG;
             game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
             this->render_status_menu();
@@ -116,7 +124,7 @@ void Inventory::step() {
             return;
         }
 
-        if (keyboard.is_hit(SDLK_RETURN)) {
+        if (controller1.is_hit(PRIMARY)) {
             std::string item = this->items[this->sel_item];
             if (!item_info.contains(item)) {
                 std::cerr << "Inventory::step error: '" << item << "' is not a valid item." << std::endl;
@@ -181,7 +189,7 @@ void Inventory::step() {
             textbox = new Textbox(action_text, INVENTORY_OBJ, DEFAULT_FONT, 50);
         }
 
-        int y_change = keyboard.is_hit(SDLK_DOWN) - keyboard.is_hit(SDLK_UP);
+        int y_change = controller1.is_hit(DOWN) - controller1.is_hit(UP);
         if (y_change != 0) {
             this->sel_action = cnf_clamp(this->sel_action + y_change, 0, NUM_ACTION_OPTIONS-1);
             this->render_item_menu();
@@ -233,11 +241,12 @@ int Inventory::add_cheese(int amount) {
         return 0;
 
     if (remaining_amount < amount) {
-        this->max_cheese += remaining_amount;
+        this->cheese += remaining_amount;
         return remaining_amount;
     }
 
-    this->max_cheese += amount;
+    // amount < remaining_amount
+    this->cheese += amount;
     return amount;
 }
 

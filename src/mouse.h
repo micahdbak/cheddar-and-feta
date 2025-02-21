@@ -26,7 +26,6 @@ public:
 
     int throw_x = 0, throw_y = 0;
 
-    int cheese = 0, max_cheese = 3;
     int health = 10, max_health = 10;
     int damage = 1, armour = 0;
 

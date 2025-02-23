@@ -21,12 +21,14 @@ public:
     bool remove_item(const std::string &item_id);
     int add_cheese(int amount);
 
-    std::string attack_item = "";
+    std::string cheddar_attack = "";
+    std::string feta_attack = "";
     int cheese = 0, max_cheese = 3;
 
 private:
     int n_attack_items();
-    void render_cycle_attack_item();
+    void render_cheddar_attack();
+    void render_feta_attack();
     void render_status_menu();
     void render_bag_menu();
     void render_item_menu();
@@ -36,7 +38,7 @@ private:
     std::string equipped_weapon = NOTHING_EQUIPPED, equipped_armour = NOTHING_EQUIPPED;
 
     enum { NOT_DISPLAYING, BAG, ITEM } menu = NOT_DISPLAYING;
-    int sel_attack_item = 0;
+    int sel_cheddar_attack = 0, sel_feta_attack = 0;
     int sel_item = 0;
     #define NUM_ACTION_OPTIONS 3
     int sel_action = 0;

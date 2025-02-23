@@ -1,10 +1,12 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
+#include <string>
 #include <unordered_map>
-#include <queue>
 
 #include <SDL3/SDL.h>
+
+#define KEYBOARD  0
 
 #define NO_CHAR -1
 
@@ -28,7 +30,7 @@ enum Button {
 
 class Controller {
 public:
-    Controller();
+    Controller(std::string name);
     ~Controller() = default;
 
     void clear_hits();
@@ -52,6 +54,8 @@ public:
 
     bool online = true;
 
+    std::string name;
+
 private:
     std::unordered_map<Button, bool> is_hit_map;
     std::unordered_map<Button, bool> is_down_map;
@@ -59,6 +63,8 @@ private:
     Sint16 stick_x, stick_y;
 };
 
-extern Controller controller1, controller2;
+extern std::unordered_map<SDL_KeyboardID, Controller *> keyboard_controllers;
+extern std::unordered_map<SDL_JoystickID, Controller *> joystick_controllers;
+extern Controller all_inputs, *player1, *player2;
 
 #endif

@@ -25,7 +25,7 @@ void Inventory::step() {
     if (this->menu != NOT_DISPLAYING) {
         if (textbox != nullptr && textbox->owner == INVENTORY_OBJ) {
             textbox->step();
-            if (textbox->done && controller1.is_hit(PRIMARY)) {
+            if (textbox->done && all_inputs.is_hit(PRIMARY)) {
                 delete textbox;
                 textbox = nullptr;
                 this->menu = BAG;
@@ -36,9 +36,9 @@ void Inventory::step() {
             return; // don't do any logic while textbox is running
         }
 
-        if (controller1.is_hit(MENU) && textbox == nullptr) {
+        if (all_inputs.is_hit(MENU) && textbox == nullptr) {
             this->menu = NOT_DISPLAYING;
-            mouse->locked = false;
+            mice_locked = false;
             game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
             return;
         }
@@ -47,33 +47,36 @@ void Inventory::step() {
     switch (this->menu) {
     case NOT_DISPLAYING: {
         // another menu is displaying - do nothing
-        if (mouse->locked)
+        if (mice_locked)
             return;
 
-        if (controller1.is_hit(MENU)) {
+        if (all_inputs.is_hit(MENU)) {
             this->menu = BAG;
-            mouse->locked = true;
+            mice_locked = true;
             this->render_status_menu();
             this->render_bag_menu();
-        } else if (controller1.is_hit(ACTION2) && this->n_attack_items() > 0) {
+        }
+
+        // cycle attack items for Cheddar (player 1)
+        if (player1 != nullptr && player1->is_hit(ACTION2) && this->n_attack_items() > 0) {
             // attack item was probably used; let's set the selection back to zero
-            if (this->sel_attack_item != 0 && this->attack_item == "")
-                this->sel_attack_item = 0;
+            if (this->sel_cheddar_attack != 0 && cheddar->attack_item == "")
+                this->sel_cheddar_attack = 0;
 
             // increment and make sure it doesn't pass the max attack items
-            this->sel_attack_item++;
-            if (this->sel_attack_item >= this->n_attack_items()+1)
-                this->sel_attack_item = 0;
+            this->sel_cheddar_attack++;
+            if (this->sel_cheddar_attack >= this->n_attack_items()+1)
+                this->sel_cheddar_attack = 0;
 
             // if zero, no attack item selected
-            if (this->sel_attack_item == 0) {
-                this->attack_item = "";
+            if (this->sel_cheddar_attack == 0) {
+                cheddar->attack_item = "";
             } else {
                 // select the corresponding attack item in inventory
                 for (int i = 0, j = 0; i < this->items.size(); i++) {
                     if (item_info[this->items[i]].type == THROWABLE) {
-                        if (j == this->sel_attack_item-1) {
-                            this->attack_item = this->items[i];
+                        if (j == this->sel_cheddar_attack-1) {
+                            cheddar->attack_item = this->items[i];
                             break; // no need to iterate further
                         }
                         j++;
@@ -81,7 +84,38 @@ void Inventory::step() {
                 }
             }
 
-            this->render_cycle_attack_item();
+            this->render_cheddar_attack();
+            this->cycle_attack_item_ticks = game->ticks;
+        }
+
+        // cycle attack items for Feta (player 2)
+        if (player2 != nullptr && player2->is_hit(ACTION2) && this->n_attack_items() > 0) {
+            // attack item was probably used; let's set the selection back to zero
+            if (this->sel_feta_attack != 0 && feta->attack_item == "")
+                this->sel_feta_attack = 0;
+
+            // increment and make sure it doesn't pass the max attack items
+            this->sel_feta_attack++;
+            if (this->sel_feta_attack >= this->n_attack_items()+1)
+                this->sel_feta_attack = 0;
+
+            // if zero, no attack item selected
+            if (this->sel_feta_attack == 0) {
+                feta->attack_item = "";
+            } else {
+                // select the corresponding attack item in inventory
+                for (int i = 0, j = 0; i < this->items.size(); i++) {
+                    if (item_info[this->items[i]].type == THROWABLE) {
+                        if (j == this->sel_feta_attack-1) {
+                            feta->attack_item = this->items[i];
+                            break; // no need to iterate further
+                        }
+                        j++;
+                    }
+                }
+            }
+
+            this->render_feta_attack();
             this->cycle_attack_item_ticks = game->ticks;
         }
 
@@ -93,21 +127,21 @@ void Inventory::step() {
 
     case BAG: {
         // go back
-        if (controller1.is_hit(SECONDARY)) {
+        if (all_inputs.is_hit(SECONDARY)) {
             this->menu = NOT_DISPLAYING;
-            mouse->locked = false;
+            mice_locked = false;
             game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
             return;
         }
 
-        if (controller1.is_hit(PRIMARY) && !this->items.empty()) {
+        if (all_inputs.is_hit(PRIMARY) && !this->items.empty()) {
             this->menu = ITEM;
             this->sel_action = 0;
             this->render_item_menu();
             return;
         }
 
-        int y_change = controller1.is_hit(DOWN) - controller1.is_hit(UP);
+        int y_change = all_inputs.is_hit(DOWN) - all_inputs.is_hit(UP);
         if (y_change != 0 && !this->items.empty()) {
             this->sel_item = cnf_clamp(this->sel_item + y_change, 0, this->items.size()-1);
             this->render_bag_menu();
@@ -116,7 +150,7 @@ void Inventory::step() {
 
     case ITEM: {
         // go back
-        if (controller1.is_hit(SECONDARY)) {
+        if (all_inputs.is_hit(SECONDARY)) {
             this->menu = BAG;
             game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
             this->render_status_menu();
@@ -124,7 +158,7 @@ void Inventory::step() {
             return;
         }
 
-        if (controller1.is_hit(PRIMARY)) {
+        if (all_inputs.is_hit(PRIMARY)) {
             std::string item = this->items[this->sel_item];
             if (!item_info.contains(item)) {
                 std::cerr << "Inventory::step error: '" << item << "' is not a valid item." << std::endl;
@@ -144,9 +178,7 @@ void Inventory::step() {
                     break;
 
                 case THROWABLE:
-                    this->attack_item = item;
-                    snprintf(buff, sizeof(buff), "The %s will be thrown on the next attack.", item_info[item].name.c_str());
-                    action_text = buff;
+                    action_text = "Press the Cycle Attack Items button for Cheddar or Feta to attack with this item.";
 
                     break;
 
@@ -174,7 +206,7 @@ void Inventory::step() {
 
             case 2: /* throw away */
                 if (this->remove_item(item)) {
-                    snprintf(buff, sizeof(buff), "%d,%d", int(mouse->x) + SDL_rand(5) - 2, int(mouse->y) + SDL_rand(5) - 2);
+                    snprintf(buff, sizeof(buff), "%d,%d", int(cheddar->x) + SDL_rand(5) - 2, int(cheddar->y) + SDL_rand(5) - 2);
                     game->push_object(item + DROPPED_OBJ, buff);
                     
                     snprintf(buff, sizeof(buff), "Threw the %s away.", item_info[item].name.c_str());
@@ -189,7 +221,7 @@ void Inventory::step() {
             textbox = new Textbox(action_text, INVENTORY_OBJ, DEFAULT_FONT, 50);
         }
 
-        int y_change = controller1.is_hit(DOWN) - controller1.is_hit(UP);
+        int y_change = all_inputs.is_hit(DOWN) - all_inputs.is_hit(UP);
         if (y_change != 0) {
             this->sel_action = cnf_clamp(this->sel_action + y_change, 0, NUM_ACTION_OPTIONS-1);
             this->render_item_menu();
@@ -261,35 +293,57 @@ int Inventory::n_attack_items() {
     return count;
 }
 
-void Inventory::render_cycle_attack_item() {
+void Inventory::render_cheddar_attack() {
     int attack_items = this->n_attack_items();
     SDL_FRect bag_rect = { 4.0f, 4.0f, 80.0f, float(32 + 8*attack_items) };
-    game->draw_ui_box(BOX_MENU_CONT, &bag_rect);
+    game->draw_ui_box(BOX_CHEDDAR, &bag_rect);
     game->draw_text("Next Attack:", SMALL_FONT, 12, 12, 0);
 
     SDL_FRect item_area = { 10.0f, 20.0f, 68.0f, 8.0f };
-    game->draw_ui_box(this->sel_attack_item == 0 ? BOX_UNDER_SEL : BOX_UNDER, &item_area);
-    game->draw_text("(Use Weapon)", this->sel_attack_item == 0 ? SM_BOLD_FONT : SMALL_FONT, 12, 20, 0);
+    game->draw_ui_box(this->sel_cheddar_attack == 0 ? BOX_CHEDDAR_U_SEL : BOX_CHEDDAR_UNDER, &item_area);
+    game->draw_text("(Use Weapon)", this->sel_cheddar_attack == 0 ? SM_BOLD_FONT : SMALL_FONT, 12, 20, 0);
 
     for (int i = 0, j = 0; j < items.size(); j++) {
         if (item_info[this->items[j]].type != THROWABLE)
             continue;
 
-        i++; // corresponds with this->sel_attack_item as i starts at 0 - first item is 1
+        i++; // corresponds with this->sel_cheddar_attack as i starts at 0 - first item is 1
 
         int y = 20 + i*8;
         SDL_FRect item_area = { 10.0f, float(y), 68.0f, 8.0f };
-        game->draw_ui_box(this->sel_attack_item == i ? BOX_UNDER_SEL : BOX_UNDER, &item_area);
-        game->draw_text(item_info[this->items[j]].name, this->sel_attack_item == i ? SM_BOLD_FONT : SMALL_FONT, 12, y, 0);
+        game->draw_ui_box(this->sel_cheddar_attack == i ? BOX_CHEDDAR_U_SEL : BOX_CHEDDAR_UNDER, &item_area);
+        game->draw_text(item_info[this->items[j]].name, this->sel_cheddar_attack == i ? SM_BOLD_FONT : SMALL_FONT, 12, y, 0);
+    }
+}
+
+void Inventory::render_feta_attack() {
+    int attack_items = this->n_attack_items();
+    SDL_FRect bag_rect = { 236.0f, 4.0f, 80.0f, float(32 + 8*attack_items) };
+    game->draw_ui_box(BOX_FETA, &bag_rect);
+    game->draw_text("Next Attack:", SMALL_FONT, 244, 12, 0);
+
+    SDL_FRect item_area = { 242.0f, 20.0f, 68.0f, 8.0f };
+    game->draw_ui_box(this->sel_feta_attack == 0 ? BOX_FETA_U_SEL : BOX_FETA_UNDER, &item_area);
+    game->draw_text("(Use Weapon)", this->sel_feta_attack == 0 ? SM_BOLD_FONT : SMALL_FONT, 244, 20, 0);
+
+    for (int i = 0, j = 0; j < items.size(); j++) {
+        if (item_info[this->items[j]].type != THROWABLE)
+            continue;
+
+        i++; // corresponds with this->sel_feta_attack as i starts at 0 - first item is 1
+
+        int y = 20 + i*8;
+        SDL_FRect item_area = { 242.0f, float(y), 68.0f, 8.0f };
+        game->draw_ui_box(this->sel_feta_attack == i ? BOX_FETA_U_SEL : BOX_FETA_UNDER, &item_area);
+        game->draw_text(item_info[this->items[j]].name, this->sel_feta_attack == i ? SM_BOLD_FONT : SMALL_FONT, 244, y, 0);
     }
 }
 
 void Inventory::render_status_menu() {
+    // Cheddar
     SDL_FRect status_rect = { 4.0f, 148.0f, 64.0f, 88.0f };
-    game->draw_ui_box(BOX_MENU_CONT, &status_rect);
-
-    game->draw_text(mouse->name, SM_BOLD_FONT, 12, 156, 0);
-
+    game->draw_ui_box(BOX_CHEDDAR, &status_rect);
+    game->draw_text(cheddar->name, SM_BOLD_FONT, 12, 156, 0);
     char status[256];
     snprintf(status, sizeof(status),
         "Level 1\n"
@@ -301,14 +355,37 @@ void Inventory::render_status_menu() {
         "~Armour %d",
 
         /* level */
-        mouse->health, mouse->max_health,
+        cheddar->health, cheddar->max_health,
         /* xp */
         this->equipped_weapon.c_str(),
-        mouse->damage,
+        cheddar->damage,
         this->equipped_armour.c_str(),
-        mouse->armour
+        cheddar->armour
     );
     game->draw_text(std::string(status), SMALL_FONT, 12, 164, 0);
+
+    // Feta
+    status_rect = { 252.0f, 148.0f, 64.0f, 88.0f };
+    game->draw_ui_box(BOX_FETA, &status_rect);
+    game->draw_text(feta->name, SM_BOLD_FONT, 260, 156, 0);
+    snprintf(status, sizeof(status),
+        "Level 1\n"
+        "HP %d/%d\n"
+        "XP 0/0\n\n"
+        "%s\n"
+        "~Damage %d\n"
+        "%s\n"
+        "~Armour %d",
+
+        /* level */
+        feta->health, feta->max_health,
+        /* xp */
+        this->equipped_weapon.c_str(),
+        feta->damage,
+        this->equipped_armour.c_str(),
+        feta->armour
+    );
+    game->draw_text(std::string(status), SMALL_FONT, 260, 164, 0);
 }
 
 void Inventory::render_bag_menu() {
@@ -322,7 +399,7 @@ void Inventory::render_bag_menu() {
     for (int i = 0; i < this->max_items; i++) {
         int y = 28 + i*8;
         SDL_FRect item_area = { 10.0f, float(y), 68.0f, 8.0f };
-        game->draw_ui_box(i == this->sel_item ? BOX_UNDER_SEL : BOX_UNDER, &item_area);
+        game->draw_ui_box(i == this->sel_item && !this->items.empty() ? BOX_UNDER_SEL : BOX_UNDER, &item_area);
 
         if (i < this->items.size()) {
             if (!item_info.contains(this->items[i])) {

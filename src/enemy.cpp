@@ -33,7 +33,7 @@ void Enemy::enemy_step() {
         return;
     }
 
-    if (mouse->locked)
+    if (mice_locked)
         return;
 
     int dx = cnf_sign(this->target_x - int(this->x));
@@ -59,20 +59,44 @@ void Enemy::enemy_step() {
         float center_x = this->x + float(game->tile_width/2);
         float center_y = this->y + float(game->tile_height/2);
 
-        float distance = distance_between_points(center_x, center_y, mouse->x, mouse->y);
+        float distance_cheddar = distance_between_points(center_x, center_y, cheddar->x, cheddar->y);
+        float distance_feta = distance_between_points(center_x, center_y, feta->x, feta->y);
+        bool cheddar_closer = distance_cheddar < distance_feta;
 
         bool in_sight = false;
         int attack = 0;
 
-        if (distance < this->attack_distance) {
-            if (mouse->attack(this->damage)) {
-                attack = 8;
-                dir_to_point(center_x, center_y, mouse->x, mouse->y, &mouse->throw_x, &mouse->throw_y);
+        if (cheddar_closer) {
+            if (distance_cheddar < this->attack_distance) {
+                if (cheddar->attack(this->damage)) {
+                    attack = 8;
+                    dir_to_point(center_x, center_y, cheddar->x, cheddar->y, &cheddar->throw_x, &cheddar->throw_y);
+                }
+            } else if (distance_cheddar < this->sight_distance) {
+                if (game->in_sight(int(this->x), int(this->y), int(cheddar->x), int(cheddar->y), &this->target_x, &this->target_y)) {
+                    in_sight = true;
+                } else if (distance_feta < this->sight_distance) {
+                    // if Cheddar isn't in sight, but Feta is within sight distance, see if they're in sight
+                    in_sight = game->in_sight(int(this->x), int(this->y), int(feta->x), int(feta->y), &this->target_x, &this->target_y);
+                }
             }
-        } else if (distance < this->sight_distance)
-            in_sight = game->in_sight(int(this->x), int(this->y), int(mouse->x), int(mouse->y), &this->target_x, &this->target_y);
+        } else {
+            if (distance_feta < this->attack_distance) {
+                if (feta->attack(this->damage)) {
+                    attack = 8;
+                    dir_to_point(center_x, center_y, feta->x, feta->y, &feta->throw_x, &feta->throw_y);
+                }
+            } else if (distance_feta < this->sight_distance) {
+                if (game->in_sight(int(this->x), int(this->y), int(feta->x), int(feta->y), &this->target_x, &this->target_y)) {
+                    in_sight = true;
+                } else if (distance_cheddar < this->sight_distance) {
+                    // if Feta isn't in sight, but Cheddar is within sight distance, see if they're in sight
+                    in_sight = game->in_sight(int(this->x), int(this->y), int(cheddar->x), int(cheddar->y), &this->target_x, &this->target_y);
+                }
+            }
+        }
 
-        // if player isn't in sight, let's move to a random tile
+        // if either mouse isn't in sight, let's move to a random tile
         if (!in_sight)
             game->random_target(int(this->x), int(this->y), &this->target_x, &this->target_y);
 

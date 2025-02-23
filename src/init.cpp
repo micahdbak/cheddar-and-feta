@@ -71,12 +71,12 @@ void Init::step() {
     if (textbox != nullptr) {
         textbox->step();
 
-        if (textbox->done && controller1.is_hit(PRIMARY)) {
+        if (textbox->done && all_inputs.is_hit(PRIMARY)) {
             delete textbox;
             textbox = nullptr;
             this->render = true;
         } else return;
-    } else if (controller1.is_hit(PRIMARY)) {
+    } else if (all_inputs.is_hit(PRIMARY)) {
         int ret = save.load_file(this->sel_save);
 
         if (/* ret == LOAD_SUCCESS || ret == LOAD_NEW */ true) {
@@ -91,7 +91,7 @@ void Init::step() {
         return;
     }
 
-    int diff = controller1.is_hit(DOWN) - controller1.is_hit(UP);
+    int diff = all_inputs.is_hit(DOWN) - all_inputs.is_hit(UP);
     if (diff != 0) {
         this->sel_save += diff;
         this->sel_save = cnf_clamp(this->sel_save, 0, NUM_SAVE_FILES - 1);

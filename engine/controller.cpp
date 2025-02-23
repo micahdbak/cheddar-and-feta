@@ -8,7 +8,7 @@ static std::unordered_map<SDL_Keycode, Button> _keycode_map = {
     { SDLK_TAB, MENU },
     { SDLK_LSHIFT, L2 },
     { SDLK_RSHIFT, R2 },
-    { SDLK_P, L1 },
+    { SDLK_1, L1 },
     { SDLK_C, R1 },
     { SDLK_RETURN, PRIMARY },
     { SDLK_BACKSPACE, SECONDARY },
@@ -39,7 +39,9 @@ static std::unordered_map<SDL_GamepadButton, Button> _gamepad_map = {
     { SDL_GAMEPAD_BUTTON_DPAD_LEFT, LEFT }
 };
 
-Controller::Controller() {
+Controller::Controller(std::string name) {
+    this->name = name;
+
     for (int i = 0; i < int(NUM_BUTTONS); i++) {
         this->is_down_map[(Button)i] = false;
     }
@@ -125,7 +127,7 @@ void Controller::handle_gamepad_axis(SDL_GamepadAxis axis, Sint16 value) {
             this->is_down_map[L2] = false;
         } else if (this->is_down_map[L2] == false) {
             this->is_hit_map[L2] = true;
-            this->is_down_map[L2] = false;
+            this->is_down_map[L2] = true;
         }
         return;
     case SDL_GAMEPAD_AXIS_RIGHT_TRIGGER:
@@ -133,7 +135,7 @@ void Controller::handle_gamepad_axis(SDL_GamepadAxis axis, Sint16 value) {
             this->is_down_map[R2] = false;
         } else if (this->is_down_map[R2] == false) {
             this->is_hit_map[R2] = true;
-            this->is_down_map[R2] = false;
+            this->is_down_map[R2] = true;
         }
         return;
 

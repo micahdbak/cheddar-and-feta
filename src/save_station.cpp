@@ -30,26 +30,26 @@ void SaveStation::step() {
 
     if (textbox != nullptr && textbox->owner == SAVE_STATION_OBJ) {
         textbox->step();
-        if (textbox->done && controller1.is_hit(PRIMARY)) {
+        if (textbox->done && all_inputs.is_hit(PRIMARY)) {
             delete textbox;
             textbox = nullptr;
-            mouse->locked = false;
+            mice_locked = false;
         }
 
         return;
     }
 
     if (this->is_displaying_ui) {
-        if (controller1.is_hit(SECONDARY)) {
+        if (all_inputs.is_hit(SECONDARY)) {
             this->is_displaying_ui = false;
             this->should_render = false;
-            mouse->locked = false;
+            mice_locked = false;
             game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
 
             return;
         }
         
-        if (controller1.is_hit(PRIMARY)) {
+        if (all_inputs.is_hit(PRIMARY)) {
             game->save_objects();
             save.write_file(this->sel_save);
             game->post_save_objects();
@@ -60,7 +60,7 @@ void SaveStation::step() {
             return;
         }
 
-        int diff = controller1.is_hit(DOWN) - controller1.is_hit(UP);
+        int diff = all_inputs.is_hit(DOWN) - all_inputs.is_hit(UP);
         if (diff != 0) {
             this->sel_save += diff;
             this->sel_save = cnf_clamp(this->sel_save, 0, NUM_SAVE_FILES - 1);
@@ -97,20 +97,20 @@ void SaveStation::step() {
     }
 
     // something else locked the mouse
-    if (mouse->locked)
+    if (mice_locked)
         return;
 
-    int distance = int(distance_between_points(this->x+16, this->y+18, mouse->x, mouse->y));
-    if (distance < 32) {
+    float distance = distance_between_points(this->x+16.0f, this->y+18.0f, cheddar->x, cheddar->y);
+    if (distance < 32.0f) {
         this->sprite->set_animation(1);
 
-        if (controller1.is_hit(PRIMARY)) {
+        if (player1 != nullptr && player1->is_hit(PRIMARY)) {
             game->draw_rect(0, 0, 0, 0, 0, SDL_BLENDMODE_NONE); // clear ui
             this->summaries = save.file_summaries();
             this->is_displaying_ui = true;
             this->should_render = true;
             this->sel_save = 0;
-            mouse->locked = true;
+            mice_locked = true;
         }
     } else this->sprite->set_animation(0);
 }

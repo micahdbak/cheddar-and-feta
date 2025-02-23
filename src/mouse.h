@@ -1,6 +1,7 @@
 #ifndef MOUSE_OBJ
 #define MOUSE_OBJ "mouse"
 
+#include "controller.h"
 #include "enemy.h"
 #include "game.h"
 #include "object.h"
@@ -8,7 +9,7 @@
 
 class Mouse : public Object {
 public:
-    Mouse(int x, int y);
+    Mouse(int x, int y, bool is_feta);
     ~Mouse();
 
     void step() override;
@@ -29,16 +30,18 @@ public:
     int health = 10, max_health = 10;
     int damage = 1, armour = 0;
 
+    std::string attack_item = "";
+
     std::string name = "Cheddar";
 
 private:
+    bool is_feta = true;
+
     SDL_FRect dst_rect;
     Sprite *sprite;
 
     enum { FALSE, ATTACKING, ATTACKED, THROWING, EATING } is_busy = FALSE;
     Uint64 busy_ticks = 0;
-    bool did_miss = false;
-    SDL_FRect miss_rect;
 
     int check_enemy = 0;
     Enemy *closest_enemy = nullptr;
@@ -54,14 +57,17 @@ public:
     ~MouseFactory() {}
 
     Object *create(const std::string &options) override {
-        int x, y;
-        if (sscanf(options.c_str(), "%d,%d", &x, &y) < 2) {
-            x = 0, y = 0;
+        int x = 0, y = 0, is_feta;
+        if (sscanf(options.c_str(), "%d,%d,%d", &x, &y, &is_feta) < 3) {
+            is_feta = 0;
         }
-        return new Mouse(x, y);
+        return new Mouse(x, y, is_feta != 0);
     }
 };
 
-extern Mouse *mouse;
+Mouse *closest_mouse(float x, float y, float min_distance);
+
+extern bool mice_locked;
+extern Mouse *cheddar, *feta;
 
 #endif

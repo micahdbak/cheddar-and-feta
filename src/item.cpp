@@ -42,19 +42,19 @@ void DroppedItem::step() {
     switch (this->state) {
     case IDLE: {
         // don't check anything if the mouse is locked
-        if (mouse->locked)
+        if (mice_locked)
             return;
 
         float _x = this->x + float(this->sprite->frame_w/2);
         float _y = this->y + float(this->sprite->frame_h/2);
 
-        float distance = distance_between_points(_x, _y, mouse->x, mouse->y);
-        
-        if (distance < 32.0f && controller1.is_hit(PRIMARY)) {
+        Mouse *mouse = closest_mouse(_x, _y, 32.0f);
+        if ((mouse == cheddar && player1 != nullptr && player1->is_hit(PRIMARY)) ||
+            (mouse == feta && player2 != nullptr && player2->is_hit(PRIMARY))) {
             game->draw_rect(0, 0, 0, 0, 0, SDL_BLENDMODE_NONE); // clear ui
             textbox = new Textbox(this->prompt_text(), this->unique_id, DEFAULT_FONT, 50);
             this->state = PROMPT;
-            mouse->locked = true;
+            mice_locked = true;
         }
     } break;
 
@@ -70,12 +70,13 @@ void DroppedItem::step() {
         break;
 
     case CHOICE:
-        if (controller1.is_hit(LEFT) || controller1.is_hit(RIGHT)) {
+        if ((all_inputs.is_hit(LEFT) && this->choice == LEAVE) ||
+            (all_inputs.is_hit(RIGHT) && this->choice == TAKE)) {
             this->choice = this->choice == TAKE ? LEAVE : TAKE;
             this->render_choice();
         }
 
-        if (controller1.is_hit(PRIMARY)) {
+        if (all_inputs.is_hit(PRIMARY)) {
             delete textbox;
             std::string result_text;
 
@@ -99,10 +100,10 @@ void DroppedItem::step() {
     case RESULT:
         textbox->step();
 
-        if (textbox->done && controller1.is_hit(PRIMARY)) {
+        if (textbox->done && all_inputs.is_hit(PRIMARY)) {
             delete textbox;
             textbox = nullptr;
-            mouse->locked = false;
+            mice_locked = false;
             this->state = IDLE;
 
             if (this->choice == TAKE)

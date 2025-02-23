@@ -44,6 +44,7 @@ Game::Game() {
         std::cerr << "SDL_CreateTextureFromSurface error: " << SDL_GetError() << std::endl;
         exit(1);
     }
+    SDL_SetTextureScaleMode(this->screen, SDL_SCALEMODE_NEAREST);
 
     this->ticks = SDL_GetTicks();
     Font::load_fonts(this->fonts);
@@ -226,7 +227,8 @@ void Game::step() {
     // render ui
     SDL_RenderTexture(renderer, this->ui, NULL, NULL);
 
-    if (controller1.is_hit(L1)) {
+    if (all_inputs.c == 'p') {
+        all_inputs.c = NO_CHAR;
         SDL_Surface *_screen = SDL_RenderReadPixels(renderer, NULL);
         SDL_SaveBMP(_screen, "screenshot.bmp");
         SDL_DestroySurface(_screen);

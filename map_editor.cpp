@@ -154,8 +154,8 @@ Editor::~Editor() {
 void Editor::step() {
     if (!this->user_inputting) {
         // move the selected tile on input
-        this->sel_x += int(controller1.is_hit(RIGHT)) - int(controller1.is_hit(LEFT));
-        this->sel_y += int(controller1.is_hit(DOWN)) - int(controller1.is_hit(UP));
+        this->sel_x += int(player1->is_hit(RIGHT)) - int(player1->is_hit(LEFT));
+        this->sel_y += int(player1->is_hit(DOWN)) - int(player1->is_hit(UP));
         this->sel_x = cnf_clamp(this->sel_x, 0, this->map.cols - 1);
         this->sel_y = cnf_clamp(this->sel_y, 0, this->map.rows - 1);
 
@@ -191,7 +191,7 @@ void Editor::step() {
         game->draw_rect(&black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
         game->draw_text(std::string(status_text), MONO_FONT, 0, SCREEN_HEIGHT - 11, 0);
 
-        switch (controller1.c) {
+        switch (player1->c) {
         case 't':
             if (this->sel_tilesheet < 0)
                 break;
@@ -229,9 +229,9 @@ void Editor::step() {
             this->text = "";
             break;
         }
-        controller1.c = NO_CHAR;
+        player1->c = NO_CHAR;
 
-        if (controller1.is_down(PRIMARY) && this->sel_tilesheet >= 0) {
+        if (player1->is_down(PRIMARY) && this->sel_tilesheet >= 0) {
             if (this->layer == COLLISION) {
                 this->map.collision[coord] = this->sel_collider;
                 this->render_collision_tile(this->collision_texture, this->sel_x, this->sel_y, this->sel_collider);
@@ -248,7 +248,7 @@ void Editor::step() {
                     }
                 } else {
                     // shift return should only place on empty tiles
-                    if (controller1.is_down(L2))
+                    if (player1->is_down(L2))
                         should_place = false;
 
                     Tile top_tile = vec->back();
@@ -265,7 +265,7 @@ void Editor::step() {
                     this->map.render_tile(this->sel_x, this->sel_y);
                 }
             }
-        } else if (controller1.is_hit(SECONDARY) || controller1.is_down(MENU)) {
+        } else if (player1->is_hit(SECONDARY) || player1->is_down(MENU)) {
             if (this->layer == COLLISION) {
                 this->map.collision[coord] = -1;
                 this->render_collision_tile(this->collision_texture, this->sel_x, this->sel_y, -1);
@@ -316,7 +316,7 @@ void Editor::step() {
 
 void Editor::input_tile() {
     // end inputting
-    if (controller1.is_hit(PRIMARY) || controller1.is_hit(PAUSE)) {
+    if (player1->is_hit(PRIMARY) || player1->is_hit(PAUSE)) {
         this->user_inputting = false;
         game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
         return;
@@ -324,11 +324,11 @@ void Editor::input_tile() {
 
     // update selected collider or tile
     if (this->layer == COLLISION) {
-        this->sel_collider += int(controller1.is_hit(RIGHT)) - int(controller1.is_hit(LEFT));
+        this->sel_collider += int(player1->is_hit(RIGHT)) - int(player1->is_hit(LEFT));
         this->sel_collider = cnf_clamp(this->sel_collider+1, 0, n_MapColliders) - 1;
     } else {    
-        this->sel_ts_x += int(controller1.is_hit(RIGHT)) - int(controller1.is_hit(LEFT));
-        this->sel_ts_y += int(controller1.is_hit(DOWN)) - int(controller1.is_hit(UP));
+        this->sel_ts_x += int(player1->is_hit(RIGHT)) - int(player1->is_hit(LEFT));
+        this->sel_ts_y += int(player1->is_hit(DOWN)) - int(player1->is_hit(UP));
         this->sel_ts_x = cnf_clamp(this->sel_ts_x, 0, this->map.tilesheets[this->sel_tilesheet]->cols - 1);
         this->sel_ts_y = cnf_clamp(this->sel_ts_y, 0, this->map.tilesheets[this->sel_tilesheet]->rows - 1);
     }
@@ -381,13 +381,13 @@ void Editor::input_sheet() {
     int sel_i, nfields;
     nfields = sscanf(this->text.c_str(), "%d", &sel_i);
     
-    if (controller1.is_hit(SECONDARY) && !text.empty())
+    if (player1->is_hit(SECONDARY) && !text.empty())
         this->text.pop_back();
-    else if (controller1.c != NO_CHAR)
-        this->text.push_back(controller1.c);
-    else if (controller1.is_hit(PRIMARY) && nfields == 1) {
+    else if (player1->c != NO_CHAR)
+        this->text.push_back(player1->c);
+    else if (player1->is_hit(PRIMARY) && nfields == 1) {
         this->sel_tilesheet = sel_i;
-    } else if (controller1.is_hit(PAUSE)) {
+    } else if (player1->is_hit(PAUSE)) {
         // close
         this->user_inputting = false;
         game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
@@ -411,11 +411,11 @@ void Editor::input_sheet() {
 }
 
 void Editor::input_add_sheet() {
-    if (controller1.is_hit(SECONDARY) && !text.empty())
+    if (player1->is_hit(SECONDARY) && !text.empty())
         this->text.pop_back();
-    else if (controller1.c != NO_CHAR)
-        this->text.push_back(controller1.c);
-    else if (controller1.is_hit(PRIMARY)) {
+    else if (player1->c != NO_CHAR)
+        this->text.push_back(player1->c);
+    else if (player1->is_hit(PRIMARY)) {
         // add new tilesheet
         Tilesheet *tilesheet = new Tilesheet(this->text.c_str(), this->map.tile_width, this->map.tile_height);
         if (tilesheet->texture != nullptr) {
@@ -424,7 +424,7 @@ void Editor::input_add_sheet() {
         } else {
             delete tilesheet;
         }
-    } else if (controller1.is_hit(PAUSE)) {
+    } else if (player1->is_hit(PAUSE)) {
         // close
         this->user_inputting = false;
         game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
@@ -442,11 +442,11 @@ void Editor::input_objects() {
     str[0] = '\0';
     nfields = sscanf(this->text.c_str(), "%d %c %[^\0]", &sel_i, &c, str);
 
-    if (controller1.is_hit(SECONDARY) && !text.empty())
+    if (player1->is_hit(SECONDARY) && !text.empty())
         this->text.pop_back();
-    else if (controller1.c != NO_CHAR)
-        this->text.push_back(controller1.c);
-    else if (controller1.is_hit(PRIMARY) && nfields >= 2) {
+    else if (player1->c != NO_CHAR)
+        this->text.push_back(player1->c);
+    else if (player1->is_hit(PRIMARY) && nfields >= 2) {
         if ((sel_i < 0 || sel_i >= this->map.objects.size()) && c == 'i') {
             // new object
             std::pair<std::string, std::string> obj;
@@ -466,7 +466,7 @@ void Editor::input_objects() {
             this->map.objects.erase(it);
         }
         this->text = "";
-    } else if (controller1.is_hit(PAUSE)) {
+    } else if (player1->is_hit(PAUSE)) {
         // leave menu
         this->user_inputting = false;
         game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);

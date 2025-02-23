@@ -35,12 +35,18 @@
 
 // ui box related things
 
-#define BOX_CONTAINER 0
-#define BOX_OUT       1
-#define BOX_OUT_SEL   2
-#define BOX_MENU_CONT 3
-#define BOX_UNDER     4
-#define BOX_UNDER_SEL 5
+#define BOX_CONTAINER     0
+#define BOX_OUT           1
+#define BOX_OUT_SEL       2
+#define BOX_MENU_CONT     3
+#define BOX_UNDER         4
+#define BOX_UNDER_SEL     5
+#define BOX_CHEDDAR       6
+#define BOX_CHEDDAR_UNDER 7
+#define BOX_CHEDDAR_U_SEL 8
+#define BOX_FETA          9
+#define BOX_FETA_UNDER    10
+#define BOX_FETA_U_SEL    11
 
 // icons
 #define SKULL_AND_BONES_ICON SDL_FRect{0.0f, 0.0f, 16.0f, 16.0f}

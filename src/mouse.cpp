@@ -1,6 +1,5 @@
 #include "inventory.h"
 #include "item.h"
-#include "controller.h"
 #include "mouse.h"
 #include "save_data.h"
 
@@ -9,45 +8,63 @@
 #include <iostream>
 #include <cmath>
 
-Mouse *mouse = nullptr;
+bool mice_locked = false;
+Mouse *cheddar = nullptr, *feta = nullptr;
 
-Mouse::Mouse(int x, int y) {
-    if (mouse != nullptr) {
-        std::cerr << "Mouse::Mouse error: another mouse exists..?" << std::endl;
-        exit(1);
+Mouse::Mouse(int x, int y, bool is_feta) {
+    this->is_feta = is_feta;
+    if (!this->is_feta) {
+        if (cheddar != nullptr) {
+            std::cerr << "Mouse::Mouse error: another Cheddar exists..?" << std::endl;
+            exit(1);
+        }
+        cheddar = this;
+
+        // add the inventory handler to the map
+        game->push_object(INVENTORY_OBJ, "");
+
+        // add feta to the map
+        char options[256];
+        snprintf(options, sizeof(options), "%d,%d,1", x, y);
+        game->push_object(MOUSE_OBJ, std::string(options));
+        this->sprite = new Sprite("sprites/cheddar.bmp", 32, 32, 250);
+        this->name = "Cheddar";
+    } else {
+        if (feta != nullptr) {
+            std::cerr << "Mouse::Mouse error: another Feta exists..?" << std::endl;
+            exit(1);
+        }
+        feta = this;
+        this->sprite = new Sprite("sprites/feta.bmp", 32, 32, 250);
+        this->name = "Feta";
     }
-    mouse = this;
-    game->push_object(INVENTORY_OBJ, "");
 
-    this->sprite = new Sprite("sprites/mouse.bmp", 32, 32, 250);
-
-    this->dst_rect.x = float(SCREEN_WIDTH/2 - 16);
-    this->dst_rect.y = float(SCREEN_HEIGHT/2 - 24);
     this->dst_rect.w = 32.0f;
     this->dst_rect.h = 32.0f;
-
-    this->miss_rect.x = float(SCREEN_WIDTH/2 - 8);
-    this->miss_rect.y = float(SCREEN_HEIGHT/2 - 32);
-    this->miss_rect.w = 16.0f;
-    this->miss_rect.h = 8.0f;
 
     this->x = float(x);
     this->y = float(y);
 
-    if (save.data["mouse_data"] == "true") {
-        save.data["mouse_data"] = "false";
-        this->x = str_to_float(save.data["mouse_x"].c_str());
-        this->y = str_to_float(save.data["mouse_y"].c_str());
-        this->sprite->set_animation(atoi(save.data["mouse_animation"].c_str()));
+    if (save.data[this->is_feta ? "feta_data" : "cheddar_data"] == "true") {
+        save.data[this->is_feta ? "feta_data" : "cheddar_data"] = "false";
+        this->x = str_to_float(save.data[this->is_feta ? "feta_x" : "cheddar_x"].c_str());
+        this->y = str_to_float(save.data[this->is_feta ? "feta_y" : "cheddar_y"].c_str());
+        this->sprite->set_animation(atoi(save.data[this->is_feta ? "feta_animation" : "cheddar_animation"].c_str()));
     }
 
-    game->set_view(this->x, this->y);
+    if (!this->is_feta) {
+        game->set_view(this->x, this->y);
+    }
 }
 
 Mouse::~Mouse() {
     delete this->sprite;
     this->sprite = nullptr;
-    mouse = nullptr;
+    if (this->is_feta) {
+        cheddar = nullptr;
+    } else {
+        feta = nullptr;
+    }
 }
 
 static bool _is_collision(float x, float y) {
@@ -63,7 +80,8 @@ static bool _is_collision(float x, float y) {
 #define DANCING_ANIMATION   33
 
 void Mouse::step() {
-    if (this->locked) {
+    Controller *controller = this->is_feta ? player2 : player1;
+    if (mice_locked) {
         game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
         return;
     }
@@ -81,7 +99,7 @@ void Mouse::step() {
 
             // calculate direction to enemy
             int x_dir, y_dir;
-            dir_to_point(mouse->x, mouse->y, enemy_x, enemy_y, &x_dir, &y_dir);
+            dir_to_point(this->x, this->y, enemy_x, enemy_y, &x_dir, &y_dir);
             int enemy_direction = direction_from_dirs(x_dir, y_dir);
 
             // current direction that the player is facing
@@ -117,7 +135,7 @@ void Mouse::step() {
     switch (this->is_busy) {
     case FALSE:
         // dancing
-        if (controller1.is_down(R2)) {
+        if (controller != nullptr && controller->is_down(R2)) {
             this->sprite->set_animation(DANCING_ANIMATION);
             this->sprite->update_frame();
             this->sprite->interval_ms = 200;
@@ -128,8 +146,10 @@ void Mouse::step() {
         }
 
         // move using arrow keys
-        x_dir = int(controller1.is_down(RIGHT)) - int(controller1.is_down(LEFT));
-        y_dir = int(controller1.is_down(DOWN)) - int(controller1.is_down(UP));
+        if (controller != nullptr) {
+            x_dir = int(controller->is_down(RIGHT)) - int(controller->is_down(LEFT));
+            y_dir = int(controller->is_down(DOWN)) - int(controller->is_down(UP));
+        }
 
         // update sprite frame and animation only if moving
         if (x_dir != 0 || y_dir != 0) {
@@ -144,19 +164,20 @@ void Mouse::step() {
         this->sprite->interval_ms = 250;
 
         // run
-        if (controller1.is_down(L2)) {
+        if (controller != nullptr && controller->is_down(L2)) {
             mov_speed = 64.0f;
             this->sprite->interval_ms = 100;
         }
 
         // attack
-        if (controller1.is_hit(ACTION1)) {
+        if (controller != nullptr && controller->is_hit(ACTION1)) {
             this->busy_ticks = game->ticks;
 
-            if (!inventory->attack_item.empty()) {
+            // if we have an attack item selected and it is still in the inventory
+            if (!this->attack_item.empty() && inventory->remove_item(this->attack_item)) {
                 if (x_dir == 0 && y_dir == 0)
                     dirs_from_direction(this->sprite->animation % 8, &x_dir, &y_dir);
-                
+
                 this->is_busy = THROWING;
 
                 // set animation to throwing
@@ -167,12 +188,10 @@ void Mouse::step() {
                 // create thrown item
                 char options[256];
                 ThrownItem::MakeOptions(options, sizeof(options), this->x, this->y, x_dir, y_dir);
-                game->push_object(inventory->attack_item + THROWN_OBJ, std::string(options));
-
-                // remove the attack item from inventory
-                inventory->remove_item(inventory->attack_item);
-                inventory->attack_item = "";
+                game->push_object(this->attack_item + THROWN_OBJ, std::string(options));
+                this->attack_item = "";
             } else {
+                this->attack_item = ""; // incase the second check of the previous if fails
                 this->is_busy = ATTACKING;
 
                 // set animation to attacking
@@ -188,9 +207,6 @@ void Mouse::step() {
                         this->closest_enemy = nullptr;
                         this->closest_distance = FLT_MAX;
                     }
-                } else if (!enemies.empty()) {
-                    this->did_miss = true;
-                    game->draw_icon(ATTACK_MISSED_ICON, &this->miss_rect);
                 }
             }
 
@@ -198,7 +214,7 @@ void Mouse::step() {
         }
 
         // eat cheese
-        if (controller1.is_hit(R1) && inventory->cheese > 0) {
+        if (controller != nullptr && controller->is_hit(R1) && inventory->cheese > 0) {
             inventory->cheese--;
             this->is_busy = EATING;
             this->busy_ticks = game->ticks;
@@ -214,18 +230,15 @@ void Mouse::step() {
 
     case ATTACKING:
         // move using arrow keys
-        x_dir = int(controller1.is_down(RIGHT)) - int(controller1.is_down(LEFT));
-        y_dir = int(controller1.is_down(DOWN)) - int(controller1.is_down(UP));
+        if (controller != nullptr) {
+            x_dir = int(controller->is_down(RIGHT)) - int(controller->is_down(LEFT));
+            y_dir = int(controller->is_down(DOWN)) - int(controller->is_down(UP));
+        }
         mov_speed = 32.0f;
 
         // will return to normal after << 500 ms >>
         if (game->ticks - this->busy_ticks > 500) {
             this->is_busy = FALSE;
-
-            if (this->did_miss) {
-                this->did_miss = false;
-                game->draw_rect(&this->miss_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
-            }
 
             // set animation to walking/running
             this->sprite->set_animation(this->sprite->animation % 8);
@@ -284,26 +297,45 @@ void Mouse::step() {
     if (!_is_collision(new_x, this->y)) this->x = new_x;
     if (!_is_collision(this->x, new_y)) this->y = new_y;
 
-    // set the game's view
-    game->set_view(this->x, this->y);
+    this->dst_rect.x = this->x - float(16 + game->corner_x);
+    this->dst_rect.y = this->y - float(24 + game->corner_y);
+
+    // only set game view if this mouse is being controlled right now
+    if (!this->is_feta) {
+        // this->dst_rect.x = float(SCREEN_WIDTH/2 - 16);
+        // this->dst_rect.y = float(SCREEN_HEIGHT/2 - 24);
+
+        game->set_view((int(this->x) + int(feta->x)) / 2, (int(this->y) + int(feta->y)) / 2);
+    }
 
     // display the sprite to the screen
     game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
 }
 
 void Mouse::save_data() {
-    save.data["mouse_data"] = "true";
-    char buff[100];
-    float_to_str(this->x, buff, sizeof(buff));
-    save.data["mouse_x"] = buff;
-    float_to_str(this->y, buff, sizeof(buff));
-    save.data["mouse_y"] = buff;
-    snprintf(buff, sizeof(buff), "%d", int(this->sprite->animation));
-    save.data["mouse_animation"] = buff;
+    if (!this->is_feta) {
+        save.data["cheddar_data"] = "true";
+        char buff[100];
+        float_to_str(this->x, buff, sizeof(buff));
+        save.data["cheddar_x"] = buff;
+        float_to_str(this->y, buff, sizeof(buff));
+        save.data["cheddar_y"] = buff;
+        snprintf(buff, sizeof(buff), "%d", int(this->sprite->animation));
+        save.data["cheddar_animation"] = buff;
+    } else {
+        save.data["feta_data"] = "true";
+        char buff[100];
+        float_to_str(this->x, buff, sizeof(buff));
+        save.data["feta_x"] = buff;
+        float_to_str(this->y, buff, sizeof(buff));
+        save.data["feta_y"] = buff;
+        snprintf(buff, sizeof(buff), "%d", int(this->sprite->animation));
+        save.data["feta_animation"] = buff;
+    }
 }
 
 void Mouse::post_save_data() {
-    save.data["mouse_data"] = "false";
+    save.data[this->is_feta ? "feta_data" : "cheddar_data"] = "false";
 }
 
 // will be called by an enemy
@@ -311,12 +343,6 @@ bool Mouse::attack(int damage) {
     // don't get attacked if was already attacked
     if (this->is_busy == ATTACKED)
         return false;
-
-    // erase "MISS" icon if this attack breaks the animation
-    if (this->is_busy == ATTACKING && this->did_miss) {
-        this->did_miss = false;
-        game->draw_rect(&this->miss_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
-    }
 
     this->is_busy = ATTACKED;
     this->busy_ticks = game->ticks;
@@ -344,4 +370,19 @@ void Mouse::push_item(const std::string &item_id) {
     }
 
     this->items.push_back(item_id);
+}
+
+Mouse *closest_mouse(float x, float y, float min_distance) {
+    float distance_cheddar = distance_between_points(x, y, cheddar->x, cheddar->y);
+    float distance_feta = distance_between_points(x, y, feta->x, feta->y);
+
+    if (distance_cheddar < distance_feta) {
+        if (distance_cheddar < min_distance) {
+            return cheddar;
+        }
+    } else if (distance_feta < min_distance) {
+        return feta;
+    }
+
+    return nullptr; // no close-enough mouse
 }

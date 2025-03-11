@@ -5,7 +5,7 @@
 
 ThrownToothpick::ThrownToothpick(float x, float y, int x_dir, int y_dir)
     : ThrownItem(x, y, x_dir, y_dir) {
-    this->sprite = new Sprite("sprites/toothpick.bmp", 16, 16, 0);
+    this->sprite = new Sprite("sprites/item_toothpick.bmp", 16, 16, 0);
     this->sprite->set_animation(direction_from_dirs(x_dir, y_dir));
     this->dst_rect.w = 16.0f;
     this->dst_rect.h = 16.0f;

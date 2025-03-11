@@ -3,16 +3,20 @@
 
 #include "enemy.h"
 #include "game.h"
+#include "mouse.h"
 #include "object.h"
 #include "sprite.h"
 
 #include <unordered_map>
 #include <string>
 
+#define ITEM_NONE "item_none"
+#define USE_OBJ   ".use"
+
 enum ItemType {
     USEFUL,
-    EDIBLE,
     THROWABLE,
+    EDIBLE,
     WEAPON,
     ARMOUR
 };
@@ -20,7 +24,7 @@ enum ItemType {
 struct Item {
     ItemType type = USEFUL;
     std::string name = "Item";
-    std::string description = "Unknown item.";
+    int damage = 0, armour = 0;
 };
 
 extern std::unordered_map<std::string, Item> item_info;
@@ -36,7 +40,7 @@ public:
 
     void step() override;
 
-    virtual bool take() = 0;
+    virtual bool take(Mouse *mouse) = 0;
 
     Sprite *sprite;
 
@@ -52,8 +56,6 @@ private:
 
 // ---- thrown item ----
 
-#define THROWN_OBJ ".thrown"
-
 class ThrownItem : public Object {
 public:
     ThrownItem(float x, float y, int x_dir, int y_dir);
@@ -64,10 +66,6 @@ public:
     virtual void on_hit(Enemy *enemy) = 0;
 
     virtual void on_miss() = 0;
-
-    static void MakeOptions(char *options, size_t options_size, float x, float y, int x_dir, int y_dir) {
-        snprintf(options, options_size, "%d,%d,%d,%d", int(x), int(y), x_dir, y_dir);
-    }
 
     static void ParseOptions(const std::string &options, float *x, float *y, int *x_dir, int *y_dir) {
         int _x, _y;

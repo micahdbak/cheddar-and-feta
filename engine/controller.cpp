@@ -8,16 +8,12 @@ static std::unordered_map<SDL_Keycode, Button> _keycode_map = {
     { SDLK_TAB, MENU },
     { SDLK_LSHIFT, L2 },
     { SDLK_RSHIFT, R2 },
-    { SDLK_1, L1 },
-    { SDLK_C, R1 },
+    { SDLK_LEFT, L1 },
+    { SDLK_RIGHT, R1 },
     { SDLK_RETURN, PRIMARY },
     { SDLK_BACKSPACE, SECONDARY },
     { SDLK_SPACE, ACTION1 },
-    { SDLK_T, ACTION2 },
-    { SDLK_UP, UP },
-    { SDLK_RIGHT, RIGHT },
-    { SDLK_DOWN, DOWN },
-    { SDLK_LEFT, LEFT },
+    { SDLK_C, ACTION2 },
     { SDLK_W, UP },
     { SDLK_D, RIGHT },
     { SDLK_S, DOWN },
@@ -78,6 +74,8 @@ void Controller::handle_key_down(SDL_Keycode keycode) {
     if (keycode >= ' ' && keycode <= '~') {
         if (this->is_down(_keycode_map[SDLK_LSHIFT]) && keycode >= 'a' && keycode <= 'z')
             this->c = char(keycode - 32);
+        else if (this->is_down(_keycode_map[SDLK_LSHIFT]) && keycode == '-')
+            this->c = '_';
         else
             this->c = char(keycode);
     }

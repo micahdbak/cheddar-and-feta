@@ -1,6 +1,5 @@
 #include "cheese.h"
 #include "game.h"
-#include "inventory.h"
 #include "mouse.h"
 
 #include <iostream>
@@ -86,8 +85,9 @@ void Cheese::render_cheese() {
 }
 
 void Cheese::step() {
-    if (closest_mouse(this->x, this->y, 8.0f) != nullptr) {
-        this->amount -= inventory->add_cheese(this->amount);
+    Mouse *mouse = closest_mouse(this->x, this->y, 8.0f);
+    if (mouse != nullptr) {
+        this->amount -= mouse->add_cheese(this->amount);
         if (this->amount == 0) {
             game->delete_object = true;
         } else {

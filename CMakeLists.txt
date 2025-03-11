@@ -28,7 +28,6 @@ add_executable(CheddarAndFeta
     src/enemy_bug.cpp
     src/enemy.cpp
     src/init.cpp
-    src/inventory.cpp
     src/item_toothpick.cpp
     src/item.cpp
     src/mouse.cpp

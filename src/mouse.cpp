@@ -1,4 +1,3 @@
-#include "inventory.h"
 #include "item.h"
 #include "mouse.h"
 #include "save_data.h"
@@ -19,9 +18,6 @@ Mouse::Mouse(int x, int y, bool is_feta) {
             exit(1);
         }
         cheddar = this;
-
-        // add the inventory handler to the map
-        game->push_object(INVENTORY_OBJ, "");
 
         // add feta to the map
         char options[256];
@@ -67,6 +63,32 @@ Mouse::~Mouse() {
     }
 }
 
+void Mouse::save_data() {
+    if (!this->is_feta) {
+        save.data["cheddar_data"] = "true";
+        char buff[100];
+        float_to_str(this->x, buff, sizeof(buff));
+        save.data["cheddar_x"] = buff;
+        float_to_str(this->y, buff, sizeof(buff));
+        save.data["cheddar_y"] = buff;
+        snprintf(buff, sizeof(buff), "%d", int(this->sprite->animation));
+        save.data["cheddar_animation"] = buff;
+    } else {
+        save.data["feta_data"] = "true";
+        char buff[100];
+        float_to_str(this->x, buff, sizeof(buff));
+        save.data["feta_x"] = buff;
+        float_to_str(this->y, buff, sizeof(buff));
+        save.data["feta_y"] = buff;
+        snprintf(buff, sizeof(buff), "%d", int(this->sprite->animation));
+        save.data["feta_animation"] = buff;
+    }
+}
+
+void Mouse::post_save_data() {
+    save.data[this->is_feta ? "feta_data" : "cheddar_data"] = "false";
+}
+
 static bool _is_collision(float x, float y) {
     return game->point_in_collider(x+2.0f, y) ||
         game->point_in_collider(x-2.0f, y) ||
@@ -80,14 +102,29 @@ static bool _is_collision(float x, float y) {
 #define DANCING_ANIMATION   33
 
 void Mouse::step() {
-    if (!this->is_feta)
-        game->draw_hud("item_none", this->health, this->max_health, inventory->cheese);
-
-    Controller *controller = this->is_feta ? player2 : player1;
     if (mice_locked) {
         game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
         return;
     }
+
+    Controller *controller = this->is_feta ? player2 : player1;
+
+    if (!this->is_feta && !this->items.empty()) {
+        this->sel_item += controller->is_hit(R1) - controller->is_hit(L1);
+        if (this->sel_item < -1)
+            this->sel_item = this->items.size() - 1;
+        else if (this->sel_item > this->items.size() - 1)
+            this->sel_item = -1;
+    }
+
+    std::string sel_item_id = this->sel_item < 0 ? ITEM_NONE : this->items[this->sel_item];
+    if (!item_info.contains(sel_item_id)) {
+        this->sel_item = -1;
+        sel_item_id = ITEM_NONE; // wtf
+    }
+
+    if (!this->is_feta)
+        game->draw_hud(sel_item_id, this->health, this->max_health, this->cheese);
 
     // cycle through available enemies to find which is closest
     if (!enemies.empty()) {
@@ -172,29 +209,41 @@ void Mouse::step() {
             this->sprite->interval_ms = 100;
         }
 
-        // attack
+        // attack / use item
         if (controller != nullptr && controller->is_hit(ACTION1)) {
             this->busy_ticks = game->ticks;
 
-            // if we have an attack item selected and it is still in the inventory
-            if (!this->attack_item.empty() && inventory->remove_item(this->attack_item)) {
+            switch (item_info[sel_item_id].type) {
+            case USEFUL:
+            case THROWABLE:
                 if (x_dir == 0 && y_dir == 0)
                     dirs_from_direction(this->sprite->animation % 8, &x_dir, &y_dir);
 
-                this->is_busy = THROWING;
-
-                // set animation to throwing
-                this->sprite->set_animation((this->sprite->animation % 8) + THROWING_ANIMATION);
-                this->sprite->set_frame(0);
-                this->sprite->interval_ms = 125;
-
-                // create thrown item
                 char options[256];
-                ThrownItem::MakeOptions(options, sizeof(options), this->x, this->y, x_dir, y_dir);
-                game->push_object(this->attack_item + THROWN_OBJ, std::string(options));
-                this->attack_item = "";
-            } else {
-                this->attack_item = ""; // incase the second check of the previous if fails
+                snprintf(options, sizeof(options), "%d,%d,%d,%d", int(this->x), int(this->y), x_dir, y_dir);
+                game->push_object(sel_item_id + USE_OBJ, std::string(options));
+
+                this->remove_item(sel_item_id);
+                if (this->sel_item >= this->items.size())
+                    this->sel_item--;
+
+                if (item_info[sel_item_id].type == THROWABLE) {
+                    this->is_busy = THROWING;
+
+                    // set animation to throwing
+                    this->sprite->set_animation((this->sprite->animation % 8) + THROWING_ANIMATION);
+                    this->sprite->set_frame(0);
+                    this->sprite->interval_ms = 125;
+                }
+
+                break;
+
+            case EDIBLE:
+                // eat
+
+                break;
+
+            case WEAPON:
                 this->is_busy = ATTACKING;
 
                 // set animation to attacking
@@ -211,14 +260,21 @@ void Mouse::step() {
                         this->closest_distance = FLT_MAX;
                     }
                 }
-            }
 
-            break;
+                break;
+
+            case ARMOUR:
+                // equip
+
+                break;
+
+            default: break;
+            }
         }
 
         // eat cheese
-        if (controller != nullptr && controller->is_hit(R1) && inventory->cheese > 0) {
-            inventory->cheese--;
+        if (controller != nullptr && controller->is_hit(ACTION2) && this->cheese > 0) {
+            this->cheese--;
             this->is_busy = EATING;
             this->busy_ticks = game->ticks;
 
@@ -315,32 +371,6 @@ void Mouse::step() {
     game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
 }
 
-void Mouse::save_data() {
-    if (!this->is_feta) {
-        save.data["cheddar_data"] = "true";
-        char buff[100];
-        float_to_str(this->x, buff, sizeof(buff));
-        save.data["cheddar_x"] = buff;
-        float_to_str(this->y, buff, sizeof(buff));
-        save.data["cheddar_y"] = buff;
-        snprintf(buff, sizeof(buff), "%d", int(this->sprite->animation));
-        save.data["cheddar_animation"] = buff;
-    } else {
-        save.data["feta_data"] = "true";
-        char buff[100];
-        float_to_str(this->x, buff, sizeof(buff));
-        save.data["feta_x"] = buff;
-        float_to_str(this->y, buff, sizeof(buff));
-        save.data["feta_y"] = buff;
-        snprintf(buff, sizeof(buff), "%d", int(this->sprite->animation));
-        save.data["feta_animation"] = buff;
-    }
-}
-
-void Mouse::post_save_data() {
-    save.data[this->is_feta ? "feta_data" : "cheddar_data"] = "false";
-}
-
 // will be called by an enemy
 bool Mouse::attack(int damage) {
     // don't get attacked if was already attacked
@@ -367,12 +397,38 @@ bool Mouse::attack(int damage) {
     return true;
 }
 
-void Mouse::push_item(const std::string &item_id) {
+bool Mouse::push_item(const std::string &item_id) {
     if (this->items.size() >= this->max_items || !item_info.contains(item_id)) {
-        return;
+        return false;
     }
 
     this->items.push_back(item_id);
+    return true;
+}
+
+void Mouse::remove_item(const std::string &item_id) {
+    for (auto it = this->items.begin(); it != this->items.end(); it++) {
+        if (*it == item_id) {
+            this->items.erase(it);
+            break;
+        }
+    }
+}
+
+int Mouse::add_cheese(int amount) {
+    int remaining_amount = this->max_cheese - this->cheese;
+
+    if (remaining_amount < 1)
+        return 0;
+
+    if (remaining_amount < amount) {
+        this->cheese += remaining_amount;
+        return remaining_amount;
+    }
+
+    // amount < remaining_amount
+    this->cheese += amount;
+    return amount;
 }
 
 Mouse *closest_mouse(float x, float y, float min_distance) {

@@ -1,6 +1,5 @@
 #include "item.h"
 #include "controller.h"
-#include "mouse.h"
 #include "textbox.h"
 
 std::unordered_map<std::string, Item> item_info;
@@ -45,7 +44,7 @@ void DroppedItem::step() {
     Mouse *mouse = closest_mouse(_x, _y, 32.0f);
     if ((mouse == cheddar && player1 != nullptr && player1->is_hit(PRIMARY)) ||
         (mouse == feta && player2 != nullptr && player2->is_hit(PRIMARY))) {
-        if (this->take()) {
+        if (this->take(mouse)) {
             game->delete_object = true;
         } else {
             // play sound that inv is full?

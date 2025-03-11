@@ -207,8 +207,9 @@ void Game::draw_hud(std::string item, int health, int max_health, int cheese) {
     // current item
     SDL_SetRenderTarget(renderer, this->ui);
     SDL_Texture *item_texture = load_bmp_texture("sprites/" + item + ".bmp");
+    SDL_FRect item_src_rect = { 0.0f, 0.0f, 16.0f, 16.0f };
     SDL_FRect item_rect = { 284.0f, 188.0f, 16.0f, 16.0f };
-    SDL_RenderTexture(renderer, item_texture, NULL, &item_rect);
+    SDL_RenderTexture(renderer, item_texture, &item_src_rect, &item_rect);
     SDL_SetRenderTarget(renderer, this->screen);
 
     // health

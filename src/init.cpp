@@ -7,7 +7,6 @@
 // objects
 #include "cheese.h"
 #include "enemy_bug.h"
-#include "inventory.h"
 #include "item_toothpick.h"
 #include "mouse.h"
 #include "save_station.h"
@@ -44,14 +43,14 @@ void Game::init() {
     // objects
     this->factories[CHEESE_OBJ] = new CheeseFactory();
     this->factories[ENEMY_BUG_OBJ] = new EnemyBugFactory();
-    this->factories[INVENTORY_OBJ] = new InventoryFactory();
     this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
-    this->factories[ITEM_TOOTHPICK THROWN_OBJ] = new ThrownToothpickFactory();
+    this->factories[ITEM_TOOTHPICK USE_OBJ] = new ThrownToothpickFactory();
     this->factories[MOUSE_OBJ] = new MouseFactory();
     this->factories[SAVE_STATION_OBJ] = new SaveStationFactory();
 
     // items
-    item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Toothpick", "A toothpick."};
+    item_info[ITEM_NONE] = Item{WEAPON, "Nothing", .damage = 1};
+    item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Toothpick"};
 
     this->create_object(INIT_OBJ, "");
     this->title = "Cheddar n' Feta";

@@ -19,18 +19,13 @@ public:
 
     bool attack(int damage);
 
-    int free_space() { return this->max_items - this->items.size(); }
-    void push_item(const std::string &item_id);
+    bool push_item(const std::string &item_id);
+    void remove_item(const std::string &item_id);
+    int add_cheese(int amount);
 
-    bool locked = false;
     float x, y;
 
     int throw_x = 0, throw_y = 0;
-
-    int health = 10, max_health = 10;
-    int damage = 1, armour = 0;
-
-    std::string attack_item = "";
 
     std::string name = "Cheddar";
 
@@ -47,8 +42,13 @@ private:
     Enemy *closest_enemy = nullptr;
     float closest_distance = FLT_MAX;
 
+    int health = 10, max_health = 10;
+    int damage = 1, armour = 0;
+
     std::vector<std::string> items;
-    int max_items = 4;
+    int max_items = 4, sel_item = -1;
+
+    int cheese = 0, max_cheese = 10;
 };
 
 class MouseFactory : public ObjectFactory {

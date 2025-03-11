@@ -1,7 +1,6 @@
 #ifndef ITEM_TOOTHPICK
-#define ITEM_TOOTHPICK "item.toothpick"
+#define ITEM_TOOTHPICK "item_toothpick"
 
-#include "inventory.h"
 #include "item.h"
 
 #include <iostream>
@@ -11,13 +10,13 @@
 class DroppedToothpick : public DroppedItem {
 public:
     DroppedToothpick(float x, float y)
-        : DroppedItem(x, y, "sprites/toothpick.bmp", 16, 16, 0) {
+        : DroppedItem(x, y, "sprites/item_toothpick.bmp", 16, 16, 0) {
         this->sprite->set_animation(1);
     }
     ~DroppedToothpick() = default;
 
-    bool take() override {
-        return inventory->push_item(ITEM_TOOTHPICK);
+    bool take(Mouse *mouse) override {
+        return mouse->push_item(ITEM_TOOTHPICK);
     }
 };
 

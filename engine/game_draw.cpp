@@ -1,3 +1,4 @@
+#include "bmp_texture.h"
 #include "game.h"
 #include "map.h"
 
@@ -196,4 +197,26 @@ SDL_FRect Game::draw_health_bar(int health, int max_health, int x, int y) {
     SDL_SetRenderTarget(renderer, this->screen);
 
     return draw_rect;
+}
+
+void Game::draw_hud(std::string item, int health, int max_health, int cheese) {
+    // container ui box
+    SDL_FRect hud_rect = { 276.0f, 184.0f, 32.0f, 44.0f };
+    this->draw_ui_box(BOX_MENU_CONT, &hud_rect);
+
+    // current item
+    SDL_SetRenderTarget(renderer, this->ui);
+    SDL_Texture *item_texture = load_bmp_texture("sprites/" + item + ".bmp");
+    SDL_FRect item_rect = { 284.0f, 188.0f, 16.0f, 16.0f };
+    SDL_RenderTexture(renderer, item_texture, NULL, &item_rect);
+    SDL_SetRenderTarget(renderer, this->screen);
+
+    // health
+    char buff[256];
+    snprintf(buff, sizeof(buff), "{%d/%d", health, max_health);
+    this->draw_text(buff, SMALL_FONT, max_health > 9 && health > 9 ? 280 : 282, 206, 0);
+
+    // cheese
+    snprintf(buff, sizeof(buff), "~ %d", cheese);
+    this->draw_text(buff, SMALL_FONT, 282, 214, 0);
 }

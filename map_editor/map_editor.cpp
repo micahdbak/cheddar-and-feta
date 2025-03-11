@@ -125,6 +125,7 @@ Editor::Editor(const char *map_path) {
     for (int i = -1; i < int(n_MapColliders); i++) {
         this->render_collision_tile(this->collision_sheet, i+1, 0, i);
     }
+    std::cout << "1" << std::endl;
 }
 
 Editor::~Editor() {
@@ -152,6 +153,11 @@ Editor::~Editor() {
 }
 
 void Editor::step() {
+    if (player1 == nullptr) {
+        game->draw_text("Press any key to start.", MONO_FONT, 8, 0, 0);
+        return;
+    }
+
     if (!this->user_inputting) {
         // move the selected tile on input
         this->sel_x += int(player1->is_hit(RIGHT)) - int(player1->is_hit(LEFT));

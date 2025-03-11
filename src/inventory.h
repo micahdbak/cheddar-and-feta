@@ -1,3 +1,5 @@
+// MARKED FOR DEPRECATION
+
 #ifndef INVENTORY_OBJ
 #define INVENTORY_OBJ "inventory"
 

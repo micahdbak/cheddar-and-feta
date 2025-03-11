@@ -89,6 +89,7 @@ public:
     void draw_text(const std::string &str, int font, int x, int y, int w);
     void draw_icon(SDL_FRect src_rect, SDL_FRect *dst_rect);
     SDL_FRect draw_health_bar(int health, int max_health, int x, int y);
+    void draw_hud(std::string item, int health, int max_health, int cheese);
 
     // game_sprite.cpp
 

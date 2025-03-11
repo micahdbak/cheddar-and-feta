@@ -1,3 +1,5 @@
+// MARKED FOR DEPRECATION
+
 #include "game.h"
 #include "inventory.h"
 #include "item.h"

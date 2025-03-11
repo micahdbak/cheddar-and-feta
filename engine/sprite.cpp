@@ -1,25 +1,14 @@
 #include "game.h"
 #include "sprite.h"
+#include "bmp_texture.h"
 
 #include <iostream>
 
 Sprite::Sprite(const char *bmp_path, int frame_w, int frame_h, int interval_ms):
     frame_w(frame_w), frame_h(frame_h), interval_ms(interval_ms) {
-    SDL_Surface *sprite_surface = SDL_LoadBMP(bmp_path);
-    if (!sprite_surface) {
-        std::cerr << "SDL_LoadBMP error: " << SDL_GetError() << std::endl;
-        exit(1);
-    }
-
-    this->sheet_w = sprite_surface->w;
-    this->sheet_h = sprite_surface->h;
-
-    this->texture = SDL_CreateTextureFromSurface(renderer, sprite_surface);
-    SDL_DestroySurface(sprite_surface);
-    if (!this->texture) {
-        std::cerr << "SDL_CreateTextureFromSurface error: " << SDL_GetError() << std::endl;
-        exit(1);
-    }
+    this->texture = load_bmp_texture(bmp_path);
+    this->sheet_w = this->texture->w;
+    this->sheet_h = this->texture->h;
     SDL_SetTextureScaleMode(this->texture, SDL_SCALEMODE_NEAREST);
 
     this->frame.x = 0.0f;
@@ -32,7 +21,6 @@ Sprite::Sprite(const char *bmp_path, int frame_w, int frame_h, int interval_ms):
 }
 
 Sprite::~Sprite() {
-    SDL_DestroyTexture(this->texture);
     this->texture = nullptr;
 }
 

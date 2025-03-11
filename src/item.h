@@ -36,9 +36,7 @@ public:
 
     void step() override;
 
-    virtual std::string prompt_text() = 0;
-    virtual std::string leave_text() = 0;
-    virtual std::pair<bool, std::string> take() = 0;
+    virtual bool take() = 0;
 
     Sprite *sprite;
 

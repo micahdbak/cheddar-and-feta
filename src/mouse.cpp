@@ -80,6 +80,9 @@ static bool _is_collision(float x, float y) {
 #define DANCING_ANIMATION   33
 
 void Mouse::step() {
+    if (!this->is_feta)
+        game->draw_hud("item_none", this->health, this->max_health, inventory->cheese);
+
     Controller *controller = this->is_feta ? player2 : player1;
     if (mice_locked) {
         game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
@@ -302,10 +305,10 @@ void Mouse::step() {
 
     // only set game view if this mouse is being controlled right now
     if (!this->is_feta) {
-        // this->dst_rect.x = float(SCREEN_WIDTH/2 - 16);
-        // this->dst_rect.y = float(SCREEN_HEIGHT/2 - 24);
+        this->dst_rect.x = float(SCREEN_WIDTH/2 - 16);
+        this->dst_rect.y = float(SCREEN_HEIGHT/2 - 24);
 
-        game->set_view((int(this->x) + int(feta->x)) / 2, (int(this->y) + int(feta->y)) / 2);
+        game->set_view(this->x, this->y);
     }
 
     // display the sprite to the screen

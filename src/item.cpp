@@ -36,81 +36,20 @@ void DroppedItem::step() {
     this->dst_rect.y = this->y - float(this->sprite->frame_h/2) - game->corner_y;
     game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, this->sprite->frame_h/2);
 
-    if (this->state != IDLE && (textbox == nullptr || textbox->owner != this->unique_id))
-        this->state = IDLE; // don't know how that happened, but GTFO that state))
+    if (mice_locked)
+        return;
 
-    switch (this->state) {
-    case IDLE: {
-        // don't check anything if the mouse is locked
-        if (mice_locked)
-            return;
+    float _x = this->x + float(this->sprite->frame_w/2);
+    float _y = this->y + float(this->sprite->frame_h/2);
 
-        float _x = this->x + float(this->sprite->frame_w/2);
-        float _y = this->y + float(this->sprite->frame_h/2);
-
-        Mouse *mouse = closest_mouse(_x, _y, 32.0f);
-        if ((mouse == cheddar && player1 != nullptr && player1->is_hit(PRIMARY)) ||
-            (mouse == feta && player2 != nullptr && player2->is_hit(PRIMARY))) {
-            game->draw_rect(0, 0, 0, 0, 0, SDL_BLENDMODE_NONE); // clear ui
-            textbox = new Textbox(this->prompt_text(), this->unique_id, DEFAULT_FONT, 50);
-            this->state = PROMPT;
-            mice_locked = true;
+    Mouse *mouse = closest_mouse(_x, _y, 32.0f);
+    if ((mouse == cheddar && player1 != nullptr && player1->is_hit(PRIMARY)) ||
+        (mouse == feta && player2 != nullptr && player2->is_hit(PRIMARY))) {
+        if (this->take()) {
+            game->delete_object = true;
+        } else {
+            // play sound that inv is full?
         }
-    } break;
-
-    case PROMPT:
-        textbox->step();
-
-        if (textbox->done) {
-            this->state = CHOICE;
-            this->choice = TAKE;
-            this->render_choice();
-        }
-
-        break;
-
-    case CHOICE:
-        if ((all_inputs.is_hit(LEFT) && this->choice == LEAVE) ||
-            (all_inputs.is_hit(RIGHT) && this->choice == TAKE)) {
-            this->choice = this->choice == TAKE ? LEAVE : TAKE;
-            this->render_choice();
-        }
-
-        if (all_inputs.is_hit(PRIMARY)) {
-            delete textbox;
-            std::string result_text;
-
-            if (this->choice == TAKE) {
-                std::pair<bool, std::string> result = this->take();
-                if (!result.first) {
-                    this->choice = LEAVE;
-                }
-
-                result_text = result.second;
-            } else {
-                result_text = this->leave_text();
-            }
-
-            textbox = new Textbox(result_text, this->unique_id, DEFAULT_FONT, 50);
-            this->state = RESULT;
-        }
-
-        break;
-
-    case RESULT:
-        textbox->step();
-
-        if (textbox->done && all_inputs.is_hit(PRIMARY)) {
-            delete textbox;
-            textbox = nullptr;
-            mice_locked = false;
-            this->state = IDLE;
-
-            if (this->choice == TAKE)
-                game->delete_object = true;
-        }
-
-        break;
     }
 }
 

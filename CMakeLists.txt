@@ -10,6 +10,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
 
 set(ENGINE_SRC
+    engine/bmp_texture.cpp
     engine/font.cpp
     engine/game_const.cpp
     engine/game_draw.cpp
@@ -35,12 +36,12 @@ add_executable(CheddarAndFeta
     src/textbox.cpp
     ${ENGINE_SRC}
 )
-target_include_directories(CheddarAndFeta PRIVATE engine src)
+target_include_directories(CheddarAndFeta PRIVATE engine src resources)
 target_link_libraries(CheddarAndFeta PRIVATE SDL3::SDL3)
 
 add_executable(MapEditor
-    map_editor.cpp
+    map_editor/map_editor.cpp
     ${ENGINE_SRC}
 )
-target_include_directories(MapEditor PRIVATE engine src)
+target_include_directories(MapEditor PRIVATE engine)
 target_link_libraries(MapEditor PRIVATE SDL3::SDL3)

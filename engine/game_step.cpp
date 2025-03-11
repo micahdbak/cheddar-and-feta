@@ -1,3 +1,4 @@
+#include "bmp_texture.h"
 #include "controller.h"
 #include "game.h"
 
@@ -52,6 +53,7 @@ Game::Game() {
 
 Game::~Game() {
     this->unload();
+    free_textures();
 
     // free fonts
     for (auto font : this->fonts)

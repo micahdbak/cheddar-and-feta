@@ -18,7 +18,8 @@ jobs:
       - name: Checkout sdl3-2d-engine
         uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: 'recursive'
+          depth: 
 
       - name: CMake build
         run: |
@@ -38,7 +39,7 @@ jobs:
       - name: Checkout sdl3-2d-engine
         uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
 
       - name: CMake build
         run: |

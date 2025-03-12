@@ -49,8 +49,8 @@ void Game::init() {
     this->factories[SAVE_STATION_OBJ] = new SaveStationFactory();
 
     // items
-    item_info[ITEM_NONE] = Item{WEAPON, "Nothing", .damage = 1};
-    item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Toothpick"};
+    item_info[ITEM_NONE] = Item{WEAPON, "Nothing", 1, 0};
+    item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Toothpick", 0, 0};
 
     this->create_object(INIT_OBJ, "");
     this->title = "Cheddar n' Feta";

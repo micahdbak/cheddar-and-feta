@@ -30,7 +30,7 @@ void SaveStation::step() {
 
     if (textbox != nullptr && textbox->owner == SAVE_STATION_OBJ) {
         textbox->step();
-        if (textbox->done && all_inputs.is_hit(PRIMARY)) {
+        if (textbox->done && player1 != nullptr && player1->is_hit(PRIMARY)) {
             delete textbox;
             textbox = nullptr;
             mice_locked = false;
@@ -40,7 +40,7 @@ void SaveStation::step() {
     }
 
     if (this->is_displaying_ui) {
-        if (all_inputs.is_hit(SECONDARY)) {
+        if (player1 != nullptr && player1->is_hit(SECONDARY)) {
             this->is_displaying_ui = false;
             this->should_render = false;
             mice_locked = false;
@@ -49,7 +49,7 @@ void SaveStation::step() {
             return;
         }
         
-        if (all_inputs.is_hit(PRIMARY)) {
+        if (player1 != nullptr && player1->is_hit(PRIMARY)) {
             game->save_objects();
             save.write_file(this->sel_save);
             game->post_save_objects();
@@ -60,7 +60,7 @@ void SaveStation::step() {
             return;
         }
 
-        int diff = all_inputs.is_hit(DOWN) - all_inputs.is_hit(UP);
+        int diff = player1 != nullptr ? (player1->is_hit(DOWN) - player1->is_hit(UP)) : 0;
         if (diff != 0) {
             this->sel_save += diff;
             this->sel_save = cnf_clamp(this->sel_save, 0, NUM_SAVE_FILES - 1);

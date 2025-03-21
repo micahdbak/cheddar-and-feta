@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: Install MinGW
         run: |
-          choco install mingw -y
+          choco install mingw openssl -y
           g++ --version
 
       - name: Checkout sdl3-2d-engine

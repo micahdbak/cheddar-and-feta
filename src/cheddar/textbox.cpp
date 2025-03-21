@@ -25,7 +25,7 @@ void Textbox::step() {
         return;
 
     if (this->done_sentence) {
-        if (all_inputs.is_hit(PRIMARY)) {
+        if (player1 != nullptr && player1->is_hit(PRIMARY)) {
             this->done_sentence = false;
             this->running_text = "";
         }
@@ -33,7 +33,7 @@ void Textbox::step() {
         return;
     }
 
-    if (all_inputs.is_hit(PRIMARY)) {
+    if (player1 != nullptr && player1->is_hit(PRIMARY)) {
         int j;
         for (j = this->i; j < text.size() && text[j] != '\n'; j++) {
             this->running_text += text[j];

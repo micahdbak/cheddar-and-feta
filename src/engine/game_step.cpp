@@ -1,6 +1,7 @@
 #include "bmp_texture.h"
 #include "controller.h"
 #include "game.h"
+#include "net_agent.h"
 
 #include <iostream>
 
@@ -54,6 +55,11 @@ Game::Game() {
 Game::~Game() {
     this->unload();
     free_textures();
+
+    // free the network agent
+    if (net_agent != nullptr) {
+        delete net_agent;
+    }
 
     // free fonts
     for (auto font : this->fonts)

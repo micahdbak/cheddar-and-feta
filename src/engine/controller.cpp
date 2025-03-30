@@ -35,9 +35,7 @@ static std::unordered_map<SDL_GamepadButton, Button> _gamepad_map = {
     { SDL_GAMEPAD_BUTTON_DPAD_LEFT, LEFT }
 };
 
-Controller::Controller(std::string name) {
-    this->name = name;
-
+Controller::Controller() {
     for (int i = 0; i < int(NUM_BUTTONS); i++) {
         this->is_down_map[(Button)i] = false;
     }
@@ -61,8 +59,11 @@ bool Controller::is_down(Button button) {
     return this->is_down_map.at(button);
 }
 
-void Controller::handle_button_down(Button button) {
+void Controller::handle_button_hit(Button button) {
     this->is_hit_map[button] = true;
+}
+
+void Controller::handle_button_down(Button button) {
     this->is_down_map[button] = true;
 }
 

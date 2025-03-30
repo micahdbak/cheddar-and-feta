@@ -1,5 +1,6 @@
 #include "game.h"
 #include "controller.h"
+#include "net_agent.h"
 #include "object.h"
 #include "save_data.h"
 #include "textbox.h"
@@ -9,6 +10,8 @@
 #include "enemy_bug.h"
 #include "item_toothpick.h"
 #include "mouse.h"
+#include "net_receiver.h"
+#include "net_sender.h"
 #include "save_station.h"
 
 #include "item.h"
@@ -52,8 +55,15 @@ void Game::init() {
     item_info[ITEM_NONE] = Item{WEAPON, "Nothing", 1, 0};
     item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Toothpick", 0, 0};
 
+    this->factories[FIRST_OBJ] = new NetReceiverFactory();
+    this->create_object(FIRST_OBJ, "");
+    this->factories[LAST_OBJ] = new NetSenderFactory();
+    this->create_object(LAST_OBJ, "");
+
     this->create_object(INIT_OBJ, "");
     this->title = "Cheddar n' Feta";
+
+    net_agent = new NetworkAgent(false);
 }
 
 // ---- init object ----
@@ -70,12 +80,12 @@ void Init::step() {
     if (textbox != nullptr) {
         textbox->step();
 
-        if (textbox->done && all_inputs.is_hit(PRIMARY)) {
+        if (textbox->done && local_controller.is_hit(PRIMARY)) {
             delete textbox;
             textbox = nullptr;
             this->render = true;
         } else return;
-    } else if (all_inputs.is_hit(PRIMARY)) {
+    } else if (local_controller.is_hit(PRIMARY)) {
         int ret = save.load_file(this->sel_save);
 
         if (/* ret == LOAD_SUCCESS || ret == LOAD_NEW */ true) {
@@ -90,7 +100,7 @@ void Init::step() {
         return;
     }
 
-    int diff = all_inputs.is_hit(DOWN) - all_inputs.is_hit(UP);
+    int diff = local_controller.is_hit(DOWN) - local_controller.is_hit(UP);
     if (diff != 0) {
         this->sel_save += diff;
         this->sel_save = cnf_clamp(this->sel_save, 0, NUM_SAVE_FILES - 1);

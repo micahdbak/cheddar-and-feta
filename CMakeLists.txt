@@ -3,6 +3,8 @@ project(CheddarAndFeta VERSION 0.1)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
 add_subdirectory(libdatachannel)
 add_subdirectory(SDL)
@@ -36,6 +38,8 @@ target_link_libraries(MapEditor PRIVATE ${DEPS})
 
 add_executable(FetaLauncher
     ${ENGINE_SRC}
+    src/feta/net_receiver.cpp
+    src/feta/net_sender.cpp
     src/feta/init.cpp
 )
 target_include_directories(FetaLauncher PRIVATE src/engine src/feta)
@@ -50,6 +54,8 @@ add_executable(CheddarLauncher
     src/cheddar/item_toothpick.cpp
     src/cheddar/item.cpp
     src/cheddar/mouse.cpp
+    src/cheddar/net_receiver.cpp
+    src/cheddar/net_sender.cpp
     src/cheddar/save_station.cpp
     src/cheddar/textbox.cpp
 )

@@ -64,5 +64,5 @@ void EnemyBug::step() {
     this->sprite->update_frame();
     this->dst_rect.x = this->x - float(game->corner_x);
     this->dst_rect.y = this->y - float(game->corner_y);
-    game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 14);
+    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 14);
 }

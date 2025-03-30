@@ -18,6 +18,8 @@ Sprite::Sprite(const char *bmp_path, int frame_w, int frame_h, int interval_ms):
 
     this->frame_i = 0;
     this->frame_last_set = game->ticks;
+
+    this->tex_id = bmp_path;
 }
 
 Sprite::~Sprite() {

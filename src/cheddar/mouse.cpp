@@ -103,11 +103,11 @@ static bool _is_collision(float x, float y) {
 
 void Mouse::step() {
     if (mice_locked) {
-        game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
+        game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
         return;
     }
 
-    Controller *controller = this->is_feta ? player2 : player1;
+    Controller *controller = this->is_feta ? &remote_controller : &local_controller;
 
     if (!this->is_feta && !this->items.empty()) {
         this->sel_item += controller->is_hit(R1) - controller->is_hit(L1);
@@ -368,7 +368,7 @@ void Mouse::step() {
     }
 
     // display the sprite to the screen
-    game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
+    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
 }
 
 // will be called by an enemy

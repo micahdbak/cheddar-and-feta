@@ -12,6 +12,7 @@ public:
     void update_frame();
     void set_frame(int frame_i);
 
+    std::string tex_id;
     SDL_FRect frame;
     SDL_Texture *texture;
     int frame_w, frame_h, interval_ms, animation = 0;

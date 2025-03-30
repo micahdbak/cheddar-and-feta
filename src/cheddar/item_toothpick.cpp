@@ -22,7 +22,7 @@ void ThrownToothpick::step() {
     this->dst_rect.x = float(this->x - game->corner_x - 8);
     this->dst_rect.y = float(this->y - game->corner_y - 8);
 
-    game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 16);
+    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 16);
 }
 
 void ThrownToothpick::on_hit(Enemy *enemy) {

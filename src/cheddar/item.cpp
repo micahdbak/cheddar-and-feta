@@ -33,7 +33,7 @@ void DroppedItem::step() {
 
     this->dst_rect.x = this->x - float(this->sprite->frame_w/2) - game->corner_x;
     this->dst_rect.y = this->y - float(this->sprite->frame_h/2) - game->corner_y;
-    game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, this->sprite->frame_h/2);
+    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, this->sprite->frame_h/2);
 
     if (mice_locked)
         return;
@@ -42,8 +42,8 @@ void DroppedItem::step() {
     float _y = this->y + float(this->sprite->frame_h/2);
 
     Mouse *mouse = closest_mouse(_x, _y, 32.0f);
-    if ((mouse == cheddar && player1 != nullptr && player1->is_hit(PRIMARY)) ||
-        (mouse == feta && player2 != nullptr && player2->is_hit(PRIMARY))) {
+    if ((mouse == cheddar && local_controller.is_hit(PRIMARY)) ||
+        (mouse == feta && remote_controller.is_hit(PRIMARY))) {
         if (this->take(mouse)) {
             game->delete_object = true;
         } else {

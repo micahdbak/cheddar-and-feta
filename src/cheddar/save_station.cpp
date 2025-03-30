@@ -26,11 +26,11 @@ void SaveStation::step() {
     this->dst_rect.y = float(this->y - game->corner_y - 16);
 
     this->sprite->update_frame();
-    game->push_sprite(this->sprite->texture, &this->sprite->frame, &this->dst_rect, 34);
+    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 34);
 
     if (textbox != nullptr && textbox->owner == SAVE_STATION_OBJ) {
         textbox->step();
-        if (textbox->done && player1 != nullptr && player1->is_hit(PRIMARY)) {
+        if (textbox->done && local_controller.is_hit(PRIMARY)) {
             delete textbox;
             textbox = nullptr;
             mice_locked = false;
@@ -40,7 +40,7 @@ void SaveStation::step() {
     }
 
     if (this->is_displaying_ui) {
-        if (player1 != nullptr && player1->is_hit(SECONDARY)) {
+        if (local_controller.is_hit(SECONDARY)) {
             this->is_displaying_ui = false;
             this->should_render = false;
             mice_locked = false;
@@ -49,7 +49,7 @@ void SaveStation::step() {
             return;
         }
         
-        if (player1 != nullptr && player1->is_hit(PRIMARY)) {
+        if (local_controller.is_hit(PRIMARY)) {
             game->save_objects();
             save.write_file(this->sel_save);
             game->post_save_objects();
@@ -60,7 +60,7 @@ void SaveStation::step() {
             return;
         }
 
-        int diff = player1 != nullptr ? (player1->is_hit(DOWN) - player1->is_hit(UP)) : 0;
+        int diff = local_controller.is_hit(DOWN) - local_controller.is_hit(UP);
         if (diff != 0) {
             this->sel_save += diff;
             this->sel_save = cnf_clamp(this->sel_save, 0, NUM_SAVE_FILES - 1);
@@ -104,7 +104,7 @@ void SaveStation::step() {
     if (distance < 32.0f) {
         this->sprite->set_animation(1);
 
-        if (player1 != nullptr && player1->is_hit(PRIMARY)) {
+        if (local_controller.is_hit(PRIMARY)) {
             game->draw_rect(0, 0, 0, 0, 0, SDL_BLENDMODE_NONE); // clear ui
             this->summaries = save.file_summaries();
             this->is_displaying_ui = true;

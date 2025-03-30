@@ -30,7 +30,7 @@ enum Button {
 
 class Controller {
 public:
-    Controller(std::string name);
+    Controller();
     ~Controller() = default;
 
     void clear_hits();
@@ -38,6 +38,7 @@ public:
     bool is_down(Button button);
 
     // network-connected player
+    void handle_button_hit(Button button);
     void handle_button_down(Button button);
     void handle_button_up(Button button);
 
@@ -52,19 +53,12 @@ public:
 
     char c = NO_CHAR;
 
-    bool online = true;
-
-    std::string name;
-
-private:
     std::unordered_map<Button, bool> is_hit_map;
     std::unordered_map<Button, bool> is_down_map;
 
     Sint16 stick_x, stick_y;
 };
 
-extern std::unordered_map<SDL_KeyboardID, Controller *> keyboard_controllers;
-extern std::unordered_map<SDL_JoystickID, Controller *> joystick_controllers;
-extern Controller all_inputs, *player1, *player2;
+extern Controller local_controller, remote_controller;
 
 #endif

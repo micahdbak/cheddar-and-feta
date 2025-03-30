@@ -118,9 +118,6 @@ func serveSignalChannel(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	fmt.Printf("Connection on ws://localhost:8080/ws/%s\n", channelId)
-	defer fmt.Printf("Disconnection on ws://localhost:8080/ws/%s\n", channelId)
-
 	// get signal channel, or create one if it doesn't exist
 	signalChannelsMux.Lock()
 	sc, exists := signalChannels[channelId]
@@ -137,6 +134,9 @@ func serveSignalChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer sc.removePeerAndChannelIfEmpty(channelId, peerId)
+
+	fmt.Printf("Connection on ws://localhost:8080/ws/%s:%d\n", channelId, peerId)
+	defer fmt.Printf("Disconnection on ws://localhost:8080/ws/%s:%d\n", channelId, peerId)
 
 	for {
 		t, msg, err := conn.ReadMessage()

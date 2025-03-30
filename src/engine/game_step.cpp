@@ -22,6 +22,8 @@ Game::Game() {
     }
     this->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
 
+    load_render_functions();
+
     // load the ui box texture
     SDL_Surface *ui_box_surface = SDL_LoadBMP("sprites/ui_box.bmp");
     if (ui_box_surface == nullptr) {
@@ -55,6 +57,16 @@ Game::Game() {
 Game::~Game() {
     this->unload();
     free_textures();
+
+    if (this->first_obj != nullptr) {
+        delete this->first_obj;
+        this->first_obj = nullptr;
+    }
+
+    if (this->last_obj != nullptr) {
+        delete this->last_obj;
+        this->last_obj = nullptr;
+    }
 
     // free the network agent
     if (net_agent != nullptr) {
@@ -115,14 +127,17 @@ void Game::unload() {
 void Game::load_map(const char *map_path) {
     Map map;
     map.read(map_path);
+    this->current_map = map_path;
 
-    for (auto obj : map.objects)
-        this->create_object(obj.first, obj.second);
+    if (this->create_objects) {
+        for (auto obj : map.objects)
+            this->create_object(obj.first, obj.second);
 
-    while (!this->new_objects.empty()) {
-        auto obj = this->new_objects.front();
-        this->new_objects.pop();
-        this->create_object(obj.first, obj.second);
+        while (!this->new_objects.empty()) {
+            auto obj = this->new_objects.front();
+            this->new_objects.pop();
+            this->create_object(obj.first, obj.second);
+        }
     }
 
     this->bg = map.bg;
@@ -146,14 +161,21 @@ void Game::load_map(const char *map_path) {
 }
 
 void Game::create_object(const std::string &id, const std::string &options) {
-    if (!this->factories.contains(id)) {
+    if (!this->factories.contains(id) && id != FIRST_OBJ && id != LAST_OBJ) {
         std::cerr << "Game::create_object error: '" << id << "' does not exist" << std::endl;
         return;
     }
 
     Object *obj = this->factories[id]->create(options);
-    if (obj != nullptr)
-        this->objects.push_back(obj);
+    if (obj != nullptr) {
+        if (id == FIRST_OBJ) {
+            this->first_obj = obj;
+        } else if (id == LAST_OBJ) {
+            this->last_obj = obj;
+        } else {
+            this->objects.push_back(obj);
+        }
+    }
 }
 
 void Game::push_object(const std::string &id, const std::string &options) {
@@ -190,6 +212,10 @@ void Game::step() {
     this->delta = float(new_ticks - this->ticks) / 1000.0f;
     this->ticks = new_ticks;
 
+    if (this->first_obj != nullptr) {
+        this->first_obj->step();
+    }
+
     // step all objects
     for (auto it = this->objects.begin(); it != this->objects.end();) {
         Object *obj = *it;
@@ -207,6 +233,10 @@ void Game::step() {
         auto args = this->new_objects.front();
         this->new_objects.pop();
         this->create_object(args.first, args.second);
+    }
+
+    if (this->last_obj != nullptr) {
+        this->last_obj->step();
     }
 
     SDL_SetRenderTarget(renderer, this->screen);
@@ -235,8 +265,8 @@ void Game::step() {
     // render ui
     SDL_RenderTexture(renderer, this->ui, NULL, NULL);
 
-    if (all_inputs.c == 'p') {
-        all_inputs.c = NO_CHAR;
+    if (local_controller.c == 'p') {
+        local_controller.c = NO_CHAR;
         SDL_Surface *_screen = SDL_RenderReadPixels(renderer, NULL);
         SDL_SaveBMP(_screen, "screenshot.bmp");
         SDL_DestroySurface(_screen);

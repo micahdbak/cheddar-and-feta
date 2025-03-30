@@ -13,6 +13,7 @@ public:
 private:
     void render_cheese();
 
+    std::string tex_id;
     SDL_Texture *texture = nullptr;
     SDL_FRect dst_rect;
     float x, y;

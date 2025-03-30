@@ -6,8 +6,6 @@
 #include <string>
 #include <thread>
 
-#define SIGNALLING_URL "ws://localhost:8080/sc/"
-
 class NetworkAgent {
 public:
     enum State { NO_CONNECTION, WAITING_FOR_PEER, CONNECTED };
@@ -32,13 +30,37 @@ public:
 
     std::string next_message() {
         std::lock_guard<std::mutex> guard(this->received_messages_mutex);
+        if (this->received_messages.empty()) {
+            return "";
+        }
+
         std::string message = this->received_messages.front();
         this->received_messages.pop();
         return message;
     }
 
+    std::string last_message() {
+        std::lock_guard<std::mutex> guard(this->received_messages_mutex);
+        if (this->received_messages.empty()) {
+            return "";
+        }
+
+        std::string message = this->received_messages.back();
+        // clear
+        while (!this->received_messages.empty())
+            this->received_messages.pop();
+        return message;
+    }
+
     void send_message(std::string message) {
         std::lock_guard<std::mutex> guard(this->send_messages_mutex);
+
+        // max 10 messages in queue
+        if (this->send_messages.size() >= 10) {
+            // drop the oldest message and prefer more recent messages
+            this->send_messages.pop();
+        }
+
         this->send_messages.push(message);
     }
 
@@ -53,9 +75,27 @@ protected:
         this->state = state;
     }
 
+    void push_message(std::string message) {
+        std::lock_guard<std::mutex> guard(this->received_messages_mutex);
+        this->received_messages.push(message);
+    }
+
+    static void initiate();
+    static void reset(bool delete_ws);
+
+    static bool next_ws_message(std::string &str);
+
+    static void description_cb(int, const char *sdp, const char *type, void *);
+    static void candidate_cb(int, const char *cand, const char *mid, void *);
+    static void datachannel_cb(int, int dc, void *);
+    static void message_cb(int, const char *message, int size, void *);
+    static void error_cb(int id, const char *error, void *);
+    static void open_cb(int id, void *);
+    static void close_cb(int id, void *);
+
     static void no_connection();
     static void waiting_for_peer();
-    // static void connected();
+    static void connected();
     static void message_loop();
 
     bool offerer;
@@ -75,8 +115,10 @@ protected:
 
     std::queue<std::string> send_messages;
     std::mutex send_messages_mutex;
+    //std::condition_variable cv;
 
-    int ws = -1, pc = -1;
+    int ws = -1, pc = -1, dc = -1;
+    bool initiated = false;
 };
 
 extern NetworkAgent *net_agent;

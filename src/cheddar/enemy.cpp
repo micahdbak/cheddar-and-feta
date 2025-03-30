@@ -157,5 +157,5 @@ void Enemy::_draw_skull_and_bones() {
     int icon_x = int(this->x) + (game->tile_width/2) - 8 - game->corner_x;
     int icon_y = int(this->y) + game->tile_height - 16 - this->height - 2 - game->corner_y;
     this->draw_rect = { float(icon_x), float(icon_y), 16.0f, 16.0f };
-    game->draw_icon(SKULL_AND_BONES_ICON, &this->draw_rect);
+    game->push_icon(SKULL_AND_BONES_ICON, &this->draw_rect);
 }

@@ -3,6 +3,7 @@ project(CheddarAndFeta VERSION 0.1)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
@@ -23,6 +24,8 @@ set(ENGINE_SRC
     src/engine/main.cpp
     src/engine/map.cpp
     src/engine/net_agent.cpp
+    src/engine/net_connection.cpp
+    src/engine/net_signaller.cpp
     src/engine/save_data.cpp
     src/engine/sprite.cpp
 )

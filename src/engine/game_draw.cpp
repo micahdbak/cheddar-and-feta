@@ -1,13 +1,16 @@
+#include "SDL3/SDL_blendmode.h"
 #include "bmp_texture.h"
+#include "font.h"
 #include "game.h"
 #include "map.h"
+#include "net_agent.h"
 
 #include <SDL3/SDL.h>
 
 #include <iostream>
 
-void Game::draw_rect(SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode) {
-    SDL_SetRenderTarget(renderer, this->ui);
+void Game::draw_rect(SDL_Texture *texture, SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode) {
+    SDL_SetRenderTarget(renderer, texture);
 
     SDL_SetRenderDrawColor(renderer, r, g, b, a);
     SDL_SetRenderDrawBlendMode(renderer, blend_mode);
@@ -16,8 +19,8 @@ void Game::draw_rect(SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Bl
     SDL_SetRenderTarget(renderer, this->screen);
 }
 
-void Game::draw_outline(SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode) {
-    SDL_SetRenderTarget(renderer, this->ui);
+void Game::draw_outline(SDL_Texture *texture, SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode) {
+    SDL_SetRenderTarget(renderer, texture);
 
     SDL_SetRenderDrawColor(renderer, r, g, b, a);
     SDL_SetRenderDrawBlendMode(renderer, blend_mode);
@@ -28,8 +31,13 @@ void Game::draw_outline(SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL
 
 #define UI_BOX_SIZE 4.0f
 
-void Game::draw_ui_box(int type, SDL_FRect *rect) {
-    SDL_SetRenderTarget(renderer, this->ui);
+void Game::draw_ui_box(SDL_Texture *texture, int type, SDL_FRect *rect) {
+    SDL_SetRenderTarget(renderer, texture);
+
+    SDL_FRect _rect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
+    if (rect == NULL) {
+        rect = &_rect;
+    }
 
     int x_shift = type * (UI_BOX_SIZE * 3);
     SDL_FRect src_rect, dst_rect;
@@ -82,13 +90,13 @@ void Game::draw_ui_box(int type, SDL_FRect *rect) {
     SDL_SetRenderTarget(renderer, this->screen);
 }
 
-void Game::draw_text(const std::string &str, int font, int x, int y, int w) {
+void Game::draw_text(SDL_Texture *texture, const std::string &str, int font, int x, int y, int w) {
     if (font < 0 || font >= NUM_FONTS) {
         std::cerr << "Game::draw_text error: '" << font << "' font does not exist" << std::endl;
         exit(1);
     }
 
-    SDL_SetRenderTarget(renderer, this->ui);
+    SDL_SetRenderTarget(renderer, texture);
 
     Font *_font = this->fonts[font];
     int _x = x, _y = y, line_height = int(_font->src_rect[0].h) + 1;
@@ -164,16 +172,16 @@ void Game::draw_text(const std::string &str, int font, int x, int y, int w) {
     SDL_SetRenderTarget(renderer, this->screen);
 }
 
-void Game::draw_icon(SDL_FRect icon, SDL_FRect *dst_rect) {
-    SDL_SetRenderTarget(renderer, this->ui);
+void Game::draw_icon(SDL_Texture *texture, SDL_FRect icon, SDL_FRect *dst_rect) {
+    SDL_SetRenderTarget(renderer, texture);
 
     SDL_RenderTexture(renderer, this->icons, &icon, dst_rect);
 
     SDL_SetRenderTarget(renderer, this->screen);
 }
 
-SDL_FRect Game::draw_health_bar(int health, int max_health, int x, int y) {
-    SDL_SetRenderTarget(renderer, this->ui);
+SDL_FRect Game::draw_health_bar(SDL_Texture *texture, int health, int max_health, int x, int y) {
+    SDL_SetRenderTarget(renderer, texture);
 
     int w_mul = 2;
     if (max_health < 4) {
@@ -199,13 +207,16 @@ SDL_FRect Game::draw_health_bar(int health, int max_health, int x, int y) {
     return draw_rect;
 }
 
-void Game::draw_hud(std::string item, int health, int max_health, int cheese) {
+void Game::draw_hud(SDL_Texture *texture, std::string item, int health, int max_health, int cheese) {
+    if (this->displaying_load_screen)
+        return;
+
     // container ui box
     SDL_FRect hud_rect = { 276.0f, 184.0f, 32.0f, 44.0f };
-    this->draw_ui_box(BOX_MENU_CONT, &hud_rect);
+    this->draw_ui_box(this->ui, BOX_MENU_CONT, &hud_rect);
 
     // current item
-    SDL_SetRenderTarget(renderer, this->ui);
+    SDL_SetRenderTarget(renderer, texture);
     SDL_Texture *item_texture = load_bmp_texture("sprites/" + item + ".bmp");
     SDL_FRect item_src_rect = { 0.0f, 0.0f, 16.0f, 16.0f };
     SDL_FRect item_rect = { 284.0f, 188.0f, 16.0f, 16.0f };
@@ -215,9 +226,87 @@ void Game::draw_hud(std::string item, int health, int max_health, int cheese) {
     // health
     char buff[256];
     snprintf(buff, sizeof(buff), "{%d/%d", health, max_health);
-    this->draw_text(buff, SMALL_FONT, max_health > 9 && health > 9 ? 280 : 282, 206, 0);
+    this->draw_text(texture, buff, SMALL_FONT, max_health > 9 && health > 9 ? 280 : 282, 206, 0);
 
     // cheese
     snprintf(buff, sizeof(buff), "~ %d", cheese);
-    this->draw_text(buff, SMALL_FONT, 282, 214, 0);
+    this->draw_text(texture, buff, SMALL_FONT, 282, 214, 0);
+}
+
+static NetworkAgent::State _last_state = NetworkAgent::State::NO_CONNECTION;
+static std::string _last_code = "";
+static Uint64 _last_drawn_ticks = 0;
+static SDL_FRect _dst_rect = SDL_FRect{ 0.0f, 0.0f, 0.0f, 0.0f };
+static SDL_FRect _icon_rect = SDL_FRect{ 2.0f, 0.0f, 16.0f, 16.0f };
+
+void Game::draw_overlay() {
+    SDL_SetRenderTarget(renderer, this->overlay);
+
+    // loading screen
+    if (this->displaying_load_screen) {
+        if (this->ticks - this->load_ticks > 1000) {
+            this->displaying_load_screen = false;
+        }
+    } else if (this->ticks - this->load_ticks < 1000) {
+        this->displaying_load_screen = true;
+        this->did_clear_overlay = false;
+
+        int title_w = this->fonts[DEFAULT_FONT]->text_width(this->map_title);
+        int description_w = this->fonts[SMALL_FONT]->text_width(this->map_description);
+
+        this->draw_rect(this->overlay, NULL, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+        this->draw_text(this->overlay, map_title, DEFAULT_FONT, (SCREEN_WIDTH / 2) - (title_w / 2), (SCREEN_HEIGHT / 2) - 8, 0);
+        this->draw_text(this->overlay, map_description, SMALL_FONT, (SCREEN_WIDTH / 2) - (description_w / 2), (SCREEN_HEIGHT / 2) + 8, 0);
+    } else if (!this->did_clear_overlay) {
+        Uint64 ms_since = this->ticks - this->load_ticks;
+
+        if (ms_since < 2000) {
+            // over the course of 1000ms (1 second), goes from 250 -> 0
+            uint8_t alpha = (1000 - (ms_since - 1000)) / 4;
+            this->draw_rect(this->overlay, NULL, 0, 0, 0, alpha, SDL_BLENDMODE_NONE);
+        } else {
+            this->did_clear_overlay = true;
+        }
+    }
+
+    // network agent overlay (only cheddar can "create objects" so that is used to check if cheddar)
+    if (game->create_objects && net_agent != nullptr && !this->displaying_load_screen && this->did_clear_overlay) {
+        NetworkAgent::State state = net_agent->get_state();
+        std::string code = net_agent->get_connection_code();
+
+        // draw if state changed, code changed, or if a second has passed since last rendered
+        if (state != _last_state || code != _last_code || this->ticks - _last_drawn_ticks > 1000) {
+            // clear last overlay
+            if (_dst_rect.w > 0.0f) {
+                this->draw_rect(this->overlay, &_dst_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+            }
+
+            switch (state) {
+            case NetworkAgent::State::NO_CONNECTION:
+                _dst_rect = SDL_FRect{ 0.0f, 0.0f, 80.0f, 16.0f };
+                this->draw_ui_box(this->overlay, BOX_OVERLAY, &_dst_rect);
+                this->draw_icon(this->overlay, NOT_CONNECTED_ICON, &_icon_rect);
+                this->draw_text(this->overlay, "Not Connected", DEFAULT_FONT, 20, 4, 0);
+                break;
+            case NetworkAgent::State::WAITING_FOR_PEER:
+                _dst_rect = SDL_FRect{ 0.0f, 0.0f, 80.0f, 16.0f };
+                this->draw_ui_box(this->overlay, BOX_OVERLAY, &_dst_rect);
+                this->draw_icon(this->overlay, WAITING_FOR_PEER_ICON, &_icon_rect);
+                this->draw_text(this->overlay, "Code:", SMALL_FONT, 20, 5, 0);
+                this->draw_text(this->overlay, code, CODE_FONT, 40, 4, 0);
+                break;
+            default:
+                // clear entire overlay screen
+                this->draw_rect(this->overlay, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+                _dst_rect = SDL_FRect{ 0.0f, 0.0f, 0.0f, 0.0f }; // no dst rect
+                break; // display nothing
+            }
+
+            _last_state = state;
+            _last_code = code;
+            _last_drawn_ticks = this->ticks;
+        }
+    }
+
+    SDL_SetRenderTarget(renderer, this->screen);
 }

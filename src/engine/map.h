@@ -56,11 +56,12 @@ public:
     void render_tile(int x, int y);
 
     // handled by Map
+    std::string title = "Unnamed map", description = "Floor 1";
     int tile_width, tile_height, cols, rows;
     std::vector<Tilesheet *> tilesheets;
+    std::vector<std::pair<std::string, std::string>> objects;
     std::vector<Tile> **bg_tiles = nullptr;
     std::vector<Tile> **fg_tiles = nullptr;
-    std::vector<std::pair<std::string, std::string>> objects;
 
     // must be retrieved and released by caller
     SDL_Texture *bg, *fg; // free with `SDL_DestroyTexture`

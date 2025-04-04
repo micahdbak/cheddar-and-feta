@@ -15,7 +15,8 @@
 #define SM_BOLD_FONT 2
 #define DEFAULT_FONT 3
 #define BOLD_FONT    4
-#define NUM_FONTS    5
+#define CODE_FONT    5
+#define NUM_FONTS    6
 
 // special chars in SMALL_FONT
 #define CHAR_EQUIP        '{'
@@ -48,6 +49,8 @@ public:
 
     Font(const char *font_path, int w, int h, int default_w, const std::unordered_map<char, int> &special_w);
     ~Font();
+
+    int text_width(const std::string &text);
 
     SDL_FRect src_rect[NUM_DISPLAYABLE_CHARS];
     SDL_Texture *texture = nullptr;

@@ -57,13 +57,13 @@ void DroppedItem::render_choice() {
     SDL_FRect leave_rect = { 160.0f, 212.0f, 36.0f, 14.0f };
     SDL_FRect text_arrow_rect = { 224.0f, 208.0f, 16.0f, 16.0f };
 
-    game->draw_rect(&text_arrow_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+    game->draw_rect(game->ui, &text_arrow_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
 
-    game->draw_ui_box(this->choice == TAKE ? BOX_OUT_SEL : BOX_OUT, &take_rect);
-    game->draw_text("Take it", SMALL_FONT, 130, 216, 0);
+    game->draw_ui_box(game->ui, this->choice == TAKE ? BOX_OUT_SEL : BOX_OUT, &take_rect);
+    game->draw_text(game->ui, "Take it", SMALL_FONT, 130, 216, 0);
 
-    game->draw_ui_box(this->choice == LEAVE ? BOX_OUT_SEL : BOX_OUT, &leave_rect);
-    game->draw_text("Leave it", SMALL_FONT, 164, 216, 0);
+    game->draw_ui_box(game->ui, this->choice == LEAVE ? BOX_OUT_SEL : BOX_OUT, &leave_rect);
+    game->draw_text(game->ui, "Leave it", SMALL_FONT, 164, 216, 0);
 }
 
 // ---- thrown item ----

@@ -32,18 +32,13 @@
 #define SCREEN_HEIGHT 240
 
 // ui box related things
-#define BOX_CONTAINER     0
-#define BOX_OUT           1
-#define BOX_OUT_SEL       2
-#define BOX_MENU_CONT     3
-#define BOX_UNDER         4
-#define BOX_UNDER_SEL     5
-#define BOX_CHEDDAR       6
-#define BOX_CHEDDAR_UNDER 7
-#define BOX_CHEDDAR_U_SEL 8
-#define BOX_FETA          9
-#define BOX_FETA_UNDER    10
-#define BOX_FETA_U_SEL    11
+#define BOX_CONTAINER 0
+#define BOX_OUT       1
+#define BOX_OUT_SEL   2
+#define BOX_MENU_CONT 3
+#define BOX_UNDER     4
+#define BOX_UNDER_SEL 5
+#define BOX_OVERLAY   6
 
 // icons
 #define CHEDDAR_ICON          SDL_FRect{0.0f, 0.0f, 16.0f, 16.0f}
@@ -88,13 +83,14 @@ public:
 
     // game_draw.cpp
 
-    void draw_rect(SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode);
-    void draw_outline(SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode);
-    void draw_ui_box(int type, SDL_FRect *rect);
-    void draw_text(const std::string &str, int font, int x, int y, int w);
-    void draw_icon(SDL_FRect src_rect, SDL_FRect *dst_rect);
-    SDL_FRect draw_health_bar(int health, int max_health, int x, int y);
-    void draw_hud(std::string item, int health, int max_health, int cheese);
+    void draw_rect(SDL_Texture *texture, SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode);
+    void draw_outline(SDL_Texture *texture, SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode);
+    void draw_ui_box(SDL_Texture *texture, int type, SDL_FRect *rect);
+    void draw_text(SDL_Texture *texture, const std::string &str, int font, int x, int y, int w);
+    void draw_icon(SDL_Texture *texture, SDL_FRect src_rect, SDL_FRect *dst_rect);
+    SDL_FRect draw_health_bar(SDL_Texture *texture, int health, int max_health, int x, int y);
+    void draw_hud(SDL_Texture *texture, std::string item, int health, int max_health, int cheese);
+    void draw_overlay();
 
     // game_sprite.cpp
 
@@ -111,9 +107,11 @@ public:
     const char **argv;
 
     Uint64 ticks = 0;
+    Uint64 load_ticks = 0;
+    bool displaying_load_screen = false;
     float delta = 0;
 
-    SDL_Texture *screen, *ui;
+    SDL_Texture *screen, *ui, *overlay;
 
     std::vector<Font *> fonts;
 
@@ -122,6 +120,7 @@ public:
 
     std::string map = ""; // set this to load a map
     std::string current_map = ""; // readonly
+    std::string map_title = "", map_description = ""; // readonly
 
     bool create_objects = true; // disable for feta launcher
     bool delete_object = false; // set to true from an object's step to delete it
@@ -160,7 +159,7 @@ private:
 
     // object things
     std::vector<Object *> objects;
-    std::queue<std::pair<std::string, std::string>> new_objects;
+    std::queue<std::pair<std::string, std::string> > new_objects;
     std::unordered_map<std::string, ObjectFactory *> factories;
     Object *first_obj = nullptr, *last_obj = nullptr;
 
@@ -168,6 +167,9 @@ private:
     SDL_Texture *ui_box = nullptr;
     std::queue<Text> texts;
     SDL_Texture *icons;
+
+    // overlay things
+    bool did_clear_overlay = false;
 };
 
 extern SDL_Renderer *renderer;

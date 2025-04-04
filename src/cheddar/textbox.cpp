@@ -12,12 +12,12 @@ Textbox::Textbox(const std::string &text, const std::string &owner, int font, in
     this->text_rect = { 80.0f, 176.0f, 160.0f, 48.0f };
     this->font = font;
     this->interval_ms = interval_ms;
-    game->draw_ui_box(BOX_CONTAINER, &this->box_rect);
+    game->draw_ui_box(game->ui, BOX_CONTAINER, &this->box_rect);
 }
 
 Textbox::~Textbox() {
     // clear all ui
-    game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+    game->draw_rect(game->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
 }
 
 void Textbox::step() {
@@ -39,8 +39,8 @@ void Textbox::step() {
             this->running_text += text[j];
         }
         this->i = j;
-        game->draw_rect(&this->text_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-        game->draw_text(this->running_text, this->font, this->text_rect.x, this->text_rect.y, this->text_rect.w);
+        game->draw_rect(game->ui, &this->text_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+        game->draw_text(game->ui, this->running_text, this->font, this->text_rect.x, this->text_rect.y, this->text_rect.w);
         return;
     }
 
@@ -70,7 +70,7 @@ void Textbox::step() {
             return;
         }
 
-        game->draw_rect(&this->text_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-        game->draw_text(this->running_text, this->font, this->text_rect.x, this->text_rect.y, this->text_rect.w);
+        game->draw_rect(game->ui, &this->text_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+        game->draw_text(game->ui, this->running_text, this->font, this->text_rect.x, this->text_rect.y, this->text_rect.w);
     }
 }

@@ -1,82 +1,65 @@
+#include "SDL3/SDL_blendmode.h"
+#include "SDL3/SDL_render.h"
+#include "SDL3/SDL_timer.h"
 #include "bmp_texture.h"
 #include "controller.h"
+#include "font.h"
 #include "game.h"
 #include "net_agent.h"
 
 #include <iostream>
 
+#define FATALITY(errfunc) {\
+    std::cerr << errfunc << " error: " << SDL_GetError() << std::endl;\
+    std::exit(1);\
+}
+
+#define DELETE_IF_NOT_NULLPTR(thing) if (thing != nullptr) {\
+    delete thing;\
+    thing = nullptr;\
+}
+
 Game::Game() {
-    // create screen texture
+    // create textures
     this->screen = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
-    if (this->screen == nullptr) {
-        std::cerr << "SDL_CreateTexture error: " << SDL_GetError() << std::endl;
-        exit(1);
-    }
+    this->ui = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
+    this->overlay = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
+    if (this->screen == nullptr || this->ui == nullptr || this->overlay == nullptr) FATALITY("SDL_CreateTexture")
+
     SDL_SetTextureScaleMode(this->screen, SDL_SCALEMODE_NEAREST);
 
-    // create ui texture
-    this->ui = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
-    if (this->ui == nullptr) {
-        std::cerr << "SDL_CreateTexture error: " << SDL_GetError() << std::endl;
-        exit(1);
-    }
-    this->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
-
-    load_render_functions();
+    this->draw_rect(this->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+    this->draw_rect(this->overlay, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
 
     // load the ui box texture
     SDL_Surface *ui_box_surface = SDL_LoadBMP("sprites/ui_box.bmp");
-    if (ui_box_surface == nullptr) {
-        std::cerr << "SDL_LoadBMP error: " << SDL_GetError() << std::endl;
-        exit(1);
-    }
+    if (ui_box_surface == nullptr) FATALITY("SDL_LoadBMP")
+
     this->ui_box = SDL_CreateTextureFromSurface(renderer, ui_box_surface);
-    if (this->ui_box == nullptr) {
-        std::cerr << "SDL_CreateTextureFromSurface error: " << SDL_GetError() << std::endl;
-        exit(1);
-    }
+    if (this->ui_box == nullptr) FATALITY("SDL_CreateTextureFromSurface")
+
     SDL_SetTextureScaleMode(this->ui_box, SDL_SCALEMODE_NEAREST);
 
     // load icons
     SDL_Surface *icons_surface = SDL_LoadBMP("sprites/icons.bmp");
-    if (icons_surface == nullptr) {
-        std::cerr << "SDL_LoadBMP error: " << SDL_GetError() << std::endl;
-        exit(1);
-    }
+    if (icons_surface == nullptr) FATALITY("SDL_LoadBMP")
+
     this->icons = SDL_CreateTextureFromSurface(renderer, icons_surface);
-    if (this->icons == nullptr) {
-        std::cerr << "SDL_CreateTextureFromSurface error: " << SDL_GetError() << std::endl;
-        exit(1);
-    }
+    if (this->icons == nullptr) FATALITY("SDL_CreateTextureFromSurface")
+
     SDL_SetTextureScaleMode(this->screen, SDL_SCALEMODE_NEAREST);
 
     this->ticks = SDL_GetTicks();
+    // only show load-in screen upon loading a map
+    this->load_ticks = this->ticks;
+
     Font::load_fonts(this->fonts);
+    load_render_functions(); // bmp_texture.h
 }
 
 Game::~Game() {
     this->unload();
     free_textures();
-
-    if (this->first_obj != nullptr) {
-        delete this->first_obj;
-        this->first_obj = nullptr;
-    }
-
-    if (this->last_obj != nullptr) {
-        delete this->last_obj;
-        this->last_obj = nullptr;
-    }
-
-    // free the network agent
-    if (net_agent != nullptr) {
-        delete net_agent;
-    }
-
-    // free fonts
-    for (auto font : this->fonts)
-        delete font;
-    this->fonts.clear();
 
     // destroy the screen
     SDL_DestroyTexture(this->screen);
@@ -86,6 +69,10 @@ Game::~Game() {
     SDL_DestroyTexture(this->ui);
     this->ui = nullptr;
 
+    // destroy the overlay texture
+    SDL_DestroyTexture(this->overlay);
+    this->overlay = nullptr;
+
     // destroy the ui box texture
     SDL_DestroyTexture(this->ui_box);
     this->ui_box = nullptr;
@@ -93,6 +80,15 @@ Game::~Game() {
     // destroy the icons texture
     SDL_DestroyTexture(this->icons);
     this->icons = nullptr;
+
+    DELETE_IF_NOT_NULLPTR(this->first_obj);
+    DELETE_IF_NOT_NULLPTR(this->last_obj);
+    DELETE_IF_NOT_NULLPTR(net_agent);
+
+    // free fonts
+    for (auto font : this->fonts)
+        delete font;
+    this->fonts.clear();
 }
 
 void Game::unload() {
@@ -121,13 +117,16 @@ void Game::unload() {
     }
 
     // clear ui
-    this->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+    this->draw_rect(this->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
 }
 
 void Game::load_map(const char *map_path) {
     Map map;
     map.read(map_path);
+
     this->current_map = map_path;
+    this->map_title = map.title;
+    this->map_description = map.description;
 
     if (this->create_objects) {
         for (auto obj : map.objects)
@@ -158,6 +157,9 @@ void Game::load_map(const char *map_path) {
     }
 
     map.clear();
+
+    // map loaded screen
+    this->load_ticks = SDL_GetTicks();
 }
 
 void Game::create_object(const std::string &id, const std::string &options) {
@@ -212,6 +214,8 @@ void Game::step() {
     this->delta = float(new_ticks - this->ticks) / 1000.0f;
     this->ticks = new_ticks;
 
+    this->draw_overlay();
+
     if (this->first_obj != nullptr) {
         this->first_obj->step();
     }
@@ -264,6 +268,9 @@ void Game::step() {
 
     // render ui
     SDL_RenderTexture(renderer, this->ui, NULL, NULL);
+
+    // render overlay
+    SDL_RenderTexture(renderer, this->overlay, NULL, NULL);
 
     if (local_controller.c == 'p') {
         local_controller.c = NO_CHAR;

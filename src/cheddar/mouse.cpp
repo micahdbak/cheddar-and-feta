@@ -8,6 +8,7 @@
 #include <cmath>
 
 bool mice_locked = false;
+bool _locked_due_to_loading = false;
 Mouse *cheddar = nullptr, *feta = nullptr;
 
 Mouse::Mouse(int x, int y, bool is_feta) {
@@ -102,6 +103,13 @@ static bool _is_collision(float x, float y) {
 #define DANCING_ANIMATION   33
 
 void Mouse::step() {
+    if (!_locked_due_to_loading && game->displaying_load_screen) {
+        _locked_due_to_loading = true;
+        mice_locked = true;
+    } else if (_locked_due_to_loading && !game->displaying_load_screen) {
+        mice_locked = false;
+    }
+
     if (mice_locked) {
         game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
         return;
@@ -124,7 +132,7 @@ void Mouse::step() {
     }
 
     if (!this->is_feta)
-        game->draw_hud(sel_item_id, this->health, this->max_health, this->cheese);
+        game->draw_hud(game->ui, sel_item_id, this->health, this->max_health, this->cheese);
 
     // cycle through available enemies to find which is closest
     if (!enemies.empty()) {
@@ -356,15 +364,14 @@ void Mouse::step() {
     if (!_is_collision(new_x, this->y)) this->x = new_x;
     if (!_is_collision(this->x, new_y)) this->y = new_y;
 
-    this->dst_rect.x = this->x - float(16 + game->corner_x);
-    this->dst_rect.y = this->y - float(24 + game->corner_y);
-
-    // only set game view if this mouse is being controlled right now
     if (!this->is_feta) {
-        this->dst_rect.x = float(SCREEN_WIDTH/2 - 16);
-        this->dst_rect.y = float(SCREEN_HEIGHT/2 - 24);
+        this->dst_rect.x = float((SCREEN_WIDTH / 2) - 16);
+        this->dst_rect.y = float((SCREEN_HEIGHT / 2) - 24);
 
         game->set_view(this->x, this->y);
+    } else {
+        this->dst_rect.x = this->x - float(16 + game->corner_x);
+        this->dst_rect.y = this->y - float(24 + game->corner_y);
     }
 
     // display the sprite to the screen

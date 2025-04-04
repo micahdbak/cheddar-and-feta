@@ -53,6 +53,9 @@ void Font::load_fonts(std::vector<Font *> &fonts) {
         { ']', 4 }, { '^', 4 }, { '`', 3 }, { 'i', 5 },
         { 'j', 4 }, { 'l', 5 }, { 'm', 7 }, { 'w', 7 }
     }));
+
+    // CODE_FONT = 5
+    fonts.push_back(new Font("fonts/code.bmp", 6, 10, 6, {}));
 }
 
 Font::Font(const char *font_path, int w, int h, int default_w, const std::unordered_map<char, int> &special_w) {
@@ -80,10 +83,22 @@ Font::Font(const char *font_path, int w, int h, int default_w, const std::unorde
     }
 }
 
-
 Font::~Font() {
     if (this->texture != nullptr) {
         SDL_DestroyTexture(this->texture);
         this->texture = nullptr;
     }
+}
+
+int Font::text_width(const std::string &text) {
+    int w = 0;
+
+    for (char c : text) {
+        int i = c - ' ';
+        if (i < 0 || i >= NUM_DISPLAYABLE_CHARS)
+            continue;
+        w += int(this->src_rect[i].w + 0.1f);
+    }
+
+    return w;
 }

@@ -13,7 +13,7 @@ Enemy::Enemy() {
 
 Enemy::~Enemy() {
     if (this->dead) {
-        game->draw_rect(&this->draw_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+        game->draw_rect(game->ui, &this->draw_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
         return;
     }
 
@@ -28,7 +28,7 @@ Enemy::~Enemy() {
 
 void Enemy::enemy_step() {
     if (this->dead) {
-        game->draw_rect(&this->draw_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+        game->draw_rect(game->ui, &this->draw_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
         this->_draw_skull_and_bones();
         return;
     }
@@ -40,12 +40,12 @@ void Enemy::enemy_step() {
     int dy = cnf_sign(this->target_y - int(this->y));
 
     if (this->animation > 15) {
-        game->draw_rect(&this->draw_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+        game->draw_rect(game->ui, &this->draw_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
 
         if (game->ticks - this->attack_ticks > 500) {
             this->animation = this->animation % 8;
         } else {
-            this->draw_rect = game->draw_health_bar(
+            this->draw_rect = game->draw_health_bar(game->ui,
                 this->health, this->max_health,
                 int(this->x) + (game->tile_width/2) - game->corner_x,
                 int(this->y) + game->tile_height - this->height - 4 - game->corner_y
@@ -144,7 +144,7 @@ bool Enemy::attack(int damage) {
         return true;
     }
 
-    this->draw_rect = game->draw_health_bar(
+    this->draw_rect = game->draw_health_bar(game->ui,
         this->health, this->max_health,
         int(this->x) + (game->tile_width/2) - game->corner_x,
         int(this->y) + game->tile_height - this->height - 4 - game->corner_y

@@ -77,57 +77,65 @@ void Map::make_empty(int tile_width, int tile_height, int cols, int rows) {
 }
 
 void Map::read(const char *map_path) {
-    FILE *file = fopen(map_path, "rb");
-    if (file == NULL) {
-        std::cerr << "map.cpp (" << __LINE__ << "): '" << map_path << "' does not exist." << std::endl;
-        exit(1);
-    }
+    std::string map_txt_path = std::string(map_path) + ".txt";
+    std::string map_bin_path = std::string(map_path) + ".bin";
 
-    uint8_t buffer[1024];
-    size_t nbytes;
+    FILE *txt_file = fopen(map_txt_path.c_str(), "r");
+    if (txt_file == NULL) CORRUPTED_EXIT
+    char buff[1024], buff2[1024];
 
-    // first four bytes of file are tile width, height, columns, and rows 
-    nbytes = fread(buffer, 1, 4, file);
-    if (nbytes < 4) CORRUPTED_EXIT
+    if (feof(txt_file)) CORRUPTED_EXIT;
+    fgets(buff, sizeof(buff), txt_file);
+    sscanf(buff, "%1023[^\n]", buff2);
+    this->title = buff2;
 
-    this->tile_width = int(buffer[0]);
-    this->tile_height = int(buffer[1]);
-    this->cols = int(buffer[2]);
-    this->rows = int(buffer[3]);
-    // arbitrary maximum tile size
-    if (this->tile_width > 64 || this->tile_height > 64) CORRUPTED_EXIT
+    if (feof(txt_file)) CORRUPTED_EXIT;
+    fgets(buff, sizeof(buff), txt_file);
+    sscanf(buff, "%1023[^\n]", buff2);
+    this->description = buff2;
+
+    if (feof(txt_file)) CORRUPTED_EXIT;
+    fgets(buff, sizeof(buff), txt_file);
+    sscanf(buff, "%d,%d,%d,%d", &this->tile_width, &this->tile_height, &this->cols, &this->rows);
 
     // allocate the necessary memory
     this->make_empty(this->tile_width, this->tile_height, this->cols, this->rows);
 
-    // read tilesheets
-    while (true) {
-        nbytes = fread(buffer, 1, 1, file);
-        if (nbytes < 1) CORRUPTED_EXIT
+    if (feof(txt_file)) CORRUPTED_EXIT;
+    fgets(buff, sizeof(buff), txt_file);
+    int ntilesheets = 0;
+    sscanf(buff, "%d", &ntilesheets);
 
-        // buffer[0] is length of tilesheet path; end of tilesheets is a zero
-        if (buffer[0] == 0) break;
-
-        char tilesheet_path[256];
-        nbytes = fread(tilesheet_path, 1, size_t(buffer[0]), file);
-        if (nbytes < buffer[0]) CORRUPTED_EXIT
-
-        tilesheet_path[nbytes] = '\0';
-        Tilesheet *tilesheet = new Tilesheet(tilesheet_path, this->tile_width, this->tile_height);
+    for (int i = 0; i < ntilesheets; i++) {
+        if (feof(txt_file)) CORRUPTED_EXIT;
+        fgets(buff, sizeof(buff), txt_file);
+        sscanf(buff, "%1023[^\n]", buff2);
+        Tilesheet *tilesheet = new Tilesheet(buff2, this->tile_width, this->tile_height);
+        if (tilesheet->texture == nullptr) CORRUPTED_EXIT
         this->tilesheets.push_back(tilesheet);
-        if (this->tilesheets[this->tilesheets.size() - 1]->texture == nullptr) CORRUPTED_EXIT
     }
 
+    if (feof(txt_file)) CORRUPTED_EXIT;
+    fgets(buff, sizeof(buff), txt_file);
+    int nobjects = 0;
+    sscanf(buff, "%d", &nobjects);
+
+    for (int i = 0; i < nobjects; i++) {
+        if (feof(txt_file)) CORRUPTED_EXIT;
+        fgets(buff, sizeof(buff), txt_file);
+        char buff3[1024];
+        sscanf(buff, "%s %1023[^\n]", buff2, buff3);
+        this->objects.push_back(std::pair<std::string, std::string>(buff2, buff3));
+    }
+
+    fclose(txt_file);
+    FILE *bin_file = fopen(map_bin_path.c_str(), "rb");
+    if (bin_file == NULL) CORRUPTED_EXIT
+    uint8_t buffer[6];
+    size_t nbytes;
+
     // read tiles
-    while (true) {
-        nbytes = fread(buffer, 1, 6, file);
-
-        if (buffer[0] == 255) {
-            // buffer[1:5] aren't for tiles in this case
-            if (fseek(file, -5, SEEK_CUR) != 0) CORRUPTED_EXIT
-            break;
-        } else if (nbytes < 6) CORRUPTED_EXIT
-
+    while (fread(buffer, 1, 6, bin_file) == 6) {
         int x = int(buffer[3]);
         int y = int(buffer[4]);
         int coord = (y * this->cols) + x;
@@ -172,18 +180,8 @@ void Map::read(const char *map_path) {
         } else CORRUPTED_EXIT
     }
 
-    // read objects
-    char line[1024];
-    while (fgets(line, sizeof(line), file) != nullptr) {
-        char obj_id[256], options[768];
-        sscanf(line, "%s %[^\n]", obj_id, options);
-        this->objects.push_back(std::pair<std::string, std::string>(
-            std::string(obj_id), std::string(options)
-        ));
-    }
-
     // done reading file
-    fclose(file);
+    fclose(bin_file);
 
     // render all tiles read from the file
     for (int i = 0; i < this->cols * this->rows; i++) {
@@ -204,27 +202,31 @@ static inline void write_tile(uint8_t *buffer, Tile tile, int x, int y, char gro
 }
 
 void Map::write(const char *map_path) {
-    FILE *file = fopen(map_path, "wb");
-    if (file == nullptr) CORRUPTED_EXIT;
-    uint8_t buffer[1024];
+    std::string map_txt_path = std::string(map_path) + ".txt";
+    std::string map_bin_path = std::string(map_path) + ".bin";
 
-    // write map width and tile info
-    buffer[0] = uint8_t(this->tile_width);
-    buffer[1] = uint8_t(this->tile_height);
-    buffer[2] = uint8_t(this->cols);
-    buffer[3] = uint8_t(this->rows);
-    fwrite(buffer, 1, 4, file);
+    FILE *txt_file = fopen(map_txt_path.c_str(), "w");
+    if (txt_file == nullptr) CORRUPTED_EXIT
+
+    fprintf(txt_file, "%s\n%s\n", this->title.c_str(), this->description.c_str());
+    fprintf(txt_file, "%d,%d,%d,%d\n", this->tile_width, this->tile_height, this->cols, this->rows);
+    fprintf(txt_file, "%d\n", int(this->tilesheets.size()));
 
     // write tilesheet info
-    for (auto &tilesheet : this->tilesheets) {
-        buffer[0] = uint8_t(tilesheet->path.size());
-        memcpy((void *)(buffer+1), (void *)tilesheet->path.c_str(), tilesheet->path.size());
-        fwrite(buffer, 1, tilesheet->path.size() + 1, file);
+    for (Tilesheet *tilesheet : this->tilesheets) {
+        fprintf(txt_file, "%s\n", tilesheet->path.c_str());
     }
 
-    // write a zero signifying end of tilesheets
-    buffer[0] = 0;
-    fwrite(buffer, 1, 1, file);
+    fprintf(txt_file, "%d\n", int(this->objects.size()));
+
+    // write objects
+    for (auto &obj : this->objects) {
+        fprintf(txt_file, "%s %s\n", obj.first.c_str(), obj.second.c_str());
+    }
+
+    FILE *bin_file = fopen(map_bin_path.c_str(), "wb");
+    if (bin_file == nullptr) CORRUPTED_EXIT;
+    uint8_t buffer[1024];
 
     // write tiles
     for (int i = 0; i < this->cols * this->rows; i++) {
@@ -233,36 +235,28 @@ void Map::write(const char *map_path) {
         int c = this->collision[i];
         if (c >= 0) {
             buffer[0] = uint8_t(c);
+            buffer[1] = 'c';
+            buffer[2] = 'c';
             buffer[3] = uint8_t(x);
             buffer[4] = uint8_t(y);
             buffer[5] = uint8_t('c');
-            fwrite(buffer, 1, 6, file);
+            fwrite(buffer, 1, 6, bin_file);
         }
 
         // background tiles
         std::vector<Tile> *vec = this->bg_tiles[i];
         if (vec != nullptr)
             for (auto tile : *vec)
-                write_tile(buffer, tile, x, y, 'b', file);
+                write_tile(buffer, tile, x, y, 'b', bin_file);
 
         // foreground tiles
         vec = this->fg_tiles[i];
         if (vec != nullptr)
             for (auto tile : *vec)
-                write_tile(buffer, tile, x, y, 'f', file);
+                write_tile(buffer, tile, x, y, 'f', bin_file);
     }
 
-    // write a 255 signifying end of tiles
-    buffer[0] = 255;
-    fwrite(buffer, 1, 1, file);
-
-    // write objects
-    for (auto obj : this->objects) {
-        size_t nbytes = snprintf((char *)buffer, sizeof(buffer), "%s %s\n", obj.first.c_str(), obj.second.c_str());
-        fwrite(buffer, 1, nbytes, file);
-    }
-
-    fclose(file);
+    fclose(bin_file);
 }
 
 void Map::clear() {

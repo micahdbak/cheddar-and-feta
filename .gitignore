@@ -1,6 +1,7 @@
 .vscode
+.cache
 screenshot.bmp
-**/*.backup
+**/*.backup.*
 
 # ignore all files under build except the Release/ directory
 build/*

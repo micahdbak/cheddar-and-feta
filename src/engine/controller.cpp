@@ -1,62 +1,73 @@
+#include "SDL3/SDL_keycode.h"
 #include "game.h"
 #include "controller.h"
 
 #include <iostream>
 
-static std::unordered_map<SDL_Keycode, Button> _keycode_map = {
-    { SDLK_ESCAPE, PAUSE },
-    { SDLK_TAB, MENU },
-    { SDLK_LSHIFT, L2 },
-    { SDLK_RSHIFT, R2 },
-    { SDLK_LEFT, L1 },
-    { SDLK_RIGHT, R1 },
-    { SDLK_RETURN, PRIMARY },
-    { SDLK_BACKSPACE, SECONDARY },
-    { SDLK_SPACE, ACTION1 },
-    { SDLK_C, ACTION2 },
-    { SDLK_W, UP },
-    { SDLK_D, RIGHT },
-    { SDLK_S, DOWN },
-    { SDLK_A, LEFT },
-};
+static Button _keycode_to_button(SDL_Keycode keycode) {
+    Button button;
 
-static std::unordered_map<SDL_GamepadButton, Button> _gamepad_map = {
-    { SDL_GAMEPAD_BUTTON_SOUTH, PRIMARY },
-    { SDL_GAMEPAD_BUTTON_EAST, SECONDARY },
-    { SDL_GAMEPAD_BUTTON_WEST, ACTION1 },
-    { SDL_GAMEPAD_BUTTON_NORTH, ACTION2 },
-    { SDL_GAMEPAD_BUTTON_BACK, PAUSE },
-    { SDL_GAMEPAD_BUTTON_START, MENU },
-    { SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, L1 },
-    { SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, R1 },
-    { SDL_GAMEPAD_BUTTON_DPAD_UP, UP },
-    { SDL_GAMEPAD_BUTTON_DPAD_RIGHT, RIGHT },
-    { SDL_GAMEPAD_BUTTON_DPAD_DOWN, DOWN },
-    { SDL_GAMEPAD_BUTTON_DPAD_LEFT, LEFT }
-};
-
-Controller::Controller() {
-    for (int i = 0; i < int(NUM_BUTTONS); i++) {
-        this->is_down_map[(Button)i] = false;
+    switch (keycode) {
+        case SDLK_ESCAPE    :button = PAUSE; break;
+        case SDLK_TAB       :button = MENU; break;
+        case SDLK_LSHIFT    :button = L2; break;
+        case SDLK_RSHIFT    :button = R2; break;
+        case SDLK_LEFT      :button = L1; break;
+        case SDLK_RIGHT     :button = R1; break;
+        case SDLK_RETURN    :button = PRIMARY; break;
+        case SDLK_BACKSPACE :button = SECONDARY; break;
+        case SDLK_SPACE     :button = ACTION1; break;
+        case SDLK_C         :button = ACTION2; break;
+        case SDLK_W         :button = UP; break;
+        case SDLK_D         :button = RIGHT; break;
+        case SDLK_S         :button = DOWN; break;
+        case SDLK_A         :button = LEFT; break;
+        default             :button = NULL_BUTTON; break;
     }
+
+    return button;
+}
+
+static Button _gamepad_to_button(SDL_GamepadButton gamepad_button) {
+    Button button;
+
+    switch (gamepad_button) {
+        case SDL_GAMEPAD_BUTTON_SOUTH          :button = PRIMARY; break;
+        case SDL_GAMEPAD_BUTTON_EAST           :button = SECONDARY; break;
+        case SDL_GAMEPAD_BUTTON_WEST           :button = ACTION1; break;
+        case SDL_GAMEPAD_BUTTON_NORTH          :button = ACTION2; break;
+        case SDL_GAMEPAD_BUTTON_BACK           :button = PAUSE; break;
+        case SDL_GAMEPAD_BUTTON_START          :button = MENU; break;
+        case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER  :button = L1; break;
+        case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER :button = R1; break;
+        case SDL_GAMEPAD_BUTTON_DPAD_UP        :button = UP; break;
+        case SDL_GAMEPAD_BUTTON_DPAD_RIGHT     :button = RIGHT; break;
+        case SDL_GAMEPAD_BUTTON_DPAD_DOWN      :button = DOWN; break;
+        case SDL_GAMEPAD_BUTTON_DPAD_LEFT      :button = LEFT; break;
+        default                                :button = NULL_BUTTON; break;
+    }
+
+    return button;
 }
 
 void Controller::clear_hits() {
-    this->is_hit_map.clear();
+    for (int i = 0; i < NUM_BUTTONS; i++) {
+        this->is_hit_map[i] = false;
+    }
     this->c = NO_CHAR;
 }
 
 bool Controller::is_hit(Button button) {
-    if (this->is_hit_map.contains(button) && this->is_hit_map[button]) {
+    if (this->is_hit_map[button]) {
         this->is_hit_map[button] = false;
         return true;
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 bool Controller::is_down(Button button) {
-    return this->is_down_map.at(button);
+    return this->is_down_map[button];
 }
 
 void Controller::handle_button_hit(Button button) {
@@ -73,48 +84,48 @@ void Controller::handle_button_up(Button button) {
 
 void Controller::handle_key_down(SDL_Keycode keycode) {
     if (keycode >= ' ' && keycode <= '~') {
-        if (this->is_down(_keycode_map[SDLK_LSHIFT]) && keycode >= 'a' && keycode <= 'z')
+        if (this->is_down_map[L2] && keycode >= 'a' && keycode <= 'z')
             this->c = char(keycode - 32);
-        else if (this->is_down(_keycode_map[SDLK_LSHIFT]) && keycode == '-')
+        else if (this->is_down_map[L2] && keycode == '-')
             this->c = '_';
         else
             this->c = char(keycode);
     }
 
-    if (!_keycode_map.contains(keycode)) {
+    Button button = _keycode_to_button(keycode);
+    if (button == NULL_BUTTON) {
         return;
     }
 
-    Button button = _keycode_map[keycode];
     this->is_hit_map[button] = true;
     this->is_down_map[button] = true;
 }
 
 void Controller::handle_key_up(SDL_Keycode keycode) {
-    if (!_keycode_map.contains(keycode)) {
+    Button button = _keycode_to_button(keycode);
+    if (button == NULL_BUTTON) {
         return;
     }
 
-    Button button = _keycode_map[keycode];
     this->is_down_map[button] = false;
 }
 
 void Controller::handle_gamepad_down(SDL_GamepadButton gamepad_button) {
-    if (!_gamepad_map.contains(gamepad_button)) {
+    Button button = _gamepad_to_button(gamepad_button);
+    if (button == NULL_BUTTON) {
         return;
     }
 
-    Button button = _gamepad_map[gamepad_button];
     this->is_hit_map[button] = true;
     this->is_down_map[button] = true;
 }
 
 void Controller::handle_gamepad_up(SDL_GamepadButton gamepad_button) {
-    if (!_gamepad_map.contains(gamepad_button)) {
+    Button button = _gamepad_to_button(gamepad_button);
+    if (button == NULL_BUTTON) {
         return;
     }
 
-    Button button = _gamepad_map[gamepad_button];
     this->is_down_map[button] = false;
 }
 

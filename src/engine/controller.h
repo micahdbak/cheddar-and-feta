@@ -2,11 +2,8 @@
 #define CONTROLLER_H
 
 #include <string>
-#include <unordered_map>
 
 #include <SDL3/SDL.h>
-
-#define KEYBOARD  0
 
 #define NO_CHAR -1
 
@@ -25,12 +22,13 @@ enum Button {
     RIGHT,
     DOWN,
     LEFT,
-    NUM_BUTTONS
+    NUM_BUTTONS,
+    NULL_BUTTON
 };
 
 class Controller {
 public:
-    Controller();
+    Controller() = default;
     ~Controller() = default;
 
     void clear_hits();
@@ -53,8 +51,8 @@ public:
 
     char c = NO_CHAR;
 
-    std::unordered_map<Button, bool> is_hit_map;
-    std::unordered_map<Button, bool> is_down_map;
+    bool is_hit_map[NUM_BUTTONS] = {0};
+    bool is_down_map[NUM_BUTTONS] = {0};
 
     Sint16 stick_x, stick_y;
 };

@@ -44,7 +44,7 @@ void SaveStation::step() {
             this->is_displaying_ui = false;
             this->should_render = false;
             mice_locked = false;
-            game->draw_rect(NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+            game->draw_rect(game->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
 
             return;
         }
@@ -72,9 +72,9 @@ void SaveStation::step() {
             const int x = (SCREEN_WIDTH - UI_WIDTH) / 2;
             const int y = SCREEN_HEIGHT - UI_HEIGHT - PADDING;
             SDL_FRect ui_rect = { float(x), float(y), UI_WIDTH, UI_HEIGHT };
-            game->draw_ui_box(BOX_CONTAINER, &ui_rect);
+            game->draw_ui_box(game->ui, BOX_CONTAINER, &ui_rect);
 
-            game->draw_text("Save Game", DEFAULT_FONT, x + PADDING + 2, y + PADDING, 0);
+            game->draw_text(game->ui, "Save Game", DEFAULT_FONT, x + PADDING + 2, y + PADDING, 0);
 
             for (int i = 0; i < NUM_SAVE_FILES; i++) {
                 const int save_y = y + PADDING + (16*i) + 16;
@@ -85,11 +85,11 @@ void SaveStation::step() {
                 highlight_rect.w = float(4 + UI_WIDTH - (2*PADDING));
                 highlight_rect.h = 14.0f;
 
-                game->draw_ui_box(this->sel_save == i ? BOX_OUT_SEL : BOX_OUT, &highlight_rect);
-                game->draw_text(this->summaries[i], this->sel_save == i ? BOLD_FONT : DEFAULT_FONT, x + PADDING + 2, save_y + 2, 0);
+                game->draw_ui_box(game->ui, this->sel_save == i ? BOX_OUT_SEL : BOX_OUT, &highlight_rect);
+                game->draw_text(game->ui, this->summaries[i], this->sel_save == i ? BOLD_FONT : DEFAULT_FONT, x + PADDING + 2, save_y + 2, 0);
             }
 
-            game->draw_text("[Enter] - save  [Escape] - cancel", SMALL_FONT, x + PADDING + 2, y + UI_HEIGHT - PADDING - 8, 0);
+            game->draw_text(game->ui, "[Enter] - save  [Escape] - cancel", SMALL_FONT, x + PADDING + 2, y + UI_HEIGHT - PADDING - 8, 0);
             this->should_render = false;
         }
 
@@ -105,7 +105,7 @@ void SaveStation::step() {
         this->sprite->set_animation(1);
 
         if (local_controller.is_hit(PRIMARY)) {
-            game->draw_rect(0, 0, 0, 0, 0, SDL_BLENDMODE_NONE); // clear ui
+            game->draw_rect(game->ui, 0, 0, 0, 0, 0, SDL_BLENDMODE_NONE); // clear ui
             this->summaries = save.file_summaries();
             this->is_displaying_ui = true;
             this->should_render = true;

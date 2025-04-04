@@ -1,6 +1,9 @@
 #ifndef NET_AGENT_H
 #define NET_AGENT_H
 
+#include "net_connection.h"
+#include "net_signaller.h"
+
 #include <mutex>
 #include <queue>
 #include <string>
@@ -80,19 +83,6 @@ protected:
         this->received_messages.push(message);
     }
 
-    static void initiate();
-    static void reset(bool delete_ws);
-
-    static bool next_ws_message(std::string &str);
-
-    static void description_cb(int, const char *sdp, const char *type, void *);
-    static void candidate_cb(int, const char *cand, const char *mid, void *);
-    static void datachannel_cb(int, int dc, void *);
-    static void message_cb(int, const char *message, int size, void *);
-    static void error_cb(int id, const char *error, void *);
-    static void open_cb(int id, void *);
-    static void close_cb(int id, void *);
-
     static void no_connection();
     static void waiting_for_peer();
     static void connected();
@@ -115,10 +105,12 @@ protected:
 
     std::queue<std::string> send_messages;
     std::mutex send_messages_mutex;
-    //std::condition_variable cv;
 
-    int ws = -1, pc = -1, dc = -1;
-    bool initiated = false;
+    // only to be used in message_thread
+    NetworkConnection connection;
+    NetworkSignaller signaller;
+    int pc = -1, dc = -1;
+    bool got_ping = false;
 };
 
 extern NetworkAgent *net_agent;

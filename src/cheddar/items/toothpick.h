@@ -1,7 +1,7 @@
 #ifndef ITEM_TOOTHPICK
 #define ITEM_TOOTHPICK "item_toothpick"
 
-#include "item.h"
+#include "items/item.h"
 
 #include <iostream>
 
@@ -38,7 +38,7 @@ public:
 
     void step() override;
 
-    void on_hit(Enemy *enemy) override;
+    void on_hit(Foe *foe) override;
 
     void on_miss() override;
 

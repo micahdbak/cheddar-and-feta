@@ -1,7 +1,7 @@
 #ifndef ITEM_H
 #define ITEM_H
 
-#include "enemy.h"
+#include "../foes/foe.h"
 #include "game.h"
 #include "mouse.h"
 #include "object.h"
@@ -63,7 +63,7 @@ public:
 
     void thrown_step();
 
-    virtual void on_hit(Enemy *enemy) = 0;
+    virtual void on_hit(Foe *foe) = 0;
 
     virtual void on_miss() = 0;
 
@@ -80,7 +80,7 @@ protected:
 private:
     int x_dir, y_dir;
     Uint64 thrown_ticks;
-    int check_enemy = 0;
+    int check_foe = 0;
 };
 
 #endif

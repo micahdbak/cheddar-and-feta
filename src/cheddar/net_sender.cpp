@@ -1,9 +1,13 @@
 #include "game.h"
+#include "items/item.h"
 #include "mouse.h"
 #include "net_agent.h"
 #include "net_sender.h"
 
 void NetSender::step() {
+    if (net_agent->get_state() != NetworkAgent::State::CONNECTED)
+        return;
+
     std::string frame_msg = game->current_map + '\n';
 
     // view
@@ -12,6 +16,20 @@ void NetSender::step() {
         snprintf(line, sizeof(line), "%d,%d\n", int(feta->x), int(feta->y));
     } else {
         snprintf(line, sizeof(line), "0,0\n");
+    }
+    frame_msg += line;
+
+    // hud
+    if (feta != nullptr) {
+        std::string sel_item_id = feta->sel_item < 0 ? ITEM_NONE : feta->items[feta->sel_item];
+        if (!item_info.contains(sel_item_id)) {
+            feta->sel_item = -1;
+            sel_item_id = ITEM_NONE; // wtf
+        }
+
+        snprintf(line, sizeof(line), "%s,%d,%d,%d\n", sel_item_id.c_str(), feta->health, feta->max_health, feta->cheese);
+    } else {
+        snprintf(line, sizeof(line), ITEM_NONE ",0,0,0\n");
     }
     frame_msg += line;
 

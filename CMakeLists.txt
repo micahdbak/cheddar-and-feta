@@ -50,12 +50,15 @@ target_link_libraries(FetaLauncher PRIVATE ${DEPS})
 
 add_executable(CheddarLauncher
     ${ENGINE_SRC}
+    src/cheddar/foes/bug.cpp
+    src/cheddar/foes/foe.cpp
+    src/cheddar/foes/foe_dijkstra.cpp
+    src/cheddar/foes/spawner.cpp
+    src/cheddar/items/toothpick.cpp
+    src/cheddar/items/item.cpp
+    src/cheddar/billboard.cpp
     src/cheddar/cheese.cpp
-    src/cheddar/enemy_bug.cpp
-    src/cheddar/enemy.cpp
     src/cheddar/init.cpp
-    src/cheddar/item_toothpick.cpp
-    src/cheddar/item.cpp
     src/cheddar/mouse.cpp
     src/cheddar/net_receiver.cpp
     src/cheddar/net_sender.cpp

@@ -1,4 +1,6 @@
 #include "bmp_texture.h"
+#include "SDL3/SDL_render.h"
+#include "SDL3/SDL_surface.h"
 #include "game.h"
 
 #include <iostream>
@@ -25,6 +27,7 @@ static SDL_Texture *render_cheese(const std::string &args) {
     SDL_SetRenderTarget(renderer, texture);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_PIXELART);
     SDL_RenderClear(renderer); // make sure texture is cleared
 
     int x = 1;
@@ -83,10 +86,13 @@ SDL_Texture *load_bmp_texture(const std::string &bmp_path) {
     SDL_Surface *surface = SDL_LoadBMP(bmp_path.c_str());
     if (surface == nullptr) {
         std::cerr << "SDL_LoadBMP error: " << bmp_path << " does not exist." << std::endl;
+        char *arr = nullptr;
+        int thing = *arr;
         exit(1);
     }
 
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
     bmp_textures[bmp_path] = texture;
     return texture;
 }

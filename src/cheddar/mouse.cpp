@@ -1,8 +1,8 @@
-#include "item.h"
+#include "items/item.h"
 #include "mouse.h"
 #include "save_data.h"
 
-#include "item_toothpick.h"
+#include "items/toothpick.h"
 
 #include <iostream>
 #include <cmath>
@@ -41,6 +41,9 @@ Mouse::Mouse(int x, int y, bool is_feta) {
 
     this->x = float(x);
     this->y = float(y);
+    this->tile_x = x / game->tile_width;
+    this->tile_y = y / game->tile_height;
+    foe_path_find(this);
 
     if (save.data[this->is_feta ? "feta_data" : "cheddar_data"] == "true") {
         save.data[this->is_feta ? "feta_data" : "cheddar_data"] = "false";
@@ -117,7 +120,7 @@ void Mouse::step() {
 
     Controller *controller = this->is_feta ? &remote_controller : &local_controller;
 
-    if (!this->is_feta && !this->items.empty()) {
+    if (!this->items.empty()) {
         this->sel_item += controller->is_hit(R1) - controller->is_hit(L1);
         if (this->sel_item < -1)
             this->sel_item = this->items.size() - 1;
@@ -134,43 +137,40 @@ void Mouse::step() {
     if (!this->is_feta)
         game->draw_hud(game->ui, sel_item_id, this->health, this->max_health, this->cheese);
 
-    // cycle through available enemies to find which is closest
-    if (!enemies.empty()) {
-        this->check_enemy++;
-        if (this->check_enemy >= enemies.size())
-            this->check_enemy = 0;
+    // cycle through available foes to find which is closest
+    if (!foes.empty()) {
+        this->check_foe++;
+        if (this->check_foe >= foes.size())
+            this->check_foe = 0;
 
-        Enemy *enemy = enemies[this->check_enemy];
-        if (enemy != nullptr) {
-            float enemy_x = enemy->x + float(game->tile_width/2);
-            float enemy_y = enemy->y + float(game->tile_height/2);
-
-            // calculate direction to enemy
+        Foe *foe = foes[this->check_foe];
+        if (foe != nullptr) {
+            // calculate direction to foe
             int x_dir, y_dir;
-            dir_to_point(this->x, this->y, enemy_x, enemy_y, &x_dir, &y_dir);
-            int enemy_direction = direction_from_dirs(x_dir, y_dir);
+            dir_to_point(this->x, this->y, foe->x, foe->y, &x_dir, &y_dir);
+            int foe_direction = direction_from_dirs(x_dir, y_dir);
 
             // current direction that the player is facing
             int facing_direction = this->sprite->animation % 8;
 
-            // if the enemy being checked is the previously determined closest enemy
-            if (enemy == this->closest_enemy) {
-                // if no longer facing this enemy
-                if (facing_direction != enemy_direction) {
-                    // then set the closest enemy to nullptr and wait to find the next closest enemy in this direction
-                    this->closest_enemy = nullptr;
+            // if the foe being checked is the previously determined closest foe
+            if (foe == this->closest_foe) {
+                // if no longer facing this foe
+                if (facing_direction != foe_direction) {
+                    // then set the closest foe to nullptr and wait to find the next closest foe in this direction
+                    this->closest_foe = nullptr;
                     this->closest_distance = FLT_MAX;
                 } else {
                     // if still facing it, update its distance, incase it has moved further away
-                    this->closest_distance = distance_between_points(enemy_x, enemy_y, this->x, this->y);
+                    this->closest_distance = distance_between_points(foe->x, foe->y, this->x, this->y);
                 }
-            } else if (facing_direction == enemy_direction) {
-                // this enemy is not the closest enemy; check its distance
-                float distance = distance_between_points(enemy_x, enemy_y, this->x, this->y);
+            } else if (facing_direction == foe_direction) {
+                // this foe is not the closest foe; check its distance
+                float distance = distance_between_points(foe->x, foe->y, this->x, this->y);
 
-                // if it is closer than the closest enemy, update it to become the closest enemy
+                // if it is closer than the closest foe, update it to become the closest foe
                 if (distance < this->closest_distance) {
-                    this->closest_enemy = enemy;
+                    this->closest_foe = foe;
                     this->closest_distance = distance;
                 }
             }
@@ -257,14 +257,14 @@ void Mouse::step() {
                 // set animation to attacking
                 this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
 
-                // attack the closest enemy (if close enough)
-                if (this->closest_enemy != nullptr && this->closest_distance < 32.0f) {
-                    this->closest_enemy->attack(this->damage);
+                // attack the closest foe (if close enough)
+                if (this->closest_foe != nullptr && this->closest_distance < 32.0f) {
+                    this->closest_foe->attack(this->damage);
 
-                    // check if enemy just died
-                    if (this->closest_enemy->dead) {
-                        // set these accordingly so next attack is not the dead enemy
-                        this->closest_enemy = nullptr;
+                    // check if foe just died
+                    if (this->closest_foe->state == Foe::State::DEAD) {
+                        // set these accordingly so next attack is not the dead foe
+                        this->closest_foe = nullptr;
                         this->closest_distance = FLT_MAX;
                     }
                 }
@@ -364,9 +364,18 @@ void Mouse::step() {
     if (!_is_collision(new_x, this->y)) this->x = new_x;
     if (!_is_collision(this->x, new_y)) this->y = new_y;
 
+    // if moved onto a new tile, update the path finding
+    int new_tile_x = (int)this->x / game->tile_width;
+    int new_tile_y = (int)this->y / game->tile_height;
+    if (new_tile_x != this->tile_x || new_tile_y != this->tile_y) {
+        foe_path_find(this);
+        this->tile_x = new_tile_x;
+        this->tile_y = new_tile_y;
+    }
+
     if (!this->is_feta) {
-        this->dst_rect.x = float((SCREEN_WIDTH / 2) - 16);
-        this->dst_rect.y = float((SCREEN_HEIGHT / 2) - 24);
+        this->dst_rect.x = (float)(int)((SCREEN_WIDTH / 2) - 16);
+        this->dst_rect.y = (float)(int)((SCREEN_HEIGHT / 2) - 24);
 
         game->set_view(this->x, this->y);
     } else {
@@ -378,7 +387,7 @@ void Mouse::step() {
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
 }
 
-// will be called by an enemy
+// will be called by a foe
 bool Mouse::attack(int damage) {
     // don't get attacked if was already attacked
     if (this->is_busy == ATTACKED)

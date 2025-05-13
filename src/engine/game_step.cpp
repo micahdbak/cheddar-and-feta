@@ -92,6 +92,8 @@ Game::~Game() {
 }
 
 void Game::unload() {
+    this->current_map = "";
+
     if (!this->objects.empty()) {
         for (int i = 0; i < this->objects.size(); i++) {
             delete this->objects[i];
@@ -128,17 +130,6 @@ void Game::load_map(const char *map_path) {
     this->map_title = map.title;
     this->map_description = map.description;
 
-    if (this->create_objects) {
-        for (auto obj : map.objects)
-            this->create_object(obj.first, obj.second);
-
-        while (!this->new_objects.empty()) {
-            auto obj = this->new_objects.front();
-            this->new_objects.pop();
-            this->create_object(obj.first, obj.second);
-        }
-    }
-
     this->bg = map.bg;
     this->fg = map.fg;
     this->collision = map.collision;
@@ -153,6 +144,17 @@ void Game::load_map(const char *map_path) {
         for (int j = 0; j < 4; j++) {
             this->colliders[i].vertex[j].x = float(map.tile_width) * MapColliders[i][j].x;
             this->colliders[i].vertex[j].y = float(map.tile_height) * MapColliders[i][j].y;
+        }
+    }
+
+    if (this->create_objects) {
+        for (auto obj : map.objects)
+            this->create_object(obj.first, obj.second);
+
+        while (!this->new_objects.empty()) {
+            auto obj = this->new_objects.front();
+            this->new_objects.pop();
+            this->create_object(obj.first, obj.second);
         }
     }
 

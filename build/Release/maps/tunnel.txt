@@ -1,0 +1,8 @@
+Tunnel of DOOM
+Floor 1
+16,16,32,32
+2
+tiles/dirttunnel.bmp
+sprites/cheddar.bmp
+1
+mouse 256,256

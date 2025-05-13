@@ -1,4 +1,4 @@
-#include "item_toothpick.h"
+#include "toothpick.h"
 #include "item.h"
 
 #include <iostream>
@@ -25,8 +25,8 @@ void ThrownToothpick::step() {
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 16);
 }
 
-void ThrownToothpick::on_hit(Enemy *enemy) {
-    enemy->attack(1);
+void ThrownToothpick::on_hit(Foe *foe) {
+    foe->attack(1);
     char options[256];
     snprintf(options, sizeof(options), "%d,%d", int(this->x), int(this->y));
     game->push_object(ITEM_TOOTHPICK DROPPED_OBJ, std::string(options));

@@ -2,7 +2,7 @@
 #define MOUSE_OBJ "mouse"
 
 #include "controller.h"
-#include "enemy.h"
+#include "foes/foe.h"
 #include "game.h"
 #include "object.h"
 #include "sprite.h"
@@ -23,24 +23,12 @@ public:
     void remove_item(const std::string &item_id);
     int add_cheese(int amount);
 
+    bool is_feta = true;
     float x, y;
 
     int throw_x = 0, throw_y = 0;
 
     std::string name = "Cheddar";
-
-private:
-    bool is_feta = true;
-
-    SDL_FRect dst_rect;
-    Sprite *sprite;
-
-    enum { FALSE, ATTACKING, ATTACKED, THROWING, EATING } is_busy = FALSE;
-    Uint64 busy_ticks = 0;
-
-    int check_enemy = 0;
-    Enemy *closest_enemy = nullptr;
-    float closest_distance = FLT_MAX;
 
     int health = 10, max_health = 10;
     int damage = 1, armour = 0;
@@ -49,6 +37,19 @@ private:
     int max_items = 4, sel_item = -1;
 
     int cheese = 0, max_cheese = 10;
+
+private:
+    SDL_FRect dst_rect;
+    Sprite *sprite;
+
+    enum { FALSE, ATTACKING, ATTACKED, THROWING, EATING } is_busy = FALSE;
+    Uint64 busy_ticks = 0;
+
+    int check_foe = 0;
+    Foe *closest_foe = nullptr;
+    float closest_distance = FLT_MAX;
+
+    int tile_x, tile_y;
 };
 
 class MouseFactory : public ObjectFactory {

@@ -76,13 +76,13 @@ std::string NetworkSignaller::block_receive() {
 }
 
 void NetworkSignaller::on_open(int, void *user_ptr) {
-    std::cout << "NetworkSignaller::on_open" << std::endl;
+    // std::cout << "NetworkSignaller::on_open" << std::endl;
     NetworkSignaller *signaller = (NetworkSignaller *)user_ptr;
     signaller->state = NetworkSignaller::State::CONNECTED;
 }
 
 void NetworkSignaller::on_close(int, void *user_ptr) {
-    std::cout << "NetworkSignaller::on_close" << std::endl;
+    // std::cout << "NetworkSignaller::on_close" << std::endl;
     NetworkSignaller *signaller = (NetworkSignaller *)user_ptr;
     signaller->disconnect();
 }
@@ -94,7 +94,7 @@ void NetworkSignaller::on_error(int, const char *error, void *user_ptr) {
 }
 
 void NetworkSignaller::on_message(int, const char *message, int size, void *user_ptr) {
-    std::cout << "NetworkSignaller::on_message" << std::endl;
+    // std::cout << "NetworkSignaller::on_message" << std::endl;
     NetworkSignaller *signaller = (NetworkSignaller *)user_ptr;
     signaller->messages.push(message);
 }

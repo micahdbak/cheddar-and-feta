@@ -102,7 +102,7 @@ bool Game::point_in_collider(float x, float y) const {
     int _y = int(y) / this->tile_height;
 
     // out of map is automatic collision
-    if (_x < 0 || _y < 0 || _x >= this->cols || _y >= this->rows)
+    if (x < 0.0f || y < 0.0f || _x >= this->cols || _y >= this->rows)
         return true;
 
     int coord = (_y * this->cols) + _x;

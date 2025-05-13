@@ -16,7 +16,8 @@
 #define DEFAULT_FONT 3
 #define BOLD_FONT    4
 #define CODE_FONT    5
-#define NUM_FONTS    6
+#define TITLE_FONT   6
+#define NUM_FONTS    7
 
 // special chars in SMALL_FONT
 #define CHAR_EQUIP        '{'

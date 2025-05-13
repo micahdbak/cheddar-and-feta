@@ -9,7 +9,6 @@ Sprite::Sprite(const char *bmp_path, int frame_w, int frame_h, int interval_ms):
     this->texture = load_bmp_texture(bmp_path);
     this->sheet_w = this->texture->w;
     this->sheet_h = this->texture->h;
-    SDL_SetTextureScaleMode(this->texture, SDL_SCALEMODE_NEAREST);
 
     this->frame.x = 0.0f;
     this->frame.y = 0.0f;
@@ -30,7 +29,7 @@ void Sprite::set_animation(int animation) {
     if (this->animation == animation) return;
 
     this->animation = animation;
-    this->frame.y = float(this->frame_h * animation);
+    this->frame.y = float(this->frame_h * animation) + 0.01f;
 }
 
 void Sprite::update_frame() {
@@ -39,13 +38,13 @@ void Sprite::update_frame() {
         if (this->frame_i * this->frame_w >= this->sheet_w) {
             this->frame_i = 0;
         }
-        this->frame.x = float(this->frame_i * this->frame_w);
+        this->frame.x = float(this->frame_i * this->frame_w) + 0.01f;
         this->frame_last_set = game->ticks;
     }
 }
 
 void Sprite::set_frame(int frame_i) {
     this->frame_i = frame_i;
-    this->frame.x = float(this->frame_i * this->frame_w);
+    this->frame.x = float(this->frame_i * this->frame_w) + 0.1f;
     this->frame_last_set = game->ticks;
 }

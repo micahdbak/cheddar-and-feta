@@ -255,8 +255,8 @@ void Game::draw_overlay() {
         int description_w = this->fonts[SMALL_FONT]->text_width(this->map_description);
 
         this->draw_rect(this->overlay, NULL, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-        this->draw_text(this->overlay, map_title, DEFAULT_FONT, (SCREEN_WIDTH / 2) - (title_w / 2), (SCREEN_HEIGHT / 2) - 8, 0);
-        this->draw_text(this->overlay, map_description, SMALL_FONT, (SCREEN_WIDTH / 2) - (description_w / 2), (SCREEN_HEIGHT / 2) + 8, 0);
+        this->draw_text(this->overlay, map_title, TITLE_FONT, (SCREEN_WIDTH / 2) - (title_w / 2), (SCREEN_HEIGHT / 2) - 8, 0);
+        this->draw_text(this->overlay, map_description, DEFAULT_FONT, (SCREEN_WIDTH / 2) - (description_w / 2), (SCREEN_HEIGHT / 2) + 8, 0);
     } else if (!this->did_clear_overlay) {
         Uint64 ms_since = this->ticks - this->load_ticks;
 
@@ -283,7 +283,7 @@ void Game::draw_overlay() {
 
             switch (state) {
             case NetworkAgent::State::NO_CONNECTION:
-                _dst_rect = SDL_FRect{ 0.0f, 0.0f, 80.0f, 16.0f };
+                _dst_rect = SDL_FRect{ 0.0f, 0.0f, 88.0f, 16.0f };
                 this->draw_ui_box(this->overlay, BOX_OVERLAY, &_dst_rect);
                 this->draw_icon(this->overlay, NOT_CONNECTED_ICON, &_icon_rect);
                 this->draw_text(this->overlay, "Not Connected", DEFAULT_FONT, 20, 4, 0);

@@ -1,5 +1,6 @@
-#include "item.h"
 #include "controller.h"
+#include "../foes/foe.h"
+#include "items/item.h"
 #include "textbox.h"
 
 std::unordered_map<std::string, Item> item_info;
@@ -31,15 +32,15 @@ void DroppedItem::step() {
     if (this->sprite->interval_ms > 0)
         this->sprite->update_frame();
 
-    this->dst_rect.x = this->x - float(this->sprite->frame_w/2) - game->corner_x;
-    this->dst_rect.y = this->y - float(this->sprite->frame_h/2) - game->corner_y;
+    this->dst_rect.x = this->x - (float)(int)(this->sprite->frame_w/2) - game->corner_x;
+    this->dst_rect.y = this->y - (float)(int)(this->sprite->frame_h/2) - game->corner_y;
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, this->sprite->frame_h/2);
 
     if (mice_locked)
         return;
 
-    float _x = this->x + float(this->sprite->frame_w/2);
-    float _y = this->y + float(this->sprite->frame_h/2);
+    float _x = this->x + (float)(int)(this->sprite->frame_w/2);
+    float _y = this->y + (float)(int)(this->sprite->frame_h/2);
 
     Mouse *mouse = closest_mouse(_x, _y, 32.0f);
     if ((mouse == cheddar && local_controller.is_hit(PRIMARY)) ||
@@ -78,21 +79,19 @@ void ThrownItem::thrown_step() {
     if (game->ticks - this->thrown_ticks < 125)
         return;
 
-    // cycle through available enemies to find which is closest
-    if (!enemies.empty()) {
-        this->check_enemy++;
-        if (this->check_enemy >= enemies.size())
-            this->check_enemy = 0;
+    // cycle through available foes to find which is closest
+    if (!foes.empty()) {
+        this->check_foe++;
+        if (this->check_foe >= foes.size())
+            this->check_foe = 0;
 
-        Enemy *enemy = enemies[this->check_enemy];
-        if (enemy != nullptr) {
-            float enemy_x = enemy->x + float(game->tile_width/2);
-            float enemy_y = enemy->y + float(game->tile_height/2);
-            float distance = distance_between_points(this->x, this->y, enemy_x, enemy_y);
+        Foe *foe = foes[this->check_foe];
+        if (foe != nullptr) {
+            float distance = distance_between_points(this->x, this->y, foe->x, foe->y);
 
-            // check if hit enemy
+            // check if hit foe
             if (distance < 16.0f) {
-                this->on_hit(enemy);
+                this->on_hit(foe);
                 game->delete_object = true;
                 return;
             }

@@ -20,6 +20,7 @@
 #define cnf_clamp(_x, _min, _max) ((_x) < (_min) ? (_min) : ((_x) > (_max) ? (_max) : (_x)))
 #define cnf_min(_a, _b)           ((_b) < (_a) ? (_b) : (_a))
 #define cnf_sign(_x)              ((_x) == 0 ? 0 : ((_x) > 0 ? 1 : -1))
+#define cnf_abs(_x)               ((_x) < 0 ? (-1 * (_x)) : (_x))
 
 #define distance_between_points(x1, y1, x2, y2) \
     (sqrt(pow((x2) - (x1), 2) + pow((y2) - (y1), 2)))
@@ -46,6 +47,7 @@
 #define WAITING_FOR_PEER_ICON SDL_FRect{32.0f, 0.0f, 16.0f, 16.0f}
 #define FETA_ICON             SDL_FRect{48.0f, 0.0f, 16.0f, 16.0f}
 #define SKULL_AND_BONES_ICON  SDL_FRect{0.0f, 16.0f, 16.0f, 16.0f}
+#define EDITOR_OBJECT_ICON    SDL_FRect{16.0f, 16.0f, 16.0f, 16.0f}
 
 // forces one object to the be the first/last object run per frame
 // should only be used by something like:
@@ -68,6 +70,7 @@ public:
     Game();
     ~Game();
 
+    void unload();
     void create_object(const std::string &id, const std::string &options);
     void push_object(const std::string &id, const std::string &options);
     void save_objects();
@@ -117,6 +120,7 @@ public:
 
     int corner_x = 0, corner_y = 0; // set in Game::step
     int tile_width = 32, tile_height = 32, cols = 1, rows = 1;
+    int *collision = nullptr;
 
     std::string map = ""; // set this to load a map
     std::string current_map = ""; // readonly
@@ -149,12 +153,10 @@ private:
 
     // game_step.cpp
 
-    void unload();
     void load_map(const char *map_path);
 
     // map things
     SDL_Texture *bg = nullptr, *fg = nullptr;
-    int *collision = nullptr;
     Quad colliders[n_MapColliders];
 
     // object things

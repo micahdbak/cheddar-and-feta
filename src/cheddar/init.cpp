@@ -6,15 +6,17 @@
 #include "textbox.h"
 
 // objects
+#include "billboard.h"
 #include "cheese.h"
-#include "enemy_bug.h"
-#include "item_toothpick.h"
+#include "foes/bug.h"
+#include "foes/spawner.h"
+#include "items/toothpick.h"
 #include "mouse.h"
 #include "net_receiver.h"
 #include "net_sender.h"
 #include "save_station.h"
 
-#include "item.h"
+#include "items/item.h"
 
 #define INIT_OBJ "init"
 
@@ -44,8 +46,10 @@ void Game::init() {
     this->factories[INIT_OBJ] = new InitFactory();
 
     // objects
+    this->factories[BILLBOARD_OBJ] = new BillboardFactory();
     this->factories[CHEESE_OBJ] = new CheeseFactory();
-    this->factories[ENEMY_BUG_OBJ] = new EnemyBugFactory();
+    this->factories[FOE_BUG_OBJ] = new FoeBugFactory();
+    this->factories[SPAWNER_OBJ] = new FoeSpawnerFactory();
     this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
     this->factories[ITEM_TOOTHPICK USE_OBJ] = new ThrownToothpickFactory();
     this->factories[MOUSE_OBJ] = new MouseFactory();
@@ -90,7 +94,7 @@ void Init::step() {
 
         if (/* ret == LOAD_SUCCESS || ret == LOAD_NEW */ true) {
             if (!save.data.contains("map"))
-                save.data["map"] = "maps/house";
+                save.data["map"] = "maps/bigtunnel";
 
             game->map = save.data["map"];
         } else {

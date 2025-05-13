@@ -11,7 +11,7 @@ void NetReceiver::step() {
     std::string frame_msg = net_agent->last_message();
 
     // reuse last frame
-    if (frame_msg == "") {
+    if (frame_msg.empty()) {
         for (Game::SpriteRender &sprite : this->sprites) {
             game->push_sprite(sprite.tex_id, sprite.texture, sprite.src_rect, sprite.dst_rect, sprite.y);
         }
@@ -28,7 +28,14 @@ void NetReceiver::step() {
         if (*line == '\0') return;
         char buff[BUFF_SIZE];
         sscanf(line, "%1023[^\n]", buff);
-        if (game->current_map != buff) {
+        if (buff[0] == '\0') {
+            if (!game->current_map.empty()) {
+                // no map loaded, so unload the previous one
+                game->unload();
+            }
+
+            return; // black screen
+        } else if (game->current_map != buff) {
             game->map = buff;
             return; // ignore all sprites - need to load the map first
         }
@@ -39,6 +46,13 @@ void NetReceiver::step() {
         int view_x, view_y;
         sscanf(line, "%d,%d", &view_x, &view_y);
         game->set_view(view_x, view_y);
+        line = next_line(line);
+        if (*line == '\0') return;
+
+        // read hud information
+        int health, max_health, cheese;
+        sscanf(line, "%1023[^,],%d,%d,%d", buff, &health, &max_health, &cheese);
+        game->draw_hud(game->ui, buff, health, max_health, cheese);
         line = next_line(line);
         if (*line == '\0') return;
 

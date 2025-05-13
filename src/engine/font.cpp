@@ -56,6 +56,18 @@ void Font::load_fonts(std::vector<Font *> &fonts) {
 
     // CODE_FONT = 5
     fonts.push_back(new Font("fonts/code.bmp", 6, 10, 6, {}));
+
+    // TITLE_FONT = 6
+    fonts.push_back(new Font("fonts/title.bmp", 8, 13, 6, {
+        { ' ', 4 }, { '\'', 4 }, { ',', 4 }, { 'A', 8 },
+        { 'B', 7 }, { 'C', 7 }, { 'D', 7 }, { 'G', 7 },
+        { 'J', 7 }, { 'K', 7 }, { 'M', 8 }, { 'N', 7 },
+        { 'O', 7 }, { 'P', 7 }, { 'Q', 7 }, { 'R', 7 },
+        { 'S', 7 }, { 'U', 7 }, { 'V', 7 }, { 'W', 8 },
+        { 'X', 8 }, { 'Y', 8 }, { 'Z', 7 }, { 'f', 5 },
+        { 'i', 4 }, { 'j', 3 }, { 'l', 4 }, { 'm', 8 },
+        { 'r', 5 }, { 't', 5 }, { 'w', 8 }
+    }));
 }
 
 Font::Font(const char *font_path, int w, int h, int default_w, const std::unordered_map<char, int> &special_w) {

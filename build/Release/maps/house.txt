@@ -7,9 +7,9 @@ tiles/dungeon.bmp
 8
 mouse 256,96
 save.station 192,64
-enemy.bug 256,128
-enemy.bug 224,128
-enemy.bug 224,144
-enemy.bug 256,144
+foe_bug 256,128
+foe_bug 224,128
+foe_bug 224,144
+foe_bug 256,144
 item_toothpick.dropped 256,272
 item_toothpick.dropped 256,144

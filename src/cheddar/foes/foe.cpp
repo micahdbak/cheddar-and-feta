@@ -93,10 +93,12 @@ void Foe::foe_step() {
         float dx = float(this->x_dir) * (this->y_dir != 0 ? DIAG_MULTIPLIER : 1.0f) * this->speed * game->delta;
         float dy = float(this->y_dir) * (this->x_dir != 0 ? DIAG_MULTIPLIER : 1.0f) * this->speed * game->delta;
 
+        // move maximum 1 pixel per frame
         if (fabs(dx) > 1.0f) {
             dx /= fabs(dx);
         }
 
+        // move maximum 1 pixel per frame
         if (fabs(dy) > 1.0f) {
             dy /= fabs(dy);
         }
@@ -110,8 +112,8 @@ void Foe::foe_step() {
         float dist1 = fabs(target_x_f - this->x) + fabs(target_y_f - this->y);
         float dist2 = fabs(target_x_f - new_x) + fabs(target_y_f - new_y);
 
-        // check for overshoot
-        if (dist2 > dist1) {
+        // check for overshoot (no missing the tile) + within 8 pixels (no teleporting a full tile)
+        if (dist2 > dist1 && dist2 < 8.0f) {
             // stand on the center of this tile
             this->x = target_x_f;
             this->y = target_y_f;

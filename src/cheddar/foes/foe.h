@@ -34,6 +34,7 @@ private:
     float speed_offset;
 
     int target_x, target_y;
+    float target_x_f, target_y_f;
 };
 
 extern std::vector<Foe *> foes;

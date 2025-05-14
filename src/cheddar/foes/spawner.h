@@ -35,7 +35,7 @@ public:
     Object *create(const std::string &options) {
         const char *arr = options.c_str();
 
-        int x, y, spawner_id;
+        int x = 0, y = 0, spawner_id = 0;
         sscanf(arr, "%d,%d,%d", &x, &y, &spawner_id);
 
         // skip until null byte or space

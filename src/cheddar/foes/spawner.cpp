@@ -46,7 +46,6 @@ void FoeSpawner::step() {
 }
 
 void FoeSpawner::trigger() {
-    std::cout << "triggering!" << std::endl;
     this->foerefs = 0;
 
     if (this->wave >= this->waves.size()) {
@@ -57,7 +56,6 @@ void FoeSpawner::trigger() {
     for (std::string obj : this->waves[this->wave]) {
         char buff[256];
         snprintf(buff, sizeof(buff), "%d,%d,%d", (int)this->x, (int)this->y, this->spawner_id);
-        std::cout << obj << " " << buff << std::endl;
         game->push_object(obj, buff);
         this->foerefs++;
     }

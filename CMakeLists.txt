@@ -53,6 +53,7 @@ add_executable(CheddarLauncher
     src/cheddar/foes/bug.cpp
     src/cheddar/foes/foe.cpp
     src/cheddar/foes/foe_dijkstra.cpp
+    src/cheddar/foes/gate.cpp
     src/cheddar/foes/spawner.cpp
     src/cheddar/items/toothpick.cpp
     src/cheddar/items/item.cpp

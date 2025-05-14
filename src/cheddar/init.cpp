@@ -9,6 +9,7 @@
 #include "billboard.h"
 #include "cheese.h"
 #include "foes/bug.h"
+#include "foes/gate.h"
 #include "foes/spawner.h"
 #include "items/toothpick.h"
 #include "mouse.h"
@@ -49,6 +50,7 @@ void Game::init() {
     this->factories[BILLBOARD_OBJ] = new BillboardFactory();
     this->factories[CHEESE_OBJ] = new CheeseFactory();
     this->factories[FOE_BUG_OBJ] = new FoeBugFactory();
+    this->factories[GATE_OBJ] = new FoeGateFactory();
     this->factories[SPAWNER_OBJ] = new FoeSpawnerFactory();
     this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
     this->factories[ITEM_TOOTHPICK USE_OBJ] = new ThrownToothpickFactory();

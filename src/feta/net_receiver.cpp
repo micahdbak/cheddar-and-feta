@@ -50,9 +50,9 @@ void NetReceiver::step() {
         if (*line == '\0') return;
 
         // read hud information
-        int health, max_health, cheese;
-        sscanf(line, "%1023[^,],%d,%d,%d", buff, &health, &max_health, &cheese);
-        game->draw_hud(game->ui, buff, health, max_health, cheese);
+        int item_count, health, max_health, cheese;
+        sscanf(line, "%1023[^,],%d,%d,%d,%d", buff, &item_count, &health, &max_health, &cheese);
+        game->draw_hud(game->ui, buff, item_count, health, max_health, cheese);
         line = next_line(line);
         if (*line == '\0') return;
 

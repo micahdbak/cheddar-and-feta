@@ -5,5 +5,6 @@ Floor 0
 tiles/dirttunnel.bmp
 3
 mouse 368,112
-spawner 176,112,1 foe_bug;foe_bug,foe_bug;foe_bug,foe_bug,foe_bug
+spawner 176,112,1 foe_bug;foe_bug,foe_bug,foe_bug,foe_frog
+bell 224,128,1
 gate 80,224,1

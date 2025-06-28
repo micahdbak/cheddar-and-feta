@@ -24,15 +24,34 @@ void Game::push_sprite(const std::string &tex_id, SDL_Texture *texture, SDL_FRec
     this->sprites.insert(it, sprite);
 }
 
-static SDL_FRect _draw_icon_rects[100];
-static int _draw_icon_rects_i = 0;
+void Game::push_icon(SDL_FRect icon_rect, float x, float y, SDL_FRect *src_rect, SDL_FRect *dst_rect) {
+    *src_rect = icon_rect;
 
-void Game::push_icon(SDL_FRect icon, SDL_FRect *dst_rect) {
-    SDL_FRect *src_rect = _draw_icon_rects + _draw_icon_rects_i;
-    _draw_icon_rects_i++;
-    if (_draw_icon_rects_i >= sizeof(_draw_icon_rects))
-        _draw_icon_rects_i = 0;
+    dst_rect->x = x - (src_rect->w / 2.0f) - (float)game->corner_x;
+    dst_rect->y = y - (src_rect->h / 2.0f) - (float)game->corner_y;
+    dst_rect->w = src_rect->w;
+    dst_rect->h = src_rect->h;
 
-    *src_rect = icon;
-    this->push_sprite("sprites/icons.bmp", this->icons, src_rect, dst_rect, 1000);
+    this->push_sprite("sprites/icons.bmp", this->icons, src_rect, dst_rect, SCREEN_HEIGHT);
+}
+
+void Game::push_health_bar(int health, int max_health, float x, float y, SDL_FRect *src_rect, SDL_FRect *dst_rect) {
+    float perc = (float)health / (float)max_health;
+
+    if (perc < 0.26f) {
+        *src_rect = HEALTH_25_ICON;
+    } else if (perc < 0.51f) {
+        *src_rect = HEALTH_50_ICON;
+    } else if (perc < 0.76f) {
+        *src_rect = HEALTH_75_ICON;
+    } else {
+        *src_rect = HEALTH_100_ICON;
+    }
+
+    dst_rect->x = x - (src_rect->w / 2.0f) - (float)game->corner_x;
+    dst_rect->y = y - (src_rect->h / 2.0f) - (float)game->corner_y;
+    dst_rect->w = src_rect->w;
+    dst_rect->h = src_rect->h;
+
+    game->push_sprite("sprites/icons.bmp", this->icons, src_rect, dst_rect, SCREEN_HEIGHT);
 }

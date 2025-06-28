@@ -31,6 +31,7 @@ void Cheese::step() {
         this->amount -= mouse->add_cheese(this->amount);
         if (this->amount == 0) {
             game->delete_object = true;
+            return;
         } else {
             this->render_cheese();
         }

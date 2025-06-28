@@ -3,7 +3,6 @@
 #include "font.h"
 #include "game.h"
 #include "map.h"
-#include "net_agent.h"
 
 #include <SDL3/SDL.h>
 
@@ -180,34 +179,7 @@ void Game::draw_icon(SDL_Texture *texture, SDL_FRect icon, SDL_FRect *dst_rect) 
     SDL_SetRenderTarget(renderer, this->screen);
 }
 
-SDL_FRect Game::draw_health_bar(SDL_Texture *texture, int health, int max_health, int x, int y) {
-    SDL_SetRenderTarget(renderer, texture);
-
-    int w_mul = 2;
-    if (max_health < 4) {
-        w_mul = 3;
-    }
-
-    int health_w = (max_health*w_mul) + 2;
-    int health_x = x - (health_w/2);
-    int health_y = y - 5;
-
-    SDL_FRect draw_rect = { float(health_x), float(health_y), float(health_w), 5.0f };
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &draw_rect);
-    draw_rect.w = float((health*w_mul) + 1);
-    SDL_SetRenderDrawColor(renderer, 255, 128, 96, 255);
-    SDL_RenderFillRect(renderer, &draw_rect);
-    draw_rect.w = float(health_w);
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderRect(renderer, &draw_rect);
-
-    SDL_SetRenderTarget(renderer, this->screen);
-
-    return draw_rect;
-}
-
-void Game::draw_hud(SDL_Texture *texture, std::string item, int health, int max_health, int cheese) {
+void Game::draw_hud(SDL_Texture *texture, std::string item, int item_count, int health, int max_health, int cheese) {
     if (this->displaying_load_screen)
         return;
 
@@ -216,6 +188,8 @@ void Game::draw_hud(SDL_Texture *texture, std::string item, int health, int max_
     this->draw_ui_box(this->ui, BOX_MENU_CONT, &hud_rect);
 
     // current item
+    SDL_FRect item_shadow = { 280.0f, 188.0f, 24.0f, 16.0f };
+    this->draw_ui_box(texture, BOX_MENU_SHD2, &item_shadow);
     SDL_SetRenderTarget(renderer, texture);
     SDL_Texture *item_texture = load_bmp_texture("sprites/" + item + ".bmp");
     SDL_FRect item_src_rect = { 0.0f, 0.0f, 16.0f, 16.0f };
@@ -223,14 +197,26 @@ void Game::draw_hud(SDL_Texture *texture, std::string item, int health, int max_
     SDL_RenderTexture(renderer, item_texture, &item_src_rect, &item_rect);
     SDL_SetRenderTarget(renderer, this->screen);
 
+    if (item_count > 1) {
+        this->draw_icon(texture, ITEM_COUNT_ICON, &this->item_count_icon);
+        char buff[256];
+        snprintf(buff, sizeof(buff), "%d", item_count);
+        this->draw_text(texture, buff, SMALL_FONT, 300, 186, 0);
+    }
+
     // health
     char buff[256];
     snprintf(buff, sizeof(buff), "{%d/%d", health, max_health);
-    this->draw_text(texture, buff, SMALL_FONT, max_health > 9 && health > 9 ? 280 : 282, 206, 0);
+    this->draw_text(texture, buff, SMALL_FONT, max_health > 9 && health > 9 ? 280 : 282, 204, 0);
+    SDL_FRect health_rect = { 280.0f, 212.0f, 24.0f, 5.0f };
+    float perc = ceil(22.0f * (float)health / (float)max_health);
+    SDL_FRect fill_rect = { 281.0f, 213.0f, perc, 3.0f };
+    this->draw_rect(texture, &health_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+    this->draw_rect(texture, &fill_rect, 255, 64, 64, 255, SDL_BLENDMODE_NONE);
 
     // cheese
     snprintf(buff, sizeof(buff), "~ %d", cheese);
-    this->draw_text(texture, buff, SMALL_FONT, 282, 214, 0);
+    this->draw_text(texture, buff, SMALL_FONT, 282, 218, 0);
 }
 
 static NetworkAgent::State _last_state = NetworkAgent::State::NO_CONNECTION;
@@ -271,17 +257,17 @@ void Game::draw_overlay() {
 
     // network agent overlay (only cheddar can "create objects" so that is used to check if cheddar)
     if (game->create_objects && net_agent != nullptr && !this->displaying_load_screen && this->did_clear_overlay) {
-        NetworkAgent::State state = net_agent->get_state();
+        this->net_state = net_agent->get_state();
         std::string code = net_agent->get_connection_code();
 
         // draw if state changed, code changed, or if a second has passed since last rendered
-        if (state != _last_state || code != _last_code || this->ticks - _last_drawn_ticks > 1000) {
+        if (this->net_state != _last_state || code != _last_code || this->ticks - _last_drawn_ticks > 1000) {
             // clear last overlay
             if (_dst_rect.w > 0.0f) {
                 this->draw_rect(this->overlay, &_dst_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
             }
 
-            switch (state) {
+            switch (this->net_state) {
             case NetworkAgent::State::NO_CONNECTION:
                 _dst_rect = SDL_FRect{ 0.0f, 0.0f, 88.0f, 16.0f };
                 this->draw_ui_box(this->overlay, BOX_OVERLAY, &_dst_rect);
@@ -302,7 +288,7 @@ void Game::draw_overlay() {
                 break; // display nothing
             }
 
-            _last_state = state;
+            _last_state = this->net_state;
             _last_code = code;
             _last_drawn_ticks = this->ticks;
         }

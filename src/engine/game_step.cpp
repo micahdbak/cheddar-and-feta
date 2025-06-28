@@ -19,6 +19,8 @@
     thing = nullptr;\
 }
 
+std::unordered_map<uint64_t, std::string> debug_obj_ptrs;
+
 Game::Game() {
     // create textures
     this->screen = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -47,7 +49,7 @@ Game::Game() {
     this->icons = SDL_CreateTextureFromSurface(renderer, icons_surface);
     if (this->icons == nullptr) FATALITY("SDL_CreateTextureFromSurface")
 
-    SDL_SetTextureScaleMode(this->screen, SDL_SCALEMODE_NEAREST);
+    SDL_SetTextureScaleMode(this->icons, SDL_SCALEMODE_NEAREST);
 
     this->ticks = SDL_GetTicks();
     // only show load-in screen upon loading a map
@@ -55,6 +57,8 @@ Game::Game() {
 
     Font::load_fonts(this->fonts);
     load_render_functions(); // bmp_texture.h
+
+    this->item_count_icon = { 294.05f, 182.05f, 16.0f, 16.0f };
 }
 
 Game::~Game() {
@@ -179,6 +183,10 @@ void Game::create_object(const std::string &id, const std::string &options) {
         } else {
             this->objects.push_back(obj);
         }
+
+        debug_obj_ptrs[(uint64_t)obj] = id;
+    } else {
+        std::cerr << "Game::create_object error: '" << id << "' resulted in nullptr" << std::endl;
     }
 }
 
@@ -225,12 +233,20 @@ void Game::step() {
     // step all objects
     for (auto it = this->objects.begin(); it != this->objects.end();) {
         Object *obj = *it;
+
+        if (obj == nullptr) {
+            std::cerr << "Game::step: nullptr found in objects" << std::endl;
+            it = this->objects.erase(it);
+            continue;
+        }
+
         obj->step();
 
         if (this->delete_object) {
-            delete obj;
             it = this->objects.erase(it);
+            delete obj;
             this->delete_object = false;
+            continue;
         } else it++;
     }
 

@@ -8,9 +8,17 @@
 // objects
 #include "billboard.h"
 #include "cheese.h"
+#include "foes/bat.h"
+#include "foes/bell.h"
 #include "foes/bug.h"
+#include "foes/frog.h"
 #include "foes/gate.h"
 #include "foes/spawner.h"
+#include "items/coffee.h"
+#include "items/fire.h"
+#include "items/frog_tongue.h"
+#include "items/grub.h"
+#include "items/molotov.h"
 #include "items/toothpick.h"
 #include "mouse.h"
 #include "net_receiver.h"
@@ -47,11 +55,23 @@ void Game::init() {
     this->factories[INIT_OBJ] = new InitFactory();
 
     // objects
+    this->factories[BELL_OBJ] = new BellFactory();
     this->factories[BILLBOARD_OBJ] = new BillboardFactory();
     this->factories[CHEESE_OBJ] = new CheeseFactory();
+    this->factories[FOE_BAT_OBJ] = new FoeBatFactory();
     this->factories[FOE_BUG_OBJ] = new FoeBugFactory();
+    this->factories[FOE_FROG_OBJ] = new FoeFrogFactory();
     this->factories[GATE_OBJ] = new FoeGateFactory();
     this->factories[SPAWNER_OBJ] = new FoeSpawnerFactory();
+    this->factories[ITEM_COFFEE_BEAN DROPPED_OBJ] = new DroppedCoffeeBeanFactory();
+    this->factories[ITEM_COFFEE_BEAN USE_OBJ] = new UsedCoffeeBeanFactory();
+    this->factories[ITEM_FIRE USE_OBJ] = new FireFactory();
+    this->factories[ITEM_FROG_TONGUE DROPPED_OBJ] = new DroppedFrogTongueFactory();
+    this->factories[ITEM_FROG_TONGUE USE_OBJ] = new FrogTongueFactory();
+    this->factories[ITEM_GRUB DROPPED_OBJ] = new DroppedGrubFactory();
+    this->factories[ITEM_GRUB USE_OBJ] = new ThrownGrubFactory();
+    this->factories[ITEM_MOLOTOV DROPPED_OBJ] = new DroppedMolotovFactory();
+    this->factories[ITEM_MOLOTOV USE_OBJ] = new ThrownMolotovFactory();
     this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
     this->factories[ITEM_TOOTHPICK USE_OBJ] = new ThrownToothpickFactory();
     this->factories[MOUSE_OBJ] = new MouseFactory();
@@ -59,6 +79,11 @@ void Game::init() {
 
     // items
     item_info[ITEM_NONE] = Item{WEAPON, "Nothing", 1, 0};
+    item_info[ITEM_COFFEE_BEAN] = Item{USEFUL, "Coffee Bean", 0, 0};
+    item_info[ITEM_FIRE] = Item{THROWABLE, "Fire", 0, 0};
+    item_info[ITEM_FROG_TONGUE] = Item{THROWABLE, "Frog Tongue", 0, 0};
+    item_info[ITEM_GRUB] = Item{THROWABLE, "Grub", 0, 0};
+    item_info[ITEM_MOLOTOV] = Item{THROWABLE, "Molotov Cocktail", 0, 0};
     item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Toothpick", 0, 0};
 
     this->factories[FIRST_OBJ] = new NetReceiverFactory();

@@ -15,6 +15,8 @@ bool _running;
 Controller local_controller, remote_controller;
 Game *game;
 
+int _object_id_counter = 0;
+
 void cleanup();
 void scale_screen_rect(SDL_FRect *screen_rect, const int window_width, const int window_height);
 

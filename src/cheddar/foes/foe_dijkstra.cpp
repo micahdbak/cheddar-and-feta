@@ -1,4 +1,5 @@
 #include "SDL3/SDL_stdinc.h"
+#include "bmp_texture.h"
 #include "foe.h"
 #include "game.h"
 #include "mouse.h"
@@ -128,7 +129,7 @@ void foe_path_find(Mouse *mouse) {
     // dist and prev are populated; all done
 }
 
-bool foe_move_towards(Mouse *mouse, int *x, int *y) {
+bool foe_move_towards(Mouse *mouse, int *x, int *y, FoeStrafe strafe) {
     int *prev = mouse->is_feta ? _feta_prev : _cheddar_prev;
 
     if (prev == nullptr) {
@@ -147,6 +148,43 @@ bool foe_move_towards(Mouse *mouse, int *x, int *y) {
     *x = i % cols;
     *y = i / rows;
 
+    // 25% chance strafe left, 25% chance strafe right, 50% don't strafe
+    if (strafe == FoeStrafe::NO_STRAFE) {
+        switch (SDL_rand(4)) {
+        case 0: strafe = FoeStrafe::STRAFE_LEFT; break;
+        case 1: strafe = FoeStrafe::STRAFE_RIGHT; break;
+        default: break;
+        }
+    }
+
+    // 50% chance to not strafe
+    if (strafe != FoeStrafe::NO_STRAFE && SDL_rand(2) == 1) {
+        int x_dir = *x - _x;
+        int y_dir = *y - _y;
+        int direction = direction_from_dirs(x_dir, y_dir);
+
+        // alter direction according to strafe
+        if (strafe == FoeStrafe::STRAFE_LEFT) direction -= 1;
+        if (strafe == FoeStrafe::STRAFE_RIGHT) direction += 1;
+
+        // cycle
+        if (direction < 0) direction = 7;
+        if (direction > 7) direction = 0;
+
+        // get new x/y dir
+        dirs_from_direction(direction, &x_dir, &y_dir);
+
+        int strafe_x = _x + x_dir;
+        int strafe_y = _y + y_dir;
+        int strafe_coord = COORD(strafe_x, strafe_y);
+
+        // strafe goes to a free tile
+        if (strafe_coord >= 0 && strafe_coord < rows * cols && game->collision[strafe_coord] < 0) {
+            *x = strafe_coord % cols;
+            *y = strafe_coord / rows;
+        } // else, leave x/y untouched
+    }
+
     return true;
 }
 
@@ -161,6 +199,68 @@ void foe_pick_random(int *x, int *y) {
     }
 }
 
-void debug_about_tile(int x, int y, int *distance, bool *is_cheddar) {
-    
+static SDL_FRect debug_src_rect[] = {
+    SDL_FRect{ 0.0f, 0.0f, 16.0f, 16.0f },
+    SDL_FRect{ 16.0f, 0.0f, 16.0f, 16.0f },
+    SDL_FRect{ 32.0f, 0.0f, 16.0f, 16.0f },
+    SDL_FRect{ 48.0f, 0.0f, 16.0f, 16.0f },
+    SDL_FRect{ 64.0f, 0.0f, 16.0f, 16.0f },
+    SDL_FRect{ 80.0f, 0.0f, 16.0f, 16.0f },
+    SDL_FRect{ 96.0f, 0.0f, 16.0f, 16.0f },
+    SDL_FRect{ 112.0f, 0.0f, 16.0f, 16.0f },
+    SDL_FRect{ 128.0f, 0.0f, 16.0f, 16.0f }
+};
+
+SDL_FRect *debug_dst_rect = nullptr;
+SDL_Texture *debug_tiles_texture = nullptr;
+
+void foe_debug_tile(int x, int y) {
+    if (debug_dst_rect == nullptr) {
+        debug_dst_rect = (SDL_FRect *)malloc(sizeof(SDL_FRect) * rows * cols);
+        debug_tiles_texture = load_bmp_texture("sprites/foedebug.bmp");
+    }
+
+    float center_x = CENTER_TILE_X(x);
+    float center_y = CENTER_TILE_Y(y);
+
+    float dist1 = distance_between_points(center_x, center_y, cheddar->x, cheddar->y);
+    float dist2 = distance_between_points(center_x, center_y, feta->x, feta->y);
+    Mouse *mouse = nullptr;
+
+    if (dist1 < dist2) {
+        mouse = cheddar;
+    } else {
+        mouse = feta;
+    }
+
+    int *prev = mouse->is_feta ? _feta_prev : _cheddar_prev;
+
+    if (x < 0 || x >= cols || y < 0 || y >= rows) {
+        return;
+    }
+
+    SDL_FRect *src_rect, *dst_rect;
+
+    int prev_tile = prev[COORD(x, y)];
+    if (prev_tile >= 0) {
+        int px = prev_tile % cols;
+        int py = prev_tile / rows;
+
+        int x_dir = px - x;
+        int y_dir = py - y;
+        int direction = direction_from_dirs(x_dir, y_dir);
+
+        src_rect = &debug_src_rect[direction];
+    } else {
+        src_rect = &debug_src_rect[8];
+    }
+
+    debug_dst_rect[COORD(x, y)] = SDL_FRect{
+        float((x * game->tile_width) - game->corner_x),
+        float((y * game->tile_height) - game->corner_y),
+        16.0f, 16.0f
+    };
+    dst_rect = &debug_dst_rect[COORD(x, y)];
+
+    game->push_sprite("sprites/foedebug.bmp", debug_tiles_texture, src_rect, dst_rect, 0);
 }

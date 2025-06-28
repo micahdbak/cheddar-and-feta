@@ -1,4 +1,4 @@
-#include "bug.h"
+#include "bat.h"
 
 #include "cheese.h"
 #include "game.h"
@@ -7,28 +7,32 @@
 
 #include <iostream>
 
-FoeBug::FoeBug(int x, int y, int spawner_id):
-    Foe(float(x), float(y), spawner_id, 500, 256.0f, 16.0f) {
-    this->sprite = new Sprite("sprites/foe_bug.bmp", 18, 18, 100);
+FoeBat::FoeBat(int x, int y, int spawner_id):
+    Foe(float(x), float(y), spawner_id, 125, 256.0f, 16.0f) {
+    this->sprite = new Sprite("sprites/foe_bat.bmp", 24, 24, 100);
 
-    this->dst_rect.w = 18.0f;
-    this->dst_rect.h = 18.0f;
+    this->dst_rect.w = 24.0f;
+    this->dst_rect.h = 24.0f;
 }
 
-FoeBug::~FoeBug() {
+FoeBat::~FoeBat() {
     delete this->sprite;
     this->sprite = nullptr;
 }
 
-void FoeBug::action(Mouse *mouse) {
-    this->state = Foe::State::ACTION;
+void FoeBat::action(Mouse *mouse) {
+    if (game->ticks - this->timer < 500) {
+        return;
+    }
+
+    this->state = Foe::State::FORCE_RANDOM_TILE;
     this->timer = game->ticks;
-    mouse->attack(1);
-    mouse->throw_x = this->x_dir;
-    mouse->throw_y = this->y_dir;
+    mouse->attack(0);
+    mouse->throw_x = -1 * this->x_dir;
+    mouse->throw_y = -1 * this->y_dir;
 }
 
-void FoeBug::attack_internal(int damage) {
+void FoeBat::attack_internal(int damage) {
     this->health -= damage;
 
     if (this->health <= 0) {
@@ -43,19 +47,15 @@ void FoeBug::attack_internal(int damage) {
 }
 
 #define WALK_ANIMATION   0
-#define ATTACK_ANIMATION 8
-#define HURT_ANIMATION   16
+#define ATTACK_ANIMATION 0 // 8
+#define HURT_ANIMATION   0 // 16
 
-void FoeBug::step() {
+void FoeBat::step() {
     this->foe_step();
 
     switch (this->state) {
     case Foe::State::ACTION:
-        this->sprite->set_animation(ATTACK_ANIMATION + this->direction);
-        this->sprite->interval_ms = 50;
-        if (game->ticks - this->timer > 1000) {
-            this->state = Foe::State::IDLE;
-        }
+        this->state = Foe::State::FORCE_RANDOM_TILE;
 
         break;
 
@@ -75,19 +75,9 @@ void FoeBug::step() {
             // delete this object
             game->delete_object = true;
             return;
-
-            int cheese_amount = SDL_rand(8); // 0..7
-
-            // add cheese for the player to pick up
-            if (cheese_amount > 4) { // 5..7
-                cheese_amount -= 4; // 1..3
-                char cheese_opt[256];
-                snprintf(cheese_opt, sizeof(cheese_opt), "%d,%d,%d", int(this->x) + game->tile_width/2, int(this->y) + game->tile_height/2, cheese_amount);
-                game->push_object(CHEESE_OBJ, std::string(cheese_opt));
-            }
         }
 
-        game->push_icon(SKULL_AND_BONES_ICON, this->x, this->y - 14.0f, &this->icon_src, &this->icon_dst);
+        game->push_icon(SKULL_AND_BONES_ICON, this->x, this->y - 16.0f, &this->icon_src, &this->icon_dst);
 
         break;
 
@@ -99,7 +89,7 @@ void FoeBug::step() {
     }
 
     this->sprite->update_frame();
-    this->dst_rect.x = this->x - float(game->corner_x) - 8.0f;
-    this->dst_rect.y = this->y - float(game->corner_y) - 8.0f;
+    this->dst_rect.x = this->x - float(game->corner_x) - 12.0f;
+    this->dst_rect.y = this->y - float(game->corner_y) - 12.0f;
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 14);
 }

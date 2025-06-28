@@ -7,6 +7,8 @@
 #include "object.h"
 #include "sprite.h"
 
+#define MOUSE_DEFAULT_SPEED 64.0f
+
 class Mouse : public Object {
 public:
     Mouse(int x, int y, bool is_feta);
@@ -20,7 +22,7 @@ public:
     bool attack(int damage);
 
     bool push_item(const std::string &item_id);
-    void remove_item(const std::string &item_id);
+    bool remove_item(const std::string &item_id); // true if no more
     int add_cheese(int amount);
 
     bool is_feta = true;
@@ -33,21 +35,30 @@ public:
     int health = 10, max_health = 10;
     int damage = 1, armour = 0;
 
-    std::vector<std::string> items;
-    int max_items = 4, sel_item = -1;
+    struct Item {
+        std::string item_id;
+        int count;
+    };
+
+    std::vector<Item> items;
+    int sel_item = -1;
 
     int cheese = 0, max_cheese = 10;
 
+    Foe *closest_foe = nullptr;
+
+    float max_mov_speed = MOUSE_DEFAULT_SPEED;
+
 private:
-    SDL_FRect dst_rect;
-    Sprite *sprite;
+    SDL_FRect dst_rect, hat_dst, icon_src, icon_dst;
+    Sprite *sprite, *hat;
 
     enum { FALSE, ATTACKING, ATTACKED, THROWING, EATING } is_busy = FALSE;
     Uint64 busy_ticks = 0;
 
     int check_foe = 0;
-    Foe *closest_foe = nullptr;
     float closest_distance = FLT_MAX;
+    bool did_miss = false;
 
     int tile_x, tile_y;
 };

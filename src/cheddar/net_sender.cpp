@@ -21,13 +21,14 @@ void NetSender::step() {
 
     // hud
     if (feta != nullptr) {
-        std::string sel_item_id = feta->sel_item < 0 ? ITEM_NONE : feta->items[feta->sel_item];
+        std::string sel_item_id = feta->sel_item < 0 ? ITEM_NONE : feta->items[feta->sel_item].item_id;
+        int sel_item_count = feta->sel_item < 0 ? 0 : feta->items[feta->sel_item].count;
         if (!item_info.contains(sel_item_id)) {
             feta->sel_item = -1;
             sel_item_id = ITEM_NONE; // wtf
         }
 
-        snprintf(line, sizeof(line), "%s,%d,%d,%d\n", sel_item_id.c_str(), feta->health, feta->max_health, feta->cheese);
+        snprintf(line, sizeof(line), "%s,%d,%d,%d,%d\n", sel_item_id.c_str(), sel_item_count, feta->health, feta->max_health, feta->cheese);
     } else {
         snprintf(line, sizeof(line), ITEM_NONE ",0,0,0\n");
     }

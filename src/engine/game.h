@@ -13,6 +13,7 @@
 
 #include "font.h"
 #include "map.h"
+#include "net_agent.h"
 #include "object.h"
 
 // useful math stuff
@@ -26,7 +27,8 @@
     (sqrt(pow((x2) - (x1), 2) + pow((y2) - (y1), 2)))
 
 // for movement
-#define DIAG_MULTIPLIER 0.7071f // for diagonal movement
+#define DIAG_MULTIPLIER  0.7071f // for diagonal movement
+#define DIAG_MULTIPLIER2 1.4142f
 
 // screen related constants
 #define SCREEN_WIDTH  320
@@ -37,17 +39,27 @@
 #define BOX_OUT       1
 #define BOX_OUT_SEL   2
 #define BOX_MENU_CONT 3
-#define BOX_UNDER     4
-#define BOX_UNDER_SEL 5
+#define BOX_MENU_SHD1 4
+#define BOX_MENU_SHD2 5
 #define BOX_OVERLAY   6
 
 // icons
-#define CHEDDAR_ICON          SDL_FRect{0.0f, 0.0f, 16.0f, 16.0f}
-#define NOT_CONNECTED_ICON    SDL_FRect{16.0f, 0.0f, 16.0f, 16.0f}
-#define WAITING_FOR_PEER_ICON SDL_FRect{32.0f, 0.0f, 16.0f, 16.0f}
-#define FETA_ICON             SDL_FRect{48.0f, 0.0f, 16.0f, 16.0f}
-#define SKULL_AND_BONES_ICON  SDL_FRect{0.0f, 16.0f, 16.0f, 16.0f}
-#define EDITOR_OBJECT_ICON    SDL_FRect{16.0f, 16.0f, 16.0f, 16.0f}
+#define CHEDDAR_ICON          SDL_FRect{ 0.05f,  0.05f, 16.0f, 16.0f}
+#define FETA_ICON             SDL_FRect{16.05f,  0.05f, 16.0f, 16.0f}
+#define NOT_CONNECTED_ICON    SDL_FRect{32.05f,  0.05f, 16.0f, 16.0f}
+#define WAITING_FOR_PEER_ICON SDL_FRect{48.05f,  0.05f, 16.0f, 16.0f}
+#define SKULL_AND_BONES_ICON  SDL_FRect{ 0.05f, 16.05f, 16.0f, 16.0f}
+#define EDITOR_OBJECT_ICON    SDL_FRect{16.05f, 16.05f, 16.0f, 16.0f}
+#define MISS_ICON             SDL_FRect{32.05f, 16.05f, 24.0f, 16.0f}
+#define HEALTH_100_ICON       SDL_FRect{ 0.05f, 32.05f, 16.0f,  8.0f}
+#define HEALTH_75_ICON        SDL_FRect{16.05f, 32.05f, 16.0f,  8.0f}
+#define HEALTH_50_ICON        SDL_FRect{32.05f, 32.05f, 16.0f,  8.0f}
+#define HEALTH_25_ICON        SDL_FRect{48.05f, 32.05f, 16.0f,  8.0f}
+#define FOE_MINUS_1_ICON      SDL_FRect{56.05f, 16.05f,  8.0f,  8.0f}
+#define FOE_MINUS_2_ICON      SDL_FRect{56.05f, 24.05f,  8.0f,  8.0f}
+#define FOE_MINUS_3_ICON      SDL_FRect{32.05f, 40.05f, 16.0f, 16.0f}
+#define FOE_MINUS_4_ICON      SDL_FRect{48.05f, 40.05f, 16.0f, 16.0f}
+#define ITEM_COUNT_ICON       SDL_FRect{16.05f, 40.05f, 16.0f, 16.0f}
 
 // forces one object to the be the first/last object run per frame
 // should only be used by something like:
@@ -91,15 +103,15 @@ public:
     void draw_ui_box(SDL_Texture *texture, int type, SDL_FRect *rect);
     void draw_text(SDL_Texture *texture, const std::string &str, int font, int x, int y, int w);
     void draw_icon(SDL_Texture *texture, SDL_FRect src_rect, SDL_FRect *dst_rect);
-    SDL_FRect draw_health_bar(SDL_Texture *texture, int health, int max_health, int x, int y);
-    void draw_hud(SDL_Texture *texture, std::string item, int health, int max_health, int cheese);
+    void draw_hud(SDL_Texture *texture, std::string item, int item_count, int health, int max_health, int cheese);
     void draw_overlay();
 
     // game_sprite.cpp
 
     void set_view(int x, int y);
     void push_sprite(const std::string &tex_id, SDL_Texture *texture, SDL_FRect *src_rect, SDL_FRect *dst_rect, int depth_offset);
-    void push_icon(SDL_FRect src_rect, SDL_FRect *dst_rect);
+    void push_icon(SDL_FRect icon_rect, float x, float y, SDL_FRect *src_rect, SDL_FRect *dst_rect);
+    void push_health_bar(int health, int max_health, float x, float y, SDL_FRect *src_rect, SDL_FRect *dst_rect);
 
     // defined per game (e.g., map_editor.cpp, init.cpp)
 
@@ -142,6 +154,9 @@ public:
 
     // sprite rendering things
     std::vector<SpriteRender> sprites;
+    std::vector<SpriteRender> push_sprites;
+
+    NetworkAgent::State net_state;
 
 private:
 
@@ -172,6 +187,8 @@ private:
 
     // overlay things
     bool did_clear_overlay = false;
+
+    SDL_FRect item_count_icon;
 };
 
 extern SDL_Renderer *renderer;

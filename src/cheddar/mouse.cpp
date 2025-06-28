@@ -1,5 +1,8 @@
+#include "foes/foe.h"
+#include "game.h"
 #include "items/item.h"
 #include "mouse.h"
+#include "net_agent.h"
 #include "save_data.h"
 
 #include "items/toothpick.h"
@@ -36,6 +39,10 @@ Mouse::Mouse(int x, int y, bool is_feta) {
         this->name = "Feta";
     }
 
+    this->hat = new Sprite("sprites/hat_cap.bmp", 16, 16, 0);
+    this->hat_dst.w = 16.0f;
+    this->hat_dst.h = 16.0f;
+
     this->dst_rect.w = 32.0f;
     this->dst_rect.h = 32.0f;
 
@@ -60,6 +67,8 @@ Mouse::Mouse(int x, int y, bool is_feta) {
 Mouse::~Mouse() {
     delete this->sprite;
     this->sprite = nullptr;
+    delete this->hat;
+    this->hat = nullptr;
     if (this->is_feta) {
         cheddar = nullptr;
     } else {
@@ -104,6 +113,7 @@ static bool _is_collision(float x, float y) {
 #define THROWING_ANIMATION  24
 #define EATING_ANIMATION    32
 #define DANCING_ANIMATION   33
+#define SLEEPING_ANIMATION  34
 
 void Mouse::step() {
     if (!_locked_due_to_loading && game->displaying_load_screen) {
@@ -126,16 +136,19 @@ void Mouse::step() {
             this->sel_item = this->items.size() - 1;
         else if (this->sel_item > this->items.size() - 1)
             this->sel_item = -1;
+    } else {
+        this->sel_item = -1;
     }
 
-    std::string sel_item_id = this->sel_item < 0 ? ITEM_NONE : this->items[this->sel_item];
+    std::string sel_item_id = this->sel_item < 0 ? ITEM_NONE : this->items[this->sel_item].item_id;
+    int sel_item_count = this->sel_item < 0 ? 0 : this->items[this->sel_item].count;
     if (!item_info.contains(sel_item_id)) {
         this->sel_item = -1;
         sel_item_id = ITEM_NONE; // wtf
     }
 
     if (!this->is_feta)
-        game->draw_hud(game->ui, sel_item_id, this->health, this->max_health, this->cheese);
+        game->draw_hud(game->ui, sel_item_id, sel_item_count, this->health, this->max_health, this->cheese);
 
     // cycle through available foes to find which is closest
     if (!foes.empty()) {
@@ -169,7 +182,7 @@ void Mouse::step() {
                 float distance = distance_between_points(foe->x, foe->y, this->x, this->y);
 
                 // if it is closer than the closest foe, update it to become the closest foe
-                if (distance < this->closest_distance) {
+                if (this->closest_foe == nullptr || distance < this->closest_distance) {
                     this->closest_foe = foe;
                     this->closest_distance = distance;
                 }
@@ -182,6 +195,17 @@ void Mouse::step() {
 
     switch (this->is_busy) {
     case FALSE:
+        // sleeping when disconnected
+        if (this->is_feta &&
+            (game->net_state == NetworkAgent::State::NO_CONNECTION ||
+            game->net_state == NetworkAgent::State::WAITING_FOR_PEER)) {
+            this->sprite->set_animation(SLEEPING_ANIMATION);
+            this->sprite->update_frame();
+            this->sprite->interval_ms = 250;
+
+            break; // don't do anything but sleep
+        }
+
         // dancing
         if (controller != nullptr && controller->is_down(R2)) {
             this->sprite->set_animation(DANCING_ANIMATION);
@@ -208,12 +232,12 @@ void Mouse::step() {
             this->sprite->set_frame(0);
         }
 
-        mov_speed = 32.0f;
+        mov_speed = this->max_mov_speed / 2.0f;
         this->sprite->interval_ms = 250;
 
         // run
         if (controller != nullptr && controller->is_down(L2)) {
-            mov_speed = 64.0f;
+            mov_speed = this->max_mov_speed;
             this->sprite->interval_ms = 100;
         }
 
@@ -228,12 +252,15 @@ void Mouse::step() {
                     dirs_from_direction(this->sprite->animation % 8, &x_dir, &y_dir);
 
                 char options[256];
-                snprintf(options, sizeof(options), "%d,%d,%d,%d", int(this->x), int(this->y), x_dir, y_dir);
+                snprintf(options, sizeof(options), "%d,%d,%d,%d,%d", int(this->x), int(this->y), x_dir, y_dir, this->id);
                 game->push_object(sel_item_id + USE_OBJ, std::string(options));
 
-                this->remove_item(sel_item_id);
-                if (this->sel_item >= this->items.size())
-                    this->sel_item--;
+                if (this->remove_item(sel_item_id)) {
+                    this->sel_item = -1;
+                } else {
+                    if (this->sel_item >= this->items.size())
+                        this->sel_item--;
+                }
 
                 if (item_info[sel_item_id].type == THROWABLE) {
                     this->is_busy = THROWING;
@@ -256,17 +283,12 @@ void Mouse::step() {
 
                 // set animation to attacking
                 this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
+                this->did_miss = true;
 
                 // attack the closest foe (if close enough)
                 if (this->closest_foe != nullptr && this->closest_distance < 32.0f) {
+                    this->did_miss = false;
                     this->closest_foe->attack(this->damage);
-
-                    // check if foe just died
-                    if (this->closest_foe->state == Foe::State::DEAD) {
-                        // set these accordingly so next attack is not the dead foe
-                        this->closest_foe = nullptr;
-                        this->closest_distance = FLT_MAX;
-                    }
                 }
 
                 break;
@@ -281,8 +303,14 @@ void Mouse::step() {
         }
 
         // eat cheese
-        if (controller != nullptr && controller->is_hit(ACTION2) && this->cheese > 0) {
+        if (controller != nullptr && controller->is_hit(ACTION2) && this->cheese > 0 && this->health < this->max_health) {
             this->cheese--;
+            this->health++;
+
+            if (this->health > this->max_health) {
+                this->health = this->max_health;
+            }
+
             this->is_busy = EATING;
             this->busy_ticks = game->ticks;
 
@@ -301,7 +329,7 @@ void Mouse::step() {
             x_dir = int(controller->is_down(RIGHT)) - int(controller->is_down(LEFT));
             y_dir = int(controller->is_down(DOWN)) - int(controller->is_down(UP));
         }
-        mov_speed = 32.0f;
+        mov_speed = this->max_mov_speed / 2.0f;
 
         // will return to normal after << 500 ms >>
         if (game->ticks - this->busy_ticks > 500) {
@@ -311,13 +339,17 @@ void Mouse::step() {
             this->sprite->set_animation(this->sprite->animation % 8);
         }
 
+        if (this->did_miss) {
+            game->push_icon(MISS_ICON, this->dst_rect.x + 16.0f + game->corner_x, this->dst_rect.y + game->corner_y - 4.0f, &this->icon_src, &this->icon_dst);
+        }
+
         break;
 
     case ATTACKED:
         // move according to the random throw direction set when attacked
         x_dir = this->throw_x;
         y_dir = this->throw_y;
-        mov_speed = 64.0f;
+        mov_speed = this->max_mov_speed;
 
         // will return to normal after << 250 ms >>
         if (game->ticks - this->busy_ticks > 250) {
@@ -357,8 +389,14 @@ void Mouse::step() {
     }
 
     // new coordinates calculated with direction moving, movement speed, and diagonal multiplier (if necessary)
-    float new_x = this->x + float(x_dir) * (y_dir != 0 ? DIAG_MULTIPLIER : 1.0f) * mov_speed * game->delta;
-    float new_y = this->y + float(y_dir) * (x_dir != 0 ? DIAG_MULTIPLIER : 1.0f) * mov_speed * game->delta;
+    float dx = float(x_dir) * (y_dir != 0 ? DIAG_MULTIPLIER : 1.0f) * mov_speed * game->delta;
+    float dy = float(y_dir) * (x_dir != 0 ? DIAG_MULTIPLIER : 1.0f) * mov_speed * game->delta;
+
+    dx = cnf_clamp(dx, -4.0f, 4.0f);
+    dy = cnf_clamp(dy, -4.0f, 4.0f);
+
+    float new_x = this->x + dx;
+    float new_y = this->y + dy;
 
     // only move if there isn't a collider in the way
     if (!_is_collision(new_x, this->y)) this->x = new_x;
@@ -377,14 +415,29 @@ void Mouse::step() {
         this->dst_rect.x = (float)(int)((SCREEN_WIDTH / 2) - 16);
         this->dst_rect.y = (float)(int)((SCREEN_HEIGHT / 2) - 24);
 
+        this->hat_dst.x = (float)(int)((SCREEN_WIDTH / 2) - 8);
+        this->hat_dst.y = (float)(int)((SCREEN_HEIGHT / 2) - 24);
+
         game->set_view(this->x, this->y);
+
+        // for (int ty = this->tile_y-8; ty < this->tile_y+9; ty++) {
+        //     for (int tx = this->tile_x-8; tx < this->tile_x+9; tx++) {
+        //         foe_debug_tile(tx, ty);
+        //     }
+        // }
     } else {
         this->dst_rect.x = this->x - float(16 + game->corner_x);
         this->dst_rect.y = this->y - float(24 + game->corner_y);
+
+        this->hat_dst.x = this->x - float(8 + game->corner_x);
+        this->hat_dst.y = this->y - float(24 + game->corner_y);
     }
 
     // display the sprite to the screen
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
+
+    // this->hat->set_animation(this->sprite->animation % 8);
+    // game->push_sprite(this->hat->tex_id, this->hat->texture, &this->hat->frame, &this->hat_dst, 23);
 }
 
 // will be called by a foe
@@ -414,21 +467,53 @@ bool Mouse::attack(int damage) {
 }
 
 bool Mouse::push_item(const std::string &item_id) {
-    if (this->items.size() >= this->max_items || !item_info.contains(item_id)) {
+    if (!item_info.contains(item_id)) {
         return false;
     }
 
-    this->items.push_back(item_id);
+    Mouse::Item new_item;
+    new_item.item_id = item_id;
+    new_item.count = 1;
+
+    if (this->items.empty()) {
+        this->items.push_back(new_item);
+        return true;
+    }
+
+    for (auto it = this->items.begin(); it != this->items.end(); ++it) {
+        if (it->item_id == item_id) {
+            it->count++;
+            return true;
+        } else if (it->item_id > item_id) {
+            if (this->sel_item >= std::distance(this->items.begin(), it)) {
+                this->sel_item++;
+            }
+
+            this->items.insert(it, new_item);
+
+            return true;
+        }
+    }
+
+    this->items.push_back(new_item);
     return true;
 }
 
-void Mouse::remove_item(const std::string &item_id) {
+bool Mouse::remove_item(const std::string &item_id) {
     for (auto it = this->items.begin(); it != this->items.end(); it++) {
-        if (*it == item_id) {
-            this->items.erase(it);
-            break;
+        if (it->item_id == item_id) {
+            if (--it->count <= 0) {
+                this->items.erase(it);
+                return true;
+            }
+
+            return false;
+        } else if (it->item_id > item_id) {
+            return false;
         }
     }
+
+    return false;
 }
 
 int Mouse::add_cheese(int amount) {
@@ -452,10 +537,10 @@ Mouse *closest_mouse(float x, float y, float min_distance) {
     float distance_feta = distance_between_points(x, y, feta->x, feta->y);
 
     if (distance_cheddar < distance_feta) {
-        if (distance_cheddar < min_distance) {
+        if (min_distance < 0.1f || distance_cheddar < min_distance) {
             return cheddar;
         }
-    } else if (distance_feta < min_distance) {
+    } else if (min_distance < 0.1f || distance_feta < min_distance) {
         return feta;
     }
 

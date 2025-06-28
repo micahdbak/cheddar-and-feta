@@ -38,11 +38,6 @@ void FoeSpawner::step() {
     this->dst_rect.x = this->x - 16.0f - game->corner_x;
     this->dst_rect.y = this->y - 16.0f - game->corner_y;
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 16.0f);
-
-    if (local_controller.c == 'q') {
-        this->trigger();
-        local_controller.c = NO_CHAR;
-    }
 }
 
 void FoeSpawner::trigger() {

@@ -7,6 +7,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.1 AND NOT WIN32)
+  set(CMAKE_C_FLAGS
+      "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer -g -O1")
+  set(CMAKE_CXX_FLAGS
+      "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer -g -O1")
+  set(CMAKE_EXE_LINKER_FLAGS
+      "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+  set(CMAKE_SHARED_LINKER_FLAGS
+      "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
+endif()
+
 add_subdirectory(libdatachannel)
 add_subdirectory(SDL)
 
@@ -50,11 +61,18 @@ target_link_libraries(FetaLauncher PRIVATE ${DEPS})
 
 add_executable(CheddarLauncher
     ${ENGINE_SRC}
+    src/cheddar/foes/bat.cpp
+    src/cheddar/foes/bell.cpp
     src/cheddar/foes/bug.cpp
     src/cheddar/foes/foe.cpp
     src/cheddar/foes/foe_dijkstra.cpp
+    src/cheddar/foes/frog.cpp
     src/cheddar/foes/gate.cpp
     src/cheddar/foes/spawner.cpp
+    src/cheddar/items/fire.cpp
+    src/cheddar/items/frog_tongue.cpp
+    src/cheddar/items/grub.cpp
+    src/cheddar/items/molotov.cpp
     src/cheddar/items/toothpick.cpp
     src/cheddar/items/item.cpp
     src/cheddar/billboard.cpp

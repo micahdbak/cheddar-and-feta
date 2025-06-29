@@ -4,15 +4,16 @@
 
 #include <iostream>
 
-#define ICE_SERVERS (const char *[]){\
-    "stun:stun.l.google.com:19302",\
-    "stun:stun1.l.google.com:19302",\
-    "stun:stun2.l.google.com:19302",\
-    "stun:stun3.l.google.com:19302"\
-}
 #define NUM_ICE_SERVERS 4
 
 #define NTS -1
+
+static const char* ICE_SERVERS[] = {
+    "stun:stun.l.google.com:19302",
+    "stun:stun1.l.google.com:19302",
+    "stun:stun2.l.google.com:19302",
+    "stun:stun3.l.google.com:19302"
+};
 
 void NetworkConnection::start_collecting(bool offerer) {
     if (this->state != NetworkConnection::State::DEAD) {

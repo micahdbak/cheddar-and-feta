@@ -7,6 +7,10 @@
 #include <iostream>
 #include <sys/stat.h>
 
+#ifdef _WIN32
+#include <direct.h> // _mkdir
+#endif
+
 SaveData save;
 
 static void _mkdir_if_not_exists(char *save_root, size_t save_root_size) {
@@ -31,7 +35,7 @@ static void _mkdir_if_not_exists(char *save_root, size_t save_root_size) {
     }
     snprintf(save_root, save_root_size, "%s/CheddarAndFeta", app_data);
 
-    if (mkdir(save_root) == 0)
+    if (_mkdir(save_root) == 0)
         return;
 #endif
 

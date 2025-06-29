@@ -1,6 +1,8 @@
 #ifndef GATE_OBJ
 #define GATE_OBJ "gate"
 
+#include <vector>
+
 #include "object.h"
 #include "sprite.h"
 

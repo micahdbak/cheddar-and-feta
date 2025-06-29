@@ -163,7 +163,7 @@ void Controller::handle_gamepad_axis(SDL_GamepadAxis axis, Sint16 value) {
     default: return;
     }
 
-    float distance = distance_between_points(0, 0, float(this->stick_x), float(this->stick_y));
+    float distance = (float)distance_between_points(0, 0, float(this->stick_x), float(this->stick_y));
     if (distance < 8000.0f) {
         this->is_down_map[UP] = this->is_down_map[RIGHT] = this->is_down_map[DOWN] = this->is_down_map[LEFT] = false;
         return;

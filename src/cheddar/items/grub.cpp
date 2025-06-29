@@ -1,6 +1,7 @@
 #include "game.h"
 #include "grub.h"
 
+#include <algorithm>
 #include <map>
 
 ThrownGrub::ThrownGrub(float x, float y, int x_dir, int y_dir, int from_id):

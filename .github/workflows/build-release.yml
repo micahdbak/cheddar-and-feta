@@ -31,10 +31,9 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Install MinGW
+      - name: Install OpenSSL
         run: |
-          choco install mingw openssl -y
-          g++ --version
+          choco install openssl -y
 
       - name: Checkout sdl3-2d-engine
         uses: actions/checkout@v4
@@ -43,5 +42,5 @@ jobs:
 
       - name: CMake build
         run: |
-          cmake -G "MinGW Makefiles" -S . -B build
-          cmake --build build
+          cmake -S . -B build -G "Visual Studio 17 2022"
+          cmake --build build --config Release

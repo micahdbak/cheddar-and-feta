@@ -38,7 +38,7 @@ void Game::draw_ui_box(SDL_Texture *texture, int type, SDL_FRect *rect) {
         rect = &_rect;
     }
 
-    int x_shift = type * (UI_BOX_SIZE * 3);
+    int x_shift = type * ((int)UI_BOX_SIZE * 3);
     SDL_FRect src_rect, dst_rect;
 
     // top-left corner
@@ -189,7 +189,7 @@ void Game::draw_hud(SDL_Texture *texture, std::string item, int item_count, int 
 
     // current item
     SDL_FRect item_shadow = { 280.0f, 188.0f, 24.0f, 16.0f };
-    this->draw_ui_box(texture, BOX_MENU_SHD2, &item_shadow);
+    this->draw_ui_box(texture, BOX_MENU_SHD1, &item_shadow);
     SDL_SetRenderTarget(renderer, texture);
     SDL_Texture *item_texture = load_bmp_texture("sprites/" + item + ".bmp");
     SDL_FRect item_src_rect = { 0.0f, 0.0f, 16.0f, 16.0f };
@@ -248,7 +248,7 @@ void Game::draw_overlay() {
 
         if (ms_since < 2000) {
             // over the course of 1000ms (1 second), goes from 250 -> 0
-            uint8_t alpha = (1000 - (ms_since - 1000)) / 4;
+            uint8_t alpha = (uint8_t)((1000 - (ms_since - 1000)) / 4);
             this->draw_rect(this->overlay, NULL, 0, 0, 0, alpha, SDL_BLENDMODE_NONE);
         } else {
             this->did_clear_overlay = true;

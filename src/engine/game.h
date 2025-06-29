@@ -16,6 +16,10 @@
 #include "net_agent.h"
 #include "object.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 // useful math stuff
 
 #define cnf_clamp(_x, _min, _max) ((_x) < (_min) ? (_min) : ((_x) > (_max) ? (_max) : (_x)))

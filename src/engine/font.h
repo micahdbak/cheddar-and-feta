@@ -1,6 +1,7 @@
 #ifndef FONT_H
 #define FONT_H
 
+#include <string>
 #include <unordered_map>
 #include <vector>
 

@@ -1,6 +1,9 @@
 #ifndef MOUSE_OBJ
 #define MOUSE_OBJ "mouse"
 
+#include <vector>
+#include <iostream>
+
 #include "controller.h"
 #include "foes/foe.h"
 #include "game.h"
@@ -9,15 +12,25 @@
 
 #define MOUSE_DEFAULT_SPEED 64.0f
 
+// save keys
+#define MOUSE_X         "_x"
+#define MOUSE_Y         "_y"
+#define MOUSE_ANIMATION "_animation"
+#define MOUSE_SPAWN_AT  DONT_WRITE "spawn_at"
+
 class Mouse : public Object {
 public:
-    Mouse(int x, int y, bool is_feta);
+    struct SpawnCoord {
+        float x, y;
+        int animation;
+    };
+
+    Mouse(std::vector<SpawnCoord> &coordinates, bool is_feta, std::string options);
     ~Mouse();
 
     void step() override;
 
     void save_data() override;
-    void post_save_data() override;
 
     bool attack(int damage);
 
@@ -63,17 +76,48 @@ private:
     int tile_x, tile_y;
 };
 
+#define MOUSEFACTORY_FAIL(str) {\
+    std::cerr << "MouseFactory::create: bad options: " << (str) << std::endl;\
+    std::exit(1);\
+}
+
 class MouseFactory : public ObjectFactory {
 public:
     MouseFactory() {}
     ~MouseFactory() {}
 
+    // options:
+    // [is_feta] [x1,y1,a1] [x2,y2,a2]
+    // e.g., 0 32,32,0 1600,640,2
     Object *create(const std::string &options) override {
-        int x = 0, y = 0, is_feta;
-        if (sscanf(options.c_str(), "%d,%d,%d", &x, &y, &is_feta) < 3) {
-            is_feta = 0;
-        }
-        return new Mouse(x, y, is_feta != 0);
+        const char *arr = options.c_str();
+        int is_feta;
+        std::vector<Mouse::SpawnCoord> coordinates;
+
+        if (sscanf(arr, "%d", &is_feta) < 1) MOUSEFACTORY_FAIL(options.c_str())
+        if (*++arr == '\0' || *++arr == '\0') MOUSEFACTORY_FAIL(options.c_str())
+
+        int i = 0;
+        do {
+            int x = 0, y = 0, animation = 0;
+            if (sscanf(arr, "%d,%d,%d", &x, &y, &animation) < 3)
+                break;
+
+            Mouse::SpawnCoord coord;
+            coord.x = (float)x;
+            coord.y = (float)y;
+            coord.animation = animation;
+            coordinates.push_back(coord);
+
+            while (*arr != '\0' && *arr != ' ')
+                arr++;
+            if (*arr == '\0') break;
+            while (*++arr == ' ')
+                arr++;
+            if (*arr == '\0') break;
+        } while (++i < 10); // max ten coords, incase something really breaks
+
+        return new Mouse(coordinates, is_feta != 0, options);
     }
 };
 

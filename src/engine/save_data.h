@@ -11,6 +11,13 @@
 #define LOAD_NEW     1
 #define LOAD_TAMPER  2
 
+#define DONT_WRITE "!"
+#define LOAD_SAVE  DONT_WRITE "load_save"
+#define LOAD_MAP   "map"
+
+void float_to_str(float f, char *str, size_t str_size);
+float str_to_float(std::string str);
+
 class SaveData {
 public:
     SaveData() = default;
@@ -20,11 +27,46 @@ public:
     void write_file(int file_i);
     int load_file(int file_i);
 
+    std::string value(std::string key) {
+        if (this->data.find(key) == this->data.end()) {
+            return "";
+        }
+
+        return this->data[key];
+    }
+
+    bool has(std::string key) {
+        return this->data.find(key) != this->data.end();
+    }
+
+    // put float
+    void putf(std::string key, float val) {
+        char buff[256];
+        float_to_str(val, buff, sizeof(buff));
+        this->data[key] = std::string(buff);
+    }
+
+    // put integer
+    void puti(std::string key, int val) {
+        char buff[256];
+        snprintf(buff, sizeof(buff), "%d", val);
+        this->data[key] = std::string(buff);
+    }
+
+    // get float
+    float getf(std::string key) {
+        std::string val = this->value(key);
+        return val.empty() ? 0.0f : str_to_float(val);
+    }
+
+    // get integer
+    int geti(std::string key) {
+        std::string val = this->value(key);
+        return val.empty() ? 0 : std::stoi(val);
+    }
+
     std::unordered_map<std::string, std::string> data;
 };
-
-void float_to_str(float f, char *str, size_t str_size);
-float str_to_float(const char *str);
 
 extern SaveData save;
 

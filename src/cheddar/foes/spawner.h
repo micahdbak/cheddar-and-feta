@@ -72,6 +72,6 @@ public:
     }
 };
 
-extern FoeSpawner **spawners;
+extern FoeSpawner *spawners[];
 
 #endif

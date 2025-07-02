@@ -17,7 +17,6 @@ public:
     virtual void step() = 0;
 
     virtual void save_data() {}
-    virtual void post_save_data() {}
 
     int id;
 };

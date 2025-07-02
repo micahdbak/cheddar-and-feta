@@ -224,39 +224,34 @@ static std::string _last_code = "";
 static Uint64 _last_drawn_ticks = 0;
 static SDL_FRect _dst_rect = SDL_FRect{ 0.0f, 0.0f, 0.0f, 0.0f };
 static SDL_FRect _icon_rect = SDL_FRect{ 2.0f, 0.0f, 16.0f, 16.0f };
+static SDL_FRect _title_rect = SDL_FRect{ 0.0f, 20.0f, 320.0f, 40.0f };
 
 void Game::draw_overlay() {
     SDL_SetRenderTarget(renderer, this->overlay);
 
-    // loading screen
+    // title screen
     if (this->displaying_load_screen) {
         if (this->ticks - this->load_ticks > 1000) {
             this->displaying_load_screen = false;
+            this->draw_rect(this->overlay, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
         }
     } else if (this->ticks - this->load_ticks < 1000) {
         this->displaying_load_screen = true;
-        this->did_clear_overlay = false;
+    
+        int title_w = this->fonts[TITLE_FONT]->text_width(this->map_title);
+        int description_w = this->fonts[DEFAULT_FONT]->text_width(this->map_description);
 
-        int title_w = this->fonts[DEFAULT_FONT]->text_width(this->map_title);
-        int description_w = this->fonts[SMALL_FONT]->text_width(this->map_description);
-
-        this->draw_rect(this->overlay, NULL, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-        this->draw_text(this->overlay, map_title, TITLE_FONT, (SCREEN_WIDTH / 2) - (title_w / 2), (SCREEN_HEIGHT / 2) - 8, 0);
-        this->draw_text(this->overlay, map_description, DEFAULT_FONT, (SCREEN_WIDTH / 2) - (description_w / 2), (SCREEN_HEIGHT / 2) + 8, 0);
-    } else if (!this->did_clear_overlay) {
-        Uint64 ms_since = this->ticks - this->load_ticks;
-
-        if (ms_since < 2000) {
-            // over the course of 1000ms (1 second), goes from 250 -> 0
-            uint8_t alpha = (uint8_t)((1000 - (ms_since - 1000)) / 4);
-            this->draw_rect(this->overlay, NULL, 0, 0, 0, alpha, SDL_BLENDMODE_NONE);
-        } else {
-            this->did_clear_overlay = true;
-        }
+        int title_x = (SCREEN_WIDTH / 2) - (title_w / 2);
+        int description_x = (SCREEN_WIDTH / 2) - (description_w / 2);
+        _title_rect.x = (title_x < description_x ? (float)title_x : (float)description_x) - 16.0f;
+        _title_rect.w = (title_x < description_x ? (float)title_w : (float)description_w) + 32.0f;
+        this->draw_ui_box(this->overlay, BOX_MAP_TITLE, &_title_rect);
+        this->draw_text(this->overlay, map_title, TITLE_FONT, title_x, 28, 0);
+        this->draw_text(this->overlay, map_description, DEFAULT_FONT, description_x, 44, 0);
     }
 
     // network agent overlay (only cheddar can "create objects" so that is used to check if cheddar)
-    if (game->create_objects && net_agent != nullptr && !this->displaying_load_screen && this->did_clear_overlay) {
+    if (game->create_objects && net_agent != nullptr && !this->displaying_load_screen) {
         this->net_state = net_agent->get_state();
         std::string code = net_agent->get_connection_code();
 

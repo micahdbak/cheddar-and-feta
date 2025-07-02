@@ -23,7 +23,7 @@ void NetSender::step() {
     if (feta != nullptr) {
         std::string sel_item_id = feta->sel_item < 0 ? ITEM_NONE : feta->items[feta->sel_item].item_id;
         int sel_item_count = feta->sel_item < 0 ? 0 : feta->items[feta->sel_item].count;
-        if (!item_info.contains(sel_item_id)) {
+        if (item_info.find(sel_item_id) == item_info.end()) {
             feta->sel_item = -1;
             sel_item_id = ITEM_NONE; // wtf
         }

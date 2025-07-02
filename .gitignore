@@ -2,14 +2,4 @@
 .cache
 screenshot.bmp
 **/*.backup.*
-
-# ignore all files under build except the Release/ directory
-build/*
-!build/Release
-
-# ignore all files under build/Release except the game data directories
-build/Release/*
-!build/Release/fonts
-!build/Release/maps
-!build/Release/sprites
-!build/Release/tiles
+build

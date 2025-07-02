@@ -6,6 +6,7 @@
 #include "font.h"
 #include "game.h"
 #include "net_agent.h"
+#include "save_data.h"
 
 #include <iostream>
 
@@ -130,7 +131,6 @@ void Game::load_map(const char *map_path) {
     Map map;
     map.read(map_path);
 
-    this->current_map = map_path;
     this->map_title = map.title;
     this->map_description = map.description;
 
@@ -164,12 +164,19 @@ void Game::load_map(const char *map_path) {
 
     map.clear();
 
+    if (save.geti(LOAD_SAVE) == 1)
+        save.data.erase(LOAD_SAVE);
+
+    this->current_map = map_path;
+    save.data[LOAD_MAP] = this->current_map;
+
     // map loaded screen
     this->load_ticks = SDL_GetTicks();
+    this->displaying_load_screen = false;
 }
 
 void Game::create_object(const std::string &id, const std::string &options) {
-    if (!this->factories.contains(id) && id != FIRST_OBJ && id != LAST_OBJ) {
+    if (this->factories.find(id) == this->factories.end() && id != FIRST_OBJ && id != LAST_OBJ) {
         std::cerr << "Game::create_object error: '" << id << "' does not exist" << std::endl;
         return;
     }
@@ -197,11 +204,6 @@ void Game::push_object(const std::string &id, const std::string &options) {
 void Game::save_objects() {
     for (auto obj : this->objects)
         obj->save_data();
-}
-
-void Game::post_save_objects() {
-    for (auto obj : this->objects)
-        obj->post_save_data();
 }
 
 void Game::step() {

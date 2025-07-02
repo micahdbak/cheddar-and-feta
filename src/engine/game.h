@@ -46,6 +46,7 @@
 #define BOX_MENU_SHD1 4
 #define BOX_MENU_SHD2 5
 #define BOX_OVERLAY   6
+#define BOX_MAP_TITLE 7
 
 // icons
 #define CHEDDAR_ICON          SDL_FRect{ 0.05f,  0.05f, 16.0f, 16.0f}
@@ -90,7 +91,6 @@ public:
     void create_object(const std::string &id, const std::string &options);
     void push_object(const std::string &id, const std::string &options);
     void save_objects();
-    void post_save_objects();
     void step();
 
     // game_const.cpp
@@ -188,9 +188,6 @@ private:
     SDL_Texture *ui_box = nullptr;
     std::queue<Text> texts;
     SDL_Texture *icons;
-
-    // overlay things
-    bool did_clear_overlay = false;
 
     SDL_FRect item_count_icon;
 };

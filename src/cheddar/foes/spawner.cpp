@@ -1,33 +1,30 @@
 #include "controller.h"
 #include "game.h"
+#include "save_data.h"
 #include "spawner.h"
 
 #include <iostream>
 
-FoeSpawner **spawners = nullptr;
-static int refcount = 0;
+FoeSpawner *spawners[20];
 
 FoeSpawner::FoeSpawner(float x, float y, int spawner_id, const std::vector<std::vector<std::string>> &waves):
     x(x), y(y), spawner_id(spawner_id), waves(waves) {
-    if (spawners == nullptr) {
-        spawners = (FoeSpawner **)malloc(sizeof(FoeSpawner*) * 10); // NOLINT(bugprone-sizeof-expression)
+    this->sprite = new Sprite("sprites/spawner.bmp", 32, 32, 0);
+    this->dst_rect.w = this->dst_rect.h = 32.0f;
+
+    char key[256];
+    snprintf(key, sizeof(key), "spawner_%d", this->spawner_id);
+    if (save.geti(key) == 1) {
+        this->empty = true;
+        this->wave = this->waves.size();
     }
 
     spawners[spawner_id] = this;
-    refcount++;
-    this->sprite = new Sprite("sprites/spawner.bmp", 32, 32, 0);
-    this->dst_rect.w = this->dst_rect.h = 32.0f;
 }
 
 FoeSpawner::~FoeSpawner() {
     delete this->sprite;
     spawners[this->spawner_id] = nullptr;
-
-    refcount--;
-    if (refcount <= 0) {
-        refcount = 0;
-        free(spawners);
-    }
 }
 
 void FoeSpawner::step() {
@@ -45,6 +42,9 @@ void FoeSpawner::trigger() {
 
     if (this->wave >= this->waves.size()) {
         this->empty = true;
+        char key[256];
+        snprintf(key, sizeof(key), "spawner_%d", this->spawner_id);
+        save.puti(key, 1);
         return;
     }
 

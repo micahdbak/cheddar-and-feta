@@ -20,10 +20,10 @@
 #include "items/grub.h"
 #include "items/molotov.h"
 #include "items/toothpick.h"
+#include "ladder.h"
 #include "mouse.h"
 #include "net_receiver.h"
 #include "net_sender.h"
-#include "save_station.h"
 
 #include "items/item.h"
 
@@ -74,8 +74,8 @@ void Game::init() {
     this->factories[ITEM_MOLOTOV USE_OBJ] = new ThrownMolotovFactory();
     this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
     this->factories[ITEM_TOOTHPICK USE_OBJ] = new ThrownToothpickFactory();
+    this->factories[LADDER_OBJ] = new LadderFactory();
     this->factories[MOUSE_OBJ] = new MouseFactory();
-    this->factories[SAVE_STATION_OBJ] = new SaveStationFactory();
 
     // items
     item_info[ITEM_NONE] = Item{WEAPON, "Nothing", 1, 0};
@@ -105,6 +105,7 @@ void Game::init() {
 
 Init::Init() {
     this->summaries = save.file_summaries();
+    game->displaying_load_screen = true;
 }
 
 void Init::step() {
@@ -118,12 +119,13 @@ void Init::step() {
         } else return;
     } else if (local_controller.is_hit(PRIMARY)) {
         int ret = save.load_file(this->sel_save);
+        save.puti(LOAD_SAVE, 1);
 
         if (/* ret == LOAD_SUCCESS || ret == LOAD_NEW */ true) {
-            if (!save.data.contains("map"))
-                save.data["map"] = "maps/bigtunnel";
+            if (!save.has(LOAD_MAP))
+                save.data[LOAD_MAP] = "maps/bigtunnel";
 
-            game->map = save.data["map"];
+            game->map = save.data[LOAD_MAP];
         } else {
             textbox = new Textbox("Save file is corrupted.", INIT_OBJ, DEFAULT_FONT, 50);
         }

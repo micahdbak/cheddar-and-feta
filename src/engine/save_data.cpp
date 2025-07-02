@@ -104,7 +104,7 @@ void SaveData::write_file(int file_i) {
     FILE *save_file = fopen(save_file_name, "w");
     if (save_file == NULL) CORRUPTED_EXIT
 
-    if (!this->data.contains("level"))
+    if (this->data.find("level") != this->data.end())
         this->data["level"] = "0";
 
     char line[MAX_LINE_LENGTH];
@@ -117,6 +117,9 @@ void SaveData::write_file(int file_i) {
 
     // write rest of save data to file
     for (auto pair : this->data) {
+        if (pair.first[0] == DONT_WRITE[0])
+            continue;
+
         snprintf(line, sizeof(line), "%s=%s\n", pair.first.c_str(), pair.second.c_str());
         hash = _djb2_hash(hash, line);
         fputs(line, save_file);
@@ -182,8 +185,9 @@ void float_to_str(float f, char *str, size_t str_size) {
     snprintf(str, str_size, "%x", bits);
 }
 
-float str_to_float(const char *str) {
-    uint32_t bits = strtoul(str, NULL, 16);
+float str_to_float(std::string str) {
+    const char *arr = str.c_str();
+    uint32_t bits = strtoul(arr, NULL, 16);
     float f;
     memcpy(&f, &bits, 4);
     return f;

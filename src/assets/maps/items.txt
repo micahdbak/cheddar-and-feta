@@ -4,7 +4,7 @@ Floor 1
 1
 tiles/dirttunnel.bmp
 12
-mouse 64,128
+mouse 0 64,128,0
 bell 64,64,1
 spawner 128,64,1 foe_bug;foe_bug;foe_bug;foe_bug;foe_bug;foe_bug;foe_bug;foe_bug;foe_bug;foe_bug
 gate 192,224,1

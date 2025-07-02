@@ -14,7 +14,7 @@ bool mice_locked = false;
 bool _locked_due_to_loading = false;
 Mouse *cheddar = nullptr, *feta = nullptr;
 
-Mouse::Mouse(int x, int y, bool is_feta) {
+Mouse::Mouse(std::vector<Mouse::SpawnCoord> &coordinates, bool is_feta, std::string options) {
     this->is_feta = is_feta;
     if (!this->is_feta) {
         if (cheddar != nullptr) {
@@ -24,9 +24,8 @@ Mouse::Mouse(int x, int y, bool is_feta) {
         cheddar = this;
 
         // add feta to the map
-        char options[256];
-        snprintf(options, sizeof(options), "%d,%d,1", x, y);
-        game->push_object(MOUSE_OBJ, std::string(options));
+        options[0] = '1';
+        game->push_object(MOUSE_OBJ, options);
         this->sprite = new Sprite("sprites/cheddar.bmp", 32, 32, 250);
         this->name = "Cheddar";
     } else {
@@ -46,21 +45,54 @@ Mouse::Mouse(int x, int y, bool is_feta) {
     this->dst_rect.w = 32.0f;
     this->dst_rect.h = 32.0f;
 
-    this->x = float(x);
-    this->y = float(y);
-    this->tile_x = x / game->tile_width;
-    this->tile_y = y / game->tile_height;
-    foe_path_find(this);
+    if (save.geti(LOAD_SAVE) && save.has(this->name + MOUSE_X)) {
+        this->x = save.getf(this->name + MOUSE_X);
+        this->y = save.getf(this->name + MOUSE_Y);
+        this->sprite->set_animation(save.geti(this->name + MOUSE_ANIMATION));
+    } else {
+        // SaveData::geti returns 0 if spawn_at is unset - this default value is ok
+        int coord = save.geti(MOUSE_SPAWN_AT);
 
-    if (save.data[this->is_feta ? "feta_data" : "cheddar_data"] == "true") {
-        save.data[this->is_feta ? "feta_data" : "cheddar_data"] = "false";
-        this->x = str_to_float(save.data[this->is_feta ? "feta_x" : "cheddar_x"].c_str());
-        this->y = str_to_float(save.data[this->is_feta ? "feta_y" : "cheddar_y"].c_str());
-        this->sprite->set_animation(atoi(save.data[this->is_feta ? "feta_animation" : "cheddar_animation"].c_str()));
+        // feta loads second so unset this then
+        if (this->is_feta) {
+            save.puti(MOUSE_SPAWN_AT, 0); // reset to 0
+        }
+
+        if (coord < 0 || coord >= coordinates.size()) {
+            coord = 0;
+        }
+
+        if (coordinates.empty()) {
+            coordinates.push_back(Mouse::SpawnCoord{0.0f, 0.0f, 0});
+        }
+
+        this->x = coordinates[coord].x;
+        this->y = coordinates[coord].y;
+        this->sprite->set_animation(coordinates[coord].animation);
     }
+
+    this->tile_x = this->x / game->tile_width;
+    this->tile_y = this->y / game->tile_height;
+    foe_path_find(this);
 
     if (!this->is_feta) {
         game->set_view(this->x, this->y);
+    }
+
+    if (!this->is_feta) {
+        this->dst_rect.x = (float)(int)((SCREEN_WIDTH / 2) - 16);
+        this->dst_rect.y = (float)(int)((SCREEN_HEIGHT / 2) - 24);
+
+        this->hat_dst.x = (float)(int)((SCREEN_WIDTH / 2) - 8);
+        this->hat_dst.y = (float)(int)((SCREEN_HEIGHT / 2) - 24);
+
+        game->set_view(this->x, this->y);
+    } else {
+        this->dst_rect.x = this->x - float(16 + game->corner_x);
+        this->dst_rect.y = this->y - float(24 + game->corner_y);
+
+        this->hat_dst.x = this->x - float(8 + game->corner_x);
+        this->hat_dst.y = this->y - float(24 + game->corner_y);
     }
 }
 
@@ -77,29 +109,9 @@ Mouse::~Mouse() {
 }
 
 void Mouse::save_data() {
-    if (!this->is_feta) {
-        save.data["cheddar_data"] = "true";
-        char buff[100];
-        float_to_str(this->x, buff, sizeof(buff));
-        save.data["cheddar_x"] = buff;
-        float_to_str(this->y, buff, sizeof(buff));
-        save.data["cheddar_y"] = buff;
-        snprintf(buff, sizeof(buff), "%d", int(this->sprite->animation));
-        save.data["cheddar_animation"] = buff;
-    } else {
-        save.data["feta_data"] = "true";
-        char buff[100];
-        float_to_str(this->x, buff, sizeof(buff));
-        save.data["feta_x"] = buff;
-        float_to_str(this->y, buff, sizeof(buff));
-        save.data["feta_y"] = buff;
-        snprintf(buff, sizeof(buff), "%d", int(this->sprite->animation));
-        save.data["feta_animation"] = buff;
-    }
-}
-
-void Mouse::post_save_data() {
-    save.data[this->is_feta ? "feta_data" : "cheddar_data"] = "false";
+    save.putf(this->name + MOUSE_X, this->x);
+    save.putf(this->name + MOUSE_Y, this->y);
+    save.puti(this->name + MOUSE_ANIMATION, this->sprite->animation);
 }
 
 static bool _is_collision(float x, float y) {
@@ -116,10 +128,13 @@ static bool _is_collision(float x, float y) {
 #define SLEEPING_ANIMATION  34
 
 void Mouse::step() {
-    if (!_locked_due_to_loading && game->displaying_load_screen) {
-        _locked_due_to_loading = true;
-        mice_locked = true;
-    } else if (_locked_due_to_loading && !game->displaying_load_screen) {
+    if (!_locked_due_to_loading) {
+        if (game->displaying_load_screen && (game->ticks - game->load_ticks) < 500) {
+            _locked_due_to_loading = true;
+            mice_locked = true;
+        }
+    } else if ((game->ticks - game->load_ticks) > 100) {
+        _locked_due_to_loading = false;
         mice_locked = false;
     }
 
@@ -142,7 +157,7 @@ void Mouse::step() {
 
     std::string sel_item_id = this->sel_item < 0 ? ITEM_NONE : this->items[this->sel_item].item_id;
     int sel_item_count = this->sel_item < 0 ? 0 : this->items[this->sel_item].count;
-    if (!item_info.contains(sel_item_id)) {
+    if (item_info.find(sel_item_id) == item_info.end()) {
         this->sel_item = -1;
         sel_item_id = ITEM_NONE; // wtf
     }
@@ -467,7 +482,7 @@ bool Mouse::attack(int damage) {
 }
 
 bool Mouse::push_item(const std::string &item_id) {
-    if (!item_info.contains(item_id)) {
+    if (item_info.find(item_id) == item_info.end()) {
         return false;
     }
 

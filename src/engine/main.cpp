@@ -84,7 +84,7 @@ int main(int argc, const char **argv) {
             } break;
 
             case SDL_EVENT_GAMEPAD_REMOVED:
-                if (gamepads.contains(event.gdevice.which)) {
+                if (gamepads.find(event.gdevice.which) != gamepads.end()) {
                     SDL_CloseGamepad(gamepads[event.gdevice.which]);
                     gamepads.erase(event.gdevice.which);
                 }

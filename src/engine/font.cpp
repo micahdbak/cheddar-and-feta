@@ -89,7 +89,7 @@ Font::Font(const char *font_path, int w, int h, int default_w, const std::unorde
 
         // see if this character has a special width
         char c = char(i) + ' ';
-        if (special_w.contains(c)) {
+        if (special_w.find(c) != special_w.end()) {
             this->src_rect[i].w = float(special_w.at(c));
         }
     }

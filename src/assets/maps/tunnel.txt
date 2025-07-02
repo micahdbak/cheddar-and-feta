@@ -5,4 +5,4 @@ Floor 1
 tiles/dirttunnel.bmp
 sprites/cheddar.bmp
 1
-mouse 256,256
+mouse 0 256,256,0

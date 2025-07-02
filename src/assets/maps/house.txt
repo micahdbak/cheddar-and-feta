@@ -4,9 +4,8 @@ Test Room
 2
 tiles/house.bmp
 tiles/dungeon.bmp
-8
-mouse 256,96
-save.station 192,64
+7
+mouse 0 256,96,0
 foe_bug 256,128
 foe_bug 224,128
 foe_bug 224,144

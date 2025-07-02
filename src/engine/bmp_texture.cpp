@@ -58,7 +58,7 @@ void load_render_functions() {
 }
 
 SDL_Texture *load_bmp_texture(const std::string &bmp_path) {
-    if (bmp_textures.contains(bmp_path)) {
+    if (bmp_textures.find(bmp_path) != bmp_textures.end()) {
         return bmp_textures[bmp_path];
     }
 
@@ -69,7 +69,7 @@ SDL_Texture *load_bmp_texture(const std::string &bmp_path) {
         size_t offset = strlen(buff) + 1; // + 1 for '/'
         sscanf(bmp_path.c_str() + offset, "%1023[^/]", buff);
 
-        if (!render_functions.contains(buff)) {
+        if (render_functions.find(buff) == render_functions.end()) {
             std::cerr << "load_bmp_texture error: render function " << buff << " does not exist." << std::endl;
             std::exit(1);
         }

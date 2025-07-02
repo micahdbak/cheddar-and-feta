@@ -4,34 +4,8 @@ project(CheddarAndFeta VERSION 0.1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
-set(CMAKE_BUILD_TYPE Debug)
 
-if(NOT WIN32)
-    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
-endif()
-
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.1 AND NOT WIN32)
-  set(CMAKE_C_FLAGS
-      "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer -g -O1")
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer -g -O1")
-  set(CMAKE_EXE_LINKER_FLAGS
-      "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
-  set(CMAKE_SHARED_LINKER_FLAGS
-      "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
-endif()
-
-add_subdirectory(libdatachannel)
-
-if(WIN32)
-    set(SDL3_DISABLE_WINDOWS_GAMEINPUT TRUE CACHE BOOL "" FORCE)
-endif()
-
-add_subdirectory(SDL)
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
+# ---- BEGIN SOURCE FILES
 
 set(ENGINE_SRC
     src/engine/bmp_texture.cpp
@@ -50,26 +24,17 @@ set(ENGINE_SRC
     src/engine/sprite.cpp
 )
 
-set(DEPS LibDataChannel::LibDataChannelStatic SDL3::SDL3)
-
-add_executable(MapEditor
-    ${ENGINE_SRC}
+set(MAP_EDITOR_SRC
     src/map_editor/map_editor.cpp
 )
-target_include_directories(MapEditor PRIVATE src/engine src/map_editor)
-target_link_libraries(MapEditor PRIVATE ${DEPS})
 
-add_executable(FetaLauncher
-    ${ENGINE_SRC}
+set(FETA_SRC
     src/feta/net_receiver.cpp
     src/feta/net_sender.cpp
     src/feta/init.cpp
 )
-target_include_directories(FetaLauncher PRIVATE src/engine src/feta)
-target_link_libraries(FetaLauncher PRIVATE ${DEPS})
 
-add_executable(CheddarLauncher
-    ${ENGINE_SRC}
+set(CHEDDAR_SRC
     src/cheddar/foes/bat.cpp
     src/cheddar/foes/bell.cpp
     src/cheddar/foes/bug.cpp
@@ -87,11 +52,69 @@ add_executable(CheddarLauncher
     src/cheddar/billboard.cpp
     src/cheddar/cheese.cpp
     src/cheddar/init.cpp
+    src/cheddar/ladder.cpp
     src/cheddar/mouse.cpp
     src/cheddar/net_receiver.cpp
     src/cheddar/net_sender.cpp
-    src/cheddar/save_station.cpp
     src/cheddar/textbox.cpp
 )
+
+# ---- END SOURCE FILES
+
+if(NOT WIN32)
+    set(BUILD_SHARED_LIBS OFF)
+
+    # debugging stuff
+    #set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer -g -O1")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer -g -O1")
+    #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+    #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
+
+    # one output directory
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
+
+    # prep dependencies
+    add_subdirectory(libdatachannel EXCLUDE_FROM_ALL)
+    add_subdirectory(SDL EXCLUDE_FROM_ALL)
+    set(DEPS LibDataChannel::LibDataChannelStatic SDL3::SDL3)
+else()
+    set(BUILD_SHARED_LIBS ON)
+
+    # VS generator generates both Debug and Release
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/Debug)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release)
+
+    # prep dependencies
+    set(SDL3_DISABLE_WINDOWS_GAMEINPUT TRUE CACHE BOOL "" FORCE)
+    add_subdirectory(libdatachannel EXCLUDE_FROM_ALL)
+    add_subdirectory(SDL EXCLUDE_FROM_ALL)
+    set(DEPS LibDataChannel::LibDataChannel SDL3::SDL3)
+endif()
+
+add_executable(MapEditor ${ENGINE_SRC} ${MAP_EDITOR_SRC})
+target_include_directories(MapEditor PRIVATE src/engine src/map_editor)
+target_link_libraries(MapEditor PRIVATE ${DEPS})
+
+add_executable(FetaLauncher ${ENGINE_SRC} ${FETA_SRC})
+target_include_directories(FetaLauncher PRIVATE src/engine src/feta)
+target_link_libraries(FetaLauncher PRIVATE ${DEPS})
+
+add_executable(CheddarLauncher ${ENGINE_SRC} ${CHEDDAR_SRC})
 target_include_directories(CheddarLauncher PRIVATE src/engine src/cheddar)
 target_link_libraries(CheddarLauncher PRIVATE ${DEPS})
+
+if(WIN32)
+    target_compile_definitions(MapEditor PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(FetaLauncher PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(CheddarLauncher PRIVATE _CRT_SECURE_NO_WARNINGS)
+
+    add_custom_command(TARGET CheddarLauncher POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_RUNTIME_DLLS:CheddarLauncher>
+            $<TARGET_FILE_DIR:CheddarLauncher>
+        COMMAND_EXPAND_LISTS
+    )
+endif()

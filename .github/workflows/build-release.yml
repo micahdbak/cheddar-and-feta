@@ -25,22 +25,3 @@ jobs:
         run: |
           cmake -S . -B build
           cmake --build build
-
-  build-windows:
-    name: Windows
-    runs-on: windows-latest
-
-    steps:
-      - name: Install OpenSSL
-        run: |
-          choco install openssl -y
-
-      - name: Checkout sdl3-2d-engine
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: CMake build
-        run: |
-          cmake -S . -B build -G "Visual Studio 17 2022"
-          cmake --build build --config Release

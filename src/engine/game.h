@@ -45,8 +45,7 @@
 #define BOX_MENU_CONT 3
 #define BOX_MENU_SHD1 4
 #define BOX_MENU_SHD2 5
-#define BOX_OVERLAY   6
-#define BOX_MAP_TITLE 7
+#define BOX_MAP_TITLE 6
 
 // icons
 #define CHEDDAR_ICON          SDL_FRect{ 0.05f,  0.05f, 16.0f, 16.0f}
@@ -121,6 +120,14 @@ public:
 
     void init();
 
+    // quick funcs
+
+    void display_notification(std::string text) {
+        this->notification = text;
+        this->notif_ticks = this->ticks;
+        this->force_notif_rerender = true;
+    }
+
     std::string title = "SDL3 Game";
     int argc;
     const char **argv;
@@ -190,6 +197,10 @@ private:
     SDL_Texture *icons;
 
     SDL_FRect item_count_icon;
+
+    std::string notification;
+    Uint64 notif_ticks;
+    bool force_notif_rerender = false;
 };
 
 extern SDL_Renderer *renderer;

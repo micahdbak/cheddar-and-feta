@@ -5,8 +5,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
-# ---- BEGIN SOURCE FILES
-
 set(ENGINE_SRC
     src/engine/bmp_texture.cpp
     src/engine/font.cpp
@@ -59,8 +57,17 @@ set(CHEDDAR_SRC
     src/cheddar/textbox.cpp
 )
 
-# ---- END SOURCE FILES
+# configure targets with source files
+add_executable(MapEditor ${ENGINE_SRC} ${MAP_EDITOR_SRC})
+add_executable(FetaLauncher ${ENGINE_SRC} ${FETA_SRC})
+add_executable(CheddarLauncher ${ENGINE_SRC} ${CHEDDAR_SRC})
 
+# configure target include directories
+target_include_directories(MapEditor PRIVATE src/engine src/map_editor)
+target_include_directories(FetaLauncher PRIVATE src/engine src/feta)
+target_include_directories(CheddarLauncher PRIVATE src/engine src/cheddar)
+
+# build options for macOS (NOT WIN32) or Windows (WIN32)
 if(NOT WIN32)
     set(BUILD_SHARED_LIBS OFF)
 
@@ -72,9 +79,9 @@ if(NOT WIN32)
     #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
 
     # one output directory
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Release)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
 
     # prep dependencies
     add_subdirectory(libdatachannel EXCLUDE_FROM_ALL)
@@ -87,30 +94,18 @@ else()
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/Debug)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release)
 
+    # hides some dumb warnings about sscanf, ...
+    target_compile_definitions(MapEditor PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(FetaLauncher PRIVATE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(CheddarLauncher PRIVATE _CRT_SECURE_NO_WARNINGS)
+
     # prep dependencies
     set(SDL3_DISABLE_WINDOWS_GAMEINPUT TRUE CACHE BOOL "" FORCE)
     add_subdirectory(libdatachannel EXCLUDE_FROM_ALL)
     add_subdirectory(SDL EXCLUDE_FROM_ALL)
     set(DEPS LibDataChannel::LibDataChannel SDL3::SDL3)
-endif()
 
-add_executable(MapEditor ${ENGINE_SRC} ${MAP_EDITOR_SRC})
-target_include_directories(MapEditor PRIVATE src/engine src/map_editor)
-target_link_libraries(MapEditor PRIVATE ${DEPS})
-
-add_executable(FetaLauncher ${ENGINE_SRC} ${FETA_SRC})
-target_include_directories(FetaLauncher PRIVATE src/engine src/feta)
-target_link_libraries(FetaLauncher PRIVATE ${DEPS})
-
-add_executable(CheddarLauncher ${ENGINE_SRC} ${CHEDDAR_SRC})
-target_include_directories(CheddarLauncher PRIVATE src/engine src/cheddar)
-target_link_libraries(CheddarLauncher PRIVATE ${DEPS})
-
-if(WIN32)
-    target_compile_definitions(MapEditor PRIVATE _CRT_SECURE_NO_WARNINGS)
-    target_compile_definitions(FetaLauncher PRIVATE _CRT_SECURE_NO_WARNINGS)
-    target_compile_definitions(CheddarLauncher PRIVATE _CRT_SECURE_NO_WARNINGS)
-
+    # copy dlls over after compiling CheddarLauncher
     add_custom_command(TARGET CheddarLauncher POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             $<TARGET_RUNTIME_DLLS:CheddarLauncher>
@@ -118,3 +113,8 @@ if(WIN32)
         COMMAND_EXPAND_LISTS
     )
 endif()
+
+# link dependencies
+target_link_libraries(MapEditor PRIVATE ${DEPS})
+target_link_libraries(FetaLauncher PRIVATE ${DEPS})
+target_link_libraries(CheddarLauncher PRIVATE ${DEPS})

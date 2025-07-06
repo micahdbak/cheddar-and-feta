@@ -201,7 +201,7 @@ void Game::draw_hud(SDL_Texture *texture, std::string item, int item_count, int 
         this->draw_icon(texture, ITEM_COUNT_ICON, &this->item_count_icon);
         char buff[256];
         snprintf(buff, sizeof(buff), "%d", item_count);
-        this->draw_text(texture, buff, SMALL_FONT, 300, 186, 0);
+        this->draw_text(texture, buff, SMALL_FONT, item_count > 9 ? 298 : 300, 186, 0);
     }
 
     // health
@@ -219,73 +219,122 @@ void Game::draw_hud(SDL_Texture *texture, std::string item, int item_count, int 
     this->draw_text(texture, buff, SMALL_FONT, 282, 218, 0);
 }
 
+// static SDL_FRect _title_rect = SDL_FRect{ 0.0f, 20.0f, 320.0f, 40.0f };
 static NetworkAgent::State _last_state = NetworkAgent::State::NO_CONNECTION;
 static std::string _last_code = "";
 static Uint64 _last_drawn_ticks = 0;
-static SDL_FRect _dst_rect = SDL_FRect{ 0.0f, 0.0f, 0.0f, 0.0f };
-static SDL_FRect _icon_rect = SDL_FRect{ 2.0f, 0.0f, 16.0f, 16.0f };
-static SDL_FRect _title_rect = SDL_FRect{ 0.0f, 20.0f, 320.0f, 40.0f };
+static SDL_FRect _netagent_rect = SDL_FRect{ 0.0f, 0.0f, 0.0f, 0.0f };
+static SDL_FRect _neticon_rect = SDL_FRect{ 10.0f, 8.0f, 16.0f, 16.0f };
+bool _displaying_netagent = false;
+bool _displaying_notification = false;
+bool _second_pass = false;
 
 void Game::draw_overlay() {
     SDL_SetRenderTarget(renderer, this->overlay);
 
-    // title screen
-    if (this->displaying_load_screen) {
-        if (this->ticks - this->load_ticks > 1000) {
-            this->displaying_load_screen = false;
-            this->draw_rect(this->overlay, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
-        }
-    } else if (this->ticks - this->load_ticks < 1000) {
-        this->displaying_load_screen = true;
-    
-        int title_w = this->fonts[TITLE_FONT]->text_width(this->map_title);
-        int description_w = this->fonts[DEFAULT_FONT]->text_width(this->map_description);
-
-        int title_x = (SCREEN_WIDTH / 2) - (title_w / 2);
-        int description_x = (SCREEN_WIDTH / 2) - (description_w / 2);
-        _title_rect.x = (title_x < description_x ? (float)title_x : (float)description_x) - 16.0f;
-        _title_rect.w = (title_x < description_x ? (float)title_w : (float)description_w) + 32.0f;
-        this->draw_ui_box(this->overlay, BOX_MAP_TITLE, &_title_rect);
-        this->draw_text(this->overlay, map_title, TITLE_FONT, title_x, 28, 0);
-        this->draw_text(this->overlay, map_description, DEFAULT_FONT, description_x, 44, 0);
-    }
+    // // title screen
+    // if (this->displaying_load_screen) {
+    //     if (this->ticks - this->load_ticks > 1000) {
+    //         this->displaying_load_screen = false;
+    //         this->draw_rect(this->overlay, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+    //     }
+    // } else if (this->ticks - this->load_ticks < 1000) {
+    //     this->displaying_load_screen = true;
+    // 
+    //     int title_w = this->fonts[TITLE_FONT]->text_width(this->map_title);
+    //     int description_w = this->fonts[DEFAULT_FONT]->text_width(this->map_description);
+    // 
+    //     int title_x = (SCREEN_WIDTH / 2) - (title_w / 2);
+    //     int description_x = (SCREEN_WIDTH / 2) - (description_w / 2);
+    //     _title_rect.x = (title_x < description_x ? (float)title_x : (float)description_x) - 16.0f;
+    //     _title_rect.w = (title_x < description_x ? (float)title_w : (float)description_w) + 32.0f;
+    //     this->draw_ui_box(this->overlay, BOX_MAP_TITLE, &_title_rect);
+    //     this->draw_text(this->overlay, map_title, TITLE_FONT, title_x, 28, 0);
+    //     this->draw_text(this->overlay, map_description, DEFAULT_FONT, description_x, 44, 0);
+    // }
 
     // network agent overlay (only cheddar can "create objects" so that is used to check if cheddar)
-    if (game->create_objects && net_agent != nullptr && !this->displaying_load_screen) {
+    if (game->create_objects && net_agent != nullptr) {
         this->net_state = net_agent->get_state();
         std::string code = net_agent->get_connection_code();
 
         // draw if state changed, code changed, or if a second has passed since last rendered
         if (this->net_state != _last_state || code != _last_code || this->ticks - _last_drawn_ticks > 1000) {
             // clear last overlay
-            if (_dst_rect.w > 0.0f) {
-                this->draw_rect(this->overlay, &_dst_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+            if (_netagent_rect.w > 0.0f) {
+                this->draw_rect(this->overlay, &_netagent_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
             }
 
             switch (this->net_state) {
             case NetworkAgent::State::NO_CONNECTION:
-                _dst_rect = SDL_FRect{ 0.0f, 0.0f, 88.0f, 16.0f };
-                this->draw_ui_box(this->overlay, BOX_OVERLAY, &_dst_rect);
-                this->draw_icon(this->overlay, NOT_CONNECTED_ICON, &_icon_rect);
-                this->draw_text(this->overlay, "Not Connected", DEFAULT_FONT, 20, 4, 0);
+                _netagent_rect = SDL_FRect{ 8.0f, 8.0f, 88.0f, 16.0f };
+                this->draw_ui_box(this->overlay, BOX_MENU_CONT, &_netagent_rect);
+                this->draw_icon(this->overlay, NOT_CONNECTED_ICON, &_neticon_rect);
+                this->draw_text(this->overlay, "Not Connected", DEFAULT_FONT, 28, 12, 0);
+                _displaying_netagent = true;
                 break;
             case NetworkAgent::State::WAITING_FOR_PEER:
-                _dst_rect = SDL_FRect{ 0.0f, 0.0f, 80.0f, 16.0f };
-                this->draw_ui_box(this->overlay, BOX_OVERLAY, &_dst_rect);
-                this->draw_icon(this->overlay, WAITING_FOR_PEER_ICON, &_icon_rect);
-                this->draw_text(this->overlay, "Code:", SMALL_FONT, 20, 5, 0);
-                this->draw_text(this->overlay, code, CODE_FONT, 40, 4, 0);
+                _netagent_rect = SDL_FRect{ 8.0f, 8.0f, 80.0f, 16.0f };
+                this->draw_ui_box(this->overlay, BOX_MENU_CONT, &_netagent_rect);
+                this->draw_icon(this->overlay, WAITING_FOR_PEER_ICON, &_neticon_rect);
+                this->draw_text(this->overlay, "Code:", SMALL_FONT, 28, 13, 0);
+                this->draw_text(this->overlay, code, CODE_FONT, 48, 12, 0);
+                _displaying_netagent = true;
                 break;
             default:
                 // clear entire overlay screen
                 this->draw_rect(this->overlay, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
-                _dst_rect = SDL_FRect{ 0.0f, 0.0f, 0.0f, 0.0f }; // no dst rect
+                _netagent_rect = SDL_FRect{ 0.0f, 0.0f, 0.0f, 0.0f }; // no dst rect
+                _displaying_netagent = false;
+                _displaying_notification = false;
                 break; // display nothing
             }
 
             _last_state = this->net_state;
             _last_code = code;
             _last_drawn_ticks = this->ticks;
+        }
+    }
+
+    if (!this->notification.empty()) {
+        if (this->force_notif_rerender) {
+            this->draw_rect(this->overlay, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+            _displaying_notification = false;
+            this->force_notif_rerender = false;
+
+            if (_displaying_netagent && !_second_pass) {
+                _last_drawn_ticks = 0;
+                _second_pass = true;
+                this->draw_overlay();
+                _second_pass = false;
+            }
+        }
+
+        if (!_displaying_notification) {
+            int text_w = fonts[DEFAULT_FONT]->text_width(this->notification);
+            SDL_FRect notif_rect = SDL_FRect{ 8.0f, 8.0f, (float)(text_w + 12), 16.0f };
+            int text_y = 12;
+
+            if (_displaying_netagent) {
+                notif_rect.y = 26.0f;
+                text_y = 30;
+            }
+
+            this->draw_ui_box(this->overlay, BOX_MENU_CONT, &notif_rect);
+            this->draw_text(this->overlay, this->notification, DEFAULT_FONT, 14, text_y, 0);
+
+            _displaying_notification = true;
+        } else if (this->ticks - this->notif_ticks > 3000) {
+            this->draw_rect(this->overlay, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+            this->notification.clear();
+            _displaying_notification = false;
+
+            if (_displaying_netagent && !_second_pass) {
+                _last_drawn_ticks = 0;
+                _second_pass = true;
+                this->draw_overlay();
+                _second_pass = false;
+            }
         }
     }
 

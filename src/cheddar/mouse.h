@@ -16,6 +16,7 @@
 #define MOUSE_X         "_x"
 #define MOUSE_Y         "_y"
 #define MOUSE_ANIMATION "_animation"
+#define MOUSE_ITEMS     "_items"
 #define MOUSE_SPAWN_AT  DONT_WRITE "spawn_at"
 
 class Mouse : public Object {

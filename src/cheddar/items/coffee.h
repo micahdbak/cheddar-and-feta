@@ -30,39 +30,45 @@ public:
 
 class UsedCoffeeBean : public Object {
 public:
-    UsedCoffeeBean(Mouse *mouse): mouse(mouse) {
+    UsedCoffeeBean(bool is_feta): is_feta(is_feta) {
         this->timer = game->ticks + 5000;
 
+        Mouse *mouse = is_feta ? feta : cheddar;
         if (mouse != nullptr)
             mouse->max_mov_speed = MOUSE_DEFAULT_SPEED * 2.0f;
     }
     ~UsedCoffeeBean() = default;
 
     void step() override {
-        if (this->mouse == nullptr || game->ticks > this->timer) {
-            this->mouse->max_mov_speed = MOUSE_DEFAULT_SPEED;
+        Mouse *mouse = is_feta ? feta : cheddar;
+
+        if (mouse == nullptr) {
+            game->delete_object;
+        }
+
+        if (game->ticks > this->timer) {
+            mouse->max_mov_speed = MOUSE_DEFAULT_SPEED;
             game->delete_object = true;
         }
     }
 
 private:
-    Mouse *mouse;
+    bool is_feta;
     Uint32 timer = 0;
 };
 
 class UsedCoffeeBeanFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) override {
-        int x, y, x_dir, y_dir, from_id;
-        sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir, &from_id);
+        int from_id;
+        sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &from_id);
 
-        Mouse *mouse = nullptr;
-        if (cheddar != nullptr && cheddar->id == from_id)
-            mouse = cheddar;
-        else if (feta != nullptr && feta->id == from_id)
-            mouse = feta;
+        bool is_feta = false;
 
-        return new UsedCoffeeBean(mouse);
+        if (feta != nullptr && feta->id == from_id)
+            is_feta = true;
+
+        return new UsedCoffeeBean(is_feta);
     }
 };
 

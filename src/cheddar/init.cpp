@@ -19,6 +19,7 @@
 #include "items/frog_tongue.h"
 #include "items/grub.h"
 #include "items/molotov.h"
+#include "items/save.h"
 #include "items/toothpick.h"
 #include "ladder.h"
 #include "mouse.h"
@@ -72,6 +73,7 @@ void Game::init() {
     this->factories[ITEM_GRUB USE_OBJ] = new ThrownGrubFactory();
     this->factories[ITEM_MOLOTOV DROPPED_OBJ] = new DroppedMolotovFactory();
     this->factories[ITEM_MOLOTOV USE_OBJ] = new ThrownMolotovFactory();
+    this->factories[ITEM_SAVE USE_OBJ] = new ItemSaveUseFactory();
     this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
     this->factories[ITEM_TOOTHPICK USE_OBJ] = new ThrownToothpickFactory();
     this->factories[LADDER_OBJ] = new LadderFactory();
@@ -84,6 +86,7 @@ void Game::init() {
     item_info[ITEM_FROG_TONGUE] = Item{THROWABLE, "Frog Tongue", 0, 0};
     item_info[ITEM_GRUB] = Item{THROWABLE, "Grub", 0, 0};
     item_info[ITEM_MOLOTOV] = Item{THROWABLE, "Molotov Cocktail", 0, 0};
+    item_info[ITEM_SAVE] = Item{USEFUL, "Save Game", 0, 0};
     item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Toothpick", 0, 0};
 
     this->factories[FIRST_OBJ] = new NetReceiverFactory();
@@ -120,10 +123,11 @@ void Init::step() {
     } else if (local_controller.is_hit(PRIMARY)) {
         int ret = save.load_file(this->sel_save);
         save.puti(LOAD_SAVE, 1);
+        save.puti(SAVE_FILE, this->sel_save);
 
         if (/* ret == LOAD_SUCCESS || ret == LOAD_NEW */ true) {
             if (!save.has(LOAD_MAP))
-                save.data[LOAD_MAP] = "maps/bigtunnel";
+                save.data[LOAD_MAP] = "maps/demo00";
 
             game->map = save.data[LOAD_MAP];
         } else {

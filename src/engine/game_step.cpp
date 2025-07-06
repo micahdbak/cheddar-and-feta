@@ -173,6 +173,8 @@ void Game::load_map(const char *map_path) {
     // map loaded screen
     this->load_ticks = SDL_GetTicks();
     this->displaying_load_screen = false;
+
+    this->display_notification(this->map_title + ", " + this->map_description);
 }
 
 void Game::create_object(const std::string &id, const std::string &options) {

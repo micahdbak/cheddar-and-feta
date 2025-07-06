@@ -31,7 +31,7 @@ private:
 
 class FoeSpawnerFactory: public ObjectFactory {
 public:
-    // e.g., 256,112 foe_bug;foe_bug,foe_bug,foe_bug;foe_mole
+    // e.g., 256,112,1 foe_bug;foe_bug,foe_bug,foe_bug;foe_mole
     Object *create(const std::string &options) {
         const char *arr = options.c_str();
 

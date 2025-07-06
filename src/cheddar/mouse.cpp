@@ -5,6 +5,7 @@
 #include "net_agent.h"
 #include "save_data.h"
 
+#include "items/save.h"
 #include "items/toothpick.h"
 
 #include <iostream>
@@ -71,6 +72,30 @@ Mouse::Mouse(std::vector<Mouse::SpawnCoord> &coordinates, bool is_feta, std::str
         this->sprite->set_animation(coordinates[coord].animation);
     }
 
+    std::string items_s = save.value(this->name + MOUSE_ITEMS);
+    if (!items_s.empty()) {
+        const char *arr = items_s.c_str();
+        int i = 0;
+        do {
+            char item_id[256];
+            int count = 1;
+            sscanf(arr, "%[^*] * %d", item_id, &count);
+            Mouse::Item item{ item_id, count };
+            this->items.push_back(item);
+
+            while (*arr != '\0' && *arr != ',')
+                arr++;
+
+            if (*arr == ',')
+                arr++;
+
+            if (*arr == '\0')
+                break;
+        } while (i++ < 100);
+    } else if (!is_feta) {
+        this->items.push_back(Mouse::Item{ ITEM_SAVE, 1 });
+    }
+
     this->tile_x = this->x / game->tile_width;
     this->tile_y = this->y / game->tile_height;
     foe_path_find(this);
@@ -112,6 +137,18 @@ void Mouse::save_data() {
     save.putf(this->name + MOUSE_X, this->x);
     save.putf(this->name + MOUSE_Y, this->y);
     save.puti(this->name + MOUSE_ANIMATION, this->sprite->animation);
+
+    std::string items_s = "";
+    for (int i = 0; i < this->items.size(); i++) {
+        char item[256];
+        snprintf(item, sizeof(item), "%s*%d", this->items[i].item_id.c_str(), this->items[i].count);
+        items_s += item;
+
+        if (i + 1 < this->items.size()) {
+            items_s += ",";
+        }
+    }
+    save.data[this->name + MOUSE_ITEMS] = items_s;
 }
 
 static bool _is_collision(float x, float y) {
@@ -413,9 +450,48 @@ void Mouse::step() {
     float new_x = this->x + dx;
     float new_y = this->y + dy;
 
-    // only move if there isn't a collider in the way
-    if (!_is_collision(new_x, this->y)) this->x = new_x;
-    if (!_is_collision(this->x, new_y)) this->y = new_y;
+    bool collision_x = false, collision_y = false;
+
+    if (x_dir != 0) {
+        collision_x = _is_collision(new_x, this->y);
+        if (!collision_x) this->x = new_x;
+    }
+
+    if (y_dir != 0) {
+        collision_y = _is_collision(this->x, new_y);
+        if (!collision_y) this->y = new_y;
+    }
+
+    // sliding on collision horizontally or vertically
+    if (x_dir != 0 && y_dir == 0) {
+        if (collision_x) {
+            float new_y1 = this->y + fabs(dx);
+            float new_y2 = this->y - fabs(dx);
+
+            bool collision_y1 = _is_collision(this->x, new_y1);
+            bool collision_y2 = _is_collision(this->x, new_y2);
+
+            if (!collision_y1 && collision_y2) {
+                this->y = new_y1;
+            } else if (collision_y1 && !collision_y2) {
+                this->y = new_y2;
+            }
+        }
+    } else if (y_dir != 0 && x_dir == 0) {
+        if (collision_y) {
+            float new_x1 = this->x + fabs(dy);
+            float new_x2 = this->x - fabs(dy);
+
+            bool collision_x1 = _is_collision(new_x1, this->y);
+            bool collision_x2 = _is_collision(new_x2, this->y);
+
+            if (!collision_x1 && collision_x2) {
+                this->x = new_x1;
+            } else if (collision_x1 && !collision_x2) {
+                this->x = new_x2;
+            }
+        }
+    }
 
     // if moved onto a new tile, update the path finding
     int new_tile_x = (int)this->x / game->tile_width;

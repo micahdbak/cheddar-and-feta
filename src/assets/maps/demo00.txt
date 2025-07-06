@@ -1,6 +1,10 @@
-Unnamed map
-Floor 1
+Mole tunnel
+B4
 16,16,80,80
 1
-.\tiles\dirttunnel.bmp
-0
+./tiles/dirttunnel.bmp
+4
+mouse 0 592,1120,0 1120,128,0
+gate 1040,1216,1
+spawner 960,1088,1 foe_bug;foe_bug,foe_bug,foe_bug;foe_bat,foe_bat
+bell 928,1024,1

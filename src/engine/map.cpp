@@ -260,12 +260,26 @@ void Map::write(const char *map_path) {
 }
 
 void Map::clear() {
+    for (Tilesheet *tilesheet : this->tilesheets)
+        delete tilesheet;
     this->tilesheets.clear();
     if (this->bg_tiles != nullptr) {
+        for (int coord = 0; coord < this->rows * this->cols; coord++) {
+            std::vector<Tile> *vec = this->bg_tiles[coord];
+            if (vec != nullptr)
+                delete vec;
+        }
+
         free(this->bg_tiles);
         this->bg_tiles = nullptr;
     }
     if (this->fg_tiles != nullptr) {
+        for (int coord = 0; coord < this->rows * this->cols; coord++) {
+            std::vector<Tile> *vec = this->fg_tiles[coord];
+            if (vec != nullptr)
+                delete vec;
+        }
+
         free(this->fg_tiles);
         this->fg_tiles = nullptr;
     }

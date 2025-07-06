@@ -13,6 +13,7 @@ public:
 
 private:
     std::vector<Game::SpriteRender> sprites;
+    Uint64 last_frame_ticks = 0;
 };
 
 class NetReceiverFactory : public ObjectFactory {

@@ -151,7 +151,7 @@ void Game::load_map(const char *map_path) {
         }
     }
 
-    if (this->create_objects) {
+    if (this->create_objects || std::string(map_path) == "maps/init") {
         for (auto obj : map.objects)
             this->create_object(obj.first, obj.second);
 
@@ -175,6 +175,7 @@ void Game::load_map(const char *map_path) {
     this->displaying_load_screen = false;
 
     this->display_notification(this->map_title + ", " + this->map_description);
+    this->display_overlay = std::string(map_path) != "maps/init";
 }
 
 void Game::create_object(const std::string &id, const std::string &options) {

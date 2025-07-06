@@ -11,7 +11,7 @@
 
 class NetworkAgent {
 public:
-    enum State { NO_CONNECTION, WAITING_FOR_PEER, CONNECTED };
+    enum State { NO_CONNECTION, WAITING_FOR_PEER, CONNECTED, TRY_RESET };
 
     NetworkAgent(bool offerer);
     ~NetworkAgent();
@@ -19,6 +19,11 @@ public:
     State get_state() {
         std::lock_guard<std::mutex> guard(this->state_mutex);
         return this->state;
+    }
+
+    void try_reset() {
+        std::lock_guard<std::mutex> guard(this->state_mutex);
+        this->state = NetworkAgent::State::TRY_RESET;
     }
 
     std::string get_connection_code() {

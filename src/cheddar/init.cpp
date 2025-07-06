@@ -90,14 +90,17 @@ void Game::init() {
     item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Toothpick", 0, 0};
 
     this->factories[FIRST_OBJ] = new NetReceiverFactory();
-    this->create_object(FIRST_OBJ, "");
     this->factories[LAST_OBJ] = new NetSenderFactory();
-    this->create_object(LAST_OBJ, "");
 
-    this->create_object(INIT_OBJ, "");
-    this->title = "Cheddar n' Feta";
+    this->title = "Playing as Cheddar";
 
     net_agent = new NetworkAgent(false);
+
+    this->create_object(FIRST_OBJ, "");
+    this->create_object(LAST_OBJ, "");
+
+    this->load_map("maps/init");
+    this->display_overlay = false;
 }
 
 // ---- init object ----

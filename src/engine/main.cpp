@@ -128,8 +128,9 @@ int main(int argc, const char **argv) {
 void cleanup() {
     delete game;
     game = nullptr;
-    SDL_DestroyRenderer(renderer);
+    SDL_SetRenderTarget(renderer, NULL);
     SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
     SDL_Quit();
 }
 

@@ -200,6 +200,16 @@ void NetworkAgent::message_loop() {
         case NetworkAgent::State::NO_CONNECTION:    NetworkAgent::no_connection();    break;
         case NetworkAgent::State::WAITING_FOR_PEER: NetworkAgent::waiting_for_peer(); break;
         case NetworkAgent::State::CONNECTED:        NetworkAgent::connected();        break;
+        case NetworkAgent::State::TRY_RESET: {
+            // disconnect everything and clear connection code
+            net_agent->connection.kill();
+            net_agent->signaller.disconnect();
+            net_agent->set_connection_code("");
+
+            // reset state to NO_CONNECTION
+            std::lock_guard<std::mutex> guard(net_agent->state_mutex);
+            net_agent->state = NetworkAgent::State::NO_CONNECTION;
+        } break;
         }
     }
 

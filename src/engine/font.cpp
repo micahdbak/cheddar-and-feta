@@ -57,7 +57,10 @@ void Font::load_fonts(std::vector<Font *> &fonts) {
     // CODE_FONT = 5
     fonts.push_back(new Font("fonts/code.bmp", 6, 10, 6, {}));
 
-    // TITLE_FONT = 6
+    // CODE_GRAY_FONT = 6
+    fonts.push_back(new Font("fonts/code_gray.bmp", 6, 10, 6, {}));
+
+    // TITLE_FONT = 7
     fonts.push_back(new Font("fonts/title.bmp", 8, 13, 6, {
         { ' ', 4 }, { '\'', 4 }, { ',', 4 }, { 'A', 8 },
         { 'B', 7 }, { 'C', 7 }, { 'D', 7 }, { 'G', 7 },
@@ -67,6 +70,11 @@ void Font::load_fonts(std::vector<Font *> &fonts) {
         { 'X', 8 }, { 'Y', 8 }, { 'Z', 7 }, { 'f', 5 },
         { 'i', 4 }, { 'j', 3 }, { 'l', 4 }, { 'm', 8 },
         { 'r', 5 }, { 't', 5 }, { 'w', 8 }
+    }));
+
+    // CONTROLS_FONT = 6
+    fonts.push_back(new Font("fonts/controls.bmp", 8, 16, 8, {
+        { '/',  5 }
     }));
 }
 

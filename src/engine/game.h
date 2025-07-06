@@ -45,7 +45,11 @@
 #define BOX_MENU_CONT 3
 #define BOX_MENU_SHD1 4
 #define BOX_MENU_SHD2 5
-#define BOX_MAP_TITLE 6
+#define BOX_CHAR_CONT 6
+#define BOX_CHAR_BOX  7
+#define BOX_CHAR_SEL  8
+#define BOX_CHAR_DISP 9
+#define BOX_MAP_TITLE 10
 
 // icons
 #define CHEDDAR_ICON          SDL_FRect{ 0.05f,  0.05f, 16.0f, 16.0f}
@@ -104,7 +108,7 @@ public:
     void draw_rect(SDL_Texture *texture, SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode);
     void draw_outline(SDL_Texture *texture, SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode);
     void draw_ui_box(SDL_Texture *texture, int type, SDL_FRect *rect);
-    void draw_text(SDL_Texture *texture, const std::string &str, int font, int x, int y, int w);
+    void draw_text(SDL_Texture *texture, std::string str, int font, int x, int y, int w);
     void draw_icon(SDL_Texture *texture, SDL_FRect src_rect, SDL_FRect *dst_rect);
     void draw_hud(SDL_Texture *texture, std::string item, int item_count, int health, int max_health, int cheese);
     void draw_overlay();
@@ -151,6 +155,7 @@ public:
 
     bool create_objects = true; // disable for feta launcher
     bool delete_object = false; // set to true from an object's step to delete it
+    bool display_overlay = false;
 
     struct SpriteRender {
         std::string tex_id;

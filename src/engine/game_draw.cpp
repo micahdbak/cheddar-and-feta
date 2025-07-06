@@ -89,7 +89,7 @@ void Game::draw_ui_box(SDL_Texture *texture, int type, SDL_FRect *rect) {
     SDL_SetRenderTarget(renderer, this->screen);
 }
 
-void Game::draw_text(SDL_Texture *texture, const std::string &str, int font, int x, int y, int w) {
+void Game::draw_text(SDL_Texture *texture, std::string str, int font, int x, int y, int w) {
     if (font < 0 || font >= NUM_FONTS) {
         std::cerr << "Game::draw_text error: '" << font << "' font does not exist" << std::endl;
         exit(1);
@@ -230,28 +230,10 @@ bool _displaying_notification = false;
 bool _second_pass = false;
 
 void Game::draw_overlay() {
-    SDL_SetRenderTarget(renderer, this->overlay);
+    if (!this->display_overlay)
+        return;
 
-    // // title screen
-    // if (this->displaying_load_screen) {
-    //     if (this->ticks - this->load_ticks > 1000) {
-    //         this->displaying_load_screen = false;
-    //         this->draw_rect(this->overlay, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
-    //     }
-    // } else if (this->ticks - this->load_ticks < 1000) {
-    //     this->displaying_load_screen = true;
-    // 
-    //     int title_w = this->fonts[TITLE_FONT]->text_width(this->map_title);
-    //     int description_w = this->fonts[DEFAULT_FONT]->text_width(this->map_description);
-    // 
-    //     int title_x = (SCREEN_WIDTH / 2) - (title_w / 2);
-    //     int description_x = (SCREEN_WIDTH / 2) - (description_w / 2);
-    //     _title_rect.x = (title_x < description_x ? (float)title_x : (float)description_x) - 16.0f;
-    //     _title_rect.w = (title_x < description_x ? (float)title_w : (float)description_w) + 32.0f;
-    //     this->draw_ui_box(this->overlay, BOX_MAP_TITLE, &_title_rect);
-    //     this->draw_text(this->overlay, map_title, TITLE_FONT, title_x, 28, 0);
-    //     this->draw_text(this->overlay, map_description, DEFAULT_FONT, description_x, 44, 0);
-    // }
+    SDL_SetRenderTarget(renderer, this->overlay);
 
     // network agent overlay (only cheddar can "create objects" so that is used to check if cheddar)
     if (game->create_objects && net_agent != nullptr) {

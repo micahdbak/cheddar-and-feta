@@ -10,12 +10,34 @@
 void NetReceiver::step() {
     std::string frame_msg = net_agent->last_message();
 
+    NetworkAgent::State state = net_agent->get_state();
+
+    if (state != NetworkAgent::State::CONNECTED) {
+        // if currently in a map other than the init map, reset the network agent and go to that
+        if (game->current_map != "maps/init") {
+            std::cout << "resetting" << std::endl;
+            net_agent->try_reset();
+            game->map = "maps/init";
+            last_frame_ticks = 0;
+        }
+
+        return;
+    }
+
     // reuse last frame
     if (frame_msg.empty()) {
         for (Game::SpriteRender &sprite : this->sprites) {
             game->push_sprite(sprite.tex_id, sprite.texture, sprite.src_rect, sprite.dst_rect, sprite.y);
         }
+
+        // 5 seconds of no frames; disconnect
+        if (game->ticks - last_frame_ticks > 5000 && last_frame_ticks != 0) {
+            net_agent->try_reset();
+            last_frame_ticks = 0;
+        }
     } else {
+        last_frame_ticks = game->ticks;
+
         // free stuff
         for (Game::SpriteRender &sprite : this->sprites) {
             delete sprite.src_rect;

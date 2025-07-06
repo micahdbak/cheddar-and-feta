@@ -11,14 +11,16 @@
 #define FONT_SHEET_COLS       16
 
 // fonts
-#define MONO_FONT    0
-#define SMALL_FONT   1
-#define SM_BOLD_FONT 2
-#define DEFAULT_FONT 3
-#define BOLD_FONT    4
-#define CODE_FONT    5
-#define TITLE_FONT   6
-#define NUM_FONTS    7
+#define MONO_FONT      0
+#define SMALL_FONT     1
+#define SM_BOLD_FONT   2
+#define DEFAULT_FONT   3
+#define BOLD_FONT      4
+#define CODE_FONT      5
+#define CODE_GRAY_FONT 6
+#define TITLE_FONT     7
+#define CONTROLS_FONT  8
+#define NUM_FONTS      9
 
 // special chars in SMALL_FONT
 #define CHAR_EQUIP        '{'

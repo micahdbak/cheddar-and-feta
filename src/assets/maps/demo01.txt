@@ -3,6 +3,10 @@ B3
 16,16,80,80
 1
 tiles/dirttunnel.bmp
-2
+6
 mouse 0 128,224,4
 ladder 128,240,0,1 maps/demo00
+item_toothpick_dropped 312,448
+gate 176,576,2
+spawner 64,560,2 foe_bug,foe_bug,foe_bug,foe_bat;foe_bug,foe_bug,foe_bug,foe_frog
+bell 224,448,2

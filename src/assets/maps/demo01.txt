@@ -1,0 +1,8 @@
+Mole tunnel
+B3
+16,16,80,80
+1
+tiles/dirttunnel.bmp
+2
+mouse 0 128,224,4
+ladder 128,240,0,1 maps/demo00

@@ -95,7 +95,7 @@ void ThrownItem::thrown_step() {
 
 void TrackingItem::tracking_step() {
     if (!foes.empty()) {
-        if (++check_foe == foes.size()) {
+        if (++check_foe >= foes.size()) {
             check_foe = 0;
         }
 

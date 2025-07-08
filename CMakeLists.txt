@@ -71,6 +71,10 @@ target_include_directories(CheddarLauncher PRIVATE src/engine src/cheddar)
 if(NOT WIN32)
     set(BUILD_SHARED_LIBS OFF)
 
+    if(NOT CMAKE_BUILD_TYPE)
+        set(CMAKE_BUILD_TYPE "Debug")
+    endif()
+
     # debugging stuff
     #set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
     #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer -g -O1")
@@ -78,10 +82,11 @@ if(NOT WIN32)
     #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
     #set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
 
-    # one output directory
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+    # output build executables into build/(Debug|Release)/
+    set_target_properties(CheddarLauncher FetaLauncher MapEditor
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/"
+    )
 
     # prep dependencies
     add_subdirectory(libdatachannel EXCLUDE_FROM_ALL)

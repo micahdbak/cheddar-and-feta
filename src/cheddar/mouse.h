@@ -10,7 +10,7 @@
 #include "object.h"
 #include "sprite.h"
 
-#define MOUSE_DEFAULT_SPEED 64.0f
+#define MOUSE_DEFAULT_SPEED 80.0f
 
 // save keys
 #define MOUSE_X         "_x"

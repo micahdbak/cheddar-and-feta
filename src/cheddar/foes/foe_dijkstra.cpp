@@ -9,9 +9,10 @@
 
 #define FREE_IF(a)      if ((a)) { free(a); }
 #define COORD(x, y)     (((y) * cols) + (x))
+#define COLLISION(x, y) (game->collision[COORD((x), (y))] >= 0)
 #define DIST_ADJACENT   10000
 #define DIST_DIAGONAL   14142
-#define MAX_DISTANCE    DIST_ADJACENT * 16 // 16 tiles radius
+#define MAX_DISTANCE    DIST_ADJACENT * 24 // tiles radius
 #define COLLIDER        -1
 #define TARGET          -2
 
@@ -52,7 +53,7 @@ static void _neighbours(int x, int y, std::vector<_Neighbour> &neighbours) {
     for (int _y = y-1; _y <= y+1; _y++) {
         for (int _x = x-1; _x <= x+1; _x++) {
             if (_x < 0 || _y < 0 || _x >= cols || _y >= rows || // out of bounds
-                game->collision[COORD(_x, _y)] >= 0 || // collider present
+                COLLISION(_x, _y) || // collider present
                 (_x == x && _y == y)) { // source tile
                 continue;
             }
@@ -179,13 +180,86 @@ bool foe_move_towards(Mouse *mouse, int *x, int *y, FoeStrafe strafe) {
         int strafe_coord = COORD(strafe_x, strafe_y);
 
         // strafe goes to a free tile
-        if (strafe_coord >= 0 && strafe_coord < rows * cols && game->collision[strafe_coord] < 0) {
+        if (strafe_coord >= 0 && strafe_coord < rows * cols && !COLLISION(_x, _y)) {
             *x = strafe_coord % cols;
             *y = strafe_coord / rows;
         } // else, leave x/y untouched
     }
 
     return true;
+}
+
+
+bool foe_move_away(Mouse *mouse, int *x, int *y) {
+    int *prev = mouse->is_feta ? _feta_prev : _cheddar_prev;
+
+    if (prev == nullptr) {
+        return false;
+    }
+
+    int source_x = cnf_clamp(*x, 0, cols-1);
+    int source_y = cnf_clamp(*y, 0, rows-1);
+
+    int i = prev[COORD(source_x, source_y)];
+
+    if (i < 0 || i >= rows * cols) {
+        return false;
+    }
+
+    int towards_x = i % cols;
+    int towards_y = i / rows;
+
+    // towards - source = direction of towards; subtract that is direction away
+    int away_x = *x - (towards_x - source_x);
+    int away_y = *y - (towards_y - source_y);
+
+    if (away_x < 0 || away_x >= cols || away_y < 0 || away_y >= rows || COLLISION(away_x, away_y)) {
+        return false;
+    }
+
+    *x = away_x;
+    *y = away_y;
+}
+
+bool foe_move_circle(Mouse *mouse, int *x, int *y) {
+    int *prev = mouse->is_feta ? _feta_prev : _cheddar_prev;
+
+    if (prev == nullptr) {
+        return false;
+    }
+
+    int source_x = cnf_clamp(*x, 0, cols-1);
+    int source_y = cnf_clamp(*y, 0, rows-1);
+
+    int i = prev[COORD(source_x, source_y)];
+
+    if (i < 0 || i >= rows * cols) {
+        return false;
+    }
+
+    int towards_x = i % cols;
+    int towards_y = i / rows;
+
+    int x_dir = towards_x - source_x;
+    int y_dir = towards_y - source_y;
+
+    // ty math 240 <3
+    std::cout << "----" << std::endl;
+    std::cout << "input x/y: " << x_dir << "," << y_dir << std::endl;
+    int x_dir2 = y_dir;
+    int y_dir2 = -1 * x_dir;
+    std::cout << "output x/y: " << x_dir2 << "," << y_dir2 << std::endl;
+
+    int circle_x = source_x + x_dir2;
+    int circle_y = source_y + y_dir2;
+
+    if (circle_x < 0 || circle_x >= cols || circle_y < 0 || circle_y >= rows || COLLISION(circle_x, circle_y)) {
+        *x = towards_x;
+        *y = towards_y;
+    }
+
+    *x = circle_x;
+    *y = circle_y;
 }
 
 void foe_pick_random(int *x, int *y) {

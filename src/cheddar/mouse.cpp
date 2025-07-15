@@ -511,8 +511,8 @@ void Mouse::step() {
 
         game->set_view(this->x, this->y);
 
-        // for (int ty = this->tile_y-8; ty < this->tile_y+9; ty++) {
-        //     for (int tx = this->tile_x-8; tx < this->tile_x+9; tx++) {
+        // for (int ty = this->tile_y-12; ty < this->tile_y+13; ty++) {
+        //     for (int tx = this->tile_x-12; tx < this->tile_x+13; tx++) {
         //         foe_debug_tile(tx, ty);
         //     }
         // }

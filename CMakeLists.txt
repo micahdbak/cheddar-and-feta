@@ -40,11 +40,13 @@ set(CHEDDAR_SRC
     src/cheddar/foes/foe_dijkstra.cpp
     src/cheddar/foes/frog.cpp
     src/cheddar/foes/gate.cpp
+    src/cheddar/foes/porcupine.cpp
     src/cheddar/foes/spawner.cpp
     src/cheddar/items/fire.cpp
     src/cheddar/items/frog_tongue.cpp
     src/cheddar/items/grub.cpp
     src/cheddar/items/molotov.cpp
+    src/cheddar/items/spine.cpp
     src/cheddar/items/toothpick.cpp
     src/cheddar/items/item.cpp
     src/cheddar/billboard.cpp

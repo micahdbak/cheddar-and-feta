@@ -53,11 +53,11 @@ void Foe::remove_from_foes() {
         }
     }
 
-    if (cheddar->closest_foe == this) {
+    if (cheddar != nullptr && cheddar->closest_foe == this) {
         cheddar->closest_foe = nullptr;
     }
 
-    if (feta->closest_foe == this) {
+    if (feta != nullptr && feta->closest_foe == this) {
         feta->closest_foe = nullptr;
     }
 }
@@ -75,6 +75,7 @@ void Foe::foe_step() {
         float cheddar_dist = distance_between_points(cheddar->x, cheddar->y, this->x, this->y);
         float feta_dist = distance_between_points(feta->x, feta->y, this->x, this->y);
         float target_dist = cheddar_dist < feta_dist ? cheddar_dist : feta_dist;
+        this->current_distance = target_dist;
         Mouse *target_mouse = cheddar_dist < feta_dist ? cheddar : feta;
 
         // perform action and stay on this tile if close enough
@@ -92,7 +93,18 @@ void Foe::foe_step() {
 
         // move towards closest mouse
         if (target_dist < this->stalking_distance) {
-            bool path_exists = foe_move_towards(target_mouse, &this->target_x, &this->target_y, this->strafe);
+            bool path_exists = false;
+            switch (this->tile_choice) {
+            case Foe::TileChoice::TOWARDS:
+                path_exists = foe_move_towards(target_mouse, &this->target_x, &this->target_y, this->strafe);
+                break;
+            case Foe::TileChoice::AWAY:
+                path_exists = foe_move_away(target_mouse, &this->target_x, &this->target_y);
+                break;
+            case Foe::TileChoice::CIRCLE:
+                path_exists = foe_move_circle(target_mouse, &this->target_x, &this->target_y);
+                break;
+            }
 
             // we are on top of the mouse - pick a random tile
             if (!path_exists) {

@@ -18,6 +18,8 @@ enum FoeStrafe {
 
 void foe_path_find(Mouse *mouse);
 bool foe_move_towards(Mouse *mouse, int *x, int *y, FoeStrafe strafe);
+bool foe_move_away(Mouse *mouse, int *x, int *y);
+bool foe_move_circle(Mouse *mouse, int *x, int *y);
 void foe_pick_random(int *x, int *y);
 void foe_debug_tile(int x, int y);
 
@@ -37,12 +39,14 @@ public:
     void foe_step();
 
     enum State { IDLE, FORCE_RANDOM_TILE, WALKING, ACTION, HURT, DEAD } state;
+    enum TileChoice { TOWARDS, AWAY, CIRCLE } tile_choice = TOWARDS;
 
     float x, y;
     int direction, x_dir, y_dir;
 
 protected:
     int icon_offset = 8;
+    float current_distance;
 
 private:
     int spawner_id, speed;

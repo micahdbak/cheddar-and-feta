@@ -1,0 +1,10 @@
+Unnamed map
+Floor 1
+16,16,80,80
+1
+tiles/dirttunnel.bmp
+4
+mouse 0 1104,192,0
+ladder 1104,176,1,1 maps/demo02
+spawner 1000,200,5 foe_porc
+bell 1000,176,5

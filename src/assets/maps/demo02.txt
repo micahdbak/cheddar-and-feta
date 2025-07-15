@@ -3,6 +3,7 @@ B2
 16,16,80,80
 1
 tiles/dirttunnel.bmp
-2
-mouse 0 1104,160,4
+3
+mouse 0 1104,160,4 48,688,4
 ladder 1104,176,0,1 maps/demo01
+ladder 48,704,0,0 maps/demo03

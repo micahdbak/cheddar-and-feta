@@ -13,6 +13,7 @@
 #include "foes/bug.h"
 #include "foes/frog.h"
 #include "foes/gate.h"
+#include "foes/porcupine.h"
 #include "foes/spawner.h"
 #include "items/coffee.h"
 #include "items/fire.h"
@@ -20,6 +21,7 @@
 #include "items/grub.h"
 #include "items/molotov.h"
 #include "items/save.h"
+#include "items/spine.h"
 #include "items/toothpick.h"
 #include "ladder.h"
 #include "mouse.h"
@@ -62,6 +64,7 @@ void Game::init() {
     this->factories[FOE_BAT_OBJ] = new FoeBatFactory();
     this->factories[FOE_BUG_OBJ] = new FoeBugFactory();
     this->factories[FOE_FROG_OBJ] = new FoeFrogFactory();
+    this->factories[FOE_PORCUPINE_OBJ] = new FoePorcupineFactory();
     this->factories[GATE_OBJ] = new FoeGateFactory();
     this->factories[SPAWNER_OBJ] = new FoeSpawnerFactory();
     this->factories[ITEM_COFFEE_BEAN DROPPED_OBJ] = new DroppedCoffeeBeanFactory();
@@ -74,6 +77,7 @@ void Game::init() {
     this->factories[ITEM_MOLOTOV DROPPED_OBJ] = new DroppedMolotovFactory();
     this->factories[ITEM_MOLOTOV USE_OBJ] = new ThrownMolotovFactory();
     this->factories[ITEM_SAVE USE_OBJ] = new ItemSaveUseFactory();
+    this->factories[ITEM_SPINE USE_OBJ] = new ThrownSpineFactory();
     this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
     this->factories[ITEM_TOOTHPICK USE_OBJ] = new ThrownToothpickFactory();
     this->factories[LADDER_OBJ] = new LadderFactory();
@@ -87,6 +91,7 @@ void Game::init() {
     item_info[ITEM_GRUB] = Item{THROWABLE, "Grub", 0, 0};
     item_info[ITEM_MOLOTOV] = Item{THROWABLE, "Molotov Cocktail", 0, 0};
     item_info[ITEM_SAVE] = Item{USEFUL, "Save Game", 0, 0};
+    item_info[ITEM_SPINE] = Item{THROWABLE, "Spine", 0, 0};
     item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Toothpick", 0, 0};
 
     this->factories[FIRST_OBJ] = new NetReceiverFactory();

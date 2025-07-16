@@ -4,15 +4,13 @@
 
 #include <iostream>
 
-#define NUM_ICE_SERVERS 4
+#define NUM_ICE_SERVERS 2
 
 #define NTS -1
 
 static const char* ICE_SERVERS[] = {
-    "stun:stun.l.google.com:19302",
-    "stun:stun1.l.google.com:19302",
-    "stun:stun2.l.google.com:19302",
-    "stun:stun3.l.google.com:19302"
+    "stun:droppr.net:5051",
+    "turn:droppr:droppr@droppr.net:5051"
 };
 
 void NetworkConnection::start_collecting(bool offerer) {

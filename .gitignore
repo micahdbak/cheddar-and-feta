@@ -3,3 +3,4 @@
 screenshot.bmp
 **/*.backup.*
 build
+**/*.DS_Store

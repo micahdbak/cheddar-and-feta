@@ -104,14 +104,11 @@ void SaveData::write_file(int file_i) {
     FILE *save_file = fopen(save_file_name, "w");
     if (save_file == NULL) CORRUPTED_EXIT
 
-    if (this->data.find("level") != this->data.end())
-        this->data["level"] = "0";
-
     char line[MAX_LINE_LENGTH];
     unsigned long hash = 0;
 
     // first line is summary
-    snprintf(line, sizeof(line), "Level %d\n", atoi(this->data["level"].c_str()));
+    snprintf(line, sizeof(line), "Gamer :)\n");
     hash = _djb2_hash(hash, line);
     fputs(line, save_file);
 
@@ -155,18 +152,18 @@ int SaveData::load_file(int file_i) {
 
     // for every subsequent line in the file
     while (fgets(line, sizeof(line), save_file) != NULL) {
-        char key[1024], val[1024];
+        char key[1024] = {0}, val[1024] = {0};
         int nread = sscanf(line, "%[^=]=%[^\n]", key, val);
 
-        // last line of file - hash
-        if (nread < 2) {
+        if (key[0] != '\0') {
+            hash = _djb2_hash(hash, line);
+        } else if (line[0] >= '0' && line[0] < '9') {
+            // last line of file - hash
             unsigned long hash_in_file;
             nread = sscanf(line, "%lu\n", &hash_in_file);
             fclose(save_file);
 
             return hash != hash_in_file ? LOAD_TAMPER : LOAD_SUCCESS;
-        } else {
-            hash = _djb2_hash(hash, line);
         }
 
         this->data[key] = val;

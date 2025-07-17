@@ -622,15 +622,11 @@ void Editor::render_collision_tile(SDL_Texture *target, int x, int y, int collid
 
 static void _ParseBillboardOptions(const std::string &options, int *x, int *y, int *ts_x, int *ts_y, int *w, int *h, int *depth, std::string &tilesheet) {
     char buff[1024];
-    std::cout << "----!!" << std::endl;
-    std::cout << options << std::endl;
     if (sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%1023[^\n]",
         x, y, ts_x, ts_y, w, h, depth, buff) < 8) {
-        std::cout << "_ParseBillboardOptions error: bad options: " << options << std::endl;
+        std::cerr << "_ParseBillboardOptions error: bad options: " << options << std::endl;
         std::exit(1);
     }
-
-    std::cout << buff << std::endl;
 
     tilesheet = buff;
 }

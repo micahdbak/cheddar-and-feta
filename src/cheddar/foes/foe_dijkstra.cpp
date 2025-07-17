@@ -149,6 +149,11 @@ bool foe_move_towards(Mouse *mouse, int *x, int *y, FoeStrafe strafe) {
     *x = i % cols;
     *y = i / rows;
 
+    // this'll happen if the next tile is the mouse
+    if (COLLISION(*x, *y)) {
+        return false;
+    }
+
     // 25% chance strafe left, 25% chance strafe right, 50% don't strafe
     if (strafe == FoeStrafe::NO_STRAFE) {
         switch (SDL_rand(4)) {
@@ -177,12 +182,11 @@ bool foe_move_towards(Mouse *mouse, int *x, int *y, FoeStrafe strafe) {
 
         int strafe_x = _x + x_dir;
         int strafe_y = _y + y_dir;
-        int strafe_coord = COORD(strafe_x, strafe_y);
 
         // strafe goes to a free tile
-        if (strafe_coord >= 0 && strafe_coord < rows * cols && !COLLISION(_x, _y)) {
-            *x = strafe_coord % cols;
-            *y = strafe_coord / rows;
+        if (strafe_x >= 0 && strafe_x < cols && strafe_y >= 0 && strafe_y < rows && !COLLISION(strafe_x, strafe_y)) {
+            *x = strafe_x;
+            *y = strafe_y;
         } // else, leave x/y untouched
     }
 
@@ -209,6 +213,11 @@ bool foe_move_away(Mouse *mouse, int *x, int *y) {
     int towards_x = i % cols;
     int towards_y = i / rows;
 
+    // this'll happen if the next tile is the mouse
+    if (COLLISION(towards_x, towards_y)) {
+        return false;
+    }
+
     // towards - source = direction of towards; subtract that is direction away
     int away_x = *x - (towards_x - source_x);
     int away_y = *y - (towards_y - source_y);
@@ -219,6 +228,7 @@ bool foe_move_away(Mouse *mouse, int *x, int *y) {
 
     *x = away_x;
     *y = away_y;
+    return true;
 }
 
 bool foe_move_circle(Mouse *mouse, int *x, int *y) {
@@ -240,15 +250,17 @@ bool foe_move_circle(Mouse *mouse, int *x, int *y) {
     int towards_x = i % cols;
     int towards_y = i / rows;
 
+    // this'll happen if the next tile is the mouse
+    if (COLLISION(towards_x, towards_y)) {
+        return false;
+    }
+
     int x_dir = towards_x - source_x;
     int y_dir = towards_y - source_y;
 
     // ty math 240 <3
-    std::cout << "----" << std::endl;
-    std::cout << "input x/y: " << x_dir << "," << y_dir << std::endl;
     int x_dir2 = y_dir;
     int y_dir2 = -1 * x_dir;
-    std::cout << "output x/y: " << x_dir2 << "," << y_dir2 << std::endl;
 
     int circle_x = source_x + x_dir2;
     int circle_y = source_y + y_dir2;
@@ -256,10 +268,12 @@ bool foe_move_circle(Mouse *mouse, int *x, int *y) {
     if (circle_x < 0 || circle_x >= cols || circle_y < 0 || circle_y >= rows || COLLISION(circle_x, circle_y)) {
         *x = towards_x;
         *y = towards_y;
+        return true;
     }
 
     *x = circle_x;
     *y = circle_y;
+    return true;
 }
 
 void foe_pick_random(int *x, int *y) {

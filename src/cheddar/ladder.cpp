@@ -35,6 +35,5 @@ void Ladder::step() {
     if (mouse != nullptr) {
         game->map = this->next_map;
         save.puti(MOUSE_SPAWN_AT, this->which_coord);
-        std::cout << "herroooo" << std::endl;
     }
 }

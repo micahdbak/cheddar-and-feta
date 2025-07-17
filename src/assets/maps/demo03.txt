@@ -1,10 +1,9 @@
-Unnamed map
-Floor 1
+Mole tunnel
+B1
 16,16,80,80
 1
 tiles/dirttunnel.bmp
-4
-mouse 0 1104,192,0
-ladder 1104,176,1,1 maps/demo02
-spawner 1000,200,5 foe_porc
-bell 1000,176,5
+3
+mouse 0 1200,64,0 1192,528,4
+ladder 1200,48,1,1 maps/demo02
+ladder 1192,544,0,2 maps/demo02

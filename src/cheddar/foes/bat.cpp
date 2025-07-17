@@ -87,10 +87,8 @@ void FoeBat::step() {
 
         if (this->tile_choice == Foe::TileChoice::TOWARDS && this->current_distance <= 32.0f) {
             this->tile_choice = Foe::TileChoice::CIRCLE;
-            std::cout << "circling" << std::endl;
         } else if (this->tile_choice == Foe::TileChoice::CIRCLE && this->current_distance >= 80.0f) {
             this->tile_choice = Foe::TileChoice::TOWARDS;
-            std::cout << "towards" << std::endl;
         }
 
         break;

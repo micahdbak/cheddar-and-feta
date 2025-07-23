@@ -53,8 +53,6 @@ Game::Game() {
     SDL_SetTextureScaleMode(this->icons, SDL_SCALEMODE_NEAREST);
 
     this->ticks = SDL_GetTicks();
-    // only show load-in screen upon loading a map
-    this->load_ticks = this->ticks;
 
     Font::load_fonts(this->fonts);
     load_render_functions(); // bmp_texture.h
@@ -97,6 +95,8 @@ Game::~Game() {
 }
 
 void Game::unload() {
+    this->save_objects();
+
     this->current_map = "";
 
     if (!this->objects.empty()) {
@@ -169,10 +169,6 @@ void Game::load_map(const char *map_path) {
 
     this->current_map = map_path;
     save.data[LOAD_MAP] = this->current_map;
-
-    // map loaded screen
-    this->load_ticks = SDL_GetTicks();
-    this->displaying_load_screen = false;
 
     this->display_notification(this->map_title + ", " + this->map_description);
     this->display_overlay = std::string(map_path) != "maps/init";

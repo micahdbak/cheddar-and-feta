@@ -9,6 +9,7 @@
 #include "game.h"
 #include "object.h"
 #include "sprite.h"
+#include "hitbox.h"
 
 #define MOUSE_DEFAULT_SPEED 80.0f
 
@@ -19,7 +20,7 @@
 #define MOUSE_ITEMS     "_items"
 #define MOUSE_SPAWN_AT  DONT_WRITE "spawn_at"
 
-class Mouse : public Object {
+class Mouse : public Object, public HitSource {
 public:
     struct SpawnCoord {
         float x, y;
@@ -36,8 +37,15 @@ public:
     bool attack(int damage);
 
     bool push_item(const std::string &item_id);
-    bool remove_item(const std::string &item_id); // true if no more
+    void remove_item(const std::string &item_id);
     int add_cheese(int amount);
+
+    float hitsource_x() override { return this->x; }
+    float hitsource_y() override { return this->y; }
+
+    void hitsource_notify() override {
+        this->did_hit = true;
+    }
 
     bool is_feta = true;
     float x, y;
@@ -59,22 +67,18 @@ public:
 
     int cheese = 0, max_cheese = 10;
 
-    Foe *closest_foe = nullptr;
-
     float max_mov_speed = MOUSE_DEFAULT_SPEED;
 
 private:
-    SDL_FRect dst_rect, hat_dst, icon_src, icon_dst;
-    Sprite *sprite, *hat;
+    SDL_FRect dst_rect, icon_src, icon_dst;
+    Sprite *sprite;
 
     enum { FALSE, ATTACKING, ATTACKED, THROWING, EATING } is_busy = FALSE;
     Uint64 busy_ticks = 0;
 
-    int check_foe = 0;
-    float closest_distance = FLT_MAX;
-    bool did_miss = false;
-
     int tile_x, tile_y;
+
+    bool did_hit = false;
 };
 
 #define MOUSEFACTORY_FAIL(str) {\

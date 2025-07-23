@@ -43,7 +43,8 @@ public:
         Mouse *mouse = is_feta ? feta : cheddar;
 
         if (mouse == nullptr) {
-            game->delete_object;
+            game->delete_object = true;
+            return;
         }
 
         if (game->ticks > this->timer) {

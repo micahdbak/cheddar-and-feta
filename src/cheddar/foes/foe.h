@@ -59,9 +59,6 @@ private:
     int walking_time, walk_offset = 0;
 
     FoeStrafe strafe;
-
-    SDL_FRect icon_src, icon_dst;
-    int damage_dealt = 0;
 };
 
 extern std::vector<Foe *> foes;

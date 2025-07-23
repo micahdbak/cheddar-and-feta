@@ -33,6 +33,8 @@ set(FETA_SRC
 )
 
 set(CHEDDAR_SRC
+    src/cheddar/billboard.cpp
+    src/cheddar/cheese.cpp
     src/cheddar/foes/bat.cpp
     src/cheddar/foes/bell.cpp
     src/cheddar/foes/bug.cpp
@@ -42,16 +44,14 @@ set(CHEDDAR_SRC
     src/cheddar/foes/gate.cpp
     src/cheddar/foes/porcupine.cpp
     src/cheddar/foes/spawner.cpp
+    src/cheddar/hitbox.cpp
+    src/cheddar/hurtbox.cpp
+    src/cheddar/init.cpp
     src/cheddar/items/fire.cpp
     src/cheddar/items/frog_tongue.cpp
-    src/cheddar/items/grub.cpp
     src/cheddar/items/molotov.cpp
-    src/cheddar/items/spine.cpp
     src/cheddar/items/toothpick.cpp
     src/cheddar/items/item.cpp
-    src/cheddar/billboard.cpp
-    src/cheddar/cheese.cpp
-    src/cheddar/init.cpp
     src/cheddar/ladder.cpp
     src/cheddar/mouse.cpp
     src/cheddar/net_receiver.cpp
@@ -120,6 +120,11 @@ else()
         COMMAND_EXPAND_LISTS
     )
 endif()
+
+# Extra debug thingys (hitboxes, hurtboxes)
+# if(CMAKE_BUILD_TYPE MATCHES "Debug")
+#     target_compile_definitions(CheddarLauncher PRIVATE ONSCREEN_DEBUG)
+# endif()
 
 # link dependencies
 target_link_libraries(MapEditor PRIVATE ${DEPS})

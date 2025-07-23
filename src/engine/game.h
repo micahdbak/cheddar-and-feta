@@ -58,15 +58,12 @@
 #define WAITING_FOR_PEER_ICON SDL_FRect{48.05f,  0.05f, 16.0f, 16.0f}
 #define SKULL_AND_BONES_ICON  SDL_FRect{ 0.05f, 16.05f, 16.0f, 16.0f}
 #define EDITOR_OBJECT_ICON    SDL_FRect{16.05f, 16.05f, 16.0f, 16.0f}
-#define MISS_ICON             SDL_FRect{32.05f, 16.05f, 24.0f, 16.0f}
+#define DEBUG_HITBOX_ICON     SDL_FRect{32.05f, 16.05f, 16.0f, 16.0f}
+#define DEBUG_HURTBOX_ICON    SDL_FRect{48.05f, 16.05f, 16.0f, 16.0f}
 #define HEALTH_100_ICON       SDL_FRect{ 0.05f, 32.05f, 16.0f,  8.0f}
 #define HEALTH_75_ICON        SDL_FRect{16.05f, 32.05f, 16.0f,  8.0f}
 #define HEALTH_50_ICON        SDL_FRect{32.05f, 32.05f, 16.0f,  8.0f}
 #define HEALTH_25_ICON        SDL_FRect{48.05f, 32.05f, 16.0f,  8.0f}
-#define FOE_MINUS_1_ICON      SDL_FRect{56.05f, 16.05f,  8.0f,  8.0f}
-#define FOE_MINUS_2_ICON      SDL_FRect{56.05f, 24.05f,  8.0f,  8.0f}
-#define FOE_MINUS_3_ICON      SDL_FRect{32.05f, 40.05f, 16.0f, 16.0f}
-#define FOE_MINUS_4_ICON      SDL_FRect{48.05f, 40.05f, 16.0f, 16.0f}
 #define ITEM_COUNT_ICON       SDL_FRect{16.05f, 40.05f, 16.0f, 16.0f}
 
 // forces one object to the be the first/last object run per frame
@@ -75,6 +72,12 @@
 // - cheddar/remote_controller(.h|.cpp)
 #define FIRST_OBJ "_first"
 #define LAST_OBJ "_last"
+
+#define FATAL_ERROR \
+{\
+    std::cerr << "Exiting due to fatal error in " << __FILE__ << " at line " << __LINE__ << "." << std::endl;\
+    exit(1);\
+}
 
 // game_const.cpp
 
@@ -132,18 +135,27 @@ public:
         this->force_notif_rerender = true;
     }
 
+    Object *get_object(int id) {
+        for (auto obj : this->objects) {
+            if (obj != nullptr && obj->id == id) {
+                return obj;
+            }
+        }
+
+        return nullptr;
+    }
+
     std::string title = "SDL3 Game";
     int argc;
     const char **argv;
 
     Uint64 ticks = 0;
-    Uint64 load_ticks = 0;
-    bool displaying_load_screen = false;
     float delta = 0;
 
     SDL_Texture *screen, *ui, *overlay;
 
     std::vector<Font *> fonts;
+    SDL_Texture *icons;
 
     int corner_x = 0, corner_y = 0; // set in Game::step
     int tile_width = 32, tile_height = 32, cols = 1, rows = 1;
@@ -199,7 +211,6 @@ private:
     // ui things
     SDL_Texture *ui_box = nullptr;
     std::queue<Text> texts;
-    SDL_Texture *icons;
 
     SDL_FRect item_count_icon;
 

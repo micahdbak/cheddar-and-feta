@@ -52,19 +52,10 @@ void Foe::remove_from_foes() {
             break;
         }
     }
-
-    if (cheddar != nullptr && cheddar->closest_foe == this) {
-        cheddar->closest_foe = nullptr;
-    }
-
-    if (feta != nullptr && feta->closest_foe == this) {
-        feta->closest_foe = nullptr;
-    }
 }
 
 void Foe::attack(int damage) {
     this->attack_internal(damage);
-    this->damage_dealt = damage;
     this->walk_offset = game->ticks - this->start_ticks;
 }
 
@@ -173,19 +164,7 @@ void Foe::foe_step() {
     } break;
 
     case HURT: {
-        SDL_FRect minus_icon;
-
-        switch (this->damage_dealt) {
-        case 0: break;
-        case 1: minus_icon = FOE_MINUS_1_ICON; break;
-        case 2: minus_icon = FOE_MINUS_2_ICON; break;
-        case 3: minus_icon = FOE_MINUS_3_ICON; break;
-        default: minus_icon = FOE_MINUS_4_ICON; break;
-        }
-        
-        game->push_icon(minus_icon, this->x, this->y - (float)this->icon_offset, &this->icon_src, &this->icon_dst);
-
-        // when out of the hurt
+        // for when out of the hurt
         this->start_ticks = game->ticks - this->walk_offset;
     } break;
 

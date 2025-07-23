@@ -180,9 +180,6 @@ void Game::draw_icon(SDL_Texture *texture, SDL_FRect icon, SDL_FRect *dst_rect) 
 }
 
 void Game::draw_hud(SDL_Texture *texture, std::string item, int item_count, int health, int max_health, int cheese) {
-    if (this->displaying_load_screen)
-        return;
-
     // container ui box
     SDL_FRect hud_rect = { 276.0f, 184.0f, 32.0f, 44.0f };
     this->draw_ui_box(this->ui, BOX_MENU_CONT, &hud_rect);
@@ -197,7 +194,7 @@ void Game::draw_hud(SDL_Texture *texture, std::string item, int item_count, int 
     SDL_RenderTexture(renderer, item_texture, &item_src_rect, &item_rect);
     SDL_SetRenderTarget(renderer, this->screen);
 
-    if (item_count > 1) {
+    if (item_count > 1 || item_count == 0) {
         this->draw_icon(texture, ITEM_COUNT_ICON, &this->item_count_icon);
         char buff[256];
         snprintf(buff, sizeof(buff), "%d", item_count);

@@ -1,5 +1,6 @@
 #include "frog.h"
 #include "game.h"
+#include "hurtbox.h"
 #include "../items/frog_tongue.h"
 
 FoeFrog::FoeFrog(int x, int y, int spawner_id):
@@ -8,6 +9,8 @@ FoeFrog::FoeFrog(int x, int y, int spawner_id):
     this->dst_rect.w = 32.0f;
     this->dst_rect.h = 32.0f;
     this->icon_offset = 16;
+
+    game->push_object(HURTBOX_OBJ, HurtBoxFactory::Options(this->id, -16, -16, 32, 32));
 }
 
 FoeFrog::~FoeFrog() {

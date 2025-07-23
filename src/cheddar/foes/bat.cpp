@@ -3,6 +3,7 @@
 #include "cheese.h"
 #include "game.h"
 #include "mouse.h"
+#include "hurtbox.h"
 #include "../items/toothpick.h"
 
 #include <iostream>
@@ -13,6 +14,8 @@ FoeBat::FoeBat(int x, int y, int spawner_id):
 
     this->dst_rect.w = 24.0f;
     this->dst_rect.h = 24.0f;
+
+    game->push_object(HURTBOX_OBJ, HurtBoxFactory::Options(this->id, -8, -8, 16, 16));
 }
 
 FoeBat::~FoeBat() {
@@ -27,9 +30,11 @@ void FoeBat::action(Mouse *mouse) {
 
     this->state = Foe::State::FORCE_RANDOM_TILE;
     this->timer = game->ticks;
-    mouse->attack(0);
-    mouse->throw_x = -1 * this->x_dir;
-    mouse->throw_y = -1 * this->y_dir;
+
+    int x_off, y_off;
+    HitBox::MakeOffset(x_dir, y_dir, &x_off, &y_off, 8.0f);
+    HitBox::Properties props = {1, 500, 250};
+    game->push_object(HITBOX_OBJ, HitBox::Options(this->id, this->id, x_off - 8, y_off - 8, 16, 16, props));
 }
 
 void FoeBat::attack_internal(int damage) {

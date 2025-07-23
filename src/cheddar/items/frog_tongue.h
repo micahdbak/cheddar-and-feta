@@ -2,6 +2,7 @@
 #define ITEM_FROG_TONGUE "item_frog_tongue"
 
 #include "item.h"
+#include "hitbox.h"
 
 class DroppedFrogTongue : public DroppedItem {
 public:
@@ -26,16 +27,18 @@ public:
 
 // use obj
 
-class FrogTongue : public TrackingItem {
+class FrogTongue : public Object, public HitSource {
 public:
     FrogTongue(float x, float y, int x_dir, int y_dir, int from_id);
     ~FrogTongue();
 
     void step() override;
-    void on_foe(Foe *foe) override;
-    void on_mouse(Mouse *mouse) override;
+
+    float hitsource_x() override { return this->x; }
+    float hitsource_y() override { return this->y; }
 
 private:
+    float x, y;
     Sprite *sprite;
     SDL_FRect dst_rect;
     int x_dir, y_dir;

@@ -2,19 +2,20 @@
 #define ITEM_FIRE "item_fire"
 
 #include "item.h"
+#include "hitbox.h"
 
-class Fire : public TrackingItem {
+class Fire : public Object, public HitSource {
 public:
     Fire(float x, float y, int x_dir, int y_dir);
     ~Fire();
 
-    void on_mouse(Mouse *mouse) override;
-
-    void on_foe(Foe *foe) override;
-
     void step() override;
 
+    float hitsource_x() override { return this->x; }
+    float hitsource_y() override { return this->y; }
+
 private:
+    float x, y;
     enum State { MOVING, STATIONARY } state = MOVING;
     Sprite *sprite;
     int x_dir, y_dir;

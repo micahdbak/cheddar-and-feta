@@ -2,6 +2,7 @@
 #define ITEM_TOOTHPICK "item_toothpick"
 
 #include "items/item.h"
+#include "hitbox.h"
 
 #include <iostream>
 
@@ -33,18 +34,25 @@ public:
 
 // ---- thrown toothpick ----
 
-class ThrownToothpick : public ThrownItem {
+class ThrownToothpick : public Object, public HitSource {
 public:
-    ThrownToothpick(float x, float y, int x_dir, int y_dir);
+    ThrownToothpick(float x, float y, int x_dir, int y_dir, int from_id);
     ~ThrownToothpick();
 
     void step() override;
 
-    void on_hit(Foe *foe) override;
+    float hitsource_x() override { return this->x; }
+    float hitsource_y() override { return this->y; }
 
-    void on_miss() override;
+    void hitsource_notify() override {
+        this->did_hit = true;
+    }
 
 private:
+    Uint64 spawned_ticks;
+    bool drop_item, did_hit;
+    float x, y;
+    int x_dir, y_dir;
     Sprite *sprite;
     SDL_FRect dst_rect;
 };
@@ -52,10 +60,9 @@ private:
 class ThrownToothpickFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) {
-        float x, y;
-        int x_dir, y_dir;
-        ThrownItem::ParseOptions(options, &x, &y, &x_dir, &y_dir);
-        return new ThrownToothpick(x, y, x_dir, y_dir);
+        int x, y, x_dir, y_dir, from_id;
+        sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir, &from_id);
+        return new ThrownToothpick((float)x, (float)y, x_dir, y_dir, from_id);
     }
 };
 

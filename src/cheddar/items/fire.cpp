@@ -4,7 +4,7 @@
 static int fire_counter = 0;
 
 Fire::Fire(float x, float y, int x_dir, int y_dir):
-    TrackingItem(x, y, 24.0f, -1), x_dir(x_dir), y_dir(y_dir) {
+    x(x), y(y), x_dir(x_dir), y_dir(y_dir) {
     this->sprite = new Sprite("sprites/fire.bmp", 16, 16, 100);
     this->dst_rect.w = this->sprite->frame_w;
     this->dst_rect.h = this->sprite->frame_h;
@@ -19,29 +19,22 @@ Fire::Fire(float x, float y, int x_dir, int y_dir):
     if (!x_dir && !y_dir) {
         this->state = Fire::State::STATIONARY;
     }
+
+    // deals 3 damage over 3 seconds
+    game->push_object(HITBOX_OBJ, HitBox::Options(this->id, -1, -8, -8, 16, 16, HitBox::Properties{
+        .damage = 1,
+        .cooldown_ms = 1000,
+        .delete_after_ms = 4000,
+        .shared_cooldowns = true,
+        .shared_id = HB_SHARED_FIRE
+    }));
 }
 
 Fire::~Fire() {
     delete this->sprite;
 }
 
-void Fire::on_mouse(Mouse *mouse) {
-    if (game->ticks - this->attack_timer > 500) {
-        mouse->attack(1);
-        this->attack_timer = game->ticks;
-    }
-}
-
-void Fire::on_foe(Foe *foe) {
-    if (game->ticks - this->attack_timer > 500) {
-        foe->attack(1);
-        this->attack_timer = game->ticks;
-    }
-}
-
 void Fire::step() {
-    this->tracking_step();
-
     if (this->state == Fire::State::MOVING) {
         float dx = float(this->x_dir) * (this->y_dir != 0 ? DIAG_MULTIPLIER : 1.0f) * mov_speed * game->delta;
         float dy = float(this->y_dir) * (this->x_dir != 0 ? DIAG_MULTIPLIER : 1.0f) * mov_speed * game->delta;
@@ -76,5 +69,5 @@ void Fire::step() {
     this->dst_rect.x = this->x - (float)(int)(this->sprite->frame_w/2) - game->corner_x;
     this->dst_rect.y = this->y - (float)(int)(this->sprite->frame_h/2) - game->corner_y;
 
-    game->push_sprite("sprites/fire.bmp", this->sprite->texture, &this->sprite->frame, &this->dst_rect, 12);
+    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 12);
 }

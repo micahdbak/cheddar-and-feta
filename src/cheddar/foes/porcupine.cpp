@@ -2,8 +2,9 @@
 
 #include "cheese.h"
 #include "game.h"
+#include "hurtbox.h"
 #include "mouse.h"
-#include "../items/spine.h"
+#include "../items/toothpick.h"
 
 #include <iostream>
 
@@ -13,6 +14,8 @@ FoePorcupine::FoePorcupine(int x, int y, int spawner_id):
 
     this->dst_rect.w = 16.0f;
     this->dst_rect.h = 16.0f;
+
+    game->push_object(HURTBOX_OBJ, HurtBoxFactory::Options(this->id, -8, -8, 16, 16));
 }
 
 FoePorcupine::~FoePorcupine() {
@@ -29,7 +32,7 @@ void FoePorcupine::action(Mouse *mouse) {
 
     char buff[256];
     snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d", (int)this->x, (int)this->y, spine_x_dir, spine_y_dir, this->id);
-    game->push_object(ITEM_SPINE USE_OBJ, std::string(buff));
+    game->push_object(ITEM_TOOTHPICK USE_OBJ, std::string(buff));
 }
 
 void FoePorcupine::attack_internal(int damage) {

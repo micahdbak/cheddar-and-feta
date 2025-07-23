@@ -2,6 +2,7 @@
 #define ITEM_MOLOTOV "item_molotov"
 
 #include "item.h"
+#include "hitbox.h"
 
 class DroppedMolotov : public DroppedItem {
 public:
@@ -26,21 +27,23 @@ public:
 
 // ----
 
-class ThrownMolotov : public TrackingItem {
+class ThrownMolotov : public Object, public HitSource {
 public:
     ThrownMolotov(float x, float y, int x_dir, int y_dir, int from_id);
     ~ThrownMolotov();
 
-    void on_mouse(Mouse *mouse) override;
-
-    void on_foe(Foe *foe) override;
-
     void step() override;
 
-private:
-    void spawn_fire();
+    float hitsource_x() override { return this->x; }
+    float hitsource_y() override { return this->y; }
 
-    enum State { FLYING, DELETE_OBJ } state = State::FLYING;
+    void hitsource_notify() override {
+        this->did_hit = true;
+    }
+
+private:
+    float x, y;
+    bool did_hit;
     Sprite *sprite;
     SDL_FRect dst_rect;
     int x_dir, y_dir;

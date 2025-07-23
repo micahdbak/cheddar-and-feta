@@ -2,9 +2,10 @@
 #define FOE_BAT_OBJ "foe_bat"
 
 #include "foe.h"
+#include "hitbox.h"
 #include "sprite.h"
 
-class FoeBat : public Foe {
+class FoeBat : public Foe, public HitSource {
 public:
     FoeBat(int x, int y, int spawner_id);
     ~FoeBat();
@@ -13,6 +14,9 @@ public:
     void attack_internal(int damage) override;
 
     void step() override;
+
+    float hitsource_x() override { return this->x; }
+    float hitsource_y() override { return this->y; }
 
 private:
     Sprite *sprite;

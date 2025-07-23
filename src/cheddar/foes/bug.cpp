@@ -2,6 +2,7 @@
 
 #include "cheese.h"
 #include "game.h"
+#include "hurtbox.h"
 #include "mouse.h"
 #include "../items/toothpick.h"
 
@@ -13,6 +14,8 @@ FoeBug::FoeBug(int x, int y, int spawner_id):
 
     this->dst_rect.w = 18.0f;
     this->dst_rect.h = 18.0f;
+
+    game->push_object(HURTBOX_OBJ, HurtBoxFactory::Options(this->id, -8, -8, 16, 16));
 }
 
 FoeBug::~FoeBug() {
@@ -23,9 +26,11 @@ FoeBug::~FoeBug() {
 void FoeBug::action(Mouse *mouse) {
     this->state = Foe::State::ACTION;
     this->timer = game->ticks;
-    mouse->attack(1);
-    mouse->throw_x = this->x_dir;
-    mouse->throw_y = this->y_dir;
+
+    int x_off, y_off;
+    HitBox::MakeOffset(x_dir, y_dir, &x_off, &y_off, 8.0f);
+    HitBox::Properties props = {1, 500, 250};
+    game->push_object(HITBOX_OBJ, HitBox::Options(this->id, this->id, x_off - 8, y_off - 8, 16, 16, props));
 }
 
 void FoeBug::attack_internal(int damage) {
@@ -99,7 +104,7 @@ void FoeBug::step() {
     }
 
     this->sprite->update_frame();
-    this->dst_rect.x = this->x - float(game->corner_x) - 8.0f;
-    this->dst_rect.y = this->y - float(game->corner_y) - 8.0f;
+    this->dst_rect.x = this->x - float(game->corner_x) - 9.0f;
+    this->dst_rect.y = this->y - float(game->corner_y) - 9.0f;
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 14);
 }

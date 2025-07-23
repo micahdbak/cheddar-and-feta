@@ -15,13 +15,13 @@
 #include "foes/gate.h"
 #include "foes/porcupine.h"
 #include "foes/spawner.h"
+#include "hitbox.h"
+#include "hurtbox.h"
 #include "items/coffee.h"
 #include "items/fire.h"
 #include "items/frog_tongue.h"
-#include "items/grub.h"
 #include "items/molotov.h"
 #include "items/save.h"
-#include "items/spine.h"
 #include "items/toothpick.h"
 #include "ladder.h"
 #include "mouse.h"
@@ -66,33 +66,30 @@ void Game::init() {
     this->factories[FOE_FROG_OBJ] = new FoeFrogFactory();
     this->factories[FOE_PORCUPINE_OBJ] = new FoePorcupineFactory();
     this->factories[GATE_OBJ] = new FoeGateFactory();
-    this->factories[SPAWNER_OBJ] = new FoeSpawnerFactory();
+    this->factories[HITBOX_OBJ] = new HitBoxFactory();
+    this->factories[HURTBOX_OBJ] = new HurtBoxFactory();
     this->factories[ITEM_COFFEE_BEAN DROPPED_OBJ] = new DroppedCoffeeBeanFactory();
     this->factories[ITEM_COFFEE_BEAN USE_OBJ] = new UsedCoffeeBeanFactory();
     this->factories[ITEM_FIRE USE_OBJ] = new FireFactory();
     this->factories[ITEM_FROG_TONGUE DROPPED_OBJ] = new DroppedFrogTongueFactory();
     this->factories[ITEM_FROG_TONGUE USE_OBJ] = new FrogTongueFactory();
-    this->factories[ITEM_GRUB DROPPED_OBJ] = new DroppedGrubFactory();
-    this->factories[ITEM_GRUB USE_OBJ] = new ThrownGrubFactory();
     this->factories[ITEM_MOLOTOV DROPPED_OBJ] = new DroppedMolotovFactory();
     this->factories[ITEM_MOLOTOV USE_OBJ] = new ThrownMolotovFactory();
     this->factories[ITEM_SAVE USE_OBJ] = new ItemSaveUseFactory();
-    this->factories[ITEM_SPINE USE_OBJ] = new ThrownSpineFactory();
     this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
     this->factories[ITEM_TOOTHPICK USE_OBJ] = new ThrownToothpickFactory();
     this->factories[LADDER_OBJ] = new LadderFactory();
     this->factories[MOUSE_OBJ] = new MouseFactory();
+    this->factories[SPAWNER_OBJ] = new FoeSpawnerFactory();
 
     // items
     item_info[ITEM_NONE] = Item{WEAPON, "Nothing", 1, 0};
     item_info[ITEM_COFFEE_BEAN] = Item{USEFUL, "Coffee Bean", 0, 0};
     item_info[ITEM_FIRE] = Item{THROWABLE, "Fire", 0, 0};
     item_info[ITEM_FROG_TONGUE] = Item{THROWABLE, "Frog Tongue", 0, 0};
-    item_info[ITEM_GRUB] = Item{THROWABLE, "Grub", 0, 0};
     item_info[ITEM_MOLOTOV] = Item{THROWABLE, "Molotov Cocktail", 0, 0};
     item_info[ITEM_SAVE] = Item{USEFUL, "Save Game", 0, 0};
-    item_info[ITEM_SPINE] = Item{THROWABLE, "Spine", 0, 0};
-    item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Toothpick", 0, 0};
+    item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Porcu' Pine", 0, 0};
 
     this->factories[FIRST_OBJ] = new NetReceiverFactory();
     this->factories[LAST_OBJ] = new NetSenderFactory();
@@ -116,7 +113,6 @@ void Game::init() {
 
 Init::Init() {
     this->summaries = save.file_summaries();
-    game->displaying_load_screen = true;
 }
 
 void Init::step() {

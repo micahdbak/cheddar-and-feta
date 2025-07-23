@@ -2,9 +2,10 @@
 #define FOE_BUG_OBJ "foe_bug"
 
 #include "foe.h"
+#include "hitbox.h"
 #include "sprite.h"
 
-class FoeBug : public Foe {
+class FoeBug : public Foe, public HitSource {
 public:
     FoeBug(int x, int y, int spawner_id);
     ~FoeBug();
@@ -14,12 +15,15 @@ public:
 
     void step() override;
 
+    float hitsource_x() override { return this->x; }
+    float hitsource_y() override { return this->y; }
+
 private:
     Sprite *sprite;
     SDL_FRect dst_rect, icon_src, icon_dst;
     Uint64 timer = 0;
 
-    int max_health = 2, health = 2;
+    int max_health = 4, health = 4;
 };
 
 class FoeBugFactory : public ObjectFactory {

@@ -3,7 +3,20 @@ B1
 16,16,80,80
 1
 tiles/dirttunnel.bmp
-3
+17
 mouse 0 1200,64,0 1192,528,4
 ladder 1200,48,1,1 maps/demo02
 ladder 1192,544,0,2 maps/demo02
+item_toothpick_dropped 384,672
+item_toothpick_dropped 304,800
+item_toothpick_dropped 496,944
+item_toothpick_dropped 576,1056
+item_toothpick_dropped 720,848
+item_toothpick_dropped 976,720
+item_toothpick_dropped 1216,768
+item_toothpick_dropped 1168,1056
+item_toothpick_dropped 1008,1120
+item_toothpick_dropped 784,1200
+bell 880,720,7
+spawner 544,1168,7 foe_porc,foe_porc,foe_porc,foe_porc,foe_porc,foe_bat,foe_bat,foe_bat,foe_bat,foe_bat
+gate 272,1024,7

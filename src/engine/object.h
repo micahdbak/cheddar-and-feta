@@ -2,6 +2,7 @@
 #define OBJECT_H
 
 #include <string>
+#include <memory>
 
 #include <SDL3/SDL.h>
 

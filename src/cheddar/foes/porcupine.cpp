@@ -15,7 +15,7 @@ FoePorcupine::FoePorcupine(int x, int y, int spawner_id):
     this->dst_rect.w = 16.0f;
     this->dst_rect.h = 16.0f;
 
-    game->push_object(HURTBOX_OBJ, HurtBoxFactory::Options(this->id, -8, -8, 16, 16));
+    game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 16, false));
 }
 
 FoePorcupine::~FoePorcupine() {

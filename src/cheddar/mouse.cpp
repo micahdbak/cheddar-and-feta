@@ -35,7 +35,7 @@ Mouse::Mouse(std::vector<Mouse::SpawnCoord> &coordinates, bool is_feta, std::str
         this->name = "Feta";
     }
 
-    game->push_object(HURTBOX_OBJ, HurtBoxFactory::Options(this->id, -8, -8, 16, 12));
+    game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 12, false));
 
     this->dst_rect.w = 32.0f;
     this->dst_rect.h = 32.0f;

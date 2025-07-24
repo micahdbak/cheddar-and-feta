@@ -5,8 +5,8 @@
 
 std::vector<HurtBox *> hurtboxes;
 
-HurtBox::HurtBox(int owner_id, int x_off, int y_off, int w, int h)
-    : owner_id(owner_id), x_off(x_off), y_off(y_off), bounding_box{0, 0, w, h} {
+HurtBox::HurtBox(int owner_id, int x_off, int y_off, int w, int h, bool absorbs)
+    : owner_id(owner_id), x_off(x_off), y_off(y_off), bounding_box{0, 0, w, h}, absorbs(absorbs) {
     this->owner = game->get_object(owner_id);
     if (this->owner == nullptr)
         return;

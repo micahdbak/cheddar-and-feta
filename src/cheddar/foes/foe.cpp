@@ -69,8 +69,8 @@ void Foe::foe_step() {
         this->current_distance = target_dist;
         Mouse *target_mouse = cheddar_dist < feta_dist ? cheddar : feta;
 
-        // perform action and stay on this tile if close enough
-        if (target_dist < this->action_distance) {
+        // perform action and stay on this tile if close enough and not running away
+        if (target_dist < this->action_distance && this->tile_choice != Foe::TileChoice::AWAY) {
             this->action(target_mouse);
             this->state = Foe::State::ACTION;
             break;

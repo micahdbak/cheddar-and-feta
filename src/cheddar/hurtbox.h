@@ -17,7 +17,13 @@
  */
 class HurtBox : public Object {
 public:
-    HurtBox(int owner_id, int x_off, int y_off, int w, int h);
+    static std::string Options(int owner_id, int x_off, int y_off, int w, int h, bool absorbs) {
+        char buff[256];
+        snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d,%d", owner_id, x_off, y_off, w, h, absorbs);
+        return std::string(buff);
+    }
+
+    HurtBox(int owner_id, int x_off, int y_off, int w, int h, bool absorbs);
     ~HurtBox();
 
     void hurt(int damage, HitBox *hitbox, int cooldown_ms);
@@ -28,6 +34,8 @@ public:
 
     int owner_id;
     enum OwnerClass { MOUSE, FOE } owner_class;
+
+    bool absorbs = false;
 
 private:
     int x_off, y_off;
@@ -46,16 +54,10 @@ private:
 
 class HurtBoxFactory : public ObjectFactory {
 public:
-    static std::string Options(int owner_id, int x_off, int y_off, int w, int h) {
-        char buff[256];
-        snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d", owner_id, x_off, y_off, w, h);
-        return std::string(buff);
-    }
-
     Object *create(const std::string &options) {
-        int owner_id, x_off, y_off, w, h;
-        sscanf(options.c_str(), "%d,%d,%d,%d,%d", &owner_id, &x_off, &y_off, &w, &h);
-        return new HurtBox(owner_id, x_off, y_off, w, h);
+        int owner_id, x_off, y_off, w, h, absorbs;
+        sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d", &owner_id, &x_off, &y_off, &w, &h, &absorbs);
+        return new HurtBox(owner_id, x_off, y_off, w, h, absorbs == 1);
     }
 };
 

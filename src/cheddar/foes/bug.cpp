@@ -15,7 +15,7 @@ FoeBug::FoeBug(int x, int y, int spawner_id):
     this->dst_rect.w = 18.0f;
     this->dst_rect.h = 18.0f;
 
-    game->push_object(HURTBOX_OBJ, HurtBoxFactory::Options(this->id, -8, -8, 16, 16));
+    game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 16, false));
 }
 
 FoeBug::~FoeBug() {

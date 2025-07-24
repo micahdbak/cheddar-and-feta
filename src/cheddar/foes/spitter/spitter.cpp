@@ -1,0 +1,101 @@
+#include "abdomen.h"
+#include "spitter.h"
+#include "head.h"
+#include "../../mouse.h"
+
+Spitter::Spitter(float x, float y, int spawner_id)
+    : Foe(x, y, spawner_id, 125, 256.0f, 80.0f) {
+    char buff[256];
+    snprintf(buff, sizeof(buff), "%d", this->id);
+    game->push_object(FOE_SPITTER_HEAD_OBJ, std::string(buff));
+    game->push_object(FOE_SPITTER_ABDOMEN_OBJ, std::string(buff));
+}
+
+Spitter::~Spitter() {
+    // pass
+}
+
+void Spitter::action(Mouse *mouse) {
+    this->timer = game->ticks;
+}
+
+void Spitter::attack_internal(int damage) {
+
+}
+
+void Spitter::step() {
+    this->foe_step();
+
+    switch (this->state) {
+    case Foe::State::ACTION: {
+        Uint64 action_offset = game->ticks - this->timer;
+        if (action_offset > 2000) {
+            this->state = Foe::State::FORCE_RANDOM_TILE;
+            break;
+        }
+
+        Mouse *mouse = closest_mouse(this->x, this->y, 80.0f);
+
+        bool cancel_action = false;
+        if (mouse == nullptr) {
+            this->state = Foe::State::IDLE;
+            break;
+        } else {
+            float distance = distance_between_points(this->x, this->y, mouse->x, mouse->y);
+            if (distance < 32.0f) {
+                this->tile_choice = AWAY;
+                this->state = Foe::State::IDLE;
+                break;
+            }
+        }
+
+        int action_direction = 0;
+
+        int x_dir, y_dir;
+        dir_to_point(this->x, this->y, mouse->x, mouse->y, &x_dir, &y_dir);
+        action_direction = direction_from_dirs(x_dir, y_dir);
+
+        int direction_offset = 0;
+
+        switch (action_offset / 250) {
+        case 0: direction_offset = 0; break;
+        case 1: direction_offset = -1; break;
+        case 2: direction_offset = 0; break;
+        case 3: direction_offset = 1; break;
+        case 4: direction_offset = 0; break;
+        case 5: direction_offset = -1; break;
+        case 6: direction_offset = 0; break;
+        case 7: direction_offset = 1; break;
+        default: break;
+        }
+
+        this->direction = action_direction + direction_offset;
+        if (this->direction < 0)
+            this->direction = 7;
+        else if (this->direction > 7)
+            this->direction = 0;
+
+        if (last_direction != this->direction) {
+            last_direction = this->direction;
+
+            // int fire_x_dir, fire_y_dir;
+            // dirs_from_direction(this->direction, &fire_x_dir, &fire_y_dir);
+        }
+    } break;
+
+    default:
+        if (this->tile_choice == Foe::TileChoice::AWAY && this->current_distance >= 64.0f) {
+            this->tile_choice = Foe::TileChoice::TOWARDS;
+        }
+
+        break;
+    }
+
+    if (this->tile_choice == Foe::TileChoice::AWAY) {
+        this->displayed_direction = this->direction - 4;
+        if (this->displayed_direction < 0)
+            this->displayed_direction += 8;
+    } else {
+        this->displayed_direction = this->direction;
+    }
+}

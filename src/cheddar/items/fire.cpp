@@ -15,9 +15,12 @@ Fire::Fire(float x, float y, int x_dir, int y_dir):
     this->sprite->set_frame(SDL_rand(4));
 
     this->mov_speed = SDL_randf() * 64.0f + 120.0f;
+    this->throw_time = 100;
 
     if (!x_dir && !y_dir) {
         this->state = Fire::State::STATIONARY;
+    } else {
+        this->throw_time = cnf_max(cnf_abs(x_dir), cnf_abs(y_dir)) * 100;
     }
 
     // deals 3 damage over 3 seconds
@@ -49,7 +52,7 @@ void Fire::step() {
             this->y = new_y;
         }
 
-        if (game->ticks - this->timer > 100) {
+        if (game->ticks - this->timer > this->throw_time) {
             this->state = Fire::State::STATIONARY;
         }
     }

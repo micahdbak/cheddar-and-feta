@@ -9,6 +9,16 @@
 #include <map>
 #include <vector>
 
+class HurtSource {
+public:
+    HurtSource() = default;
+    ~HurtSource() = default;
+
+    virtual float hurtsource_x() = 0;
+    virtual float hurtsource_y() = 0;
+    virtual void attack(int damage) = 0;
+};
+
 /*
  * Main ideas:
  * - A hurt box represents a fixed-size rectangle, offset from the object that created it
@@ -17,13 +27,13 @@
  */
 class HurtBox : public Object {
 public:
-    static std::string Options(int owner_id, int x_off, int y_off, int w, int h, bool absorbs) {
+    static std::string Options(int owner_id, int x_off, int y_off, int w, int h) {
         char buff[256];
-        snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d,%d", owner_id, x_off, y_off, w, h, absorbs);
+        snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d", owner_id, x_off, y_off, w, h);
         return std::string(buff);
     }
 
-    HurtBox(int owner_id, int x_off, int y_off, int w, int h, bool absorbs);
+    HurtBox(int owner_id, int x_off, int y_off, int w, int h);
     ~HurtBox();
 
     void hurt(int damage, HitBox *hitbox, int cooldown_ms);
@@ -33,9 +43,7 @@ public:
     SDL_Rect bounding_box;
 
     int owner_id;
-    enum OwnerClass { MOUSE, FOE } owner_class;
-
-    bool absorbs = false;
+    enum OwnerClass { MOUSE, FOE, HURTSOURCE } owner_class;
 
 private:
     int x_off, y_off;
@@ -43,6 +51,7 @@ private:
     Object *owner;
     Mouse *mouse;
     Foe *foe;
+    HurtSource *source;
 
     std::shared_ptr<bool> owner_deleted;
 
@@ -55,9 +64,9 @@ private:
 class HurtBoxFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) {
-        int owner_id, x_off, y_off, w, h, absorbs;
-        sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d", &owner_id, &x_off, &y_off, &w, &h, &absorbs);
-        return new HurtBox(owner_id, x_off, y_off, w, h, absorbs == 1);
+        int owner_id, x_off, y_off, w, h;
+        sscanf(options.c_str(), "%d,%d,%d,%d,%d", &owner_id, &x_off, &y_off, &w, &h);
+        return new HurtBox(owner_id, x_off, y_off, w, h);
     }
 };
 

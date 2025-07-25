@@ -1,5 +1,5 @@
 #ifndef FOE_SPITTER_OBJ
-#define FOE_SPITTER_OBJ "foe_spitter"
+#define FOE_SPITTER_OBJ "spitter"
 
 #include "../foe.h"
 #include "../../hitbox.h"

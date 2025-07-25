@@ -5,20 +5,26 @@
 
 std::vector<HurtBox *> hurtboxes;
 
-HurtBox::HurtBox(int owner_id, int x_off, int y_off, int w, int h, bool absorbs)
-    : owner_id(owner_id), x_off(x_off), y_off(y_off), bounding_box{0, 0, w, h}, absorbs(absorbs) {
+HurtBox::HurtBox(int owner_id, int x_off, int y_off, int w, int h)
+    : owner_id(owner_id), x_off(x_off), y_off(y_off), bounding_box{0, 0, w, h} {
     this->owner = game->get_object(owner_id);
     if (this->owner == nullptr)
         return;
 
-    if ((this->mouse = dynamic_cast<Mouse*>(this->owner))) {
+    if ((this->mouse = dynamic_cast<Mouse*>(this->owner)) != nullptr) {
         this->owner_class = HurtBox::OwnerClass::MOUSE;
         this->bounding_box.x = (int)this->mouse->x + x_off;
-    } else if ((this->foe = dynamic_cast<Foe*>(this->owner))) {
+        this->bounding_box.y = (int)this->mouse->y + y_off;
+    } else if ((this->foe = dynamic_cast<Foe*>(this->owner)) != nullptr) {
         this->owner_class = HurtBox::OwnerClass::FOE;
+        this->bounding_box.x = (int)this->foe->x + x_off;
         this->bounding_box.y = (int)this->foe->y + y_off;
+    } else if ((this->source = dynamic_cast<HurtSource*>(this->owner)) != nullptr) {
+        this->owner_class = HurtBox::OwnerClass::HURTSOURCE;
+        this->bounding_box.x = (int)this->source->hurtsource_y() + x_off;
+        this->bounding_box.y = (int)this->source->hurtsource_x() + y_off;
     } else {
-        this->owner = nullptr; // owner must be a Mouse or a Foe
+        this->owner = nullptr; // owner must be a Mouse, Foe, or a HurtSource
     }
 
     // owner is Mouse or Foe
@@ -84,6 +90,10 @@ void HurtBox::hurt(int damage, HitBox *hitbox, int cooldown_ms) {
         case HurtBox::OwnerClass::FOE:
             this->foe->attack(damage);
             break;
+
+        case HurtBox::OwnerClass::HURTSOURCE:
+            this->source->attack(damage);
+            break;
         }
     }
 }
@@ -103,6 +113,10 @@ void HurtBox::step() {
     case HurtBox::OwnerClass::FOE:
         this->bounding_box.x = (int)this->foe->x + this->x_off;
         this->bounding_box.y = (int)this->foe->y + this->y_off;
+        break;
+    case HurtBox::OwnerClass::HURTSOURCE:
+        this->bounding_box.x = (int)this->source->hurtsource_x() + this->x_off;
+        this->bounding_box.y = (int)this->source->hurtsource_y() + this->y_off;
         break;
     }
 

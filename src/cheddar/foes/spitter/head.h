@@ -3,15 +3,22 @@
 
 #include "spitter.h"
 #include "sprite.h"
+#include "hurtbox.h"
 
-class SpitterHead : public Object {
+class SpitterHead : public Object, public HurtSource {
 public:
     SpitterHead(Spitter *parent, std::shared_ptr<bool> deleted_ptr);
     ~SpitterHead();
 
     void step() override;
 
+    float hurtsource_x() override { return this->x; }
+    float hurtsource_y() override { return this->y; }
+
+    void attack(int) override {}
+
 private:
+    float x, y;
     Spitter *parent;
     std::shared_ptr<bool> deleted_ptr;
     Sprite *sprite;

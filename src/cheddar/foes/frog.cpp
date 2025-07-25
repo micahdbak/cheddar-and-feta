@@ -10,7 +10,7 @@ FoeFrog::FoeFrog(int x, int y, int spawner_id):
     this->dst_rect.h = 32.0f;
     this->icon_offset = 16;
 
-    game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -16, -16, 32, 32, false));
+    game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -16, -16, 32, 32));
 }
 
 FoeFrog::~FoeFrog() {

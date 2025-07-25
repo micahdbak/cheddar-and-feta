@@ -2,6 +2,7 @@
 #include "spitter.h"
 #include "head.h"
 #include "../../mouse.h"
+#include "../../items/fire.h"
 
 Spitter::Spitter(float x, float y, int spawner_id)
     : Foe(x, y, spawner_id, 125, 256.0f, 80.0f) {
@@ -78,8 +79,9 @@ void Spitter::step() {
         if (last_direction != this->direction) {
             last_direction = this->direction;
 
-            // int fire_x_dir, fire_y_dir;
-            // dirs_from_direction(this->direction, &fire_x_dir, &fire_y_dir);
+            int fire_x_dir, fire_y_dir;
+            dirs_from_direction(this->direction, &fire_x_dir, &fire_y_dir);
+            game->push_object(ITEM_FIRE USE_OBJ, UseItem::Options(this->x, this->y, fire_x_dir * 2, fire_y_dir * 2, -1));
         }
     } break;
 

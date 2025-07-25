@@ -44,6 +44,9 @@ set(CHEDDAR_SRC
     src/cheddar/foes/gate.cpp
     src/cheddar/foes/porcupine.cpp
     src/cheddar/foes/spawner.cpp
+    src/cheddar/foes/spitter/abdomen.cpp
+    src/cheddar/foes/spitter/head.cpp
+    src/cheddar/foes/spitter/spitter.cpp
     src/cheddar/hitbox.cpp
     src/cheddar/hurtbox.cpp
     src/cheddar/init.cpp
@@ -122,9 +125,9 @@ else()
 endif()
 
 # Extra debug thingys (hitboxes, hurtboxes)
-# if(CMAKE_BUILD_TYPE MATCHES "Debug")
-#     target_compile_definitions(CheddarLauncher PRIVATE ONSCREEN_DEBUG)
-# endif()
+#if(CMAKE_BUILD_TYPE MATCHES "Debug")
+#    target_compile_definitions(CheddarLauncher PRIVATE ONSCREEN_DEBUG)
+#endif()
 
 # link dependencies
 target_link_libraries(MapEditor PRIVATE ${DEPS})

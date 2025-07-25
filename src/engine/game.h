@@ -24,6 +24,7 @@
 
 #define cnf_clamp(_x, _min, _max) ((_x) < (_min) ? (_min) : ((_x) > (_max) ? (_max) : (_x)))
 #define cnf_min(_a, _b)           ((_b) < (_a) ? (_b) : (_a))
+#define cnf_max(_a, _b)           ((_b) > (_a) ? (_b) : (_a))
 #define cnf_sign(_x)              ((_x) == 0 ? 0 : ((_x) > 0 ? 1 : -1))
 #define cnf_abs(_x)               ((_x) < 0 ? (-1 * (_x)) : (_x))
 

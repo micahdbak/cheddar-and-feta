@@ -26,6 +26,7 @@ public:
         int delete_after_ms;
         bool shared_cooldowns = false;
         int shared_id = HB_SHARED_UNKNOWN;
+        bool single_use = false;
     };
 
     static void MakeOffset(int x_dir, int y_dir, int *x_off, int *y_off, float distance) {
@@ -45,13 +46,14 @@ public:
         Properties props
     ) {
         char buff[256];
-        snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+        snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
             hitsource_owner_id, hurtbox_owner_id, x_off, y_off, w, h,
             props.damage,
             props.cooldown_ms,
             props.delete_after_ms,
             props.shared_cooldowns ? 1 : 0,
-            props.shared_id);
+            props.shared_id,
+            props.single_use ? 1 : 0);
         return std::string(buff);
     }
 
@@ -73,7 +75,7 @@ public:
 
     bool throw_away = true;
 
-    bool shared_cooldowns = false;
+    bool shared_cooldowns = false, single_use = false;
     int shared_id = HB_SHARED_UNKNOWN;
 
 private:
@@ -90,10 +92,10 @@ class HitBoxFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) {
         int hitsource_owner_id, hurtbox_owner_id, x_off, y_off, w, h,
-            damage, cooldown_ms, delete_after_ms, shared_cooldowns, shared_id;
-        sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+            damage, cooldown_ms, delete_after_ms, shared_cooldowns, shared_id, single_use;
+        sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
             &hitsource_owner_id, &hurtbox_owner_id, &x_off, &y_off, &w, &h,
-            &damage, &cooldown_ms, &delete_after_ms, &shared_cooldowns, &shared_id);
+            &damage, &cooldown_ms, &delete_after_ms, &shared_cooldowns, &shared_id, &single_use);
 
         Object *source_obj = game->get_object(hitsource_owner_id);
         if (source_obj == nullptr)
@@ -109,8 +111,9 @@ public:
         props.damage = damage;
         props.cooldown_ms = cooldown_ms;
         props.delete_after_ms = delete_after_ms;
-        props.shared_cooldowns = shared_cooldowns;
+        props.shared_cooldowns = shared_cooldowns == 1;
         props.shared_id = shared_id;
+        props.single_use = single_use == 1;
 
         return new HitBox(hurtbox_owner_id, source, source_deleted, x_off, y_off, w, h, props);
     }

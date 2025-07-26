@@ -47,6 +47,7 @@ public:
 protected:
     int icon_offset = 8;
     float current_distance;
+    Mouse *target_mouse = nullptr;
 
 private:
     int spawner_id, speed;
@@ -55,7 +56,7 @@ private:
 
     int target_x, target_y;
     float start_x, start_y;
-    Uint32 start_ticks = 0;
+    Uint64 start_ticks = 0, target_ticks = 0;
     int walking_time, walk_offset = 0;
 
     FoeStrafe strafe;

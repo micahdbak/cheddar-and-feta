@@ -21,7 +21,8 @@ HitBox::HitBox(
     cooldown_ms(props.cooldown_ms),
     delete_after_ms(props.delete_after_ms),
     shared_cooldowns(props.shared_cooldowns),
-    shared_id(props.shared_id) {
+    shared_id(props.shared_id),
+    single_use(props.single_use) {
     this->created_ticks = game->ticks;
     this->src_rect = DEBUG_HITBOX_ICON;
 
@@ -59,6 +60,12 @@ void HitBox::step() {
         if (this->hurtbox_owner_id != hb->owner_id && SDL_HasRectIntersection(&this->bounding_box, &hb->bounding_box)) {
             hb->hurt(this->damage, this, this->cooldown_ms);
             this->source->hitsource_notify();
+
+            if (this->single_use) {
+                // will be deleted on next loop
+                this->created_ticks = game->ticks - (this->delete_after_ms + 1000);
+                break; // end for loop
+            }
         }
     }
 

@@ -21,9 +21,10 @@ public:
     int displayed_direction = 0;
 
 private:
-    Uint64 timer;
+    Uint64 timer, hurt_timer, direction_timer = 0;
     int last_direction = 0;
     int max_health = 10, health = 10;
+    SDL_FRect icon_src, icon_dst;
 };
 
 class SpitterFactory : public ObjectFactory {

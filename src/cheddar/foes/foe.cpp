@@ -62,16 +62,34 @@ void Foe::attack(int damage) {
 void Foe::foe_step() {
     switch (this->state) {
     case Foe::State::IDLE: {
-        // find target mouse by distance
-        float cheddar_dist = distance_between_points(cheddar->x, cheddar->y, this->x, this->y);
-        float feta_dist = distance_between_points(feta->x, feta->y, this->x, this->y);
-        float target_dist = cheddar_dist < feta_dist ? cheddar_dist : feta_dist;
-        this->current_distance = target_dist;
-        Mouse *target_mouse = cheddar_dist < feta_dist ? cheddar : feta;
+        Mouse *new_mouse = closest_mouse(this->x, this->y, this->stalking_distance);
+
+        if (new_mouse == nullptr) {
+            // no more stalking if neither mouse is close enough
+            this->target_mouse = nullptr;
+            this->current_distance = this->stalking_distance;
+        } else if (this->target_mouse == nullptr) {
+            // no target mouse presently; target the new mouse
+            Uint64 target_ticks_offset = SDL_rand(10) * 1000;
+            this->target_ticks = game->ticks - target_ticks_offset;
+            this->target_mouse = new_mouse;
+            this->current_distance = distance_between_points(this->x, this->y, new_mouse->x, new_mouse->y);
+        } else {
+            this->current_distance = distance_between_points(this->x, this->y, this->target_mouse->x, this->target_mouse->y);
+
+            if (new_mouse != this->target_mouse
+                && (this->target_mouse->is_down
+                || this->current_distance > this->stalking_distance
+                || game->ticks - this->target_ticks > 10000)) {
+                this->target_ticks = game->ticks;
+                this->target_mouse = new_mouse;
+                this->current_distance = distance_between_points(this->x, this->y, new_mouse->x, new_mouse->y);
+            }
+        }
 
         // perform action and stay on this tile if close enough and not running away
-        if (target_dist < this->action_distance && this->tile_choice != Foe::TileChoice::AWAY) {
-            this->action(target_mouse);
+        if (this->current_distance < this->action_distance && this->tile_choice != Foe::TileChoice::AWAY) {
+            this->action(this->target_mouse);
             this->state = Foe::State::ACTION;
             break;
         }
@@ -83,17 +101,17 @@ void Foe::foe_step() {
         int current_y = this->target_y;
 
         // move towards closest mouse
-        if (target_dist < this->stalking_distance) {
+        if (this->target_mouse != nullptr) {
             bool path_exists = false;
             switch (this->tile_choice) {
             case Foe::TileChoice::TOWARDS:
-                path_exists = foe_move_towards(target_mouse, &this->target_x, &this->target_y, this->strafe);
+                path_exists = foe_move_towards(this->target_mouse, &this->target_x, &this->target_y, this->strafe);
                 break;
             case Foe::TileChoice::AWAY:
-                path_exists = foe_move_away(target_mouse, &this->target_x, &this->target_y);
+                path_exists = foe_move_away(this->target_mouse, &this->target_x, &this->target_y);
                 break;
             case Foe::TileChoice::CIRCLE:
-                path_exists = foe_move_circle(target_mouse, &this->target_x, &this->target_y);
+                path_exists = foe_move_circle(this->target_mouse, &this->target_x, &this->target_y);
                 break;
             }
 

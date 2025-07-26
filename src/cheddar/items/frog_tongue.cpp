@@ -22,6 +22,7 @@ FrogTongue::FrogTongue(float x, float y, int x_dir, int y_dir, int from_id):
     this->ticks = game->ticks;
 
     HitBox::Properties props = {2, 750, 500};
+    props.single_use = true;
     game->push_object(HITBOX_OBJ, HitBox::Options(this->id, from_id, -16, -16, 32, 32, props));
 }
 

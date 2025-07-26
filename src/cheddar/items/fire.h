@@ -19,7 +19,7 @@ private:
     enum State { MOVING, STATIONARY } state = MOVING;
     Sprite *sprite;
     int x_dir, y_dir, throw_time;
-    Uint32 timer, attack_timer = 0;
+    Uint64 timer, attack_timer = 0;
     SDL_FRect dst_rect;
     float mov_speed;
 };

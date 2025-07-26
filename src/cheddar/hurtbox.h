@@ -72,4 +72,8 @@ public:
 
 extern std::vector<HurtBox *> hurtboxes;
 
+// can be used to check what hitbox attacked a given hurtbox
+// (yes this is ugly, but I don't wanna change all attack() signatures to include the id cuz im lazy)
+extern int hurtbox_hitbox_id;
+
 #endif

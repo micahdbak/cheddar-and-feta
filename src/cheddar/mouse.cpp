@@ -268,7 +268,8 @@ void Mouse::step() {
                 int x_off, y_off;
                 HitBox::MakeOffset(x_dir, y_dir, &x_off, &y_off, 8.0f);
                 HitBox::Properties props = {1, 200, 100};
-                game->push_object(HITBOX_OBJ, HitBox::Options(this->id, this->id, x_off - 6, y_off - 8, 12, 12, props));
+                props.single_use = true;
+                game->push_object(HITBOX_OBJ, HitBox::Options(this->id, this->id, x_off - 10, y_off - 12, 20, 20, props));
 
                 // set animation to attacking
                 this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
@@ -281,10 +282,8 @@ void Mouse::step() {
 
             default: break;
             }
-        }
-
-        // eat cheese
-        if (controller != nullptr && controller->is_hit(ACTION2) && this->cheese > 0 && this->health < this->max_health) {
+        } else if (controller->is_hit(ACTION2) && this->cheese > 0) {
+            // eat cheese
             this->cheese--;
             this->health++;
 
@@ -315,9 +314,9 @@ void Mouse::step() {
         int cooldown = 250;
 
         if (this->did_hit)
-            cooldown = 750;
+            cooldown = 500;
 
-        // will return to normal after << 250 or 750 ms >>
+        // will return to normal after << 250 or 500 ms >>
         if (game->ticks - this->busy_ticks > cooldown) {
             this->is_busy = FALSE;
             this->did_hit = false;

@@ -55,7 +55,7 @@ public:
 
 private:
     bool is_feta;
-    Uint32 timer = 0;
+    Uint64 timer = 0;
 };
 
 class UsedCoffeeBeanFactory : public ObjectFactory {

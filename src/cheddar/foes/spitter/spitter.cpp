@@ -1,14 +1,16 @@
 #include "abdomen.h"
-#include "spitter.h"
 #include "head.h"
+#include "spitter.h"
+#include "thorax.h"
 #include "../../mouse.h"
 #include "../../items/fire.h"
 
 Spitter::Spitter(float x, float y, int spawner_id)
-    : Foe(x, y, spawner_id, 125, 256.0f, 80.0f) {
+    : Foe(x, y, spawner_id, 150, 256.0f, 80.0f) {
     char buff[256];
     snprintf(buff, sizeof(buff), "%d", this->id);
     game->push_object(FOE_SPITTER_HEAD_OBJ, std::string(buff));
+    game->push_object(FOE_SPITTER_THORAX_OBJ, std::string(buff));
     game->push_object(FOE_SPITTER_ABDOMEN_OBJ, std::string(buff));
 }
 
@@ -21,7 +23,21 @@ void Spitter::action(Mouse *mouse) {
 }
 
 void Spitter::attack_internal(int damage) {
+    if (hurtbox_hitbox_id == HB_SHARED_FIRE) {
+        return; // fire does no damage
+    }
 
+    this->health -= damage;
+
+    if (this->health <= 0) {
+        this->health = 0;
+        this->state = Foe::State::DEAD;
+        this->remove_from_foes();
+    } else {
+        this->state = Foe::State::HURT;
+    }
+
+    this->hurt_timer = game->ticks;
 }
 
 void Spitter::step() {
@@ -76,14 +92,38 @@ void Spitter::step() {
         else if (this->direction > 7)
             this->direction = 0;
 
-        if (last_direction != this->direction) {
+        if (last_direction != this->direction && this->direction == this->displayed_direction) {
             last_direction = this->direction;
+
+            int distance = (int)(x_dir != 0 && y_dir != 0 ? 16.0f * DIAG_MULTIPLIER : 16.0f);
+            float fire_x = this->x + (float)(x_dir * distance);
+            float fire_y = this->y + (float)(y_dir * distance);
 
             int fire_x_dir, fire_y_dir;
             dirs_from_direction(this->direction, &fire_x_dir, &fire_y_dir);
-            game->push_object(ITEM_FIRE USE_OBJ, UseItem::Options(this->x, this->y, fire_x_dir * 2, fire_y_dir * 2, -1));
+            game->push_object(ITEM_FIRE USE_OBJ, UseItem::Options(fire_x, fire_y, fire_x_dir * 2, fire_y_dir * 2, -1));
         }
     } break;
+
+    case Foe::State::HURT:
+        if (game->ticks - this->hurt_timer > 500) {
+            this->state = Foe::State::WALKING;
+        }
+
+        game->push_health_bar(this->health, this->max_health, this->x, this->y - 16.0f, &this->icon_src, &this->icon_dst);
+
+        break;
+
+    case Foe::State::DEAD:
+        if (game->ticks - this->hurt_timer > 2000) {
+            // delete this object
+            game->delete_object = true;
+            return;
+        }
+
+        game->push_icon(SKULL_AND_BONES_ICON, this->x, this->y - 14.0f, &this->icon_src, &this->icon_dst);
+
+        break;
 
     default:
         if (this->tile_choice == Foe::TileChoice::AWAY && this->current_distance >= 64.0f) {
@@ -93,11 +133,31 @@ void Spitter::step() {
         break;
     }
 
+    int target_direction;
     if (this->tile_choice == Foe::TileChoice::AWAY) {
-        this->displayed_direction = this->direction - 4;
-        if (this->displayed_direction < 0)
-            this->displayed_direction += 8;
+        target_direction = this->direction - 4;
+        if (target_direction < 0)
+            target_direction += 8;
     } else {
-        this->displayed_direction = this->direction;
+        target_direction = this->direction;
+    }
+
+    if (game->ticks - this->direction_timer > 100 && this->displayed_direction != target_direction) {
+        this->direction_timer = game->ticks;
+
+        int diff_up = (target_direction < this->displayed_direction ? target_direction + 8 : target_direction) - this->displayed_direction;
+        int diff_down = this->displayed_direction - (target_direction > this->displayed_direction ? target_direction - 8 : target_direction);
+
+        if (diff_up <= diff_down) {
+            this->displayed_direction++;
+        } else {
+            // diff_down < diff_up
+            this->displayed_direction--;
+        }
+
+        if (this->displayed_direction < 0)
+            this->displayed_direction = 7;
+        else if (this->displayed_direction > 7)
+            this->displayed_direction = 0;
     }
 }

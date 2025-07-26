@@ -29,5 +29,5 @@ void SpitterAbdomen::step() {
     this->dst_rect.y = this->y - 16.0f - game->corner_y;
 
     this->sprite->set_animation(this->parent->displayed_direction);
-    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 14);
+    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 15);
 }

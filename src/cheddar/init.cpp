@@ -18,6 +18,7 @@
 #include "foes/spitter/abdomen.h"
 #include "foes/spitter/head.h"
 #include "foes/spitter/spitter.h"
+#include "foes/spitter/thorax.h"
 #include "hitbox.h"
 #include "hurtbox.h"
 #include "items/coffee.h"
@@ -70,6 +71,7 @@ void Game::init() {
     this->factories[FOE_PORCUPINE_OBJ] = new FoePorcupineFactory();
     this->factories[FOE_SPITTER_ABDOMEN_OBJ] = new SpitterAbdomenFactory();
     this->factories[FOE_SPITTER_HEAD_OBJ] = new SpitterHeadFactory();
+    this->factories[FOE_SPITTER_THORAX_OBJ] = new SpitterThoraxFactory();
     this->factories[FOE_SPITTER_OBJ] = new SpitterFactory();
     this->factories[GATE_OBJ] = new FoeGateFactory();
     this->factories[HITBOX_OBJ] = new HitBoxFactory();

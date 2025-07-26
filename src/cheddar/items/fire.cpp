@@ -57,12 +57,12 @@ void Fire::step() {
         }
     }
 
-    if (game->ticks - this->timer > 5000) {
+    if (game->ticks - this->timer > 3000) {
         game->delete_object = true;
         return;
-    } else if (game->ticks - this->timer > 4875) {
+    } else if (game->ticks - this->timer > 2875) {
         this->sprite->set_animation(3);
-    } else if (game->ticks - this->timer > 4750) {
+    } else if (game->ticks - this->timer > 2750) {
         this->sprite->set_animation(2);
         this->sprite->interval_ms = 1000;
     }

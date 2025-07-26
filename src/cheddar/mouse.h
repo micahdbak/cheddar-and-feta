@@ -47,7 +47,7 @@ public:
         this->did_hit = true;
     }
 
-    bool is_feta = true;
+    bool is_feta = true, is_down = false;
     float x, y;
 
     int throw_x = 0, throw_y = 0;
@@ -65,7 +65,7 @@ public:
     std::vector<Item> items;
     int sel_item = -1;
 
-    int cheese = 0, max_cheese = 10;
+    int cheese = 10, max_cheese = 10;
 
     float max_mov_speed = MOUSE_DEFAULT_SPEED;
 

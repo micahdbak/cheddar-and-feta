@@ -79,7 +79,6 @@ void FoeBug::step() {
         if (game->ticks - this->timer > 2000) {
             // delete this object
             game->delete_object = true;
-            return;
 
             int cheese_amount = SDL_rand(8); // 0..7
 
@@ -90,6 +89,8 @@ void FoeBug::step() {
                 snprintf(cheese_opt, sizeof(cheese_opt), "%d,%d,%d", int(this->x) + game->tile_width/2, int(this->y) + game->tile_height/2, cheese_amount);
                 game->push_object(CHEESE_OBJ, std::string(cheese_opt));
             }
+
+            return;
         }
 
         game->push_icon(SKULL_AND_BONES_ICON, this->x, this->y - 14.0f, &this->icon_src, &this->icon_dst);

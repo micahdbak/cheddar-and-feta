@@ -4,6 +4,7 @@
 #include "mouse.h"
 
 std::vector<HurtBox *> hurtboxes;
+int hurtbox_hitbox_id;
 
 HurtBox::HurtBox(int owner_id, int x_off, int y_off, int w, int h)
     : owner_id(owner_id), x_off(x_off), y_off(y_off), bounding_box{0, 0, w, h} {
@@ -70,6 +71,8 @@ void HurtBox::hurt(int damage, HitBox *hitbox, int cooldown_ms) {
     }
 
     if (should_hit) {
+        hurtbox_hitbox_id = hitbox_id;
+
         switch (this->owner_class) {
         case HurtBox::OwnerClass::MOUSE: {
             this->mouse->attack(damage);

@@ -150,9 +150,10 @@ static bool _is_collision(float x, float y) {
 #define ATTACKING_ANIMATION 8
 #define ATTACKED_ANIMATION  16
 #define THROWING_ANIMATION  24
-#define EATING_ANIMATION    32
-#define DANCING_ANIMATION   33
-#define SLEEPING_ANIMATION  34
+#define DOWN_ANIMATION      32
+#define EATING_ANIMATION    40
+#define DANCING_ANIMATION   41
+#define SLEEPING_ANIMATION  42
 
 void Mouse::step() {
     if (mice_locked) {
@@ -367,6 +368,18 @@ void Mouse::step() {
         }
 
         break;
+
+    case DOWNED:
+        this->sprite->update_frame();
+        this->sprite->interval_ms = 250;
+
+        if (game->ticks - this->busy_ticks > 2000) {
+            this->is_busy = FALSE;
+            this->is_down = false;
+
+            // set animation to walking/running
+            this->sprite->set_animation(this->sprite->animation % 8);
+        }
     }
 
     // new coordinates calculated with direction moving, movement speed, and diagonal multiplier (if necessary)
@@ -456,10 +469,10 @@ void Mouse::step() {
 }
 
 // will be called by a foe
-bool Mouse::attack(int damage) {
-    // don't get attacked if was already attacked
-    if (this->is_busy == ATTACKED)
-        return false;
+void Mouse::attack(int damage) {
+    // don't get attacked if was already attacked / down
+    if (this->is_busy == ATTACKED || this->is_busy == DOWNED)
+        return;
 
     this->is_busy = ATTACKED;
     this->busy_ticks = game->ticks;
@@ -473,12 +486,14 @@ bool Mouse::attack(int damage) {
         this->health -= damage;
     }
 
-    // if dead, just revive
-    if (this->health < 0) {
-        this->health = this->max_health;
+    // if dead, go down
+    if (this->health <= 0) {
+        this->health = 0;
+        this->is_busy = DOWNED;
+        this->is_down = true;
+        this->busy_ticks = game->ticks;
+        this->sprite->set_animation((this->sprite->animation % 8) + DOWN_ANIMATION);
     }
-
-    return true;
 }
 
 bool Mouse::push_item(const std::string &item_id) {
@@ -541,8 +556,8 @@ int Mouse::add_cheese(int amount) {
 }
 
 Mouse *closest_mouse(float x, float y, float min_distance) {
-    float distance_cheddar = distance_between_points(x, y, cheddar->x, cheddar->y);
-    float distance_feta = distance_between_points(x, y, feta->x, feta->y);
+    float distance_cheddar = cheddar->is_down ? FLT_MAX : distance_between_points(x, y, cheddar->x, cheddar->y);
+    float distance_feta = feta->is_down ? FLT_MAX : distance_between_points(x, y, feta->x, feta->y);
 
     if (distance_cheddar < distance_feta) {
         if (min_distance < 0.1f || distance_cheddar < min_distance) {

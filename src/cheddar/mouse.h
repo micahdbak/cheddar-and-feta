@@ -34,7 +34,7 @@ public:
 
     void save_data() override;
 
-    bool attack(int damage);
+    void attack(int damage);
 
     bool push_item(const std::string &item_id);
     void remove_item(const std::string &item_id);
@@ -73,7 +73,7 @@ private:
     SDL_FRect dst_rect, icon_src, icon_dst;
     Sprite *sprite;
 
-    enum { FALSE, ATTACKING, ATTACKED, THROWING, EATING } is_busy = FALSE;
+    enum Busy { FALSE, ATTACKING, ATTACKED, THROWING, EATING, DOWNED } is_busy = FALSE;
     Uint64 busy_ticks = 0;
 
     int tile_x, tile_y;

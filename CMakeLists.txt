@@ -34,7 +34,6 @@ set(FETA_SRC
 
 set(CHEDDAR_SRC
     src/cheddar/billboard.cpp
-    src/cheddar/cheese.cpp
     src/cheddar/foes/bat.cpp
     src/cheddar/foes/bell.cpp
     src/cheddar/foes/bug.cpp
@@ -51,10 +50,12 @@ set(CHEDDAR_SRC
     src/cheddar/hitbox.cpp
     src/cheddar/hurtbox.cpp
     src/cheddar/init.cpp
+    src/cheddar/items/cheese.cpp
     src/cheddar/items/fire.cpp
     src/cheddar/items/frog_tongue.cpp
     src/cheddar/items/molotov.cpp
     src/cheddar/items/toothpick.cpp
+    src/cheddar/items/tossed.cpp
     src/cheddar/items/item.cpp
     src/cheddar/ladder.cpp
     src/cheddar/mouse.cpp

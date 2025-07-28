@@ -1,15 +1,15 @@
 #include "porcupine.h"
 
-#include "cheese.h"
 #include "game.h"
 #include "hurtbox.h"
 #include "mouse.h"
+#include "../items/cheese.h"
 #include "../items/toothpick.h"
 
 #include <iostream>
 
 FoePorcupine::FoePorcupine(int x, int y, int spawner_id):
-    Foe(float(x), float(y), spawner_id, 225, 256.0f, 64.0f) {
+    Foe(float(x), float(y), spawner_id, 250, 256.0f, 64.0f) {
     this->sprite = new Sprite("sprites/foe_porcupine.bmp", 16, 16, 100);
 
     this->dst_rect.w = 16.0f;
@@ -64,7 +64,7 @@ void FoePorcupine::step() {
 
     case Foe::State::HURT:
         this->sprite->set_animation(HURT_ANIMATION + this->direction);
-        if (game->ticks - this->timer > 1000) {
+        if (game->ticks - this->timer > 250) {
             this->state = Foe::State::WALKING;
         }
 
@@ -77,6 +77,16 @@ void FoePorcupine::step() {
         if (game->ticks - this->timer > 2000) {
             // delete this object
             game->delete_object = true;
+
+            int cheese_amount = SDL_rand(8); // 0..7
+
+            // add cheese for the player to pick up
+            if (cheese_amount > 4) { // 5..7
+                cheese_amount -= 4; // 1..3
+                char cheese_opt[256];
+                game->push_object(ITEM_CHEESE DROPPED_OBJ, Cheese::Options(this->x, this->y, cheese_amount));
+            }
+
             return;
         }
 

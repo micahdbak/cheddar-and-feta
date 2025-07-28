@@ -10,6 +10,8 @@ ThrownToothpick::ThrownToothpick(float x, float y, int x_dir, int y_dir, int fro
     if (obj != nullptr && (mouse = dynamic_cast<Mouse*>(obj)) != nullptr) {
         // only drop if thrown by a mouse
         this->drop_item = true;
+    } else {
+        this->drop_item = false;
     }
 
     this->did_hit = false;
@@ -22,6 +24,7 @@ ThrownToothpick::ThrownToothpick(float x, float y, int x_dir, int y_dir, int fro
     this->spawned_ticks = game->ticks;
 
     HitBox::Properties props = {1, 1000, 1000};
+    props.single_use = true;
     game->push_object(HITBOX_OBJ, HitBox::Options(this->id, from_id, -8, -8, 16, 16, props));
 }
 

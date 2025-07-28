@@ -25,7 +25,8 @@ enum ItemType {
 struct Item {
     ItemType type = USEFUL;
     std::string name = "Item";
-    int damage = 0, armour = 0;
+    int damage = 0;
+    int armour = 0;
 };
 
 extern std::unordered_map<std::string, Item> item_info;
@@ -43,7 +44,7 @@ public:
 
     void dropped_step();
 
-    virtual bool take(Mouse *mouse) = 0;
+    virtual void take(Mouse *mouse) = 0;
 
 protected:
     float x, y;

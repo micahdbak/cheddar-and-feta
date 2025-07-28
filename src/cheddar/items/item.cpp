@@ -23,8 +23,9 @@ DroppedItem::~DroppedItem() {
 }
 
 void DroppedItem::dropped_step() {
-    Mouse *mouse = closest_mouse(this->x, this->y, 8.0f);
-    if (!mice_locked && mouse != nullptr && this->take(mouse)) {
+    Mouse *mouse = closest_mouse(this->x, this->y, 12.0f);
+    if (!mice_locked && mouse != nullptr) {
+        this->take(mouse);
         game->delete_object = true;
         return;
     }

@@ -192,8 +192,8 @@ Editor::~Editor() {
 void Editor::step() {
     if (!this->user_inputting) {
         // move the selected tile on input
-        this->sel_x += int(local_controller.is_hit(RIGHT)) - int(local_controller.is_hit(LEFT));
-        this->sel_y += int(local_controller.is_hit(DOWN)) - int(local_controller.is_hit(UP));
+        this->sel_x += int(local_controller.is_hit(Button::RIGHT)) - int(local_controller.is_hit(Button::LEFT));
+        this->sel_y += int(local_controller.is_hit(Button::DOWN)) - int(local_controller.is_hit(Button::UP));
         this->sel_x = cnf_clamp(this->sel_x, 0, this->map.cols - 1);
         this->sel_y = cnf_clamp(this->sel_y, 0, this->map.rows - 1);
 
@@ -269,7 +269,7 @@ void Editor::step() {
         }
         local_controller.c = NO_CHAR;
 
-        if (local_controller.is_hit(ACTION1) && this->sel_tilesheet >= 0 && this->sel_ts2_x >= 0) {
+        if (local_controller.is_hit(Button::ATTACK) && this->sel_tilesheet >= 0 && this->sel_ts2_x >= 0) {
             if (this->layer != COLLISION) {
                 int _x = cnf_min(this->sel_ts_x, this->sel_ts2_x);
                 int _y = cnf_min(this->sel_ts_y, this->sel_ts2_y);
@@ -310,7 +310,7 @@ void Editor::step() {
                     }
                 }
             }
-        } else if (local_controller.is_hit(ACTION2) && this->sel_tilesheet >= 0 && this->sel_ts2_x >= 0) {
+        } else if (local_controller.is_hit(Button::TOSS) && this->sel_tilesheet >= 0 && this->sel_ts2_x >= 0) {
             int _x = cnf_min(this->sel_ts_x, this->sel_ts2_x);
             int _y = cnf_min(this->sel_ts_y, this->sel_ts2_y);
             int _w = (cnf_abs(this->sel_ts_x - this->sel_ts2_x) + 1) * this->map.tile_width;
@@ -322,7 +322,7 @@ void Editor::step() {
                 _x, _y, _w, _h, _h, this->map.tilesheets[this->sel_tilesheet]->path.c_str());
             this->map.objects.push_back(std::pair<std::string, std::string>("billboard", buff));
             this->render_objects();
-        } else if (local_controller.is_down(PRIMARY) && this->sel_tilesheet >= 0) {
+        } else if (local_controller.is_down(Button::SELECT) && this->sel_tilesheet >= 0) {
             if (this->layer == COLLISION) {
                 this->map.collision[coord] = this->sel_collider;
                 this->render_collision_tile(this->collision_texture, this->sel_x, this->sel_y, this->sel_collider);
@@ -339,7 +339,7 @@ void Editor::step() {
                     }
                 } else {
                     // shift return should only place on empty tiles
-                    if (local_controller.is_down(L2))
+                    if (local_controller.is_down(Button::RUN))
                         should_place = false;
 
                     Tile top_tile = vec->back();
@@ -356,7 +356,7 @@ void Editor::step() {
                     this->map.render_tile(this->sel_x, this->sel_y);
                 }
             }
-        } else if (local_controller.is_hit(SECONDARY) || local_controller.is_down(MENU)) {
+        } else if (local_controller.is_hit(Button::CANCEL)) {
             if (this->layer == COLLISION) {
                 this->map.collision[coord] = -1;
                 this->render_collision_tile(this->collision_texture, this->sel_x, this->sel_y, -1);
@@ -401,7 +401,7 @@ void Editor::step() {
 
 void Editor::input_tile() {
     // end inputting
-    if (local_controller.is_hit(PRIMARY) || local_controller.is_hit(PAUSE)) {
+    if (local_controller.is_hit(Button::SELECT) || local_controller.is_hit(Button::MENU)) {
         this->user_inputting = false;
         game->draw_rect(game->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
         return;
@@ -409,21 +409,21 @@ void Editor::input_tile() {
 
     // update selected collider or tile
     if (this->layer == COLLISION) {
-        this->sel_collider += int(local_controller.is_hit(RIGHT)) - int(local_controller.is_hit(LEFT));
-        int y_dir = int(local_controller.is_hit(DOWN)) - int(local_controller.is_hit(UP));
+        this->sel_collider += int(local_controller.is_hit(Button::RIGHT)) - int(local_controller.is_hit(Button::LEFT));
+        int y_dir = int(local_controller.is_hit(Button::DOWN)) - int(local_controller.is_hit(Button::UP));
         this->sel_collider += y_dir * 14;
 
         this->sel_collider = cnf_clamp(this->sel_collider+1, 0, n_MapColliders) - 1;
     } else {    
-        this->sel_ts_x += int(local_controller.is_hit(RIGHT)) - int(local_controller.is_hit(LEFT));
-        this->sel_ts_y += int(local_controller.is_hit(DOWN)) - int(local_controller.is_hit(UP));
+        this->sel_ts_x += int(local_controller.is_hit(Button::RIGHT)) - int(local_controller.is_hit(Button::LEFT));
+        this->sel_ts_y += int(local_controller.is_hit(Button::DOWN)) - int(local_controller.is_hit(Button::UP));
         this->sel_ts_x = cnf_clamp(this->sel_ts_x, 0, this->map.tilesheets[this->sel_tilesheet]->cols - 1);
         this->sel_ts_y = cnf_clamp(this->sel_ts_y, 0, this->map.tilesheets[this->sel_tilesheet]->rows - 1);
 
-        if (local_controller.is_hit(ACTION1)) { // space
+        if (local_controller.is_hit(Button::ATTACK)) { // space
             this->sel_ts2_x = this->sel_ts_x;
             this->sel_ts2_y = this->sel_ts_y;
-        } else if (local_controller.is_hit(ACTION2)) { // c
+        } else if (local_controller.is_hit(Button::TOSS)) { // c
             this->sel_ts2_x = this->sel_ts2_y = -1;
         }
     }
@@ -490,13 +490,13 @@ void Editor::input_sheet() {
     int sel_i, nfields;
     nfields = sscanf(this->text.c_str(), "%d", &sel_i);
     
-    if (local_controller.is_hit(SECONDARY) && !text.empty())
+    if (local_controller.is_hit(Button::CANCEL) && !text.empty())
         this->text.pop_back();
     else if (local_controller.c != NO_CHAR)
         this->text.push_back(local_controller.c);
-    else if (local_controller.is_hit(PRIMARY) && nfields == 1) {
+    else if (local_controller.is_hit(Button::SELECT) && nfields == 1) {
         this->sel_tilesheet = sel_i;
-    } else if (local_controller.is_hit(PAUSE)) {
+    } else if (local_controller.is_hit(Button::MENU)) {
         // close
         this->user_inputting = false;
         game->draw_rect(game->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);

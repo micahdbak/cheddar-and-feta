@@ -1,7 +1,7 @@
-#include "mouse.h"
 #ifndef ITEM_COFFEE_BEAN
 #define ITEM_COFFEE_BEAN "item_coffee_bean"
 
+#include "mouse.h"
 #include "item.h"
 
 #include <iostream>
@@ -14,8 +14,8 @@ public:
 
     void step() override { this->dropped_step(); }
 
-    bool take(Mouse *mouse) override {
-        return mouse->push_item(ITEM_COFFEE_BEAN);
+    void take(Mouse *mouse) override {
+        mouse->push_item(ITEM_COFFEE_BEAN);
     }
 };
 

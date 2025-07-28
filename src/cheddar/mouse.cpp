@@ -1,7 +1,9 @@
 #include "foes/foe.h"
 #include "game.h"
 #include "hurtbox.h"
+#include "items/cheese.h"
 #include "items/item.h"
+#include "items/tossed.h"
 #include "mouse.h"
 #include "net_agent.h"
 #include "save_data.h"
@@ -75,7 +77,7 @@ Mouse::Mouse(std::vector<Mouse::SpawnCoord> &coordinates, bool is_feta, std::str
             sscanf(arr, "%[^*] * %d", item_id, &count);
 
             // validate item
-            if (item_info.find(item_id) == item_info.end())
+            if (item_info.find(item_id) == item_info.end() || count <= 0)
                 continue;
 
             Mouse::Item item{ item_id, count };
@@ -130,6 +132,9 @@ void Mouse::save_data() {
 
     std::string items_s = "";
     for (int i = 0; i < this->items.size(); i++) {
+        if (this->items[i].count <= 0)
+            continue;
+
         char item[256];
         snprintf(item, sizeof(item), "%s*%d", this->items[i].item_id.c_str(), this->items[i].count);
         items_s += item;
@@ -147,13 +152,14 @@ static bool _is_collision(float x, float y) {
         game->point_in_collider(x, y-2.0f);
 }
 
-#define ATTACKING_ANIMATION 8
-#define ATTACKED_ANIMATION  16
-#define THROWING_ANIMATION  24
-#define DOWN_ANIMATION      32
-#define EATING_ANIMATION    40
-#define DANCING_ANIMATION   41
-#define SLEEPING_ANIMATION  42
+#define RUNPREP_ANIMATION   8
+#define ATTACKING_ANIMATION 16
+#define ATTACKED_ANIMATION  24
+#define THROWING_ANIMATION  32
+#define DOWN_ANIMATION      40
+#define EATING_ANIMATION    48
+#define DANCING_ANIMATION   49
+#define SLEEPING_ANIMATION  50
 
 void Mouse::step() {
     if (mice_locked) {
@@ -164,7 +170,7 @@ void Mouse::step() {
     Controller *controller = this->is_feta ? &remote_controller : &local_controller;
 
     if (!this->items.empty()) {
-        this->sel_item += controller->is_hit(R1) - controller->is_hit(L1);
+        this->sel_item += controller->is_hit(Button::CYCLE_RIGHT) - controller->is_hit(Button::CYCLE_LEFT);
         if (this->sel_item < -1)
             this->sel_item = this->items.size() - 1;
         else if (this->sel_item > this->items.size() - 1)
@@ -177,7 +183,7 @@ void Mouse::step() {
     int sel_item_count = sel_item_id == ITEM_NONE ? 1 : this->items[this->sel_item].count;
 
     if (!this->is_feta)
-        game->draw_hud(game->ui, sel_item_id, sel_item_count, this->health, this->max_health, this->cheese);
+        game->draw_hud(game->ui, sel_item_id, sel_item_count, this->health, this->max_health);
 
     // note that this is done after the above draw hud; using an item with count 0 = using no item
     if (sel_item_count == 0 && sel_item_id != ITEM_NONE) {
@@ -200,7 +206,7 @@ void Mouse::step() {
         }
 
         // dancing
-        if (controller->is_down(R2)) {
+        if (controller->is_down(Button::DANCE)) {
             this->sprite->set_animation(DANCING_ANIMATION);
             this->sprite->update_frame();
             this->sprite->interval_ms = 200;
@@ -211,29 +217,44 @@ void Mouse::step() {
         }
 
         // move using arrow keys
-        x_dir = int(controller->is_down(RIGHT)) - int(controller->is_down(LEFT));
-        y_dir = int(controller->is_down(DOWN)) - int(controller->is_down(UP));
+        x_dir = int(controller->is_down(Button::RIGHT)) - int(controller->is_down(Button::LEFT));
+        y_dir = int(controller->is_down(Button::DOWN)) - int(controller->is_down(Button::UP));
 
         // update sprite frame and animation only if moving
         if (x_dir != 0 || y_dir != 0) {
             this->sprite->set_animation(direction_from_dirs(x_dir, y_dir));
             this->sprite->update_frame();
+
+            // toggle running when L2 is hit
+            if (controller->is_down(Button::RUN) && !this->is_running) {
+                this->is_running = true;
+                // this->running_ticks = game->ticks;
+            }
         } else {
             // otherwise show only the first frame
             this->sprite->set_frame(0);
+            this->is_running = false;
         }
 
         // running / walking
-        if (controller->is_down(L2)) {
-            mov_speed = this->max_mov_speed;
-            this->sprite->interval_ms = 100;
+        if (x_dir == 0 && y_dir == 0) {
+            mov_speed = 0.0f;
+        } else if (this->is_running) {
+            // if (game->ticks - this->running_ticks < 200) {
+            //     mov_speed = 0;
+            //     this->sprite->set_animation(RUNPREP_ANIMATION + direction_from_dirs(x_dir, y_dir));
+            //     this->sprite->set_frame((game->ticks - this->running_ticks) / 50);
+            // } else {
+                mov_speed = this->max_mov_speed;
+                this->sprite->interval_ms = 100;
+            // }
         } else {
             mov_speed = this->max_mov_speed / 2.0f;
             this->sprite->interval_ms = 250;
         }
 
         // attack / use item
-        if (controller->is_hit(ACTION1)) {
+        if (controller->is_hit(Button::ATTACK)) {
             this->busy_ticks = game->ticks;
 
             if (x_dir == 0 && y_dir == 0)
@@ -259,7 +280,19 @@ void Mouse::step() {
                 break;
 
             case EDIBLE:
-                // TODO: eat
+                if (this->health < this->max_health) {
+                    this->health++;
+                    this->remove_item(sel_item_id);
+
+                    this->is_busy = EATING;
+                    this->busy_ticks = game->ticks;
+
+                    // set animation to eating cheese
+                    this->sprite->set_animation(EATING_ANIMATION);
+                    this->sprite->interval_ms = 75;
+                } else {
+                    // play sfx for already full?
+                }
 
                 break;
 
@@ -283,23 +316,23 @@ void Mouse::step() {
 
             default: break;
             }
-        } else if (controller->is_hit(ACTION2) && this->cheese > 0) {
-            // eat cheese
-            this->cheese--;
-            this->health++;
-
-            if (this->health > this->max_health) {
-                this->health = this->max_health;
-            }
-
-            this->is_busy = EATING;
+        } else if (controller->is_hit(Button::TOSS) && sel_item_id != ITEM_NONE && sel_item_id != ITEM_SAVE) {
             this->busy_ticks = game->ticks;
 
-            // set animation to eating cheese
-            this->sprite->set_animation(EATING_ANIMATION);
-            this->sprite->interval_ms = 75;
+            if (x_dir == 0 && y_dir == 0)
+                dirs_from_direction(this->sprite->animation % 8, &x_dir, &y_dir);
 
-            break;
+            // toss item
+            game->push_object(TOSSED_ITEM_OBJ, TossedItem::Options(this->x, this->y, x_dir, y_dir, this->is_feta, sel_item_id));
+            this->remove_item(sel_item_id);
+
+            this->is_busy = THROWING;
+            this->busy_ticks = game->ticks;
+
+            // set animation to throwing
+            this->sprite->set_animation((this->sprite->animation % 8) + THROWING_ANIMATION);
+            this->sprite->set_frame(0);
+            this->sprite->interval_ms = 125;
         }
 
         break;
@@ -307,8 +340,8 @@ void Mouse::step() {
     case ATTACKING: {
         // move using arrow keys
         if (controller != nullptr) {
-            x_dir = int(controller->is_down(RIGHT)) - int(controller->is_down(LEFT));
-            y_dir = int(controller->is_down(DOWN)) - int(controller->is_down(UP));
+            x_dir = int(controller->is_down(Button::RIGHT)) - int(controller->is_down(Button::LEFT));
+            y_dir = int(controller->is_down(Button::DOWN)) - int(controller->is_down(Button::UP));
         }
         mov_speed = this->max_mov_speed / 2.0f;
 
@@ -375,11 +408,17 @@ void Mouse::step() {
 
         if (game->ticks - this->busy_ticks > 2000) {
             this->is_busy = FALSE;
-            this->is_down = false;
+            this->health = this->max_health / 2;
 
             // set animation to walking/running
             this->sprite->set_animation(this->sprite->animation % 8);
         }
+    }
+
+    // you get 5 seconds after being "downed" before enemies will attack you again
+    // (three seconds of movement)
+    if (this->is_down && game->ticks - this->is_down_ticks > 5000) {
+        this->is_down = false;
     }
 
     // new coordinates calculated with direction moving, movement speed, and diagonal multiplier (if necessary)
@@ -481,7 +520,6 @@ void Mouse::attack(int damage) {
     this->sprite->set_animation((this->sprite->animation % 8) + ATTACKED_ANIMATION);
 
     // apply armour to damage
-    damage -= this->armour;
     if (damage > 0) {
         this->health -= damage;
     }
@@ -492,13 +530,14 @@ void Mouse::attack(int damage) {
         this->is_busy = DOWNED;
         this->is_down = true;
         this->busy_ticks = game->ticks;
+        this->is_down_ticks = game->ticks;
         this->sprite->set_animation((this->sprite->animation % 8) + DOWN_ANIMATION);
     }
 }
 
-bool Mouse::push_item(const std::string &item_id) {
+void Mouse::push_item(const std::string &item_id) {
     if (item_info.find(item_id) == item_info.end()) {
-        return false;
+        return;
     }
 
     Mouse::Item new_item;
@@ -507,32 +546,36 @@ bool Mouse::push_item(const std::string &item_id) {
 
     if (this->items.empty()) {
         this->items.push_back(new_item);
-        return true;
+        return;
     }
 
-    for (auto it = this->items.begin(); it != this->items.end(); ++it) {
+    int i = 0;
+    for (auto it = this->items.begin(); it != this->items.end(); ++it, ++i) {
         if (it->item_id == item_id) {
             it->count++;
-            return true;
+            break;
         } else if (it->item_id > item_id) {
-            if (this->sel_item >= std::distance(this->items.begin(), it)) {
-                this->sel_item++;
-            }
-
             this->items.insert(it, new_item);
-
-            return true;
+            break;
         }
     }
 
-    this->items.push_back(new_item);
-    return true;
+    if (i >= this->items.size()) {
+        this->items.push_back(new_item);
+    }
+
+    this->sel_item = i;
 }
 
 void Mouse::remove_item(const std::string &item_id) {
     for (auto it = this->items.begin(); it != this->items.end(); it++) {
         if (it->item_id == item_id && it->count > 0) {
             it->count--;
+            if (it->count == 0) {
+                this->items.erase(it);
+                this->sel_item = -1;
+                break;
+            }
         } else if (it->item_id > item_id) {
             return;
         }
@@ -540,18 +583,9 @@ void Mouse::remove_item(const std::string &item_id) {
 }
 
 int Mouse::add_cheese(int amount) {
-    int remaining_amount = this->max_cheese - this->cheese;
-
-    if (remaining_amount < 1)
-        return 0;
-
-    if (remaining_amount < amount) {
-        this->cheese += remaining_amount;
-        return remaining_amount;
+    for (int i = 0; i < amount; i++) {
+        this->push_item(ITEM_CHEESE);
     }
-
-    // amount < remaining_amount
-    this->cheese += amount;
     return amount;
 }
 

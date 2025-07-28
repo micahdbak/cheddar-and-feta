@@ -6,7 +6,7 @@
 #include "../../items/fire.h"
 
 Spitter::Spitter(float x, float y, int spawner_id)
-    : Foe(x, y, spawner_id, 150, 256.0f, 80.0f) {
+    : Foe(x, y, spawner_id, 500, 256.0f, 80.0f) {
     char buff[256];
     snprintf(buff, sizeof(buff), "%d", this->id);
     game->push_object(FOE_SPITTER_HEAD_OBJ, std::string(buff));

@@ -57,7 +57,8 @@ Game::Game() {
     Font::load_fonts(this->fonts);
     load_render_functions(); // bmp_texture.h
 
-    this->item_count_icon = { 294.05f, 182.05f, 16.0f, 16.0f };
+    this->item_count_icon = { 294.05f, 186.05f, 16.0f, 16.0f };
+    this->item_cooldown_icon = { 284.0f, 192.0f, 16.0f, 16.0f };
 }
 
 Game::~Game() {
@@ -171,7 +172,6 @@ void Game::load_map(const char *map_path) {
     save.data[LOAD_MAP] = this->current_map;
 
     this->display_notification(this->map_title + ", " + this->map_description);
-    this->display_overlay = std::string(map_path) != "maps/init";
 }
 
 void Game::create_object(const std::string &id, const std::string &options) {
@@ -206,6 +206,13 @@ void Game::save_objects() {
 }
 
 void Game::step() {
+    // toggle controls menu
+    Controller *cur_controller = capture_controls ? &captured_controller : &local_controller;
+    if (cur_controller->is_hit(Button::MENU)) {
+        this->display_controls_menu = !this->display_controls_menu;
+        capture_controls = this->display_controls_menu;
+    }
+
     // create new map
     if (this->map != "") {
         // clear the window
@@ -291,7 +298,7 @@ void Game::step() {
     // render overlay
     SDL_RenderTexture(renderer, this->overlay, NULL, NULL);
 
-    if (local_controller.c == 'p') {
+    if (local_controller.c == 'p' || captured_controller.c == 'p') {
         local_controller.c = NO_CHAR;
         SDL_Surface *_screen = SDL_RenderReadPixels(renderer, NULL);
         SDL_SaveBMP(_screen, "screenshot.bmp");

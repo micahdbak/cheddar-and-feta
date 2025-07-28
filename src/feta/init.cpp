@@ -85,10 +85,10 @@ void Init::step() {
         static const int rows = 4;
         bool valid_code = this->code.size() == 6;
 
-        int x_dir = local_controller.is_hit(RIGHT) - local_controller.is_hit(LEFT);
-        int y_dir = local_controller.is_hit(DOWN) - local_controller.is_hit(UP);
-        bool select = local_controller.is_hit(PRIMARY);
-        bool remove = local_controller.is_hit(SECONDARY);
+        int x_dir = local_controller.is_hit(Button::RIGHT) - local_controller.is_hit(Button::LEFT);
+        int y_dir = local_controller.is_hit(Button::DOWN) - local_controller.is_hit(Button::UP);
+        bool select = local_controller.is_hit(Button::SELECT);
+        bool remove = local_controller.is_hit(Button::CANCEL);
 
         this->sel_c += x_dir;
         this->sel_c += y_dir * cols;
@@ -154,7 +154,7 @@ void Init::step() {
             game->draw_text(this->ui, "1/B/X", CONTROLS_FONT, 184, 160, 0);
 
             game->draw_text(this->ui, "NAV:", SMALL_FONT, 122, 180, 0);
-            game->draw_text(this->ui, "45/EF/45", CONTROLS_FONT, 140, 176, 0);
+            game->draw_text(this->ui, "45/EF/[\\", CONTROLS_FONT, 140, 176, 0);
 
             if (this->sel_c == 36) {
                 if (select && valid_code) {
@@ -196,7 +196,6 @@ void Init::step() {
         // no connection after 15 seconds
         if (this->waiting_ticks != 0 && game->ticks - this->waiting_ticks > 15000) {
             net_agent->try_reset();
-            game->display_overlay = true;
             game->display_notification("That code didn't work.");
             this->waiting_ticks = 0;
         }

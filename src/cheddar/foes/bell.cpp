@@ -10,28 +10,27 @@ Bell::Bell(int x, int y, int spawner_id) {
     this->sprite = new Sprite("sprites/bell.bmp", 24, 24, 50);
     this->dst_rect.w = 24.0f;
     this->dst_rect.h = 24.0f;
+
+    game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 16));
 }
 
 Bell::~Bell() {
     delete this->sprite;
 }
 
-void Bell::step() {
-    Mouse *mouse = closest_mouse(this->x, this->y, 32.0f);
-    Controller *controller = mouse == cheddar ? &local_controller : &remote_controller;
+void Bell::attack(int damage) {
+    FoeSpawner *spawner = spawners[this->spawner_id];
 
-    if (mouse != nullptr && controller->is_hit(PRIMARY)) {
-        FoeSpawner *spawner = spawners[this->spawner_id];
-        
-        if (spawner != nullptr && !spawner->empty && !this->triggered) {
-            spawners[this->spawner_id]->trigger();
-            this->triggered = true;
-            this->sprite->set_animation(1);
-        }
-
-        this->timer = game->ticks;
+    if (spawner != nullptr && !spawner->empty && !this->triggered) {
+        spawners[this->spawner_id]->trigger();
+        this->triggered = true;
+        this->sprite->set_animation(1);
     }
 
+    this->timer = game->ticks;
+}
+
+void Bell::step() {
     if (this->triggered && game->ticks - this->timer < 1500) {
         this->sprite->update_frame();
     } else {

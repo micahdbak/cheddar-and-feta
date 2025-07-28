@@ -11,8 +11,8 @@ SDL_Window *window;
 SDL_Renderer *renderer;
 std::unordered_map<SDL_JoystickID, SDL_Gamepad *> gamepads;
 
-bool _running;
-Controller local_controller, remote_controller;
+bool _running, capture_controls = false;
+Controller local_controller, remote_controller, captured_controller;
 Game *game;
 
 int _object_id_counter = 0;
@@ -61,6 +61,8 @@ int main(int argc, const char **argv) {
     while (_running) {
         SDL_Event event;
 
+        Controller *controller = capture_controls ? &captured_controller : &local_controller;
+
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_EVENT_WINDOW_RESIZED:
@@ -70,12 +72,13 @@ int main(int argc, const char **argv) {
 
             case SDL_EVENT_KEY_DOWN:
                 if (!event.key.repeat) {
-                    local_controller.handle_key_down(event.key.key);
+                    controller->handle_key_down(event.key.key);
+                    controller->last_input = event.key.key;
                 }
                 break;
 
             case SDL_EVENT_KEY_UP:
-                local_controller.handle_key_up(event.key.key);
+                controller->handle_key_up(event.key.key);
                 break;
 
             case SDL_EVENT_GAMEPAD_ADDED: {
@@ -91,15 +94,15 @@ int main(int argc, const char **argv) {
                 break;
 
             case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
-                local_controller.handle_gamepad_down(SDL_GamepadButton(event.gbutton.button));
+                controller->handle_gamepad_down(SDL_GamepadButton(event.gbutton.button));
                 break;
 
             case SDL_EVENT_GAMEPAD_BUTTON_UP:
-                local_controller.handle_gamepad_up(SDL_GamepadButton(event.gbutton.button));
+                controller->handle_gamepad_up(SDL_GamepadButton(event.gbutton.button));
                 break;
 
             case SDL_EVENT_GAMEPAD_AXIS_MOTION:
-                local_controller.handle_gamepad_axis(SDL_GamepadAxis(event.gaxis.axis), event.gaxis.value);
+                controller->handle_gamepad_axis(SDL_GamepadAxis(event.gaxis.axis), event.gaxis.value);
                 break;
 
             case SDL_EVENT_QUIT:
@@ -114,7 +117,7 @@ int main(int argc, const char **argv) {
 
         game->step();
 
-        local_controller.clear_hits();
+        controller->clear_hits();
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);

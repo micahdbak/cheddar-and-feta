@@ -1,9 +1,9 @@
 #include "bug.h"
 
-#include "cheese.h"
 #include "game.h"
 #include "hurtbox.h"
 #include "mouse.h"
+#include "../items/cheese.h"
 #include "../items/toothpick.h"
 
 #include <iostream>
@@ -66,7 +66,7 @@ void FoeBug::step() {
 
     case Foe::State::HURT:
         this->sprite->set_animation(HURT_ANIMATION + this->direction);
-        if (game->ticks - this->timer > 1000) {
+        if (game->ticks - this->timer > 500) {
             this->state = Foe::State::WALKING;
         }
 
@@ -86,8 +86,7 @@ void FoeBug::step() {
             if (cheese_amount > 4) { // 5..7
                 cheese_amount -= 4; // 1..3
                 char cheese_opt[256];
-                snprintf(cheese_opt, sizeof(cheese_opt), "%d,%d,%d", int(this->x) + game->tile_width/2, int(this->y) + game->tile_height/2, cheese_amount);
-                game->push_object(CHEESE_OBJ, std::string(cheese_opt));
+                game->push_object(ITEM_CHEESE DROPPED_OBJ, Cheese::Options(this->x, this->y, cheese_amount));
             }
 
             return;

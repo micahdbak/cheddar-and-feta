@@ -7,7 +7,6 @@
 
 // objects
 #include "billboard.h"
-#include "cheese.h"
 #include "foes/bat.h"
 #include "foes/bell.h"
 #include "foes/bug.h"
@@ -21,12 +20,14 @@
 #include "foes/spitter/thorax.h"
 #include "hitbox.h"
 #include "hurtbox.h"
+#include "items/cheese.h"
 #include "items/coffee.h"
 #include "items/fire.h"
 #include "items/frog_tongue.h"
 #include "items/molotov.h"
 #include "items/save.h"
 #include "items/toothpick.h"
+#include "items/tossed.h"
 #include "ladder.h"
 #include "mouse.h"
 #include "net_receiver.h"
@@ -64,7 +65,6 @@ void Game::init() {
     // objects
     this->factories[BELL_OBJ] = new BellFactory();
     this->factories[BILLBOARD_OBJ] = new BillboardFactory();
-    this->factories[CHEESE_OBJ] = new CheeseFactory();
     this->factories[FOE_BAT_OBJ] = new FoeBatFactory();
     this->factories[FOE_BUG_OBJ] = new FoeBugFactory();
     this->factories[FOE_FROG_OBJ] = new FoeFrogFactory();
@@ -76,6 +76,7 @@ void Game::init() {
     this->factories[GATE_OBJ] = new FoeGateFactory();
     this->factories[HITBOX_OBJ] = new HitBoxFactory();
     this->factories[HURTBOX_OBJ] = new HurtBoxFactory();
+    this->factories[ITEM_CHEESE DROPPED_OBJ] = new CheeseFactory();
     this->factories[ITEM_COFFEE_BEAN DROPPED_OBJ] = new DroppedCoffeeBeanFactory();
     this->factories[ITEM_COFFEE_BEAN USE_OBJ] = new UsedCoffeeBeanFactory();
     this->factories[ITEM_FIRE USE_OBJ] = new FireFactory();
@@ -89,9 +90,11 @@ void Game::init() {
     this->factories[LADDER_OBJ] = new LadderFactory();
     this->factories[MOUSE_OBJ] = new MouseFactory();
     this->factories[SPAWNER_OBJ] = new FoeSpawnerFactory();
+    this->factories[TOSSED_ITEM_OBJ] = new TossedItemFactory();
 
     // items
     item_info[ITEM_NONE] = Item{WEAPON, "Nothing", 1, 0};
+    item_info[ITEM_CHEESE] = Item{EDIBLE, "Cheese", 0, 0};
     item_info[ITEM_COFFEE_BEAN] = Item{USEFUL, "Coffee Bean", 0, 0};
     item_info[ITEM_FIRE] = Item{THROWABLE, "Fire", 0, 0};
     item_info[ITEM_FROG_TONGUE] = Item{THROWABLE, "Frog Tongue", 0, 0};
@@ -110,7 +113,6 @@ void Game::init() {
     this->create_object(LAST_OBJ, "");
 
     this->load_map("maps/init");
-    this->display_overlay = false;
 }
 
 // ---- init object ----
@@ -127,12 +129,12 @@ void Init::step() {
     if (textbox != nullptr) {
         textbox->step();
 
-        if (textbox->done && local_controller.is_hit(PRIMARY)) {
+        if (textbox->done && local_controller.is_hit(Button::SELECT)) {
             delete textbox;
             textbox = nullptr;
             this->render = true;
         } else return;
-    } else if (local_controller.is_hit(PRIMARY)) {
+    } else if (local_controller.is_hit(Button::SELECT)) {
         int ret = save.load_file(this->sel_save);
         save.puti(LOAD_SAVE, 1);
         save.puti(SAVE_FILE, this->sel_save);
@@ -149,7 +151,7 @@ void Init::step() {
         return;
     }
 
-    int diff = local_controller.is_hit(DOWN) - local_controller.is_hit(UP);
+    int diff = local_controller.is_hit(Button::DOWN) - local_controller.is_hit(Button::UP);
     if (diff != 0) {
         this->sel_save += diff;
         this->sel_save = cnf_clamp(this->sel_save, 0, NUM_SAVE_FILES - 1);

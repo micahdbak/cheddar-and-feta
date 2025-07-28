@@ -36,7 +36,7 @@ public:
 
     void attack(int damage);
 
-    bool push_item(const std::string &item_id);
+    void push_item(const std::string &item_id);
     void remove_item(const std::string &item_id);
     int add_cheese(int amount);
 
@@ -47,16 +47,6 @@ public:
         this->did_hit = true;
     }
 
-    bool is_feta = true, is_down = false;
-    float x, y;
-
-    int throw_x = 0, throw_y = 0;
-
-    std::string name = "Cheddar";
-
-    int health = 10, max_health = 10;
-    int damage = 1, armour = 0;
-
     struct Item {
         std::string item_id;
         int count;
@@ -65,16 +55,25 @@ public:
     std::vector<Item> items;
     int sel_item = -1;
 
-    int cheese = 10, max_cheese = 10;
+    int health = 10, max_health = 10;
+
+    bool is_feta = true, is_down = false;
+    float x, y;
+
+    int throw_x = 0, throw_y = 0;
 
     float max_mov_speed = MOUSE_DEFAULT_SPEED;
 
 private:
+    std::string name = "Cheddar";
+
+    bool is_running = false;
+
     SDL_FRect dst_rect, icon_src, icon_dst;
     Sprite *sprite;
 
     enum Busy { FALSE, ATTACKING, ATTACKED, THROWING, EATING, DOWNED } is_busy = FALSE;
-    Uint64 busy_ticks = 0;
+    Uint64 busy_ticks = 0, is_down_ticks = 0, running_ticks = 0;
 
     int tile_x, tile_y;
 

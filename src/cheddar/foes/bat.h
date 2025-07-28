@@ -23,7 +23,7 @@ private:
     SDL_FRect dst_rect, icon_src, icon_dst;
     Uint64 timer = 0;
 
-    int max_health = 1, health = 1;
+    int max_health = 2, health = 2;
 };
 
 class FoeBatFactory : public ObjectFactory {

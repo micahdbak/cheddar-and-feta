@@ -1,15 +1,15 @@
 #include "bat.h"
 
-#include "cheese.h"
 #include "game.h"
 #include "mouse.h"
 #include "hurtbox.h"
+#include "../items/cheese.h"
 #include "../items/toothpick.h"
 
 #include <iostream>
 
 FoeBat::FoeBat(int x, int y, int spawner_id):
-    Foe(float(x), float(y), spawner_id, 125, 256.0f, 16.0f) {
+    Foe(float(x), float(y), spawner_id, 200, 256.0f, 16.0f) {
     this->sprite = new Sprite("sprites/foe_bat.bmp", 24, 24, 100);
 
     this->dst_rect.w = 24.0f;
@@ -79,6 +79,16 @@ void FoeBat::step() {
         if (game->ticks - this->timer > 2000) {
             // delete this object
             game->delete_object = true;
+
+            int cheese_amount = SDL_rand(8); // 0..7
+
+            // add cheese for the player to pick up
+            if (cheese_amount > 4) { // 5..7
+                cheese_amount -= 4; // 1..3
+                char cheese_opt[256];
+                game->push_object(ITEM_CHEESE DROPPED_OBJ, Cheese::Options(this->x, this->y, cheese_amount));
+            }
+
             return;
         }
 

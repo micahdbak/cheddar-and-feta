@@ -3,13 +3,19 @@
 
 #include "object.h"
 #include "sprite.h"
+#include "../hurtbox.h"
 
-class Bell : public Object {
+class Bell : public Object, public HurtSource {
 public:
     Bell(int x, int y, int spawner_id);
     ~Bell();
 
     void step() override;
+
+    float hurtsource_x() override { return this->x; }
+    float hurtsource_y() override { return this->y; }
+
+    void attack(int damage) override;
 
 private:
     Sprite *sprite;

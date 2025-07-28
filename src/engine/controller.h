@@ -2,29 +2,33 @@
 #define CONTROLLER_H
 
 #include <string>
+#include <map>
 
 #include <SDL3/SDL.h>
 
 #define NO_CHAR -1
 
 enum Button {
-    PAUSE = 0,
-    MENU,
-    L2,
-    R2,
-    L1,
-    R1,
-    PRIMARY,
-    SECONDARY,
-    ACTION1,
-    ACTION2,
+    MENU = 0,
     UP,
     RIGHT,
     DOWN,
     LEFT,
+    SELECT,
+    CANCEL,
+    CYCLE_LEFT,
+    CYCLE_RIGHT,
+    TOSS,
+    RUN,
+    ATTACK,
+    DANCE,
     NUM_BUTTONS,
     NULL_BUTTON
 };
+
+extern std::map<SDL_Keycode, Button> ktobutton_map;
+extern std::map<Button, SDL_Keycode> btokeycode_map;
+extern std::map<Button, std::string> btostring_map;
 
 class Controller {
 public:
@@ -55,8 +59,11 @@ public:
     bool is_down_map[NUM_BUTTONS] = {0};
 
     Sint16 stick_x, stick_y;
+
+    SDL_Keycode last_input;
 };
 
-extern Controller local_controller, remote_controller;
+extern Controller local_controller, remote_controller, captured_controller;
+extern bool capture_controls;
 
 #endif

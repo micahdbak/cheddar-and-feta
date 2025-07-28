@@ -1,6 +1,7 @@
 #include "frog.h"
 #include "game.h"
 #include "hurtbox.h"
+#include "../items/cheese.h"
 #include "../items/frog_tongue.h"
 
 FoeFrog::FoeFrog(int x, int y, int spawner_id):
@@ -64,7 +65,7 @@ void FoeFrog::step() {
 
     case Foe::State::HURT:
         this->sprite->set_animation(HURT_ANIMATION + this->direction);
-        if (game->ticks - this->timer > 500) {
+        if (game->ticks - this->timer > 250) {
             this->state = Foe::State::WALKING;
         }
 
@@ -77,6 +78,15 @@ void FoeFrog::step() {
         if (game->ticks - this->timer > 2000) {
             // delete this object
             game->delete_object = true;
+
+            int cheese_amount = SDL_rand(8); // 0..7
+
+            // add cheese for the player to pick up
+            if (cheese_amount > 4) { // 5..7
+                cheese_amount -= 4; // 1..3
+                char cheese_opt[256];
+                game->push_object(ITEM_CHEESE DROPPED_OBJ, Cheese::Options(this->x, this->y, cheese_amount));
+            }
 
             char options[256];
             snprintf(options, sizeof(options), "%d,%d", int(this->x), int(this->y));

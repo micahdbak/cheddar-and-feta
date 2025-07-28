@@ -53,19 +53,27 @@
 #define BOX_MAP_TITLE 10
 
 // icons
-#define CHEDDAR_ICON          SDL_FRect{ 0.05f,  0.05f, 16.0f, 16.0f}
-#define FETA_ICON             SDL_FRect{16.05f,  0.05f, 16.0f, 16.0f}
-#define NOT_CONNECTED_ICON    SDL_FRect{32.05f,  0.05f, 16.0f, 16.0f}
-#define WAITING_FOR_PEER_ICON SDL_FRect{48.05f,  0.05f, 16.0f, 16.0f}
-#define SKULL_AND_BONES_ICON  SDL_FRect{ 0.05f, 16.05f, 16.0f, 16.0f}
-#define EDITOR_OBJECT_ICON    SDL_FRect{16.05f, 16.05f, 16.0f, 16.0f}
-#define DEBUG_HITBOX_ICON     SDL_FRect{32.05f, 16.05f, 16.0f, 16.0f}
-#define DEBUG_HURTBOX_ICON    SDL_FRect{48.05f, 16.05f, 16.0f, 16.0f}
-#define HEALTH_100_ICON       SDL_FRect{ 0.05f, 32.05f, 16.0f,  8.0f}
-#define HEALTH_75_ICON        SDL_FRect{16.05f, 32.05f, 16.0f,  8.0f}
-#define HEALTH_50_ICON        SDL_FRect{32.05f, 32.05f, 16.0f,  8.0f}
-#define HEALTH_25_ICON        SDL_FRect{48.05f, 32.05f, 16.0f,  8.0f}
-#define ITEM_COUNT_ICON       SDL_FRect{16.05f, 40.05f, 16.0f, 16.0f}
+#define CHEDDAR_ICON          SDL_FRect{  0.05f,  0.05f, 16.0f, 16.0f}
+#define FETA_ICON             SDL_FRect{ 16.05f,  0.05f, 16.0f, 16.0f}
+#define NOT_CONNECTED_ICON    SDL_FRect{ 32.05f,  0.05f, 16.0f, 16.0f}
+#define WAITING_FOR_PEER_ICON SDL_FRect{ 48.05f,  0.05f, 16.0f, 16.0f}
+#define SKULL_AND_BONES_ICON  SDL_FRect{  0.05f, 16.05f, 16.0f, 16.0f}
+#define EDITOR_OBJECT_ICON    SDL_FRect{ 16.05f, 16.05f, 16.0f, 16.0f}
+#define DEBUG_HITBOX_ICON     SDL_FRect{ 32.05f, 16.05f, 16.0f, 16.0f}
+#define DEBUG_HURTBOX_ICON    SDL_FRect{ 48.05f, 16.05f, 16.0f, 16.0f}
+#define HEALTH_100_ICON       SDL_FRect{  0.05f, 32.05f, 16.0f,  8.0f}
+#define HEALTH_75_ICON        SDL_FRect{ 16.05f, 32.05f, 16.0f,  8.0f}
+#define HEALTH_50_ICON        SDL_FRect{ 32.05f, 32.05f, 16.0f,  8.0f}
+#define HEALTH_25_ICON        SDL_FRect{ 48.05f, 32.05f, 16.0f,  8.0f}
+#define ITEM_COUNT_ICON       SDL_FRect{ 16.05f, 40.05f, 16.0f, 16.0f}
+#define ITEM_COOLDOWN_0       SDL_FRect{  0.05f, 56.05f, 16.0f, 16.0f}
+#define ITEM_COOLDOWN_1       SDL_FRect{ 16.05f, 56.05f, 16.0f, 16.0f}
+#define ITEM_COOLDOWN_2       SDL_FRect{ 32.05f, 56.05f, 16.0f, 16.0f}
+#define ITEM_COOLDOWN_3       SDL_FRect{ 48.05f, 56.05f, 16.0f, 16.0f}
+#define ITEM_COOLDOWN_4       SDL_FRect{ 64.05f, 56.05f, 16.0f, 16.0f}
+#define ITEM_COOLDOWN_5       SDL_FRect{ 80.05f, 56.05f, 16.0f, 16.0f}
+#define ITEM_COOLDOWN_6       SDL_FRect{ 96.05f, 56.05f, 16.0f, 16.0f}
+#define ITEM_COOLDOWN_7       SDL_FRect{112.05f, 56.05f, 16.0f, 16.0f}
 
 // forces one object to the be the first/last object run per frame
 // should only be used by something like:
@@ -114,7 +122,7 @@ public:
     void draw_ui_box(SDL_Texture *texture, int type, SDL_FRect *rect);
     void draw_text(SDL_Texture *texture, std::string str, int font, int x, int y, int w);
     void draw_icon(SDL_Texture *texture, SDL_FRect src_rect, SDL_FRect *dst_rect);
-    void draw_hud(SDL_Texture *texture, std::string item, int item_count, int health, int max_health, int cheese);
+    void draw_hud(SDL_Texture *texture, std::string item, int item_count, int health, int max_health);
     void draw_overlay();
 
     // game_sprite.cpp
@@ -168,7 +176,6 @@ public:
 
     bool create_objects = true; // disable for feta launcher
     bool delete_object = false; // set to true from an object's step to delete it
-    bool display_overlay = false;
 
     struct SpriteRender {
         std::string tex_id;
@@ -213,11 +220,13 @@ private:
     SDL_Texture *ui_box = nullptr;
     std::queue<Text> texts;
 
-    SDL_FRect item_count_icon;
+    SDL_FRect item_count_icon, item_cooldown_icon;
 
     std::string notification;
     Uint64 notif_ticks;
     bool force_notif_rerender = false;
+
+    bool display_controls_menu = false;
 };
 
 extern SDL_Renderer *renderer;

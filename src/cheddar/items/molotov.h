@@ -11,8 +11,8 @@ public:
 
     void step() override { this->dropped_step(); }
 
-    bool take(Mouse *mouse) override {
-        return mouse->push_item(ITEM_MOLOTOV);
+    void take(Mouse *mouse) override {
+        mouse->push_item(ITEM_MOLOTOV);
     }
 };
 

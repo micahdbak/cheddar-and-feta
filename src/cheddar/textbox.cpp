@@ -25,7 +25,7 @@ void Textbox::step() {
         return;
 
     if (this->done_sentence) {
-        if (local_controller.is_hit(PRIMARY)) {
+        if (local_controller.is_hit(Button::SELECT)) {
             this->done_sentence = false;
             this->running_text = "";
         }
@@ -33,7 +33,7 @@ void Textbox::step() {
         return;
     }
 
-    if (local_controller.is_hit(PRIMARY)) {
+    if (local_controller.is_hit(Button::SELECT)) {
         int j;
         for (j = this->i; j < text.size() && text[j] != '\n'; j++) {
             this->running_text += text[j];

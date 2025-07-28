@@ -1,5 +1,6 @@
 #include "SDL3/SDL_blendmode.h"
 #include "bmp_texture.h"
+#include "controller.h"
 #include "font.h"
 #include "game.h"
 #include "map.h"
@@ -179,18 +180,18 @@ void Game::draw_icon(SDL_Texture *texture, SDL_FRect icon, SDL_FRect *dst_rect) 
     SDL_SetRenderTarget(renderer, this->screen);
 }
 
-void Game::draw_hud(SDL_Texture *texture, std::string item, int item_count, int health, int max_health, int cheese) {
+void Game::draw_hud(SDL_Texture *texture, std::string item, int item_count, int health, int max_health) {
     // container ui box
-    SDL_FRect hud_rect = { 276.0f, 184.0f, 32.0f, 44.0f };
+    SDL_FRect hud_rect = { 276.0f, 188.0f, 32.0f, 40.0f };
     this->draw_ui_box(this->ui, BOX_MENU_CONT, &hud_rect);
 
     // current item
-    SDL_FRect item_shadow = { 280.0f, 188.0f, 24.0f, 16.0f };
+    SDL_FRect item_shadow = { 280.0f, 192.0f, 24.0f, 16.0f };
     this->draw_ui_box(texture, BOX_MENU_SHD1, &item_shadow);
     SDL_SetRenderTarget(renderer, texture);
     SDL_Texture *item_texture = load_bmp_texture("sprites/" + item + ".bmp");
     SDL_FRect item_src_rect = { 0.0f, 0.0f, 16.0f, 16.0f };
-    SDL_FRect item_rect = { 284.0f, 188.0f, 16.0f, 16.0f };
+    SDL_FRect item_rect = { 284.0f, 192.0f, 16.0f, 16.0f };
     SDL_RenderTexture(renderer, item_texture, &item_src_rect, &item_rect);
     SDL_SetRenderTarget(renderer, this->screen);
 
@@ -198,22 +199,18 @@ void Game::draw_hud(SDL_Texture *texture, std::string item, int item_count, int 
         this->draw_icon(texture, ITEM_COUNT_ICON, &this->item_count_icon);
         char buff[256];
         snprintf(buff, sizeof(buff), "%d", item_count);
-        this->draw_text(texture, buff, SMALL_FONT, item_count > 9 ? 298 : 300, 186, 0);
+        this->draw_text(texture, buff, SMALL_FONT, item_count > 9 ? 298 : 300, 190, 0);
     }
 
     // health
     char buff[256];
     snprintf(buff, sizeof(buff), "{%d/%d", health, max_health);
-    this->draw_text(texture, buff, SMALL_FONT, max_health > 9 && health > 9 ? 280 : 282, 204, 0);
-    SDL_FRect health_rect = { 280.0f, 212.0f, 24.0f, 5.0f };
+    this->draw_text(texture, buff, SMALL_FONT, max_health > 9 && health > 9 ? 280 : 282, 209, 0);
+    SDL_FRect health_rect = { 280.0f, 217.0f, 24.0f, 5.0f };
     float perc = ceil(22.0f * (float)health / (float)max_health);
-    SDL_FRect fill_rect = { 281.0f, 213.0f, perc, 3.0f };
+    SDL_FRect fill_rect = { 281.0f, 218.0f, perc, 3.0f };
     this->draw_rect(texture, &health_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
     this->draw_rect(texture, &fill_rect, 255, 64, 64, 255, SDL_BLENDMODE_NONE);
-
-    // cheese
-    snprintf(buff, sizeof(buff), "~ %d", cheese);
-    this->draw_text(texture, buff, SMALL_FONT, 282, 218, 0);
 }
 
 // static SDL_FRect _title_rect = SDL_FRect{ 0.0f, 20.0f, 320.0f, 40.0f };
@@ -222,15 +219,100 @@ static std::string _last_code = "";
 static Uint64 _last_drawn_ticks = 0;
 static SDL_FRect _netagent_rect = SDL_FRect{ 0.0f, 0.0f, 0.0f, 0.0f };
 static SDL_FRect _neticon_rect = SDL_FRect{ 10.0f, 8.0f, 16.0f, 16.0f };
-bool _displaying_netagent = false;
-bool _displaying_notification = false;
-bool _second_pass = false;
+static bool _displaying_netagent = false;
+static bool _displaying_notification = false;
+static bool _displaying_controls_menu = false;
+static bool _second_pass = false;
+static int _sel_control = 0;
+static bool _waiting_for_key = false;
 
 void Game::draw_overlay() {
-    if (!this->display_overlay)
-        return;
+    bool force_render = false;
 
-    SDL_SetRenderTarget(renderer, this->overlay);
+    if (this->display_controls_menu) {
+        bool should_render = !_displaying_controls_menu;
+        _displaying_controls_menu = true;
+
+        if (_waiting_for_key) {
+            if (captured_controller.last_input != SDLK_UNKNOWN) {
+                SDL_Keycode new_key = captured_controller.last_input;
+                Button sel_button = (Button)_sel_control;
+
+                if (ktobutton_map.find(new_key) != ktobutton_map.end()) {
+                    SDL_Keycode old_key = btokeycode_map[sel_button];
+                    Button existing_button = ktobutton_map[new_key];
+
+                    btokeycode_map[existing_button] = old_key;
+                    ktobutton_map[old_key] = existing_button;
+                } else {
+                    SDL_Keycode old_key = btokeycode_map[sel_button];
+                    ktobutton_map.erase(old_key);
+                }
+                
+                btokeycode_map[sel_button] = new_key;
+                ktobutton_map[new_key] = sel_button;
+
+                should_render = true;
+                _waiting_for_key = false;
+            }
+        } else {
+            int y_dir = captured_controller.is_hit(DOWN) - captured_controller.is_hit(UP);
+            int new_sel_control = cnf_clamp(_sel_control + y_dir, 0, (int)Button::NUM_BUTTONS-1);
+
+            if (_sel_control != new_sel_control) {
+                _sel_control = new_sel_control;
+                should_render = true;
+            } else if (captured_controller.is_hit(Button::SELECT)) {
+                captured_controller.last_input = SDLK_UNKNOWN;
+                _waiting_for_key = true;
+                should_render = true;
+            }
+        }
+
+        if (should_render) {
+            this->draw_rect(this->overlay, nullptr, 0, 0, 0, 128, SDL_BLENDMODE_NONE);
+
+            SDL_FRect config_rect = { 8.0f, 8.0f, 112.0f, 136.0f };
+            this->draw_ui_box(this->overlay, BOX_CONTAINER, &config_rect);
+
+            SDL_FRect title_shadow = { 16.0f, 16.0f, 96.0f, 8.0f };
+            this->draw_text(this->overlay, "Controls", SMALL_FONT, 20, 16, 0);
+
+            int start_y = 28;
+
+            for (int i = 0; i < (int)Button::NUM_BUTTONS; i++) {
+                std::string control_name = btostring_map[(Button)i];
+                std::string input_name = _waiting_for_key && i == _sel_control ? "<Press a Key>" : SDL_GetKeyName(btokeycode_map[(Button)i]);
+
+                int y = start_y + (i * 8);
+                game->draw_text(this->overlay, control_name, SMALL_FONT, 20, y, 0);
+                game->draw_text(this->overlay, input_name, SMALL_FONT, 52, y, 0);
+
+                int control_opacity = 128;
+                int input_opacity = 192;
+                if (i == _sel_control) {
+                    if (_waiting_for_key) {
+                        control_opacity = 96;
+                        input_opacity = 0;
+                    } else {
+                        control_opacity = 0;
+                        input_opacity = 96;
+                    }
+                }
+
+                SDL_FRect control_rect = { 20.0f, (float)y, 28.0f, 8.0f };
+                SDL_FRect input_rect = { 52.0f, (float)y, 64.0f, 8.0f };
+                game->draw_rect(this->overlay, &control_rect, 0, 0, 0, control_opacity, SDL_BLENDMODE_BLEND);
+                game->draw_rect(this->overlay, &input_rect, 0, 0, 0, input_opacity, SDL_BLENDMODE_BLEND);
+            }
+        }
+
+        return; // don't display anything else
+    } else if (_displaying_controls_menu) {
+        this->draw_rect(this->overlay, nullptr, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+        _displaying_controls_menu = false;
+        force_render = true;
+    }
 
     // network agent overlay (only cheddar can "create objects" so that is used to check if cheddar)
     if (game->create_objects && net_agent != nullptr) {
@@ -238,7 +320,7 @@ void Game::draw_overlay() {
         std::string code = net_agent->get_connection_code();
 
         // draw if state changed, code changed, or if a second has passed since last rendered
-        if (this->net_state != _last_state || code != _last_code || this->ticks - _last_drawn_ticks > 1000) {
+        if (force_render || this->net_state != _last_state || code != _last_code || this->ticks - _last_drawn_ticks > 1000) {
             // clear last overlay
             if (_netagent_rect.w > 0.0f) {
                 this->draw_rect(this->overlay, &_netagent_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
@@ -276,7 +358,7 @@ void Game::draw_overlay() {
     }
 
     if (!this->notification.empty()) {
-        if (this->force_notif_rerender) {
+        if (force_render || this->force_notif_rerender) {
             this->draw_rect(this->overlay, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
             _displaying_notification = false;
             this->force_notif_rerender = false;
@@ -316,6 +398,4 @@ void Game::draw_overlay() {
             }
         }
     }
-
-    SDL_SetRenderTarget(renderer, this->screen);
 }

@@ -28,7 +28,7 @@ void NetSender::step() {
             sel_item_id = ITEM_NONE; // wtf
         }
 
-        snprintf(line, sizeof(line), "%s,%d,%d,%d,%d\n", sel_item_id.c_str(), sel_item_count, feta->health, feta->max_health, feta->cheese);
+        snprintf(line, sizeof(line), "%s,%d,%d,%d\n", sel_item_id.c_str(), sel_item_count, feta->health, feta->max_health);
     } else {
         snprintf(line, sizeof(line), ITEM_NONE ",0,0,0\n");
     }

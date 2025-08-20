@@ -20,6 +20,7 @@
 #include "foes/spitter/thorax.h"
 #include "hitbox.h"
 #include "hurtbox.h"
+#include "items/cannon_ball.h"
 #include "items/cheese.h"
 #include "items/coffee.h"
 #include "items/fire.h"
@@ -76,6 +77,8 @@ void Game::init() {
     this->factories[GATE_OBJ] = new FoeGateFactory();
     this->factories[HITBOX_OBJ] = new HitBoxFactory();
     this->factories[HURTBOX_OBJ] = new HurtBoxFactory();
+    this->factories[ITEM_CANNON_BALL DROPPED_OBJ] = new DroppedCannonBallFactory();
+    this->factories[ITEM_CANNON_BALL USE_OBJ] = new ThrownCannonBallFactory();
     this->factories[ITEM_CHEESE DROPPED_OBJ] = new CheeseFactory();
     this->factories[ITEM_COFFEE_BEAN DROPPED_OBJ] = new DroppedCoffeeBeanFactory();
     this->factories[ITEM_COFFEE_BEAN USE_OBJ] = new UsedCoffeeBeanFactory();
@@ -94,6 +97,7 @@ void Game::init() {
 
     // items
     item_info[ITEM_NONE] = Item{WEAPON, "Nothing", 1, 0};
+    item_info[ITEM_CANNON_BALL] = Item{THROWABLE, "Cannon Ball", 0, 0};
     item_info[ITEM_CHEESE] = Item{EDIBLE, "Cheese", 0, 0};
     item_info[ITEM_COFFEE_BEAN] = Item{USEFUL, "Coffee Bean", 0, 0};
     item_info[ITEM_FIRE] = Item{THROWABLE, "Fire", 0, 0};

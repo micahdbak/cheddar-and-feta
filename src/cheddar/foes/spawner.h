@@ -8,7 +8,7 @@
 
 class FoeSpawner: public Object {
 public:
-    FoeSpawner(float x, float y, int spawner_id, const std::vector<std::vector<std::string>> &waves);
+    FoeSpawner(float x, float y, int spawner_id, int animation, const std::vector<std::vector<std::string>> &waves);
     ~FoeSpawner();
 
     void step() override;
@@ -22,8 +22,10 @@ private:
     float x, y;
     int spawner_id;
     std::vector<std::vector<std::string>> waves;
+    std::vector<std::string> to_spawn;
     Sprite *sprite;
     SDL_FRect dst_rect;
+    Uint64 spawned_ticks = 0;
 
     int wave = 0;
     int foerefs = 0;
@@ -31,12 +33,12 @@ private:
 
 class FoeSpawnerFactory: public ObjectFactory {
 public:
-    // e.g., 256,112,1 foe_bug;foe_bug,foe_bug,foe_bug;foe_mole
+    // e.g., 256,112,1,0 foe_bug;foe_bug,foe_bug,foe_bug;foe_mole
     Object *create(const std::string &options) {
         const char *arr = options.c_str();
 
-        int x = 0, y = 0, spawner_id = 0;
-        sscanf(arr, "%d,%d,%d", &x, &y, &spawner_id);
+        int x = 0, y = 0, spawner_id = 0, animation = 0;
+        sscanf(arr, "%d,%d,%d,%d", &x, &y, &spawner_id, &animation);
 
         // skip until null byte or space
         while (*arr != '\0' && *arr != ' ')
@@ -68,7 +70,7 @@ public:
             if (*arr != '\0') arr++;
         }
 
-        return new FoeSpawner(x, y, spawner_id, waves);
+        return new FoeSpawner(x, y, spawner_id, animation, waves);
     }
 };
 

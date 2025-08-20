@@ -8,7 +8,7 @@
 
 class FoeGate: public Object {
 public:
-    FoeGate(int x, int y, int spawner_id);
+    FoeGate(int x, int y, int spawner_id, int animation);
     ~FoeGate();
 
     void step() override;
@@ -26,9 +26,9 @@ private:
 class FoeGateFactory: public ObjectFactory {
 public:
     Object *create(const std::string &options) {
-        int x = 0, y = 0, spawner_id = 0;
-        sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id);
-        return new FoeGate(x, y, spawner_id);
+        int x = 0, y = 0, spawner_id = 0, animation = 0;
+        sscanf(options.c_str(), "%d,%d,%d,%d", &x, &y, &spawner_id, &animation);
+        return new FoeGate(x, y, spawner_id, animation);
     }
 };
 

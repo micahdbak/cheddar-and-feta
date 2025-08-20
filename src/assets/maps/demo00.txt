@@ -5,9 +5,9 @@ B4
 ./tiles/dirttunnel.bmp
 17
 mouse 0 592,1120,0 1120,128,0
-gate 1040,1216,1
-spawner 960,1088,1 foe_bug;foe_bug,foe_bug,foe_bug;foe_bat,foe_bat
-bell 928,1024,1
+gate 1008,1152,1
+spawner 976,1040,1 foe_bug;foe_bug,foe_bug;foe_bat
+bell 848,1008,1
 ladder 1120,112,1,0 maps/demo01
 item_molotov_dropped 480,384
 item_molotov_dropped 496,384

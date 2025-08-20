@@ -50,6 +50,7 @@ set(CHEDDAR_SRC
     src/cheddar/hitbox.cpp
     src/cheddar/hurtbox.cpp
     src/cheddar/init.cpp
+    src/cheddar/items/cannon_ball.cpp
     src/cheddar/items/cheese.cpp
     src/cheddar/items/fire.cpp
     src/cheddar/items/frog_tongue.cpp

@@ -34,6 +34,9 @@ Foe::Foe(float x, float y, int spawner_id, int speed, float stalking_distance, f
     case 2: this->strafe = FoeStrafe::STRAFE_RIGHT; break;
     default: this->strafe = FoeStrafe::NO_STRAFE; break;
     }
+
+    this->off_x = SDL_randf() * 16.0f - 8.0f;
+    this->off_y = SDL_randf() * 16.0f - 8.0f;
 }
 
 Foe::~Foe() {
@@ -178,6 +181,25 @@ void Foe::foe_step() {
             this->x = CENTER_TILE_X(this->target_x);
             this->y = CENTER_TILE_Y(this->target_y);
             this->state = Foe::State::IDLE; // next step will select a new tile
+        }
+
+        if (game->ticks - this->direction_timer > 100 && this->_displayed_direction != this->direction) {
+            this->direction_timer = game->ticks;
+
+            int diff_up = (this->direction < this->_displayed_direction ? this->direction + 8 : this->direction) - this->_displayed_direction;
+            int diff_down = this->_displayed_direction - (this->direction > this->_displayed_direction ? this->direction - 8 : this->direction);
+
+            if (diff_up <= diff_down) {
+                this->_displayed_direction++;
+            } else {
+                // diff_down < diff_up
+                this->_displayed_direction--;
+            }
+
+            if (this->_displayed_direction < 0)
+                this->_displayed_direction = 7;
+            else if (this->_displayed_direction > 7)
+                this->_displayed_direction = 0;
         }
     } break;
 

@@ -10,10 +10,10 @@
 
 FoeBug::FoeBug(int x, int y, int spawner_id):
     Foe(float(x), float(y), spawner_id, 500, 256.0f, 16.0f) {
-    this->sprite = new Sprite("sprites/foe_bug.bmp", 18, 18, 100);
+    this->sprite = new Sprite("sprites/foe_bug.bmp", 32, 32, 100);
 
-    this->dst_rect.w = 18.0f;
-    this->dst_rect.h = 18.0f;
+    this->dst_rect.w = 32.0f;
+    this->dst_rect.h = 32.0f;
 
     game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 16));
 }
@@ -48,34 +48,34 @@ void FoeBug::attack_internal(int damage) {
 }
 
 #define WALK_ANIMATION   0
-#define ATTACK_ANIMATION 8
-#define HURT_ANIMATION   16
+#define ATTACK_ANIMATION 0
+#define HURT_ANIMATION   8
 
 void FoeBug::step() {
     this->foe_step();
 
     switch (this->state) {
     case Foe::State::ACTION:
-        this->sprite->set_animation(ATTACK_ANIMATION + this->direction);
+        this->sprite->set_animation(ATTACK_ANIMATION + this->_displayed_direction);
         this->sprite->interval_ms = 50;
         if (game->ticks - this->timer > 1000) {
-            this->state = Foe::State::IDLE;
+            this->state = Foe::State::FORCE_RANDOM_TILE;
         }
 
         break;
 
     case Foe::State::HURT:
-        this->sprite->set_animation(HURT_ANIMATION + this->direction);
+        this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
         if (game->ticks - this->timer > 500) {
             this->state = Foe::State::WALKING;
         }
 
-        game->push_health_bar(this->health, this->max_health, this->x, this->y - 16.0f, &this->icon_src, &this->icon_dst);
+        game->push_health_bar(this->health, this->max_health, this->x + this->off_x, this->y - 16.0f + this->off_y, &this->icon_src, &this->icon_dst);
 
         break;
 
     case Foe::State::DEAD:
-        this->sprite->set_animation(HURT_ANIMATION + this->direction);
+        this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
         if (game->ticks - this->timer > 2000) {
             // delete this object
             game->delete_object = true;
@@ -92,19 +92,19 @@ void FoeBug::step() {
             return;
         }
 
-        game->push_icon(SKULL_AND_BONES_ICON, this->x, this->y - 14.0f, &this->icon_src, &this->icon_dst);
+        game->push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x, this->y - 14.0f + this->off_y, &this->icon_src, &this->icon_dst);
 
         break;
 
     default:
-        this->sprite->set_animation(WALK_ANIMATION + this->direction);
+        this->sprite->set_animation(WALK_ANIMATION + this->_displayed_direction);
         this->sprite->interval_ms = 100;
 
         break;
     }
 
     this->sprite->update_frame();
-    this->dst_rect.x = this->x - float(game->corner_x) - 9.0f;
-    this->dst_rect.y = this->y - float(game->corner_y) - 9.0f;
-    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 14);
+    this->dst_rect.x = this->x - float(game->corner_x) - 16.0f + this->off_x;
+    this->dst_rect.y = this->y - float(game->corner_y) - 16.0f + this->off_y;
+    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 18);
 }

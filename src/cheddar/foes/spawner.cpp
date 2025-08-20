@@ -7,10 +7,12 @@
 
 FoeSpawner *spawners[20];
 
-FoeSpawner::FoeSpawner(float x, float y, int spawner_id, const std::vector<std::vector<std::string>> &waves):
+FoeSpawner::FoeSpawner(float x, float y, int spawner_id, int animation, const std::vector<std::vector<std::string>> &waves):
     x(x), y(y), spawner_id(spawner_id), waves(waves) {
-    this->sprite = new Sprite("sprites/spawner.bmp", 32, 32, 0);
-    this->dst_rect.w = this->dst_rect.h = 32.0f;
+    this->sprite = new Sprite("sprites/spawner.bmp", 24, 16, 0);
+    this->dst_rect.w = 24.0f;
+    this->dst_rect.h = 16.0f;
+    this->sprite->set_animation(animation);
 
     char key[256];
     snprintf(key, sizeof(key), "spawner_%d", this->spawner_id);
@@ -28,13 +30,27 @@ FoeSpawner::~FoeSpawner() {
 }
 
 void FoeSpawner::step() {
-    if (this->empty) {
-        this->sprite->set_frame(1);
-    }
+    // if (this->empty) {
+    //     // this->sprite->set_frame(1);
+    // }
+    // 
+    // float horiz_offset = this->sprite->animation == 0 ? 8.0f : 0.0f;
+    // 
+    // this->dst_rect.x = this->x - horiz_offset - (float)game->corner_x;
+    // this->dst_rect.y = this->y - (float)game->corner_y;
+    // game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 0.0f);
 
-    this->dst_rect.x = this->x - 16.0f - game->corner_x;
-    this->dst_rect.y = this->y - 16.0f - game->corner_y;
-    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 16.0f);
+    if (!this->to_spawn.empty() && game->ticks - this->spawned_ticks > 500)
+    {
+        this->spawned_ticks = game->ticks;
+
+        std::string obj = this->to_spawn.back();
+        this->to_spawn.pop_back();
+
+        char buff[256];
+        snprintf(buff, sizeof(buff), "%d,%d,%d", (int)this->x, (int)this->y, this->spawner_id);
+        game->push_object(obj, buff);
+    }
 }
 
 void FoeSpawner::trigger() {
@@ -48,13 +64,8 @@ void FoeSpawner::trigger() {
         return;
     }
 
-    for (std::string obj : this->waves[this->wave]) {
-        char buff[256];
-        snprintf(buff, sizeof(buff), "%d,%d,%d", (int)this->x, (int)this->y, this->spawner_id);
-        game->push_object(obj, buff);
-        this->foerefs++;
-    }
-
+    this->to_spawn = this->waves[this->wave];
+    this->foerefs += this->to_spawn.size();
     this->wave++;
 }
 

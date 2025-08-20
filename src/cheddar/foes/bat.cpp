@@ -7,13 +7,16 @@
 #include "../items/toothpick.h"
 
 #include <iostream>
+#include <cmath>
+
+#define CIRCLE_TICKS 2000
 
 FoeBat::FoeBat(int x, int y, int spawner_id):
-    Foe(float(x), float(y), spawner_id, 200, 256.0f, 16.0f) {
-    this->sprite = new Sprite("sprites/foe_bat.bmp", 24, 24, 100);
+    Foe(float(x), float(y), spawner_id, 333, 256.0f, 16.0f) {
+    this->sprite = new Sprite("sprites/foe_bat.bmp", 32, 32, 45); // approx every 3 frames
 
-    this->dst_rect.w = 24.0f;
-    this->dst_rect.h = 24.0f;
+    this->dst_rect.w = 32.0f;
+    this->dst_rect.h = 32.0f;
 
     game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 16));
 }
@@ -28,7 +31,6 @@ void FoeBat::action(Mouse *mouse) {
         return;
     }
 
-    this->state = Foe::State::FORCE_RANDOM_TILE;
     this->timer = game->ticks;
 
     int x_off, y_off;
@@ -52,30 +54,32 @@ void FoeBat::attack_internal(int damage) {
 }
 
 #define WALK_ANIMATION   0
-#define ATTACK_ANIMATION 0 // 8
-#define HURT_ANIMATION   0 // 16
+#define HURT_ANIMATION   8 // 16
 
 void FoeBat::step() {
     this->foe_step();
 
     switch (this->state) {
     case Foe::State::ACTION:
-        this->state = Foe::State::FORCE_RANDOM_TILE;
+        if (game->ticks - this->timer > 250) {
+            this->state = State::FORCE_RANDOM_TILE;
+        }
 
         break;
 
     case Foe::State::HURT:
-        this->sprite->set_animation(HURT_ANIMATION + this->direction);
-        if (game->ticks - this->timer > 1000) {
+        this->sprite->set_animation(WALK_ANIMATION + this->_displayed_direction);
+        if (game->ticks - this->timer > 250) {
             this->state = Foe::State::WALKING;
         }
 
-        game->push_health_bar(this->health, this->max_health, this->x, this->y - 16.0f, &this->icon_src, &this->icon_dst);
+        game->push_health_bar(this->health, this->max_health, this->x + this->off_x, this->y - 16.0f + this->off_y, &this->icon_src, &this->icon_dst);
 
         break;
 
     case Foe::State::DEAD:
-        this->sprite->set_animation(HURT_ANIMATION + this->direction);
+        this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
+
         if (game->ticks - this->timer > 2000) {
             // delete this object
             game->delete_object = true;
@@ -92,13 +96,12 @@ void FoeBat::step() {
             return;
         }
 
-        game->push_icon(SKULL_AND_BONES_ICON, this->x, this->y - 16.0f, &this->icon_src, &this->icon_dst);
+        game->push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x, this->y - 16.0f + this->off_y, &this->icon_src, &this->icon_dst);
 
         break;
 
     default:
-        this->sprite->set_animation(WALK_ANIMATION + this->direction);
-        this->sprite->interval_ms = 100;
+        this->sprite->set_animation(WALK_ANIMATION + this->_displayed_direction);
 
         if (this->tile_choice == Foe::TileChoice::TOWARDS && this->current_distance <= 32.0f) {
             this->tile_choice = Foe::TileChoice::CIRCLE;
@@ -109,8 +112,17 @@ void FoeBat::step() {
         break;
     }
 
+    if (this->state != Foe::State::HURT && this->state != Foe::State::DEAD) {
+        float angle = (float)((game->ticks - this->ticks_offset) % CIRCLE_TICKS) / 1000.0f;
+        angle *= M_PI;
+        this->off_x = sinf(angle) * 8.0f;
+        this->off_y = cosf(angle) * 8.0f;
+    } else {
+        this->ticks_offset = game->ticks - this->timer;
+    }
+
     this->sprite->update_frame();
-    this->dst_rect.x = this->x - float(game->corner_x) - 12.0f;
-    this->dst_rect.y = this->y - float(game->corner_y) - 12.0f;
-    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 14);
+    this->dst_rect.x = this->x - float(game->corner_x) - 16.0f + this->off_x;
+    this->dst_rect.y = this->y - float(game->corner_y) - 16.0f + this->off_y;
+    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 26);
 }

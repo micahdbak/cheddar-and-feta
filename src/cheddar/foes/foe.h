@@ -42,12 +42,14 @@ public:
     enum TileChoice { TOWARDS, AWAY, CIRCLE } tile_choice = TOWARDS;
 
     float x, y;
+    float off_x = 0.0f, off_y = 0.0f;
     int direction, x_dir, y_dir;
 
 protected:
     int icon_offset = 8;
     float current_distance;
     Mouse *target_mouse = nullptr;
+    int _displayed_direction;
 
 private:
     int spawner_id, speed;
@@ -56,7 +58,7 @@ private:
 
     int target_x, target_y;
     float start_x, start_y;
-    Uint64 start_ticks = 0, target_ticks = 0;
+    Uint64 start_ticks = 0, target_ticks = 0, direction_timer = 0;
     int walking_time, walk_offset = 0;
 
     FoeStrafe strafe;

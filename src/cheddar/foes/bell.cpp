@@ -7,9 +7,9 @@ Bell::Bell(int x, int y, int spawner_id) {
     this->x = x;
     this->y = y;
     this->spawner_id = spawner_id;
-    this->sprite = new Sprite("sprites/bell.bmp", 24, 24, 50);
-    this->dst_rect.w = 24.0f;
-    this->dst_rect.h = 24.0f;
+    this->sprite = new Sprite("sprites/bell.bmp", 32, 32, 50);
+    this->dst_rect.w = 32.0f;
+    this->dst_rect.h = 32.0f;
 
     game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 16));
 }
@@ -24,7 +24,6 @@ void Bell::attack(int damage) {
     if (spawner != nullptr && !spawner->empty && !this->triggered) {
         spawners[this->spawner_id]->trigger();
         this->triggered = true;
-        this->sprite->set_animation(1);
     }
 
     this->timer = game->ticks;
@@ -37,7 +36,7 @@ void Bell::step() {
         this->sprite->set_frame(0);
     }
 
-    this->dst_rect.x = this->x - 12.0f - game->corner_x;
-    this->dst_rect.y = this->y - 12.0f - game->corner_y;
+    this->dst_rect.x = this->x - 16.0f - game->corner_x;
+    this->dst_rect.y = this->y - 16.0f - game->corner_y;
     game->push_sprite("sprites/bell.bmp", this->sprite->texture, &this->sprite->frame, &this->dst_rect, 16);
 }

@@ -68,7 +68,7 @@ void FoePorcupine::step() {
             this->state = Foe::State::WALKING;
         }
 
-        game->push_health_bar(this->health, this->max_health, this->x, this->y - 12.0f, &this->icon_src, &this->icon_dst);
+        game->push_health_bar(this->health, this->max_health, this->x + this->off_x, this->y - 12.0f + this->off_y, &this->icon_src, &this->icon_dst);
 
         break;
 
@@ -90,7 +90,7 @@ void FoePorcupine::step() {
             return;
         }
 
-        game->push_icon(SKULL_AND_BONES_ICON, this->x, this->y - 16.0f, &this->icon_src, &this->icon_dst);
+        game->push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x, this->y - 16.0f + this->off_y, &this->icon_src, &this->icon_dst);
 
         break;
 
@@ -106,7 +106,7 @@ void FoePorcupine::step() {
     }
 
     this->sprite->update_frame();
-    this->dst_rect.x = this->x - float(game->corner_x) - 8.0f;
-    this->dst_rect.y = this->y - float(game->corner_y) - 8.0f;
+    this->dst_rect.x = this->x - float(game->corner_x) - 8.0f + this->off_x;
+    this->dst_rect.y = this->y - float(game->corner_y) - 8.0f + this->off_y;
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 14);
 }

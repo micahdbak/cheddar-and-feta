@@ -119,7 +119,7 @@ int main(int argc, const char **argv) {
 
         controller->clear_hits();
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 36, 32, 28, 255);
         SDL_RenderClear(renderer);
         SDL_RenderTexture(renderer, game->screen, NULL, &screen_rect);
         SDL_RenderPresent(renderer);

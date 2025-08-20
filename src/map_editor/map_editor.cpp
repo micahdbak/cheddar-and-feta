@@ -163,6 +163,9 @@ Editor::Editor(const char *map_path) {
     this->objects = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, this->map.bg->w, this->map.bg->h);
     SDL_SetTextureAlphaMod(this->objects, 0xa0);
     this->render_objects();
+
+    this->sel_x = this->map.cols / 2;
+    this->sel_y = this->map.rows / 2;
 }
 
 Editor::~Editor() {
@@ -401,7 +404,7 @@ void Editor::step() {
 
 void Editor::input_tile() {
     // end inputting
-    if (local_controller.is_hit(Button::SELECT) || local_controller.is_hit(Button::MENU)) {
+    if (local_controller.is_hit(Button::SELECT) || local_controller.is_hit(Button::CYCLE_LEFT)) {
         this->user_inputting = false;
         game->draw_rect(game->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
         return;
@@ -483,27 +486,29 @@ void Editor::input_tile() {
     SDL_SetRenderTarget(renderer, game->screen);
     SDL_FRect black_rect = { 0.0f, 0.0f, float(SCREEN_WIDTH), 11.0f };
     game->draw_rect(game->ui, &black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-    game->draw_text(game->ui, "<Return> to place, <Escape> to close", MONO_FONT, 0, 0, 0);
+    game->draw_text(game->ui, "<Return> to place, <Q> to close", MONO_FONT, 0, 0, 0);
 }
 
 void Editor::input_sheet() {
     int sel_i, nfields;
     nfields = sscanf(this->text.c_str(), "%d", &sel_i);
-    
-    if (local_controller.is_hit(Button::CANCEL) && !text.empty())
-        this->text.pop_back();
-    else if (local_controller.c != NO_CHAR)
-        this->text.push_back(local_controller.c);
-    else if (local_controller.is_hit(Button::SELECT) && nfields == 1) {
-        this->sel_tilesheet = sel_i;
-    } else if (local_controller.is_hit(Button::MENU)) {
+
+    if (local_controller.is_hit(Button::SELECT) && text.empty()) {
         // close
         this->user_inputting = false;
         game->draw_rect(game->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
         return;
     }
 
-    std::string display_text = "Tilesheet: " + this->text + "\n<Return> to select, <Escape> to close\n\n";
+    if (local_controller.is_hit(Button::CANCEL) && !text.empty())
+        this->text.pop_back();
+    else if (local_controller.c != NO_CHAR)
+        this->text.push_back(local_controller.c);
+    else if (local_controller.is_hit(Button::SELECT) && nfields == 1) {
+        this->sel_tilesheet = sel_i;
+    }
+
+    std::string display_text = "Tilesheet: " + this->text + "\n<Return> to select or close (when empty)\n\n";
     for (int i = 0; i < this->map.tilesheets.size(); i++) {
         char tilesheet[256];
         char first_c, second_c, end_char = i == this->map.tilesheets.size()-1 ? ' ' : '\n';

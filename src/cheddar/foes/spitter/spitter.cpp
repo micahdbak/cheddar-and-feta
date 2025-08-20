@@ -12,6 +12,9 @@ Spitter::Spitter(float x, float y, int spawner_id)
     game->push_object(FOE_SPITTER_HEAD_OBJ, std::string(buff));
     game->push_object(FOE_SPITTER_THORAX_OBJ, std::string(buff));
     game->push_object(FOE_SPITTER_ABDOMEN_OBJ, std::string(buff));
+
+    this->off_x = 0.0f;
+    this->off_y = 0.0f;
 }
 
 Spitter::~Spitter() {

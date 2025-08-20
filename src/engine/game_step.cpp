@@ -270,7 +270,7 @@ void Game::step() {
     }
 
     SDL_SetRenderTarget(renderer, this->screen);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 36, 32, 28, 255);
     SDL_RenderClear(renderer);
 
     // render background

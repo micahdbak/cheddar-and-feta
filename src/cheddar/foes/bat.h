@@ -3,6 +3,7 @@
 
 #include "foe.h"
 #include "hitbox.h"
+#include "hurtbox.h"
 #include "sprite.h"
 
 class FoeBat : public Foe, public HitSource {
@@ -15,13 +16,14 @@ public:
 
     void step() override;
 
-    float hitsource_x() override { return this->x; }
-    float hitsource_y() override { return this->y; }
+    float hitsource_x() override { return this->x + this->off_x; }
+    float hitsource_y() override { return this->y + this->off_y; }
 
 private:
     Sprite *sprite;
     SDL_FRect dst_rect, icon_src, icon_dst;
     Uint64 timer = 0;
+    int ticks_offset = 0;
 
     int max_health = 2, health = 2;
 };

@@ -30,7 +30,7 @@ void Ladder::step() {
     this->dst_rect.y = this->y - game->corner_y - 38.0f;
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 28);
 
-    Mouse *mouse = closest_mouse(this->x, this->y, 8);
+    Mouse *mouse = closest_mouse(this->x, this->y, 8, true);
 
     if (mouse != nullptr) {
         game->map = this->next_map;

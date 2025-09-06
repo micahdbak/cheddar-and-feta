@@ -65,7 +65,7 @@ void Foe::attack(int damage) {
 void Foe::foe_step() {
     switch (this->state) {
     case Foe::State::IDLE: {
-        Mouse *new_mouse = closest_mouse(this->x, this->y, this->stalking_distance);
+        Mouse *new_mouse = closest_mouse(this->x, this->y, this->stalking_distance, false);
 
         if (new_mouse == nullptr) {
             // no more stalking if neither mouse is close enough
@@ -91,7 +91,7 @@ void Foe::foe_step() {
         }
 
         // perform action and stay on this tile if close enough and not running away
-        if (this->current_distance < this->action_distance && this->tile_choice != Foe::TileChoice::AWAY) {
+        if (this->current_distance < this->action_distance) {
             this->action(this->target_mouse);
             this->state = Foe::State::ACTION;
             break;

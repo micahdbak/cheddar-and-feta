@@ -125,7 +125,7 @@ public:
     }
 };
 
-Mouse *closest_mouse(float x, float y, float min_distance);
+Mouse *closest_mouse(float x, float y, float min_distance, bool forced);
 
 extern bool mice_locked;
 extern Mouse *cheddar, *feta;

@@ -19,6 +19,9 @@ FoeBat::FoeBat(int x, int y, int spawner_id):
     this->dst_rect.h = 32.0f;
 
     game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 16));
+
+    this->base_ticks_offset = SDL_rand(CIRCLE_TICKS + 1);
+    this->ticks_offset = base_ticks_offset;
 }
 
 FoeBat::~FoeBat() {
@@ -118,7 +121,7 @@ void FoeBat::step() {
         this->off_x = sinf(angle) * 8.0f;
         this->off_y = cosf(angle) * 8.0f;
     } else {
-        this->ticks_offset = game->ticks - this->timer;
+        this->ticks_offset = game->ticks - this->timer + base_ticks_offset;
     }
 
     this->sprite->update_frame();

@@ -26,7 +26,7 @@ void Cheese::render_cheese() {
 }
 
 void Cheese::step() {
-    Mouse *mouse = closest_mouse(this->x, this->y, 8.0f);
+    Mouse *mouse = closest_mouse(this->x, this->y, 8.0f, true);
     if (mouse != nullptr) {
         this->amount -= mouse->add_cheese(this->amount);
         if (this->amount == 0) {

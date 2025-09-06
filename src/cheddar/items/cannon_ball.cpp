@@ -15,7 +15,7 @@ ThrownCannonBall::ThrownCannonBall(float x, float y, int x_dir, int y_dir, int f
     }
 
     this->x += (float)dx;
-    this->y += (float)dy - 5.0f;
+    this->y += (float)dy;
 
     Object *obj = game->get_object(from_id);
     Mouse *mouse;

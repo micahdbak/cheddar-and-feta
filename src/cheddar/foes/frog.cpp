@@ -6,7 +6,7 @@
 
 FoeFrog::FoeFrog(int x, int y, int spawner_id):
     Foe(float(x), float(y), spawner_id, 500, 128.0f, 64.0f) {
-    this->sprite = new Sprite("sprites/foe_frog.bmp", 48, 48, 250);
+    this->sprite = new Sprite("sprites/foe_frog.bmp", 48, 48, 125);
     this->dst_rect.w = 48.0f;
     this->dst_rect.h = 48.0f;
     this->icon_offset = 16;
@@ -31,7 +31,7 @@ void FoeFrog::action(Mouse *mouse) {
     this->timer = game->ticks;
 
     char options[256];
-    snprintf(options, sizeof(options), "%d,%d,%d,%d,%d", (int)this->x, (int)this->y, this->x_dir, this->y_dir, this->id);
+    snprintf(options, sizeof(options), "%d,%d,%d,%d,%d", (int)(this->x + this->off_x), (int)(this->y + this->off_y), this->x_dir, this->y_dir, this->id);
     game->push_object(std::string(ITEM_CANNON_BALL USE_OBJ), std::string(options));
 
     // for action animation
@@ -61,14 +61,15 @@ void FoeFrog::step() {
     switch (this->state) {
     case Foe::State::ACTION:
         this->sprite->set_animation(ACTION_ANIMATION + this->_displayed_direction);
-        if (game->ticks - this->timer > 750) {
+        if (game->ticks - this->timer > 500) {
             this->state = Foe::State::FORCE_RANDOM_TILE;
         }
 
         break;
 
     case Foe::State::HURT:
-        this->sprite->set_animation(WALK_ANIMATION + this->_displayed_direction);
+        this->sprite->set_animation(ACTION_ANIMATION + this->_displayed_direction);
+        this->sprite->set_frame(0);
         if (game->ticks - this->timer > 250) {
             this->state = Foe::State::WALKING;
         }
@@ -78,7 +79,8 @@ void FoeFrog::step() {
         break;
 
     case Foe::State::DEAD:
-        this->sprite->set_animation(WALK_ANIMATION + this->_displayed_direction);
+        this->sprite->set_animation(ACTION_ANIMATION + this->_displayed_direction);
+        this->sprite->set_frame(0);
         if (game->ticks - this->timer > 2000) {
             // delete this object
             game->delete_object = true;
@@ -93,7 +95,7 @@ void FoeFrog::step() {
             }
 
             char options[256];
-            snprintf(options, sizeof(options), "%d,%d", int(this->x), int(this->y));
+            snprintf(options, sizeof(options), "%d,%d", int(this->x + this->off_x), int(this->y + this->off_y));
             game->push_object(std::string(ITEM_CANNON_BALL DROPPED_OBJ), std::string(options));
 
             return;

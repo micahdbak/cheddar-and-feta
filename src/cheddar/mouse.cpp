@@ -220,20 +220,16 @@ void Mouse::step() {
         x_dir = int(controller->is_down(Button::RIGHT)) - int(controller->is_down(Button::LEFT));
         y_dir = int(controller->is_down(Button::DOWN)) - int(controller->is_down(Button::UP));
 
+        // walk when Button::RUN is held down
+        this->is_running = !controller->is_down(Button::RUN);
+
         // update sprite frame and animation only if moving
         if (x_dir != 0 || y_dir != 0) {
             this->sprite->set_animation(direction_from_dirs(x_dir, y_dir));
             this->sprite->update_frame();
-
-            // toggle running when L2 is hit
-            if (controller->is_down(Button::RUN) && !this->is_running) {
-                this->is_running = true;
-                // this->running_ticks = game->ticks;
-            }
         } else {
             // otherwise show only the first frame
             this->sprite->set_frame(0);
-            this->is_running = false;
         }
 
         // running / walking
@@ -564,7 +560,9 @@ void Mouse::push_item(const std::string &item_id) {
         this->items.push_back(new_item);
     }
 
-    this->sel_item = i;
+    if (item_id != ITEM_CHEESE) {
+        this->sel_item = i;
+    }
 }
 
 void Mouse::remove_item(const std::string &item_id) {
@@ -589,9 +587,9 @@ int Mouse::add_cheese(int amount) {
     return amount;
 }
 
-Mouse *closest_mouse(float x, float y, float min_distance) {
-    float distance_cheddar = cheddar->is_down ? FLT_MAX : distance_between_points(x, y, cheddar->x, cheddar->y);
-    float distance_feta = feta->is_down ? FLT_MAX : distance_between_points(x, y, feta->x, feta->y);
+Mouse *closest_mouse(float x, float y, float min_distance, bool forced) {
+    float distance_cheddar = (cheddar->is_down && !forced) ? FLT_MAX : distance_between_points(x, y, cheddar->x, cheddar->y);
+    float distance_feta = (feta->is_down && !forced) ? FLT_MAX : distance_between_points(x, y, feta->x, feta->y);
 
     if (distance_cheddar < distance_feta) {
         if (min_distance < 0.1f || distance_cheddar < min_distance) {

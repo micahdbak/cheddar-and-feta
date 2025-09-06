@@ -54,7 +54,7 @@ void Spitter::step() {
             break;
         }
 
-        Mouse *mouse = closest_mouse(this->x, this->y, 80.0f);
+        Mouse *mouse = closest_mouse(this->x, this->y, 80.0f, false);
 
         bool cancel_action = false;
         if (mouse == nullptr) {

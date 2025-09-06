@@ -23,7 +23,7 @@ private:
     Sprite *sprite;
     SDL_FRect dst_rect, icon_src, icon_dst;
     Uint64 timer = 0;
-    int ticks_offset = 0;
+    int ticks_offset = 0, base_ticks_offset = 0;
 
     int max_health = 2, health = 2;
 };

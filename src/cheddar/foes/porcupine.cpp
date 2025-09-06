@@ -10,12 +10,12 @@
 
 FoePorcupine::FoePorcupine(int x, int y, int spawner_id):
     Foe(float(x), float(y), spawner_id, 250, 256.0f, 64.0f) {
-    this->sprite = new Sprite("sprites/foe_porcupine.bmp", 16, 16, 100);
+    this->sprite = new Sprite("sprites/foe_porcupine.bmp", 32, 32, 250);
 
-    this->dst_rect.w = 16.0f;
-    this->dst_rect.h = 16.0f;
+    this->dst_rect.w = 32.0f;
+    this->dst_rect.h = 32.0f;
 
-    game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 16));
+    game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -6, -8, 12, 16));
 }
 
 FoePorcupine::~FoePorcupine() {
@@ -23,16 +23,15 @@ FoePorcupine::~FoePorcupine() {
     this->sprite = nullptr;
 }
 
+#define WALK_ANIMATION   0
+#define ATTACK_ANIMATION 8
+#define DEAD_ANIMATION   16
+
 void FoePorcupine::action(Mouse *mouse) {
-    this->state = Foe::State::FORCE_RANDOM_TILE;
-    this->tile_choice = Foe::TileChoice::AWAY;
-
-    int spine_x_dir, spine_y_dir;
-    dir_to_point(this->x, this->y, mouse->x, mouse->y, &spine_x_dir, &spine_y_dir);
-
-    char buff[256];
-    snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d", (int)this->x, (int)this->y, spine_x_dir, spine_y_dir, this->id);
-    game->push_object(ITEM_TOOTHPICK USE_OBJ, std::string(buff));
+    dir_to_point(this->x, this->y, mouse->x, mouse->y, &this->spine_x_dir, &this->spine_y_dir);
+    this->sprite->set_animation(ATTACK_ANIMATION + direction_from_dirs(this->spine_x_dir, this->spine_y_dir));
+    this->sprite->set_frame(0);
+    this->timer = game->ticks;
 }
 
 void FoePorcupine::attack_internal(int damage) {
@@ -49,21 +48,26 @@ void FoePorcupine::attack_internal(int damage) {
     this->timer = game->ticks;
 }
 
-#define WALK_ANIMATION   0
-#define ATTACK_ANIMATION 0 // 8
-#define HURT_ANIMATION   0 // 16
-
 void FoePorcupine::step() {
     this->foe_step();
 
     switch (this->state) {
     case Foe::State::ACTION:
-        this->state = Foe::State::FORCE_RANDOM_TILE;
+        this->sprite->interval_ms = 200;
+        if (game->ticks - this->timer > 600) {
+            this->state = Foe::State::WALKING;
+            this->tile_choice = Foe::TileChoice::AWAY;
+            this->sprite->set_animation(WALK_ANIMATION + this->direction);
+        } else if (game->ticks - this->timer > 400 && (this->spine_x_dir != 0 || this->spine_y_dir != 0)) {
+            char buff[256];
+            snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d", (int)(this->x + this->off_x), (int)(this->y + this->off_y), this->spine_x_dir, this->spine_y_dir, this->id);
+            game->push_object(ITEM_TOOTHPICK USE_OBJ, std::string(buff));
+            this->spine_x_dir = this->spine_y_dir = 0;
+        }
 
         break;
 
     case Foe::State::HURT:
-        this->sprite->set_animation(HURT_ANIMATION + this->direction);
         if (game->ticks - this->timer > 250) {
             this->state = Foe::State::WALKING;
         }
@@ -73,7 +77,7 @@ void FoePorcupine::step() {
         break;
 
     case Foe::State::DEAD:
-        this->sprite->set_animation(HURT_ANIMATION + this->direction);
+        this->sprite->set_animation(DEAD_ANIMATION + this->direction);
         if (game->ticks - this->timer > 2000) {
             // delete this object
             game->delete_object = true;
@@ -98,7 +102,7 @@ void FoePorcupine::step() {
         this->sprite->set_animation(WALK_ANIMATION + this->direction);
         this->sprite->interval_ms = 100;
  
-        if (this->tile_choice == Foe::TileChoice::AWAY && this->current_distance >= 128.0f) {
+        if (this->tile_choice == Foe::TileChoice::AWAY && this->current_distance >= 48.0f) {
             this->tile_choice = Foe::TileChoice::TOWARDS;
         }
 
@@ -106,7 +110,7 @@ void FoePorcupine::step() {
     }
 
     this->sprite->update_frame();
-    this->dst_rect.x = this->x - float(game->corner_x) - 8.0f + this->off_x;
-    this->dst_rect.y = this->y - float(game->corner_y) - 8.0f + this->off_y;
-    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 14);
+    this->dst_rect.x = this->x - float(game->corner_x) - 16.0f + this->off_x;
+    this->dst_rect.y = this->y - float(game->corner_y) - 16.0f + this->off_y;
+    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
 }

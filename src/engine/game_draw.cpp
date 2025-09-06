@@ -270,7 +270,7 @@ void Game::draw_overlay() {
         }
 
         if (should_render) {
-            this->draw_rect(this->overlay, nullptr, 0, 0, 0, 128, SDL_BLENDMODE_NONE);
+            this->draw_rect(this->overlay, nullptr, 36, 32, 28, 128, SDL_BLENDMODE_NONE);
 
             SDL_FRect config_rect = { 8.0f, 8.0f, 112.0f, 136.0f };
             this->draw_ui_box(this->overlay, BOX_CONTAINER, &config_rect);

@@ -20,6 +20,7 @@ private:
     Uint64 timer = 0;
 
     int max_health = 10, health = 10;
+    int spine_x_dir = 0, spine_y_dir = 0;
 };
 
 class FoePorcupineFactory : public ObjectFactory {

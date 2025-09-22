@@ -98,7 +98,7 @@ Game::~Game() {
 void Game::unload() {
     this->save_objects();
 
-    this->current_map = "";
+    this->deleting_objects = true;
 
     if (!this->objects.empty()) {
         for (int i = 0; i < this->objects.size(); i++) {
@@ -108,6 +108,9 @@ void Game::unload() {
 
         this->objects.clear();
     }
+
+    this->deleting_objects = false;
+    this->current_map = "";
 
     if (this->bg != nullptr) {
         SDL_DestroyTexture(this->bg);
@@ -152,6 +155,9 @@ void Game::load_map(const char *map_path) {
         }
     }
 
+    this->current_map = map_path;
+    this->creating_objects = true;
+
     if (this->create_objects || std::string(map_path) == "maps/init") {
         for (auto obj : map.objects)
             this->create_object(obj.first, obj.second);
@@ -163,12 +169,13 @@ void Game::load_map(const char *map_path) {
         }
     }
 
+    this->creating_objects = false;
+
     map.clear();
 
     if (save.geti(LOAD_SAVE) == 1)
         save.data.erase(LOAD_SAVE);
 
-    this->current_map = map_path;
     save.data[LOAD_MAP] = this->current_map;
 
     this->display_notification(this->map_title + ", " + this->map_description);
@@ -180,7 +187,19 @@ void Game::create_object(const std::string &id, const std::string &options) {
         return;
     }
 
+    this->delete_object = false;
+
     Object *obj = this->factories[id]->create(options);
+    bool obj_cancelled = false;
+
+    // object cancelled being created
+    if (this->delete_object == true) {
+        delete obj;
+        obj = nullptr;
+        this->delete_object = false;
+        obj_cancelled = true;
+    }
+
     if (obj != nullptr) {
         if (id == FIRST_OBJ) {
             this->first_obj = obj;
@@ -191,7 +210,7 @@ void Game::create_object(const std::string &id, const std::string &options) {
         }
 
         debug_obj_ptrs[(uint64_t)obj] = id;
-    } else {
+    } else if (!obj_cancelled) {
         std::cerr << "Game::create_object error: '" << id << "' resulted in nullptr" << std::endl;
     }
 }
@@ -240,6 +259,7 @@ void Game::step() {
 
     // step all objects
     for (auto it = this->objects.begin(); it != this->objects.end();) {
+        this->delete_object = false;
         Object *obj = *it;
 
         if (obj == nullptr) {

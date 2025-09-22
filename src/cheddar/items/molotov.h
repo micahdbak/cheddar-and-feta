@@ -6,7 +6,8 @@
 
 class DroppedMolotov : public DroppedItem {
 public:
-    DroppedMolotov(float x, float y): DroppedItem(x, y, "sprites/item_molotov.bmp", 16, 16, 100) {}
+    DroppedMolotov(float x, float y):
+        DroppedItem(ITEM_MOLOTOV, x, y, "sprites/item_molotov.bmp", 16, 16, 100) {}
     ~DroppedMolotov() = default;
 
     void step() override { this->dropped_step(); }

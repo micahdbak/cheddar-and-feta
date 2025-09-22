@@ -10,8 +10,8 @@
 
 class DroppedToothpick : public DroppedItem {
 public:
-    DroppedToothpick(float x, float y)
-        : DroppedItem(x, y, "sprites/item_toothpick.bmp", 16, 16, 0) {
+    DroppedToothpick(float x, float y):
+        DroppedItem(ITEM_TOOTHPICK, x, y, "sprites/item_toothpick.bmp", 16, 16, 0) {
         this->sprite->set_animation(1);
     }
     ~DroppedToothpick() = default;

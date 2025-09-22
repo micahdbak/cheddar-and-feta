@@ -18,15 +18,15 @@ enum ItemType {
     USEFUL,
     THROWABLE,
     EDIBLE,
-    WEAPON,
-    ARMOUR
+    HELD_EFFECT
 };
 
 struct Item {
-    ItemType type = USEFUL;
-    std::string name = "Item";
-    int damage = 0;
+    ItemType type = HELD_EFFECT;
+    std::string name = "Unknown Item";
+    int damage = 1;
     int armour = 0;
+    float speed = 1.0f;
 };
 
 extern std::unordered_map<std::string, Item> item_info;
@@ -39,7 +39,7 @@ public:
         return std::string(buff);
     }
 
-    DroppedItem(float x, float y, const char *sprite_path, int frame_w, int frame_h, int interval_ms);
+    DroppedItem(std::string item_id, float x, float y, const char *sprite_path, int frame_w, int frame_h, int interval_ms);
     ~DroppedItem();
 
     void dropped_step();
@@ -47,9 +47,12 @@ public:
     virtual void take(Mouse *mouse) = 0;
 
 protected:
+    std::string item_id;
     float x, y;
 
     Sprite *sprite;
+
+    bool spawned_item = false;
 
 private:
     SDL_FRect dst_rect;

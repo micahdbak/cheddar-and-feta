@@ -54,13 +54,13 @@ public:
         this->data[key] = std::string(buff);
     }
 
-    // get float
+    // get float (0.0f by default)
     float getf(std::string key) {
         std::string val = this->value(key);
         return val.empty() ? 0.0f : str_to_float(val);
     }
 
-    // get integer
+    // get integer (0 by default)
     int geti(std::string key) {
         std::string val = this->value(key);
         return val.empty() ? 0 : std::stoi(val);

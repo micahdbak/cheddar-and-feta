@@ -25,7 +25,9 @@
 #include "items/coffee.h"
 #include "items/fire.h"
 #include "items/frog_tongue.h"
+#include "items/hermes_boot.h"
 #include "items/molotov.h"
+#include "items/persister.h"
 #include "items/save.h"
 #include "items/toothpick.h"
 #include "items/tossed.h"
@@ -85,8 +87,10 @@ void Game::init() {
     this->factories[ITEM_FIRE USE_OBJ] = new FireFactory();
     this->factories[ITEM_FROG_TONGUE DROPPED_OBJ] = new DroppedFrogTongueFactory();
     this->factories[ITEM_FROG_TONGUE USE_OBJ] = new FrogTongueFactory();
+    this->factories[ITEM_HERMES_BOOT DROPPED_OBJ] = new DroppedHermesBootFactory();
     this->factories[ITEM_MOLOTOV DROPPED_OBJ] = new DroppedMolotovFactory();
     this->factories[ITEM_MOLOTOV USE_OBJ] = new ThrownMolotovFactory();
+    this->factories[ITEM_PERSISTER_OBJ] = new ItemPersisterFactory();
     this->factories[ITEM_SAVE USE_OBJ] = new ItemSaveUseFactory();
     this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
     this->factories[ITEM_TOOTHPICK USE_OBJ] = new ThrownToothpickFactory();
@@ -96,15 +100,16 @@ void Game::init() {
     this->factories[TOSSED_ITEM_OBJ] = new TossedItemFactory();
 
     // items
-    item_info[ITEM_NONE] = Item{WEAPON, "Nothing", 1, 0};
-    item_info[ITEM_CANNON_BALL] = Item{THROWABLE, "Cannon Ball", 0, 0};
-    item_info[ITEM_CHEESE] = Item{EDIBLE, "Cheese", 0, 0};
-    item_info[ITEM_COFFEE_BEAN] = Item{USEFUL, "Coffee Bean", 0, 0};
-    item_info[ITEM_FIRE] = Item{THROWABLE, "Fire", 0, 0};
-    item_info[ITEM_FROG_TONGUE] = Item{THROWABLE, "Frog Tongue", 0, 0};
-    item_info[ITEM_MOLOTOV] = Item{THROWABLE, "Molotov Cocktail", 0, 0};
-    item_info[ITEM_SAVE] = Item{USEFUL, "Save Game", 0, 0};
-    item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Porcu' Pine", 0, 0};
+    item_info[ITEM_NONE] = Item{HELD_EFFECT, "Nothing", .damage = 1, .armour = 0};
+    item_info[ITEM_CANNON_BALL] = Item{THROWABLE, "Cannon Ball"};
+    item_info[ITEM_CHEESE] = Item{EDIBLE, "Cheese"};
+    item_info[ITEM_COFFEE_BEAN] = Item{USEFUL, "Coffee Bean"};
+    item_info[ITEM_FIRE] = Item{THROWABLE, "Fire"};
+    item_info[ITEM_FROG_TONGUE] = Item{THROWABLE, "Frog Tongue"};
+    item_info[ITEM_HERMES_BOOT] = Item{HELD_EFFECT, "Hermes Boot", .damage = 0, .speed = 1.75f};
+    item_info[ITEM_MOLOTOV] = Item{THROWABLE, "Molotov Cocktail"};
+    item_info[ITEM_SAVE] = Item{USEFUL, "Save Game"};
+    item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Porcu' Pine"};
 
     this->factories[FIRST_OBJ] = new NetReceiverFactory();
     this->factories[LAST_OBJ] = new NetSenderFactory();

@@ -9,7 +9,7 @@
 class DroppedCoffeeBean : public DroppedItem {
 public:
     DroppedCoffeeBean(float x, float y):
-        DroppedItem(x, y, "sprites/item_coffee_bean.bmp", 16, 16, 0) {}
+        DroppedItem(ITEM_COFFEE_BEAN, x, y, "sprites/item_coffee_bean.bmp", 16, 16, 0) {}
     ~DroppedCoffeeBean() = default;
 
     void step() override { this->dropped_step(); }

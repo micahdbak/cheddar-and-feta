@@ -55,6 +55,7 @@ set(CHEDDAR_SRC
     src/cheddar/items/fire.cpp
     src/cheddar/items/frog_tongue.cpp
     src/cheddar/items/molotov.cpp
+    src/cheddar/items/persister.cpp
     src/cheddar/items/toothpick.cpp
     src/cheddar/items/tossed.cpp
     src/cheddar/items/item.cpp

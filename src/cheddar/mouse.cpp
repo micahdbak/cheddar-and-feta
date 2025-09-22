@@ -3,6 +3,7 @@
 #include "hurtbox.h"
 #include "items/cheese.h"
 #include "items/item.h"
+#include "items/persister.h"
 #include "items/tossed.h"
 #include "mouse.h"
 #include "net_agent.h"
@@ -30,6 +31,7 @@ Mouse::Mouse(std::vector<Mouse::SpawnCoord> &coordinates, bool is_feta, std::str
         // add feta to the map
         options[0] = '1';
         game->push_object(MOUSE_OBJ, options);
+        game->push_object(ITEM_PERSISTER_OBJ, "");
     } else {
         if (feta != nullptr) FATAL_ERROR
         feta = this;
@@ -249,6 +251,10 @@ void Mouse::step() {
             this->sprite->interval_ms = 250;
         }
 
+        if (item_info[sel_item_id].type == HELD_EFFECT) {
+            mov_speed *= item_info[sel_item_id].speed;
+        }
+
         // attack / use item
         if (controller->is_hit(Button::ATTACK)) {
             this->busy_ticks = game->ticks;
@@ -292,23 +298,23 @@ void Mouse::step() {
 
                 break;
 
-            case WEAPON: {
+            case HELD_EFFECT: {
+                // must be an item which deals damage
+                if (item_info[sel_item_id].damage < 1) {
+                    break;
+                }
+
                 this->is_busy = ATTACKING;
 
                 int x_off, y_off;
                 HitBox::MakeOffset(x_dir, y_dir, &x_off, &y_off, 8.0f);
-                HitBox::Properties props = {1, 200, 100};
+                HitBox::Properties props = {item_info[sel_item_id].damage, 200, 100};
                 props.single_use = true;
                 game->push_object(HITBOX_OBJ, HitBox::Options(this->id, this->id, x_off - 10, y_off - 12, 20, 20, props));
 
                 // set animation to attacking
                 this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
             } break;
-
-            case ARMOUR:
-                // shield?
-
-                break;
 
             default: break;
             }
@@ -511,6 +517,14 @@ void Mouse::attack(int damage) {
 
     this->is_busy = ATTACKED;
     this->busy_ticks = game->ticks;
+
+    std::string sel_item_id = this->sel_item < 0 ? ITEM_NONE : this->items[this->sel_item].item_id;
+    int armour = item_info[sel_item_id].armour;
+
+    damage -= armour;
+    if (damage < 0) {
+        damage = 0;
+    }
 
     // set animation to attacked
     this->sprite->set_animation((this->sprite->animation % 8) + ATTACKED_ANIMATION);

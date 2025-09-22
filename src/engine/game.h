@@ -177,6 +177,11 @@ public:
     bool create_objects = true; // disable for feta launcher
     bool delete_object = false; // set to true from an object's step to delete it
 
+    // is set to true when creating objects while loading a map (for use in obj constructors)
+    bool creating_objects = false;
+    // is set to true when deleting objects before loading a map (for use in obj destructors)
+    bool deleting_objects = false;
+
     struct SpriteRender {
         std::string tex_id;
         SDL_Texture *texture = nullptr;

@@ -6,7 +6,8 @@
 
 class DroppedFrogTongue : public DroppedItem {
 public:
-    DroppedFrogTongue(float x, float y): DroppedItem(x, y, "sprites/item_frog_tongue.bmp", 16, 16, 0) {}
+    DroppedFrogTongue(float x, float y):
+        DroppedItem(ITEM_FROG_TONGUE, x, y, "sprites/item_frog_tongue.bmp", 16, 16, 0) {}
     ~DroppedFrogTongue() = default;
 
     void step() override { this->dropped_step(); }

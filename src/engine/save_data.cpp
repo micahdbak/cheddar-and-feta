@@ -52,8 +52,6 @@ static void _mkdir_if_not_exists(char *save_root, size_t save_root_size) {
     exit(1);\
 }
 
-#define MAX_LINE_LENGTH 1024
-
 std::vector<std::string> SaveData::file_summaries() {
     char save_root[1024], save_file_name[1024];
     _mkdir_if_not_exists(save_root, sizeof(save_root));
@@ -70,7 +68,7 @@ std::vector<std::string> SaveData::file_summaries() {
         }
 
         // read first line of file
-        char line[MAX_LINE_LENGTH];
+        char line[1024];
         if (fgets(line, sizeof(line), save_file) == NULL) CORRUPTED_EXIT
         line[strcspn(line, "\n")] = '\0';
 
@@ -83,7 +81,7 @@ std::vector<std::string> SaveData::file_summaries() {
 }
 
 // http://www.cse.yorku.ca/~oz/hash.html
-static unsigned long _djb2_hash(unsigned long starting_hash, char *str) {
+static unsigned long _djb2_hash(unsigned long starting_hash, const char *str) {
     unsigned long hash = starting_hash == 0 ? 5381 : starting_hash;
     int c;
 
@@ -104,30 +102,36 @@ void SaveData::write_file(int file_i) {
     FILE *save_file = fopen(save_file_name, "w");
     if (save_file == NULL) CORRUPTED_EXIT
 
-    char line[MAX_LINE_LENGTH];
+    std::string line;
     unsigned long hash = 0;
 
     // first line is summary
-    snprintf(line, sizeof(line), "Gamer :)\n");
-    hash = _djb2_hash(hash, line);
-    fputs(line, save_file);
+    line = "Game :)\n";
+    hash = _djb2_hash(hash, line.c_str());
+    fputs(line.c_str(), save_file);
 
     // write rest of save data to file
     for (auto pair : this->data) {
         if (pair.first[0] == DONT_WRITE[0])
             continue;
 
-        snprintf(line, sizeof(line), "%s=%s\n", pair.first.c_str(), pair.second.c_str());
-        hash = _djb2_hash(hash, line);
-        fputs(line, save_file);
+        if (pair.first.empty() || pair.second.empty())
+            continue;
+
+        line = pair.first + "=" + pair.second + "\n";
+        hash = _djb2_hash(hash, line.c_str());
+        fputs(line.c_str(), save_file);
     }
 
     // output hash of file to prevent tampering (not super secure, just enough)
-    snprintf(line, sizeof(line), "%lu\n", hash);
-    fputs(line, save_file);
+    char buff[256];
+    snprintf(buff, sizeof(buff), "%lu\n", hash);
+    fputs(buff, save_file);
 
     fclose(save_file);
 }
+
+#define MAX_LINE_LENGTH 10240 // 10kb
 
 int SaveData::load_file(int file_i) {
     if (file_i < 0 || file_i >= NUM_SAVE_FILES) CORRUPTED_EXIT
@@ -152,15 +156,28 @@ int SaveData::load_file(int file_i) {
 
     // for every subsequent line in the file
     while (fgets(line, sizeof(line), save_file) != NULL) {
-        char key[1024] = {0}, val[1024] = {0};
-        int nread = sscanf(line, "%[^=]=%[^\n]", key, val);
+        // remove last newline
+        size_t len = strnlen(line, MAX_LINE_LENGTH);
+        if (len > 0 && line[len-1] == '\n')
+            line[len-1] = '\0';
 
-        if (key[0] != '\0') {
+        char *key = line, *val;
+        bool is_kvp = false;
+
+        for (char *ptr = line; *ptr != '\0'; ptr++) {
+            if (*ptr == '=') {
+                *ptr = '\0';
+                val = ptr + 1;
+                is_kvp = true;
+            }
+        }
+
+        if (is_kvp) {
             hash = _djb2_hash(hash, line);
         } else if (line[0] >= '0' && line[0] < '9') {
             // last line of file - hash
             unsigned long hash_in_file;
-            nread = sscanf(line, "%lu\n", &hash_in_file);
+            sscanf(line, "%lu\n", &hash_in_file);
             fclose(save_file);
 
             return hash != hash_in_file ? LOAD_TAMPER : LOAD_SUCCESS;

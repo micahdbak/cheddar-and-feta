@@ -73,7 +73,7 @@ void NetReceiver::step() {
 
         // read hud information
         int item_count, health, max_health;
-        sscanf(line, "%1023[^,],%d,%d,%d,%d", buff, &item_count, &health, &max_health);
+        sscanf(line, "%1023[^,],%d,%d,%d", buff, &item_count, &health, &max_health);
         game->draw_hud(game->ui, buff, item_count, health, max_health);
         line = next_line(line);
         if (*line == '\0') return;

@@ -3,7 +3,7 @@ B2
 16,16,80,80
 1
 tiles/dirttunnel.bmp
-15
+16
 mouse 0 1104,160,4 48,688,4 48,1224,0
 ladder 1104,176,0,1 maps/demo01
 ladder 48,704,0,0 maps/demo03
@@ -19,3 +19,4 @@ foe_bug 464,1248,-1
 gate 96,1096,6
 bell 32,1080,6
 spawner 96,1040,6 foe_frog,foe_bat,foe_bug;foe_frog,foe_bat,foe_bat,foe_bat
+item_hermes_boot_dropped 96,1040

@@ -10,7 +10,8 @@
 
 class DroppedCannonBall : public DroppedItem {
 public:
-    DroppedCannonBall(float x, float y): DroppedItem(x, y, "sprites/item_cannon_ball.bmp", 16, 16, 0) {}
+    DroppedCannonBall(float x, float y):
+        DroppedItem(ITEM_CANNON_BALL, x, y, "sprites/item_cannon_ball.bmp", 16, 16, 0) {}
     ~DroppedCannonBall() = default;
 
     void step() override { this->dropped_step(); }

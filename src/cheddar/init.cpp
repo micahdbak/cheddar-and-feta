@@ -12,6 +12,7 @@
 #include "foes/bug.h"
 #include "foes/frog.h"
 #include "foes/gate.h"
+#include "foes/mole.h"
 #include "foes/porcupine.h"
 #include "foes/spawner.h"
 #include "foes/spitter/abdomen.h"
@@ -71,6 +72,7 @@ void Game::init() {
     this->factories[FOE_BAT_OBJ] = new FoeBatFactory();
     this->factories[FOE_BUG_OBJ] = new FoeBugFactory();
     this->factories[FOE_FROG_OBJ] = new FoeFrogFactory();
+    this->factories[FOE_MOLE_OBJ] = new FoeMoleFactory();
     this->factories[FOE_PORCUPINE_OBJ] = new FoePorcupineFactory();
     this->factories[FOE_SPITTER_ABDOMEN_OBJ] = new SpitterAbdomenFactory();
     this->factories[FOE_SPITTER_HEAD_OBJ] = new SpitterHeadFactory();

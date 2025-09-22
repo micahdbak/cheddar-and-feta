@@ -41,6 +41,7 @@ set(CHEDDAR_SRC
     src/cheddar/foes/foe_dijkstra.cpp
     src/cheddar/foes/frog.cpp
     src/cheddar/foes/gate.cpp
+    src/cheddar/foes/mole.cpp
     src/cheddar/foes/porcupine.cpp
     src/cheddar/foes/spawner.cpp
     src/cheddar/foes/spitter/abdomen.cpp

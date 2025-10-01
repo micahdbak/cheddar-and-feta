@@ -82,6 +82,10 @@
 #define FIRST_OBJ "_first"
 #define LAST_OBJ "_last"
 
+#define DEFAULT_BG_R 36
+#define DEFAULT_BG_G 32
+#define DEFAULT_BG_B 28
+
 #define FATAL_ERROR \
 {\
     std::cerr << "Exiting due to fatal error in " << __FILE__ << " at line " << __LINE__ << "." << std::endl;\
@@ -198,6 +202,8 @@ public:
     std::vector<SpriteRender> push_sprites;
 
     NetworkAgent::State net_state;
+
+    Uint8 bg_r, bg_g, bg_b;
 
 private:
 

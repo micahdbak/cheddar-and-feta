@@ -270,7 +270,7 @@ void Game::draw_overlay() {
         }
 
         if (should_render) {
-            this->draw_rect(this->overlay, nullptr, 36, 32, 28, 128, SDL_BLENDMODE_NONE);
+            this->draw_rect(this->overlay, nullptr, this->bg_r, this->bg_g, this->bg_b, 128, SDL_BLENDMODE_NONE);
 
             SDL_FRect config_rect = { 8.0f, 8.0f, 112.0f, 136.0f };
             this->draw_ui_box(this->overlay, BOX_CONTAINER, &config_rect);
@@ -312,6 +312,10 @@ void Game::draw_overlay() {
         this->draw_rect(this->overlay, nullptr, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
         _displaying_controls_menu = false;
         force_render = true;
+    }
+
+    if (this->current_map == "maps/splash" || this->current_map == "maps/init") {
+        return;
     }
 
     // network agent overlay (only cheddar can "create objects" so that is used to check if cheddar)

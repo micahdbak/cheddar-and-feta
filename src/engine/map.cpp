@@ -67,7 +67,7 @@ void Map::make_empty(int tile_width, int tile_height, int cols, int rows) {
     }
 
     SDL_SetRenderTarget(renderer, this->bg);
-    SDL_SetRenderDrawColor(renderer, 36, 32, 28, 255);
+    SDL_SetRenderDrawColor(renderer, game->bg_r, game->bg_g, game->bg_b, 255);
     SDL_RenderFillRect(renderer, NULL);
     SDL_SetRenderTarget(renderer, this->fg);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
@@ -294,7 +294,7 @@ void Map::render_tile(int x, int y) {
     dst_rect.h = float(this->tile_height);
 
     SDL_SetRenderTarget(renderer, this->bg);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 24, 24, 24, 255);
     SDL_RenderFillRect(renderer, &dst_rect); // fill a black square
 
     // render bg tiles

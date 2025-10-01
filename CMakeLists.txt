@@ -61,9 +61,11 @@ set(CHEDDAR_SRC
     src/cheddar/items/tossed.cpp
     src/cheddar/items/item.cpp
     src/cheddar/ladder.cpp
+    src/cheddar/load_save.cpp
     src/cheddar/mouse.cpp
     src/cheddar/net_receiver.cpp
     src/cheddar/net_sender.cpp
+    src/cheddar/splash.cpp
     src/cheddar/textbox.cpp
 )
 

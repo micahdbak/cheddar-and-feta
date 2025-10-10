@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 
-#define INIT_OBJ "init"
+#define INIT_OBJ "load_save"
 
 class Init : public Object {
 public:

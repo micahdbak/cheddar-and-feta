@@ -48,6 +48,7 @@ set(CHEDDAR_SRC
     src/cheddar/foes/spitter/head.cpp
     src/cheddar/foes/spitter/spitter.cpp
     src/cheddar/foes/spitter/thorax.cpp
+    src/cheddar/game_over.cpp
     src/cheddar/hitbox.cpp
     src/cheddar/hurtbox.cpp
     src/cheddar/init.cpp

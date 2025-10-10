@@ -71,31 +71,9 @@ Mouse::Mouse(std::vector<Mouse::SpawnCoord> &coordinates, bool is_feta, std::str
 
     std::string items_s = save.value(this->name + MOUSE_ITEMS);
     if (!items_s.empty()) {
-        const char *arr = items_s.c_str();
-        int i = 0;
-        do {
-            char item_id[256];
-            int count = 1;
-            sscanf(arr, "%[^*] * %d", item_id, &count);
-
-            // validate item
-            if (item_info.find(item_id) == item_info.end() || count <= 0)
-                continue;
-
-            Mouse::Item item{ item_id, count };
-            this->items.push_back(item);
-
-            while (*arr != '\0' && *arr != ',')
-                arr++;
-
-            if (*arr == ',')
-                arr++;
-
-            if (*arr == '\0')
-                break;
-        } while (i++ < 100);
+        this->items = Mouse::read_items(items_s);
     } else if (!is_feta) {
-        this->items.push_back(Mouse::Item{ ITEM_SAVE, 1 });
+        this->items.push_back(Game::HudItem{ ITEM_SAVE, 1 });
     }
 
     this->tile_x = (int)this->x / game->tile_width;
@@ -131,21 +109,7 @@ void Mouse::save_data() {
     save.putf(this->name + MOUSE_X, this->x);
     save.putf(this->name + MOUSE_Y, this->y);
     save.puti(this->name + MOUSE_ANIMATION, this->sprite->animation);
-
-    std::string items_s = "";
-    for (int i = 0; i < this->items.size(); i++) {
-        if (this->items[i].count <= 0)
-            continue;
-
-        char item[256];
-        snprintf(item, sizeof(item), "%s*%d", this->items[i].item_id.c_str(), this->items[i].count);
-        items_s += item;
-
-        if (i + 1 < this->items.size()) {
-            items_s += ",";
-        }
-    }
-    save.data[this->name + MOUSE_ITEMS] = items_s;
+    save.data[this->name + MOUSE_ITEMS] = Mouse::encode_items(this->items);
 }
 
 static bool _is_collision(float x, float y) {
@@ -185,7 +149,7 @@ void Mouse::step() {
     int sel_item_count = sel_item_id == ITEM_NONE ? 1 : this->items[this->sel_item].count;
 
     if (!this->is_feta)
-        game->draw_hud(game->ui, sel_item_id, sel_item_count, this->health, this->max_health);
+        game->draw_hud(game->ui, this->items, this->sel_item, this->health, this->max_health);
 
     // note that this is done after the above draw hud; using an item with count 0 = using no item
     if (sel_item_count == 0 && sel_item_id != ITEM_NONE) {
@@ -202,9 +166,9 @@ void Mouse::step() {
             (game->net_state == NetworkAgent::State::NO_CONNECTION ||
             game->net_state == NetworkAgent::State::WAITING_FOR_PEER)) {
             this->sprite->set_animation(SLEEPING_ANIMATION);
-            this->sprite->update_frame();
             this->sprite->interval_ms = 250;
-            break; // don't do anything but sleep
+            this->sprite->update_frame();
+            break; // don't do anything else
         }
 
         // dancing
@@ -340,7 +304,7 @@ void Mouse::step() {
         break;
 
     case ATTACKING: {
-        // move using arrow keys
+        // move slower using arrow keys
         if (controller != nullptr) {
             x_dir = int(controller->is_down(Button::RIGHT)) - int(controller->is_down(Button::LEFT));
             y_dir = int(controller->is_down(Button::DOWN)) - int(controller->is_down(Button::UP));
@@ -379,6 +343,13 @@ void Mouse::step() {
         break;
 
     case THROWING:
+        // move slower using arrow keys
+        if (controller != nullptr) {
+            x_dir = int(controller->is_down(Button::RIGHT)) - int(controller->is_down(Button::LEFT));
+            y_dir = int(controller->is_down(Button::DOWN)) - int(controller->is_down(Button::UP));
+        }
+        mov_speed = this->max_mov_speed / 2.0f;
+
         this->sprite->update_frame();
 
         // will return to normal after << 500 ms >>
@@ -542,6 +513,18 @@ void Mouse::attack(int damage) {
         this->busy_ticks = game->ticks;
         this->is_down_ticks = game->ticks;
         this->sprite->set_animation((this->sprite->animation % 8) + DOWN_ANIMATION);
+
+        Mouse *other = this == cheddar ? feta : cheddar;
+
+        if (other == feta &&
+            (game->net_state == NetworkAgent::State::NO_CONNECTION ||
+            game->net_state == NetworkAgent::State::WAITING_FOR_PEER)) {
+            other->is_down = true;
+        }
+
+        if (other->is_down) {
+            game->map = "maps/dead";
+        }
     }
 }
 
@@ -550,7 +533,7 @@ void Mouse::push_item(const std::string &item_id) {
         return;
     }
 
-    Mouse::Item new_item;
+    Game::HudItem new_item;
     new_item.item_id = item_id;
     new_item.count = 1;
 
@@ -614,4 +597,53 @@ Mouse *closest_mouse(float x, float y, float min_distance, bool forced) {
     }
 
     return nullptr; // no close-enough mouse
+}
+
+std::string Mouse::encode_items(const std::vector<Game::HudItem> &items) {
+    std::string items_s = "";
+    for (int i = 0; i < items.size(); i++) {
+        if (items[i].count <= 0)
+            continue;
+
+        char item[256];
+        snprintf(item, sizeof(item), "%s*%d", items[i].item_id.c_str(), items[i].count);
+        items_s += item;
+
+        if (i + 1 < items.size()) {
+            items_s += ",";
+        }
+    }
+    return items_s;
+}
+
+std::vector<Game::HudItem> Mouse::read_items(const std::string &items_s) {
+    std::vector<Game::HudItem> ret;
+
+    if (!items_s.empty()) {
+        const char *arr = items_s.c_str();
+        int i = 0;
+        do {
+            char item_id[256];
+            int count = 1;
+            sscanf(arr, "%[^*] * %d", item_id, &count);
+
+            // validate item
+            if (item_info.find(item_id) == item_info.end() || count <= 0)
+                continue;
+
+            Game::HudItem item{ item_id, count };
+            ret.push_back(item);
+
+            while (*arr != '\0' && *arr != ',')
+                arr++;
+
+            if (*arr == ',')
+                arr++;
+
+            if (*arr == '\0')
+                break;
+        } while (i++ < 100);
+    }
+
+    return ret;
 }

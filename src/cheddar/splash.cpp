@@ -2,6 +2,7 @@
 
 #include "splash.h"
 #include "game.h"
+#include "controller.h"
 
 Splash::Splash() {
     this->overlay = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -29,6 +30,8 @@ Splash::Splash() {
     game->bg_r = 24;
     game->bg_g = 24;
     game->bg_b = 24;
+    game->corner_x = 0;
+    game->corner_y = 0;
 }
 
 Splash::~Splash() {
@@ -46,9 +49,15 @@ Splash::~Splash() {
 void Splash::step() {
     this->timer = game->ticks - this->initial_timer;
 
+    // skip splash
+    if (local_controller.is_hit(Button::SELECT)) {
+        this->timer = DISPLAY_FOR;
+        this->animation = this->animations;
+    }
+
     uint8_t alpha = 0;
 
-    if (this->timer > DISPLAY_FOR) {
+    if (this->timer >= DISPLAY_FOR) {
         this->timer = 0;
         this->initial_timer = game->ticks;
 

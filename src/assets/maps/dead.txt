@@ -1,0 +1,7 @@
+Game Over
+-
+16,16,20,15
+1
+./tiles/game_over.bmp
+1
+game_over €P

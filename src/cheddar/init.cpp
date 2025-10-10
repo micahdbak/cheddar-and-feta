@@ -19,6 +19,7 @@
 #include "foes/spitter/head.h"
 #include "foes/spitter/spitter.h"
 #include "foes/spitter/thorax.h"
+#include "game_over.h"
 #include "hitbox.h"
 #include "hurtbox.h"
 #include "items/cannon_ball.h"
@@ -56,6 +57,7 @@ void Game::init() {
     this->factories[FOE_SPITTER_HEAD_OBJ] = new SpitterHeadFactory();
     this->factories[FOE_SPITTER_THORAX_OBJ] = new SpitterThoraxFactory();
     this->factories[FOE_SPITTER_OBJ] = new SpitterFactory();
+    this->factories[GAME_OVER_OBJ] = new GameOverFactory();
     this->factories[GATE_OBJ] = new FoeGateFactory();
     this->factories[HITBOX_OBJ] = new HitBoxFactory();
     this->factories[HURTBOX_OBJ] = new HurtBoxFactory();

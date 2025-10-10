@@ -28,6 +28,11 @@ public:
     void write_file(int file_i);
     int load_file(int file_i);
 
+    // call this if you intend on loading a save after playing a game
+    void clear() {
+        this->data.clear();
+    }
+
     std::string value(std::string key) {
         if (this->data.find(key) == this->data.end()) {
             return "";

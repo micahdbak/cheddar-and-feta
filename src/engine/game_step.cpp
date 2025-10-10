@@ -57,8 +57,8 @@ Game::Game() {
     Font::load_fonts(this->fonts);
     load_render_functions(); // bmp_texture.h
 
-    this->item_count_icon = { 294.05f, 186.05f, 16.0f, 16.0f };
-    this->item_cooldown_icon = { 284.0f, 192.0f, 16.0f, 16.0f };
+    this->item_count_icon = { HUD_MAIN_X + 18, HUD_MAIN_Y - 2, 16.0f, 16.0f };
+    this->item_cooldown_icon = { HUD_MAIN_X + 8, HUD_MAIN_Y + 4, 16.0f, 16.0f };
 }
 
 Game::~Game() {

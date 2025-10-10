@@ -4,8 +4,38 @@
 #include "net_receiver.h"
 
 #include <iostream>
+#include <vector>
 
 #define BUFF_SIZE 1024
+
+#define ITEM_NONE "item_none"
+
+static std::vector<Game::HudItem> read_items(const char *arr) {
+    std::vector<Game::HudItem> ret;
+
+    if (arr[0] != '\0' && arr[0] != '\n') {
+        int i = 0;
+        do {
+            char item_id[256];
+            int count = 1;
+            sscanf(arr, "%255[^*] * %d", item_id, &count);
+
+            Game::HudItem item{ item_id, count };
+            ret.push_back(item);
+
+            while (*arr != '\0' && *arr != '\n' && *arr != ',')
+                arr++;
+
+            if (*arr == ',')
+                arr++;
+
+            if (*arr == '\0' || *arr == '\n')
+                break;
+        } while (i++ < 100);
+    }
+
+    return ret;
+}
 
 void NetReceiver::step() {
     std::string frame_msg = net_agent->last_message();
@@ -71,10 +101,15 @@ void NetReceiver::step() {
         line = next_line(line);
         if (*line == '\0') return;
 
+        std::vector<Game::HudItem> items = read_items(line);
+
+        line = next_line(line);
+        if (*line == '\0') return;
+
         // read hud information
-        int item_count, health, max_health;
-        sscanf(line, "%1023[^,],%d,%d,%d", buff, &item_count, &health, &max_health);
-        game->draw_hud(game->ui, buff, item_count, health, max_health);
+        int sel_item, health, max_health;
+        sscanf(line, "%d,%d,%d", &sel_item, &health, &max_health);
+        game->draw_hud(game->ui, items, sel_item, health, max_health);
         line = next_line(line);
         if (*line == '\0') return;
 

@@ -86,6 +86,12 @@
 #define DEFAULT_BG_G 32
 #define DEFAULT_BG_B 28
 
+// hud coordinates
+#define HUD_ITEMS_X 48
+#define HUD_ITEMS_Y 204
+#define HUD_MAIN_X 12
+#define HUD_MAIN_Y 188
+
 #define FATAL_ERROR \
 {\
     std::cerr << "Exiting due to fatal error in " << __FILE__ << " at line " << __LINE__ << "." << std::endl;\
@@ -121,12 +127,18 @@ public:
 
     // game_draw.cpp
 
+    // for draw_hud
+    struct HudItem {
+        std::string item_id;
+        int count;
+    };
+
     void draw_rect(SDL_Texture *texture, SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode);
     void draw_outline(SDL_Texture *texture, SDL_FRect *rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_BlendMode blend_mode);
     void draw_ui_box(SDL_Texture *texture, int type, SDL_FRect *rect);
     void draw_text(SDL_Texture *texture, std::string str, int font, int x, int y, int w);
     void draw_icon(SDL_Texture *texture, SDL_FRect src_rect, SDL_FRect *dst_rect);
-    void draw_hud(SDL_Texture *texture, std::string item, int item_count, int health, int max_health);
+    void draw_hud(SDL_Texture *texture, std::vector<HudItem> items, int sel_item, int health, int max_health);
     void draw_overlay();
 
     // game_sprite.cpp

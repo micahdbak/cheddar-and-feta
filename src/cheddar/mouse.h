@@ -47,12 +47,7 @@ public:
         this->did_hit = true;
     }
 
-    struct Item {
-        std::string item_id;
-        int count;
-    };
-
-    std::vector<Item> items;
+    std::vector<Game::HudItem> items;
     int sel_item = -1;
 
     int health = 10, max_health = 10;
@@ -63,6 +58,10 @@ public:
     int throw_x = 0, throw_y = 0;
 
     float max_mov_speed = MOUSE_DEFAULT_SPEED;
+
+    static std::string encode_items(const std::vector<Game::HudItem> &items);
+
+    static std::vector<Game::HudItem> read_items(const std::string &items_s);
 
 private:
     std::string name = "Cheddar";

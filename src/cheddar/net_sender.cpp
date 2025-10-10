@@ -21,22 +21,19 @@ void NetSender::step() {
 
     // hud
     if (feta != nullptr) {
-        std::string sel_item_id = feta->sel_item < 0 ? ITEM_NONE : feta->items[feta->sel_item].item_id;
-        int sel_item_count = feta->sel_item < 0 ? 1 : feta->items[feta->sel_item].count;
-        if (item_info.find(sel_item_id) == item_info.end()) {
-            feta->sel_item = -1;
-            sel_item_id = ITEM_NONE; // wtf
-        }
-
-        snprintf(line, sizeof(line), "%s,%d,%d,%d\n", sel_item_id.c_str(), sel_item_count, feta->health, feta->max_health);
+        std::string feta_items = Mouse::encode_items(feta->items);
+        feta_items += '\n';
+        frame_msg += feta_items;
+        snprintf(line, sizeof(line), "%d,%d,%d\n", feta->sel_item, feta->health, feta->max_health);
     } else {
-        snprintf(line, sizeof(line), ITEM_NONE ",0,0,0\n");
+
+        snprintf(line, sizeof(line), "\n-1,0,0\n");
     }
     frame_msg += line;
 
     // sprites
     for (Game::SpriteRender &sprite : game->sprites) {
-        if (sprite.texture == nullptr || sprite.dst_rect == nullptr)
+        if (sprite.texture == nullptr || sprite.dst_rect == nullptr || sprite.tex_id.size() == 0)
             continue;
 
         SDL_Rect src_rect;

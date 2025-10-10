@@ -180,35 +180,96 @@ void Game::draw_icon(SDL_Texture *texture, SDL_FRect icon, SDL_FRect *dst_rect) 
     SDL_SetRenderTarget(renderer, this->screen);
 }
 
-void Game::draw_hud(SDL_Texture *texture, std::string item, int item_count, int health, int max_health) {
+#define ITEM_NONE "item_none"
+
+void Game::draw_hud(SDL_Texture *texture, std::vector<Game::HudItem> items, int sel_item, int health, int max_health) {
+    static std::string last_item = ITEM_NONE;
+    static Uint64 start_display_change = 0;
+    static SDL_FRect item_list_rect = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+    std::string current_item = ITEM_NONE;
+    int item_count = 1;
+
+    if (sel_item >= 0 && sel_item < items.size()) {
+        current_item = items[sel_item].item_id;
+        item_count = items[sel_item].count;
+    }
+
+    if (last_item != current_item) {
+        start_display_change = game->ticks;
+        last_item = current_item;
+    }
+
+    SDL_FRect item_src_rect = { 0.0f, 0.0f, 16.0f, 16.0f };
+    SDL_Texture *item_texture;
+
+    if (game->ticks - start_display_change < 1000) {
+        // clear last item listing (possibly a different size, if a new item was picked up intermittently)
+        this->draw_rect(texture, &item_list_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+
+        item_list_rect.x = HUD_ITEMS_X;
+        item_list_rect.y = HUD_ITEMS_Y;
+        item_list_rect.w = float((items.size() + 1) * 18 + 8);
+        item_list_rect.h = 24.0f;
+
+        this->draw_ui_box(texture, BOX_CONTAINER, &item_list_rect);
+
+        for (int i = -1; i < (ssize_t)items.size(); i++) {
+            int x_offset = HUD_ITEMS_X + 5 + 18 * (i+1);
+            SDL_FRect item_rect = { (float)x_offset, (float)(HUD_ITEMS_Y + 4), 16.0f, 16.0f };
+
+            if (i == sel_item) {
+                SDL_FRect outline_rect = item_rect;
+                outline_rect.x -= 1.0f;
+                outline_rect.y -= 1.0f;
+                outline_rect.w += 2.0f;
+                outline_rect.h += 2.0f;
+                this->draw_ui_box(texture, BOX_OUT_SEL, &outline_rect);
+            }
+
+            std::string item_id = i < 0 ? ITEM_NONE : items[i].item_id;
+            item_texture = load_bmp_texture("sprites/" + item_id + ".bmp");
+            SDL_SetRenderTarget(renderer, texture);
+            SDL_RenderTexture(renderer, item_texture, &item_src_rect, &item_rect);
+            SDL_SetRenderTarget(renderer, this->screen);
+
+            SDL_FRect hint_rect = { float(x_offset), HUD_ITEMS_Y + 15, 5.0f, 7.0f };
+            this->draw_rect(texture, &hint_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+            game->draw_text(texture, std::to_string(i+2), SMALL_FONT, x_offset+1, HUD_ITEMS_Y + 15, 0);
+        }
+    } else if (start_display_change != 0) {
+        // clear last item listing
+        this->draw_rect(texture, &item_list_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+        start_display_change = 0; // reset
+    }
+
     // container ui box
-    SDL_FRect hud_rect = { 276.0f, 188.0f, 32.0f, 40.0f };
-    this->draw_ui_box(this->ui, BOX_MENU_CONT, &hud_rect);
+    SDL_FRect hud_rect = { HUD_MAIN_X, HUD_MAIN_Y, 32.0f, 40.0f };
+    this->draw_ui_box(texture, BOX_MENU_CONT, &hud_rect);
 
     // current item
-    SDL_FRect item_shadow = { 280.0f, 192.0f, 24.0f, 16.0f };
+    SDL_FRect item_shadow = { HUD_MAIN_X + 4, HUD_MAIN_Y + 4, 24.0f, 16.0f };
     this->draw_ui_box(texture, BOX_MENU_SHD1, &item_shadow);
     SDL_SetRenderTarget(renderer, texture);
-    SDL_Texture *item_texture = load_bmp_texture("sprites/" + item + ".bmp");
-    SDL_FRect item_src_rect = { 0.0f, 0.0f, 16.0f, 16.0f };
-    SDL_FRect item_rect = { 284.0f, 192.0f, 16.0f, 16.0f };
+    item_texture = load_bmp_texture("sprites/" + current_item + ".bmp");
+    SDL_FRect item_rect = { HUD_MAIN_X + 8, HUD_MAIN_Y + 4, 16.0f, 16.0f };
     SDL_RenderTexture(renderer, item_texture, &item_src_rect, &item_rect);
     SDL_SetRenderTarget(renderer, this->screen);
 
-    if (item_count > 1 || item_count == 0) {
+    if (item_count > 1) {
         this->draw_icon(texture, ITEM_COUNT_ICON, &this->item_count_icon);
         char buff[256];
         snprintf(buff, sizeof(buff), "%d", item_count);
-        this->draw_text(texture, buff, SMALL_FONT, item_count > 9 ? 298 : 300, 190, 0);
+        this->draw_text(texture, buff, SMALL_FONT, item_count > 9 ? (HUD_MAIN_X + 22) : (HUD_MAIN_X + 24), HUD_MAIN_Y + 2, 0);
     }
 
     // health
     char buff[256];
     snprintf(buff, sizeof(buff), "{%d/%d", health, max_health);
-    this->draw_text(texture, buff, SMALL_FONT, max_health > 9 && health > 9 ? 280 : 282, 209, 0);
-    SDL_FRect health_rect = { 280.0f, 217.0f, 24.0f, 5.0f };
+    this->draw_text(texture, buff, SMALL_FONT, max_health > 9 && health > 9 ? (HUD_MAIN_X + 4) : (HUD_MAIN_X + 6), HUD_MAIN_Y + 21, 0);
+    SDL_FRect health_rect = { HUD_MAIN_X + 4, HUD_MAIN_Y + 29, 24.0f, 5.0f };
     float perc = ceil(22.0f * (float)health / (float)max_health);
-    SDL_FRect fill_rect = { 281.0f, 218.0f, perc, 3.0f };
+    SDL_FRect fill_rect = { HUD_MAIN_X + 5, HUD_MAIN_Y + 30, perc, 3.0f };
     this->draw_rect(texture, &health_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
     this->draw_rect(texture, &fill_rect, 255, 64, 64, 255, SDL_BLENDMODE_NONE);
 }
@@ -314,7 +375,7 @@ void Game::draw_overlay() {
         force_render = true;
     }
 
-    if (this->current_map == "maps/splash" || this->current_map == "maps/init") {
+    if (this->current_map == "maps/splash" || this->current_map == "maps/init" || this->current_map == "maps/dead") {
         return;
     }
 

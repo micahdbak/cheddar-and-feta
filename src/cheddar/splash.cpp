@@ -12,16 +12,19 @@ Splash::Splash() {
     this->overlay_rect.w = SCREEN_WIDTH;
     this->overlay_rect.h = SCREEN_HEIGHT;
 
+    this->animation = 0;
+
     this->sprite = new Sprite("sprites/splash.bmp", 128, 96, 250);
-    this->sprite->set_frame(this->animation);
+    this->sprite->set_animation(this->animation);
+    this->dst_rect.w = 128.0f;
+    this->dst_rect.h = 96.0f;
 
     this->ched_src = { 16.0f, 400.0f, 32.0f, 32.0f };
     this->ched_dst.w = this->ched_dst.h = 32.0f;
     this->feta_src = { 16.0f, 432.0f, 32.0f, 32.0f };
     this->feta_dst.w = this->feta_dst.h = 32.0f;
 
-    this->dst_rect.w = 128.0f;
-    this->dst_rect.h = 96.0f;
+    this->ant = new Sprite("sprites/splash_ant.bmp", 32, 32, 100);
 
     this->initial_timer = game->ticks;
 
@@ -36,6 +39,7 @@ Splash::Splash() {
 
 Splash::~Splash() {
     delete this->sprite;
+    delete this->ant;
     SDL_DestroyTexture(this->overlay);
     SDL_DestroyTexture(this->tunnel);
 
@@ -93,6 +97,36 @@ void Splash::step() {
         SDL_FRect tile_dst = {float(SCREEN_WIDTH/2 - 32), 0.0f - perc * 128.0f, 64.0f, (float)SCREEN_HEIGHT + 128.0f};
         SDL_RenderTextureTiled(renderer, this->sprite->texture, &tile_spr, 1.0f, &tile_dst);
         SDL_SetRenderTarget(renderer, game->screen);
+
+        // ants
+
+        float ant_x[] = { 128.0f, 144.0f, 160.0f };
+        float ant_y[] = { 24.0f, 4.0f, -12.0f, 7.0f, -30.0f };
+
+        for (int which_ant = 0; which_ant < NUM_ANTS; which_ant++) {
+            this->ant->update_frame();
+            this->ant->set_animation(which_ant % 3);
+            this->ant_src[which_ant] = this->ant->frame;
+
+            this->ant_dst[which_ant].x = ant_x[which_ant % 3];
+            this->ant_dst[which_ant].y = 0.0f - (perc * 256.0f)
+                + (float)((which_ant/3) * 64) + ant_y[which_ant % 5];
+            this->ant_dst[which_ant].w = this->ant_dst[which_ant].h = 32.0f;
+
+            if (this->ant_dst[which_ant].y < -32.0f)
+                this->ant_dst[which_ant].y += (float)SCREEN_HEIGHT + 32.0f;
+            else if (this->ant_dst[which_ant].y < 0.0f) {
+                float neg = this->ant_dst[which_ant].y;
+                this->ant_dst[which_ant].y = 0.0f;
+                this->ant_src[which_ant].y -= neg;
+                this->ant_dst[which_ant].h = this->ant_src[which_ant].h = 32.0f + neg;
+            }
+
+            game->push_sprite(this->ant->tex_id, this->ant->texture,
+                this->ant_src + which_ant, this->ant_dst + which_ant, 8);
+        }
+
+        // mice
 
         float cos_res = cosf(2.0f * perc * 2.0f * (float)M_PI);
         float sin_res = sinf(2.0f * perc * 2.0f * (float)M_PI);

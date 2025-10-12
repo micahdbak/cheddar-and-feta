@@ -183,9 +183,18 @@ void Game::draw_icon(SDL_Texture *texture, SDL_FRect icon, SDL_FRect *dst_rect) 
 #define ITEM_NONE "item_none"
 
 void Game::draw_hud(SDL_Texture *texture, std::vector<Game::HudItem> items, int sel_item, int health, int max_health) {
-    static std::string last_item = ITEM_NONE;
-    static Uint64 start_display_change = 0;
     static SDL_FRect item_list_rect = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+    // container ui box
+    SDL_FRect hud_rect = { HUD_MAIN_X, HUD_MAIN_Y, 18.0f, 48.0f };
+    this->draw_ui_box(texture, BOX_MENU_CONT, &hud_rect);
+    this->draw_text(texture, "HP:", SMALL_FONT, HUD_MAIN_X + 5, HUD_MAIN_Y + 4, 0);
+
+    SDL_FRect health_rect = { (float)(HUD_MAIN_X + 5), (float)(HUD_MAIN_Y + 11), 8.0f, 32.0f };
+    int fill_px = ceil(30.0f * (float)health / (float)max_health) + 0.5f;
+    SDL_FRect fill_rect = { (float)(HUD_MAIN_X + 6), (float)(HUD_MAIN_Y + 12 + 30 - fill_px), 6.0f, (float)fill_px };
+    this->draw_rect(texture, &health_rect, 52, 48, 48, 255, SDL_BLENDMODE_NONE);
+    this->draw_rect(texture, &fill_rect, 240, 80, 64, 255, SDL_BLENDMODE_NONE);
 
     std::string current_item = ITEM_NONE;
     int item_count = 1;
@@ -195,83 +204,48 @@ void Game::draw_hud(SDL_Texture *texture, std::vector<Game::HudItem> items, int 
         item_count = items[sel_item].count;
     }
 
-    if (last_item != current_item) {
-        start_display_change = game->ticks;
-        last_item = current_item;
-    }
-
     SDL_FRect item_src_rect = { 0.0f, 0.0f, 16.0f, 16.0f };
     SDL_Texture *item_texture;
 
-    if (game->ticks - start_display_change < 1000) {
-        // clear last item listing (possibly a different size, if a new item was picked up intermittently)
-        this->draw_rect(texture, &item_list_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+    // clear last item listing (possibly a different size, if a new item was picked up intermittently)
+    SDL_FRect clear_rect = item_list_rect;
+    clear_rect.y -= 4.0f;
+    clear_rect.h += 10.0f;
+    this->draw_rect(texture, &clear_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
 
-        item_list_rect.x = HUD_ITEMS_X;
-        item_list_rect.y = HUD_ITEMS_Y;
-        item_list_rect.w = float((items.size() + 1) * 18 + 8);
-        item_list_rect.h = 24.0f;
+    item_list_rect.x = HUD_ITEMS_X;
+    item_list_rect.y = HUD_ITEMS_Y;
+    item_list_rect.w = float((items.size() + 1) * 18 + 8);
+    item_list_rect.h = 24.0f;
 
-        this->draw_ui_box(texture, BOX_CONTAINER, &item_list_rect);
+    this->draw_ui_box(texture, BOX_CONTAINER, &item_list_rect);
 
-        for (int i = -1; i < (ssize_t)items.size(); i++) {
-            int x_offset = HUD_ITEMS_X + 5 + 18 * (i+1);
-            SDL_FRect item_rect = { (float)x_offset, (float)(HUD_ITEMS_Y + 4), 16.0f, 16.0f };
+    int sel_offset = HUD_ITEMS_X + 5 + 18 * (sel_item+1);
+    SDL_FRect sel_outline_rect = { (float)(sel_offset - 1), (float)(HUD_ITEMS_Y + 3), 18.0f, 18.0f };
+    this->draw_ui_box(texture, BOX_OUT_SEL, &sel_outline_rect);
 
-            if (i == sel_item) {
-                SDL_FRect outline_rect = item_rect;
-                outline_rect.x -= 1.0f;
-                outline_rect.y -= 1.0f;
-                outline_rect.w += 2.0f;
-                outline_rect.h += 2.0f;
-                this->draw_ui_box(texture, BOX_OUT_SEL, &outline_rect);
-            }
+    for (int i = -1; i < (ssize_t)items.size(); i++) {
+        int x_offset = HUD_ITEMS_X + 5 + 18 * (i+1);
+        SDL_FRect item_rect = { (float)x_offset, (float)(HUD_ITEMS_Y + 4), 16.0f, 16.0f };
 
-            std::string item_id = i < 0 ? ITEM_NONE : items[i].item_id;
-            item_texture = load_bmp_texture("sprites/" + item_id + ".bmp");
-            SDL_SetRenderTarget(renderer, texture);
-            SDL_RenderTexture(renderer, item_texture, &item_src_rect, &item_rect);
-            SDL_SetRenderTarget(renderer, this->screen);
+        std::string item_id = i < 0 ? ITEM_NONE : items[i].item_id;
+        item_texture = load_bmp_texture("sprites/" + item_id + ".bmp");
+        SDL_SetRenderTarget(renderer, texture);
+        SDL_RenderTexture(renderer, item_texture, &item_src_rect, &item_rect);
+        SDL_SetRenderTarget(renderer, this->screen);
 
-            SDL_FRect hint_rect = { float(x_offset), HUD_ITEMS_Y + 15, 5.0f, 7.0f };
-            this->draw_rect(texture, &hint_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-            game->draw_text(texture, std::to_string(i+2), SMALL_FONT, x_offset+1, HUD_ITEMS_Y + 15, 0);
+        SDL_FRect hint_rect = { float(x_offset), HUD_ITEMS_Y + 15, 5.0f, 7.0f };
+        // this->draw_rect(texture, &hint_rect, 24, 24, 24, 128, SDL_BLENDMODE_BLEND);
+        game->draw_text(texture, std::to_string(i+2), SMALL_FONT, x_offset, HUD_ITEMS_Y + 15, 0);
+
+        int this_item_count = i >= 0 ? items[i].count : 1;
+        if (this_item_count > 1) {
+            SDL_FRect item_count_icon = { (float)(x_offset + 8), (float)(HUD_ITEMS_Y - 4), 16.0f, 16.0f };
+            this->draw_icon(texture, i == sel_item ? ITEM_COUNT_ICON : ITEM_COUNT_ICON_SHD, &item_count_icon);
+            this->draw_text(texture, std::to_string(this_item_count), SMALL_FONT,
+                this_item_count > 9 ? x_offset + 11 : x_offset + 13, HUD_ITEMS_Y - 1, 0);
         }
-    } else if (start_display_change != 0) {
-        // clear last item listing
-        this->draw_rect(texture, &item_list_rect, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
-        start_display_change = 0; // reset
     }
-
-    // container ui box
-    SDL_FRect hud_rect = { HUD_MAIN_X, HUD_MAIN_Y, 32.0f, 40.0f };
-    this->draw_ui_box(texture, BOX_MENU_CONT, &hud_rect);
-
-    // current item
-    SDL_FRect item_shadow = { HUD_MAIN_X + 4, HUD_MAIN_Y + 4, 24.0f, 16.0f };
-    this->draw_ui_box(texture, BOX_MENU_SHD1, &item_shadow);
-    SDL_SetRenderTarget(renderer, texture);
-    item_texture = load_bmp_texture("sprites/" + current_item + ".bmp");
-    SDL_FRect item_rect = { HUD_MAIN_X + 8, HUD_MAIN_Y + 4, 16.0f, 16.0f };
-    SDL_RenderTexture(renderer, item_texture, &item_src_rect, &item_rect);
-    SDL_SetRenderTarget(renderer, this->screen);
-
-    if (item_count > 1) {
-        this->draw_icon(texture, ITEM_COUNT_ICON, &this->item_count_icon);
-        char buff[256];
-        snprintf(buff, sizeof(buff), "%d", item_count);
-        this->draw_text(texture, buff, SMALL_FONT, item_count > 9 ? (HUD_MAIN_X + 22) : (HUD_MAIN_X + 24), HUD_MAIN_Y + 2, 0);
-    }
-
-    // health
-    char buff[256];
-    snprintf(buff, sizeof(buff), "{%d/%d", health, max_health);
-    this->draw_text(texture, buff, SMALL_FONT, max_health > 9 && health > 9 ? (HUD_MAIN_X + 4) : (HUD_MAIN_X + 6), HUD_MAIN_Y + 21, 0);
-    SDL_FRect health_rect = { HUD_MAIN_X + 4, HUD_MAIN_Y + 29, 24.0f, 5.0f };
-    float perc = ceil(22.0f * (float)health / (float)max_health);
-    SDL_FRect fill_rect = { HUD_MAIN_X + 5, HUD_MAIN_Y + 30, perc, 3.0f };
-    this->draw_rect(texture, &health_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-    this->draw_rect(texture, &fill_rect, 255, 64, 64, 255, SDL_BLENDMODE_NONE);
 }
 
 // static SDL_FRect _title_rect = SDL_FRect{ 0.0f, 20.0f, 320.0f, 40.0f };
@@ -318,7 +292,7 @@ void Game::draw_overlay() {
             }
         } else {
             int y_dir = captured_controller.is_hit(DOWN) - captured_controller.is_hit(UP);
-            int new_sel_control = cnf_clamp(_sel_control + y_dir, 0, (int)Button::NUM_BUTTONS-1);
+            int new_sel_control = cnf_clamp(_sel_control + y_dir, 0, (int)Button::DIGIT-1);
 
             if (_sel_control != new_sel_control) {
                 _sel_control = new_sel_control;
@@ -341,7 +315,7 @@ void Game::draw_overlay() {
 
             int start_y = 28;
 
-            for (int i = 0; i < (int)Button::NUM_BUTTONS; i++) {
+            for (int i = 0; i < (int)Button::DIGIT; i++) {
                 std::string control_name = btostring_map[(Button)i];
                 std::string input_name = _waiting_for_key && i == _sel_control ? "<Press a Key>" : SDL_GetKeyName(btokeycode_map[(Button)i]);
 

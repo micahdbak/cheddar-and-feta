@@ -10,9 +10,10 @@ void NetReceiver::step() {
 
         const char *line = controller_msg.c_str();
 
-        while (*line != '\0') {
+        for (int i = 0; i < Button::NUM_BUTTONS; i++) {
             int button, is_hit, is_down;
             sscanf(line, "%d,%d,%d\n", &button, &is_hit, &is_down);
+
             if (is_hit)
                 remote_controller.handle_button_hit((Button)button);
 
@@ -24,5 +25,9 @@ void NetReceiver::step() {
 
             line = next_line(line);
         }
+
+        int digit;
+        sscanf(line, "%d\n", &digit);
+        remote_controller.digit = digit;
     }
 }

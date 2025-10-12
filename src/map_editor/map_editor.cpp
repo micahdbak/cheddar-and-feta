@@ -341,10 +341,6 @@ void Editor::step() {
                         this->map.bg_tiles[coord] = vec;
                     }
                 } else {
-                    // shift return should only place on empty tiles
-                    if (local_controller.is_down(Button::RUN))
-                        should_place = false;
-
                     Tile top_tile = vec->back();
                     if (top_tile.tilesheet == this->sel_tilesheet && top_tile.x == this->sel_ts_x && top_tile.y == this->sel_ts_y)
                         should_place = false;
@@ -404,7 +400,7 @@ void Editor::step() {
 
 void Editor::input_tile() {
     // end inputting
-    if (local_controller.is_hit(Button::SELECT) || local_controller.is_hit(Button::CYCLE_LEFT)) {
+    if (local_controller.is_hit(Button::SELECT) || local_controller.is_hit(DIGIT)) {
         this->user_inputting = false;
         game->draw_rect(game->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
         return;

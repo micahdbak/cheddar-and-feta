@@ -66,6 +66,7 @@
 #define HEALTH_50_ICON        SDL_FRect{ 32.05f, 32.05f, 16.0f,  8.0f}
 #define HEALTH_25_ICON        SDL_FRect{ 48.05f, 32.05f, 16.0f,  8.0f}
 #define ITEM_COUNT_ICON       SDL_FRect{ 16.05f, 40.05f, 16.0f, 16.0f}
+#define ITEM_COUNT_ICON_SHD   SDL_FRect{ 32.05f, 40.05f, 16.0f, 16.0f}
 #define ITEM_COOLDOWN_0       SDL_FRect{  0.05f, 56.05f, 16.0f, 16.0f}
 #define ITEM_COOLDOWN_1       SDL_FRect{ 16.05f, 56.05f, 16.0f, 16.0f}
 #define ITEM_COOLDOWN_2       SDL_FRect{ 32.05f, 56.05f, 16.0f, 16.0f}
@@ -87,10 +88,10 @@
 #define DEFAULT_BG_B 28
 
 // hud coordinates
-#define HUD_ITEMS_X 48
+#define HUD_ITEMS_X 32
 #define HUD_ITEMS_Y 204
 #define HUD_MAIN_X 12
-#define HUD_MAIN_Y 188
+#define HUD_MAIN_Y 180
 
 #define FATAL_ERROR \
 {\

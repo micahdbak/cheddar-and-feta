@@ -9,7 +9,6 @@
 
 SDL_Window *window;
 SDL_Renderer *renderer;
-std::unordered_map<SDL_JoystickID, SDL_Gamepad *> gamepads;
 
 bool _running, capture_controls = false;
 Controller local_controller, remote_controller, captured_controller;
@@ -79,30 +78,6 @@ int main(int argc, const char **argv) {
 
             case SDL_EVENT_KEY_UP:
                 controller->handle_key_up(event.key.key);
-                break;
-
-            case SDL_EVENT_GAMEPAD_ADDED: {
-                SDL_Gamepad *gamepad = SDL_OpenGamepad(event.gdevice.which);
-                gamepads[event.gdevice.which] = gamepad;
-            } break;
-
-            case SDL_EVENT_GAMEPAD_REMOVED:
-                if (gamepads.find(event.gdevice.which) != gamepads.end()) {
-                    SDL_CloseGamepad(gamepads[event.gdevice.which]);
-                    gamepads.erase(event.gdevice.which);
-                }
-                break;
-
-            case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
-                controller->handle_gamepad_down(SDL_GamepadButton(event.gbutton.button));
-                break;
-
-            case SDL_EVENT_GAMEPAD_BUTTON_UP:
-                controller->handle_gamepad_up(SDL_GamepadButton(event.gbutton.button));
-                break;
-
-            case SDL_EVENT_GAMEPAD_AXIS_MOTION:
-                controller->handle_gamepad_axis(SDL_GamepadAxis(event.gaxis.axis), event.gaxis.value);
                 break;
 
             case SDL_EVENT_QUIT:

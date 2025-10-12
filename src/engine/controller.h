@@ -16,12 +16,10 @@ enum Button {
     LEFT,
     SELECT,
     CANCEL,
-    CYCLE_LEFT,
-    CYCLE_RIGHT,
     TOSS,
-    RUN,
     ATTACK,
     DANCE,
+    DIGIT,
     NUM_BUTTONS,
     NULL_BUTTON
 };
@@ -48,12 +46,8 @@ public:
     void handle_key_down(SDL_Keycode keycode);
     void handle_key_up(SDL_Keycode keycode);
 
-    // controller
-    void handle_gamepad_down(SDL_GamepadButton gamepad_button);
-    void handle_gamepad_up(SDL_GamepadButton gamepad_button);
-    void handle_gamepad_axis(SDL_GamepadAxis gamepad_axis, Sint16 value);
-
     char c = NO_CHAR;
+    int digit = 0;
 
     bool is_hit_map[NUM_BUTTONS] = {0};
     bool is_down_map[NUM_BUTTONS] = {0};

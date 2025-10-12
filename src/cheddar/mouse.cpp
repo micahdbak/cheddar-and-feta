@@ -136,11 +136,11 @@ void Mouse::step() {
     Controller *controller = this->is_feta ? &remote_controller : &local_controller;
 
     if (!this->items.empty()) {
-        this->sel_item += controller->is_hit(Button::CYCLE_RIGHT) - controller->is_hit(Button::CYCLE_LEFT);
-        if (this->sel_item < -1)
-            this->sel_item = this->items.size() - 1;
-        else if (this->sel_item > this->items.size() - 1)
-            this->sel_item = -1;
+        if (controller->is_hit(Button::DIGIT)) {
+            int new_item = controller->digit - 2;
+            if (new_item >= -1 && new_item < (int)this->items.size())
+                this->sel_item = new_item;
+        } // else pass
     } else {
         this->sel_item = -1;
     }
@@ -186,8 +186,8 @@ void Mouse::step() {
         x_dir = int(controller->is_down(Button::RIGHT)) - int(controller->is_down(Button::LEFT));
         y_dir = int(controller->is_down(Button::DOWN)) - int(controller->is_down(Button::UP));
 
-        // walk when Button::RUN is held down
-        this->is_running = !controller->is_down(Button::RUN);
+        // always run :kekw:
+        this->is_running = true;
 
         // update sprite frame and animation only if moving
         if (x_dir != 0 || y_dir != 0) {
@@ -546,33 +546,24 @@ void Mouse::push_item(const std::string &item_id) {
     for (auto it = this->items.begin(); it != this->items.end(); ++it, ++i) {
         if (it->item_id == item_id) {
             it->count++;
-            break;
-        } else if (it->item_id > item_id) {
-            this->items.insert(it, new_item);
-            break;
+            this->sel_item = item_id == ITEM_CHEESE ? this->sel_item : i;
+            return;
         }
     }
 
-    if (i >= this->items.size()) {
-        this->items.push_back(new_item);
-    }
-
-    if (item_id != ITEM_CHEESE) {
-        this->sel_item = i;
-    }
+    this->items.push_back(new_item);
+    this->sel_item = item_id == ITEM_CHEESE ? this->sel_item : i;
 }
 
 void Mouse::remove_item(const std::string &item_id) {
     for (auto it = this->items.begin(); it != this->items.end(); it++) {
         if (it->item_id == item_id && it->count > 0) {
             it->count--;
-            if (it->count == 0) {
+            if (it->count <= 0) {
                 this->items.erase(it);
                 this->sel_item = -1;
                 break;
             }
-        } else if (it->item_id > item_id) {
-            return;
         }
     }
 }

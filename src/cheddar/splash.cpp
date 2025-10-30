@@ -101,7 +101,7 @@ void Splash::step() {
         // ants
 
         float ant_x[] = { 128.0f, 144.0f, 160.0f };
-        float ant_y[] = { 24.0f, 4.0f, -12.0f, 7.0f, -30.0f };
+        float ant_y[] = { -40.0f, 40.0f, -12.0f, 7.0f, -30.0f };
 
         for (int which_ant = 0; which_ant < NUM_ANTS; which_ant++) {
             this->ant->update_frame();

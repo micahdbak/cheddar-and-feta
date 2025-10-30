@@ -9,7 +9,7 @@
 #include <iostream>
 
 FoeBug::FoeBug(int x, int y, int spawner_id):
-    Foe(float(x), float(y), spawner_id, 500, 256.0f, 16.0f) {
+    Foe(float(x), float(y), spawner_id, spawner_id == -2 ? 1000 : 500, 256.0f, 16.0f) {
     this->sprite = new Sprite("sprites/foe_bug.bmp", 32, 32, 100);
 
     this->dst_rect.w = 32.0f;
@@ -80,13 +80,9 @@ void FoeBug::step() {
             // delete this object
             game->delete_object = true;
 
-            int cheese_amount = SDL_rand(8); // 0..7
-
-            // add cheese for the player to pick up
-            if (cheese_amount > 4) { // 5..7
-                cheese_amount -= 4; // 1..3
+            if (SDL_rand(2) > 0) {
                 char cheese_opt[256];
-                game->push_object(ITEM_CHEESE DROPPED_OBJ, Cheese::Options(this->x, this->y, cheese_amount));
+                game->push_object(ITEM_CHEESE DROPPED_OBJ, Cheese::Options(this->x, this->y, 1));
             }
 
             return;

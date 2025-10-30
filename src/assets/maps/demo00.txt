@@ -1,14 +1,14 @@
 Mole tunnel
 B4
 16,16,80,80
-1
+2
 ./tiles/dirttunnel.bmp
-17
-mouse 0 592,1120,0 1120,128,0
+./tiles/dirtclutter.bmp
+32
+mouse 0 120,1198,0 1224,912,0
 gate 1008,1152,1
 spawner 976,1040,1 foe_bug;foe_bug,foe_bug;foe_bat
 bell 848,1008,1
-ladder 1120,112,1,0 maps/demo01
 item_molotov_dropped 480,384
 item_molotov_dropped 496,384
 item_molotov_dropped 512,384
@@ -21,3 +21,19 @@ item_molotov_dropped 512,416
 item_coffee_bean_dropped 240,752
 item_coffee_bean_dropped 400,192
 item_toothpick_dropped 768,528
+gate 352,1088,0,1
+spawner 304,1152,0 foe_bug;foe_bug
+bell 340,1208,0
+foe_bug 432,848,-1
+foe_bug 176,704,-1
+foe_bug 400,832,-1
+foe_bug 128,544,-1
+foe_bug 176,272,-1
+foe_bug 512,256,-1
+foe_bug 528,448,-1
+foe_bug 768,496,-1
+foe_bug 1056,160,-1
+foe_bug 1104,128,-1
+foe_bug 1152,176,-1
+foe_bug 1072,464,-1
+ladder 1224,896,1,0 maps/demo01

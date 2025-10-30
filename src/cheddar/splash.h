@@ -4,7 +4,7 @@
 #include "object.h"
 #include "sprite.h"
 
-#define NUM_ANTS 12
+#define NUM_ANTS 3
 
 class Splash : public Object {
 public:

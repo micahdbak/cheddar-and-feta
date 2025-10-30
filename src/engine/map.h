@@ -66,6 +66,9 @@ const struct ColliderPoint { float x, y; } MapColliders[][4] = {
     { { 1.0f, 0.5f }, { 1.0f, 0.9f }, { 1.0f, 1.0f }, { 0.5f, 1.0f } }, // SE
     { { 0.0f, 0.5f }, { 0.5f, 1.0f }, { 0.1f, 1.0f }, { 0.0f, 1.0f } }, // SW
     { { 0.0f, 0.0f }, { 0.1f, 0.0f }, { 0.5f, 0.0f }, { 0.0f, 0.5f } }, // NW
+
+    { { 0.0f, 0.0f }, { 0.5f, 0.0f }, { 0.5f, 0.75f }, { 0.0f, 1.0f } }, // special
+    { { 0.5f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.5f, 0.75f } }, // special
 };
 
 const size_t n_MapColliders = sizeof(MapColliders) / sizeof(MapColliders[0]);

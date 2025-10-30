@@ -482,27 +482,28 @@ void Editor::input_tile() {
     SDL_SetRenderTarget(renderer, game->screen);
     SDL_FRect black_rect = { 0.0f, 0.0f, float(SCREEN_WIDTH), 11.0f };
     game->draw_rect(game->ui, &black_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
-    game->draw_text(game->ui, "<Return> to place, <Q> to close", MONO_FONT, 0, 0, 0);
+    game->draw_text(game->ui, "<Return> to place, <0-9> to close", MONO_FONT, 0, 0, 0);
 }
 
 void Editor::input_sheet() {
     int sel_i, nfields;
     nfields = sscanf(this->text.c_str(), "%d", &sel_i);
 
-    if (local_controller.is_hit(Button::SELECT) && text.empty()) {
-        // close
-        this->user_inputting = false;
-        game->draw_rect(game->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
-        return;
+    if (local_controller.is_hit(Button::SELECT)) {
+        if (text.empty()) {
+            // close
+            this->user_inputting = false;
+            game->draw_rect(game->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+            return;
+        } else if (nfields == 1) {
+            this->sel_tilesheet = sel_i;
+        }
     }
 
     if (local_controller.is_hit(Button::CANCEL) && !text.empty())
         this->text.pop_back();
     else if (local_controller.c != NO_CHAR)
         this->text.push_back(local_controller.c);
-    else if (local_controller.is_hit(Button::SELECT) && nfields == 1) {
-        this->sel_tilesheet = sel_i;
-    }
 
     std::string display_text = "Tilesheet: " + this->text + "\n<Return> to select or close (when empty)\n\n";
     for (int i = 0; i < this->map.tilesheets.size(); i++) {

@@ -3,20 +3,28 @@ B2
 16,16,80,80
 1
 tiles/dirttunnel.bmp
-16
-mouse 0 1104,160,4 48,688,4 48,1224,0
+24
+mouse 0 1104,160,4 72,648,4 48,1224,0
 ladder 1104,176,0,1 maps/demo01
-ladder 48,704,0,0 maps/demo03
+ladder 72,664,0,0 maps/demo03
 ladder 48,1208,1,1 maps/demo03
 gate 800,144,5
-bell 656,312,5
-spawner 704,272,5 foe_bug,foe_bug,foe_porc
+bell 680,368,5
+spawner 688,304,5 foe_porc
 item_molotov_dropped 720,576
 item_coffee_bean_dropped 1248,1040
 item_coffee_bean_dropped 1232,784
 item_molotov_dropped 1136,768
 foe_bug 464,1248,-1
-gate 96,1096,6
-bell 32,1080,6
-spawner 96,1040,6 foe_frog,foe_bat,foe_bug;foe_frog,foe_bat,foe_bat,foe_bat
+gate 96,1168,6,1
+bell 24,1072,6
+spawner 96,1040,6 foe_frog,foe_bat,foe_bug;foe_frog,foe_bat,foe_bat,foe_bat;foe_porc
 item_hermes_boot_dropped 96,1040
+foe_bug 80,112,-1
+foe_bat 128,160,-1
+foe_bug 80,176,-1
+foe_bat 720,576,-1
+foe_bug 816,1168,-1
+foe_frog 912,1184,-1
+foe_bug 1216,1040,-1
+foe_bat 1232,1088,-1

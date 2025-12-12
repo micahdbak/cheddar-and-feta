@@ -5,6 +5,8 @@
 #include "sprite.h"
 #include "hurtbox.h"
 
+#define FRAMES_TO_SET_CUR_DIR 4
+
 class SpitterAbdomen : public Object, public HurtSource {
 public:
     SpitterAbdomen(Spitter *parent, std::shared_ptr<bool> deleted_ptr);
@@ -22,6 +24,7 @@ public:
     }
 
 private:
+    int cur_dir, dirs[FRAMES_TO_SET_CUR_DIR], dirs_i;
     float x, y;
     Spitter *parent;
     std::shared_ptr<bool> deleted_ptr;

@@ -7,6 +7,7 @@
 // hitbox shared IDs
 #define HB_SHARED_UNKNOWN -1
 #define HB_SHARED_FIRE    -2
+#define HB_SHARED_SPITTER -3
 
 class HitSource {
 public:
@@ -23,7 +24,7 @@ public:
     struct Properties {
         int damage;
         int cooldown_ms;
-        int delete_after_ms;
+        int delete_after_ms = 0;
         bool shared_cooldowns = false;
         int shared_id = HB_SHARED_UNKNOWN;
         bool single_use = false;

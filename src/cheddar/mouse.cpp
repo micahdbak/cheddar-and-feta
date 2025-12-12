@@ -274,7 +274,7 @@ void Mouse::step() {
                 HitBox::MakeOffset(x_dir, y_dir, &x_off, &y_off, 8.0f);
                 HitBox::Properties props = {item_info[sel_item_id].damage, 200, 100};
                 props.single_use = true;
-                game->push_object(HITBOX_OBJ, HitBox::Options(this->id, this->id, x_off - 10, y_off - 12, 20, 20, props));
+                game->push_object(HITBOX_OBJ, HitBox::Options(this->id, this->id, x_off - 16, y_off - 18, 32, 32, props));
 
                 // set animation to attacking
                 this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
@@ -500,7 +500,6 @@ void Mouse::attack(int damage) {
     // set animation to attacked
     this->sprite->set_animation((this->sprite->animation % 8) + ATTACKED_ANIMATION);
 
-    // apply armour to damage
     if (damage > 0) {
         this->health -= damage;
     }

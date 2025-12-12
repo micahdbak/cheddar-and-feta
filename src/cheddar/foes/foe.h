@@ -39,7 +39,7 @@ public:
     void foe_step();
 
     enum State { IDLE, FORCE_RANDOM_TILE, WALKING, ACTION, HURT, DEAD } state;
-    enum TileChoice { TOWARDS, AWAY, CIRCLE } tile_choice = TOWARDS;
+    enum TileChoice { TOWARDS, AWAY, CIRCLE, SPAZZ } tile_choice = TOWARDS;
 
     float x, y;
     float off_x = 0.0f, off_y = 0.0f;

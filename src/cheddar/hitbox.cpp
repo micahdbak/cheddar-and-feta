@@ -44,7 +44,7 @@ HitBox::~HitBox() {
 }
 
 void HitBox::step() {
-    if (*this->source_deleted || game->ticks - this->created_ticks > this->delete_after_ms) {
+    if (*this->source_deleted || (this->delete_after_ms > 0 && game->ticks - this->created_ticks > this->delete_after_ms)) {
         game->delete_object = true;
         return;
     }

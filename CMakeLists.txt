@@ -45,9 +45,8 @@ set(CHEDDAR_SRC
     src/cheddar/foes/porcupine.cpp
     src/cheddar/foes/spawner.cpp
     src/cheddar/foes/spitter/abdomen.cpp
-    src/cheddar/foes/spitter/head.cpp
+    src/cheddar/foes/spitter/segment.cpp
     src/cheddar/foes/spitter/spitter.cpp
-    src/cheddar/foes/spitter/thorax.cpp
     src/cheddar/game_over.cpp
     src/cheddar/hitbox.cpp
     src/cheddar/hurtbox.cpp

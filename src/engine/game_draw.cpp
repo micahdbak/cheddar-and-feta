@@ -350,6 +350,11 @@ void Game::draw_overlay() {
     }
 
     if (this->current_map == "maps/splash" || this->current_map == "maps/init" || this->current_map == "maps/dead") {
+        if (!force_render) {
+            force_render = true;
+            this->draw_rect(this->overlay, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+        }
+
         return;
     }
 

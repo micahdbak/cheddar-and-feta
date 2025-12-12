@@ -1,4 +1,4 @@
-Mole tunnel
+Ant hill
 B4
 16,16,80,80
 2

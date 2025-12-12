@@ -224,6 +224,7 @@ void Map::write(const char *map_path) {
         fprintf(txt_file, "%s %s\n", obj.first.c_str(), obj.second.c_str());
     }
 
+    fclose(txt_file);
     FILE *bin_file = fopen(map_bin_path.c_str(), "wb");
     if (bin_file == nullptr) CORRUPTED_EXIT;
     uint8_t buffer[1024];

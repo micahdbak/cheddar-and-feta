@@ -1,0 +1,12 @@
+Ant hill
+Finale
+16,16,40,40
+1
+./tiles/dirttunnel.bmp
+6
+ladder 544,616,0,2 maps/demo03
+mouse 0 544,600,4
+spawner 336,320,10 foe_spitter
+bell 416,384,10
+gate 64,144,10
+item_shield_dropped 416,400

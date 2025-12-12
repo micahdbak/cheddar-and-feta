@@ -16,9 +16,8 @@
 #include "foes/porcupine.h"
 #include "foes/spawner.h"
 #include "foes/spitter/abdomen.h"
-#include "foes/spitter/head.h"
+#include "foes/spitter/segment.h"
 #include "foes/spitter/spitter.h"
-#include "foes/spitter/thorax.h"
 #include "game_over.h"
 #include "hitbox.h"
 #include "hurtbox.h"
@@ -31,6 +30,7 @@
 #include "items/molotov.h"
 #include "items/persister.h"
 #include "items/save.h"
+#include "items/shield.h"
 #include "items/toothpick.h"
 #include "items/tossed.h"
 #include "ladder.h"
@@ -54,8 +54,7 @@ void Game::init() {
     this->factories[FOE_MOLE_OBJ] = new FoeMoleFactory();
     this->factories[FOE_PORCUPINE_OBJ] = new FoePorcupineFactory();
     this->factories[FOE_SPITTER_ABDOMEN_OBJ] = new SpitterAbdomenFactory();
-    this->factories[FOE_SPITTER_HEAD_OBJ] = new SpitterHeadFactory();
-    this->factories[FOE_SPITTER_THORAX_OBJ] = new SpitterThoraxFactory();
+    this->factories[FOE_SPITTER_SEGMENT_OBJ] = new SpitterSegmentFactory();
     this->factories[FOE_SPITTER_OBJ] = new SpitterFactory();
     this->factories[GAME_OVER_OBJ] = new GameOverFactory();
     this->factories[GATE_OBJ] = new FoeGateFactory();
@@ -74,6 +73,7 @@ void Game::init() {
     this->factories[ITEM_MOLOTOV USE_OBJ] = new ThrownMolotovFactory();
     this->factories[ITEM_PERSISTER_OBJ] = new ItemPersisterFactory();
     this->factories[ITEM_SAVE USE_OBJ] = new ItemSaveUseFactory();
+    this->factories[ITEM_SHIELD DROPPED_OBJ] = new DroppedShieldFactory();
     this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
     this->factories[ITEM_TOOTHPICK USE_OBJ] = new ThrownToothpickFactory();
     this->factories[LADDER_OBJ] = new LadderFactory();
@@ -83,7 +83,7 @@ void Game::init() {
     this->factories[TOSSED_ITEM_OBJ] = new TossedItemFactory();
 
     // items
-    item_info[ITEM_NONE] = Item{HELD_EFFECT, "Nothing", .damage = 1, .armour = 0};
+    item_info[ITEM_NONE] = Item{HELD_EFFECT, "Kick", .damage = 1, .armour = 0};
     item_info[ITEM_CANNON_BALL] = Item{THROWABLE, "Cannon Ball"};
     item_info[ITEM_CHEESE] = Item{EDIBLE, "Cheese"};
     item_info[ITEM_COFFEE_BEAN] = Item{USEFUL, "Coffee Bean"};
@@ -92,6 +92,7 @@ void Game::init() {
     item_info[ITEM_HERMES_BOOT] = Item{HELD_EFFECT, "Hermes Boot", .damage = 0, .speed = 1.75f};
     item_info[ITEM_MOLOTOV] = Item{THROWABLE, "Molotov Cocktail"};
     item_info[ITEM_SAVE] = Item{USEFUL, "Save Game"};
+    item_info[ITEM_SHIELD] = Item{HELD_EFFECT, "Shield", .damage = 0, .armour = 1};
     item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Porcu' Pine"};
 
     this->factories[FIRST_OBJ] = new NetReceiverFactory();

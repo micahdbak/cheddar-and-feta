@@ -1,24 +1,29 @@
 #include "abdomen.h"
-#include "head.h"
+#include "segment.h"
 #include "spitter.h"
-#include "thorax.h"
 #include "../../mouse.h"
 #include "../../items/fire.h"
 
 Spitter::Spitter(float x, float y, int spawner_id)
-    : Foe(x, y, spawner_id, 500, 256.0f, 80.0f) {
-    char buff[256];
-    snprintf(buff, sizeof(buff), "%d", this->id);
-    game->push_object(FOE_SPITTER_HEAD_OBJ, std::string(buff));
-    game->push_object(FOE_SPITTER_THORAX_OBJ, std::string(buff));
-    game->push_object(FOE_SPITTER_ABDOMEN_OBJ, std::string(buff));
+    : Foe(x, y, spawner_id, 200, 256.0f, 80.0f) {
+    // make NUM_SEGMENTS-1 segments (the NUM_SEGMENTS'th segment is the abdomen)
+    for (int i = 1; i < NUM_SEGMENTS; i++) {
+        game->push_object(FOE_SPITTER_SEGMENT_OBJ, std::to_string(this->id) + "," + std::to_string(i));
+    }
+
+    game->push_object(FOE_SPITTER_ABDOMEN_OBJ, std::to_string(this->id));
 
     this->off_x = 0.0f;
     this->off_y = 0.0f;
+
+    this->push_step(this->x, this->y, 0);
+
+    this->sprite = new Sprite("sprites/foe_spitter_head.bmp", 32, 32, 0);
+    this->dst_rect.w = this->dst_rect.h = 32.0f;
 }
 
 Spitter::~Spitter() {
-    // pass
+    delete this->sprite;
 }
 
 void Spitter::action(Mouse *mouse) {
@@ -26,7 +31,7 @@ void Spitter::action(Mouse *mouse) {
 }
 
 void Spitter::attack_internal(int damage) {
-    if (hurtbox_hitbox_id == HB_SHARED_FIRE) {
+    if (hurtbox_hitbox_id == HB_SHARED_FIRE || hurtbox_hitbox_id == HB_SHARED_SPITTER) {
         return; // fire does no damage
     }
 
@@ -50,20 +55,20 @@ void Spitter::step() {
     case Foe::State::ACTION: {
         Uint64 action_offset = game->ticks - this->timer;
         if (action_offset > 2000) {
-            this->state = Foe::State::FORCE_RANDOM_TILE;
+            this->tile_choice = Foe::TileChoice::SPAZZ;
+            this->state = Foe::State::WALKING;
             break;
         }
 
-        Mouse *mouse = closest_mouse(this->x, this->y, 80.0f, false);
+        Mouse *mouse = closest_mouse(this->x, this->y, 80.0f, true);
 
-        bool cancel_action = false;
         if (mouse == nullptr) {
             this->state = Foe::State::IDLE;
             break;
         } else {
             float distance = distance_between_points(this->x, this->y, mouse->x, mouse->y);
-            if (distance < 32.0f) {
-                this->tile_choice = AWAY;
+            if (distance < 32.0f || this->abdomen_distance < 32.0f) {
+                this->tile_choice = Foe::TileChoice::SPAZZ;
                 this->state = Foe::State::IDLE;
                 break;
             }
@@ -129,27 +134,18 @@ void Spitter::step() {
         break;
 
     default:
-        if (this->tile_choice == Foe::TileChoice::AWAY && this->current_distance >= 64.0f) {
+        if (this->tile_choice == Foe::TileChoice::SPAZZ && this->abdomen_distance > 64.0f) {
             this->tile_choice = Foe::TileChoice::TOWARDS;
         }
 
         break;
     }
 
-    int target_direction;
-    if (this->tile_choice == Foe::TileChoice::AWAY) {
-        target_direction = this->direction - 4;
-        if (target_direction < 0)
-            target_direction += 8;
-    } else {
-        target_direction = this->direction;
-    }
-
-    if (game->ticks - this->direction_timer > 100 && this->displayed_direction != target_direction) {
+    if (game->ticks - this->direction_timer > 100 && this->displayed_direction != this->direction) {
         this->direction_timer = game->ticks;
 
-        int diff_up = (target_direction < this->displayed_direction ? target_direction + 8 : target_direction) - this->displayed_direction;
-        int diff_down = this->displayed_direction - (target_direction > this->displayed_direction ? target_direction - 8 : target_direction);
+        int diff_up = (this->direction < this->displayed_direction ? this->direction + 8 : this->direction) - this->displayed_direction;
+        int diff_down = this->displayed_direction - (this->direction > this->displayed_direction ? this->direction - 8 : this->direction);
 
         if (diff_up <= diff_down) {
             this->displayed_direction++;
@@ -163,4 +159,16 @@ void Spitter::step() {
         else if (this->displayed_direction > 7)
             this->displayed_direction = 0;
     }
+
+    // get last recorded position
+    struct Spitter::step_t pos = this->get_pos(0);
+
+    if (pos.x - (int)this->x != 0 || pos.y - (int)this->y != 0) {
+        this->push_step(this->x, this->y, this->displayed_direction);
+    }
+
+    this->sprite->set_animation(this->displayed_direction);
+    this->dst_rect.x = this->x - 16.0f - game->corner_x;
+    this->dst_rect.y = this->y - 16.0f - game->corner_y;
+    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 16);
 }

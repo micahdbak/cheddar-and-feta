@@ -495,7 +495,7 @@ void Editor::input_sheet() {
             this->user_inputting = false;
             game->draw_rect(game->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
             return;
-        } else if (nfields == 1) {
+        } else if (nfields == 1 && sel_i < this->map.tilesheets.size()) {
             this->sel_tilesheet = sel_i;
         }
     }

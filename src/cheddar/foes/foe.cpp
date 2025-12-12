@@ -91,7 +91,7 @@ void Foe::foe_step() {
         }
 
         // perform action and stay on this tile if close enough and not running away
-        if (this->current_distance < this->action_distance) {
+        if (this->current_distance < this->action_distance && this->tile_choice != TileChoice::SPAZZ) {
             this->action(this->target_mouse);
             this->state = Foe::State::ACTION;
             break;
@@ -115,6 +115,13 @@ void Foe::foe_step() {
                 break;
             case Foe::TileChoice::CIRCLE:
                 path_exists = foe_move_circle(this->target_mouse, &this->target_x, &this->target_y);
+                break;
+            case Foe::TileChoice::SPAZZ:
+                if (SDL_rand(2)) {
+                    path_exists = foe_move_circle(this->target_mouse, &this->target_x, &this->target_y);
+                } else {
+                    path_exists = false; // random tile
+                }
                 break;
             }
 

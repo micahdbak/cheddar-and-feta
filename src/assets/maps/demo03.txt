@@ -1,18 +1,19 @@
-Mole tunnel
+Ant hill
 B1
 16,16,80,80
 1
 tiles/dirttunnel.bmp
-12
-mouse 0 1200,64,0 1192,528,4
+13
+mouse 0 1200,64,0 1192,528,4 56,1192,4
 ladder 1200,48,1,1 maps/demo02
 ladder 1192,544,0,2 maps/demo02
 gate 256,976,7,1
 gate 192,1072,8,1
 gate 208,1136,9
-bell 352,928,7
-bell 384,912,8
-bell 416,928,9
+bell 256,752,7
+bell 768,992,8
+bell 656,688,9
 spawner 224,752,7 foe_porc,foe_bug;foe_porc;foe_porc,foe_bat
 spawner 736,992,8 foe_porc,foe_bat;foe_porc;foe_porc,foe_bat
 spawner 688,688,9 foe_porc;foe_frog,foe_bug;foe_porc,foe_bat
+ladder 56,1176,1,0 maps/demo04

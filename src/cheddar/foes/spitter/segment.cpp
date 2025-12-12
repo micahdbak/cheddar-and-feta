@@ -1,11 +1,19 @@
-#include "abdomen.h"
+#include "segment.h"
 
-SpitterAbdomen::SpitterAbdomen(Spitter *parent, std::shared_ptr<bool> deleted_ptr):
+SpitterSegment::SpitterSegment(Spitter *parent, int segment_id, std::shared_ptr<bool> deleted_ptr):
     parent(parent), deleted_ptr(deleted_ptr) {
-    this->sprite = new Sprite("sprites/foe_spitter_abdomen.bmp", 32, 32, 250);
+    this->sprite = new Sprite("sprites/foe_spitter_segment.bmp", 32, 32, 50 + (segment_id * 50));
+    this->sprite->set_frame((segment_id * 2) % 4);
     this->dst_rect.w = 32.0f;
     this->dst_rect.h = 32.0f;
-    game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -16, -16, 32, 32));
+    game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -12, -12, 24, 24));
+    game->push_object(HITBOX_OBJ, HitBox::Options(this->id, -1, -8, -8, 16, 16, HitBox::Properties{
+        .damage = 2,
+        .cooldown_ms = 1000,
+        .shared_cooldowns = true,
+        .shared_id = HB_SHARED_SPITTER
+    }));
+    this->segment_id = segment_id;
 
     this->cur_dir = 0;
     for (int i = 0; i < FRAMES_TO_SET_CUR_DIR; i++)
@@ -13,29 +21,29 @@ SpitterAbdomen::SpitterAbdomen(Spitter *parent, std::shared_ptr<bool> deleted_pt
     this->dirs_i = 0;
 }
 
-SpitterAbdomen::~SpitterAbdomen() {
+SpitterSegment::~SpitterSegment() {
     delete this->sprite;
 }
 
-void SpitterAbdomen::step() {
+void SpitterSegment::step() {
     if (*this->deleted_ptr) {
         game->delete_object = true;
         return;
     }
 
-    struct Spitter::step_t p2, p3, p4;
+    struct Spitter::step_t p1, p2, p3, p4;
     int direction;
 
-    // p1, not used
-    p2 = this->parent->get_pos(NUM_SEGMENTS);
-    p3 = this->parent->get_pos(NUM_SEGMENTS - 1);
-    p4 = this->parent->get_pos(NUM_SEGMENTS - 2);
+    p1 = this->parent->get_pos(cnf_clamp(this->segment_id + 1, 0, NUM_SEGMENTS));
+    p2 = this->parent->get_pos(this->segment_id);
+    p3 = this->parent->get_pos(cnf_clamp(this->segment_id - 1, 0, NUM_SEGMENTS));
+    p4 = this->parent->get_pos(cnf_clamp(this->segment_id - 2, 0, NUM_SEGMENTS));
 
-    if (p2.x == 0 || p3.x == 0 || p4.x == 0)
+    if (p1.x == 0 || p2.x == 0 || p3.x == 0 || p4.x == 0)
         return;
 
-    int this_x = p2.x;
-    int this_y = p2.y;
+    int this_x = (p1.x + p3.x) >> 1;
+    int this_y = (p1.y + p3.y) >> 1;
     int next_x = (p2.x + p4.x) >> 1;
     int next_y = (p2.y + p4.y) >> 1;
 
@@ -55,14 +63,6 @@ void SpitterAbdomen::step() {
 
     if (sum >= FRAMES_TO_SET_CUR_DIR - 1) {
         this->cur_dir = this->dirs[0];
-    }
-
-    Mouse *mouse = closest_mouse(this->x, this->y, 64.0f, true);
-
-    if (mouse == nullptr) {
-        this->parent->abdomen_distance = 256.0f;
-    } else {
-        this->parent->abdomen_distance = distance_between_points(mouse->x, mouse->y, this->x, this->y);
     }
 
     this->dst_rect.x = this->x - 16.0f - game->corner_x;

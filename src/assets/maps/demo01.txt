@@ -1,11 +1,12 @@
 Ant hill
 B3
 16,16,80,80
-1
+2
 tiles/dirttunnel.bmp
-21
-mouse 0 128,224,4 1120,1184,0
-ladder 128,240,0,1 maps/demo00
+tiles/dirtclutter.bmp
+22
+mouse 0 128,216,4 1120,1184,0
+ladder 128,232,1 maps/demo00
 item_toothpick_dropped 312,448
 gate 160,560,2
 spawner 112,432,2,1 foe_bug,foe_bug,foe_bug,foe_bat;foe_bug,foe_bug,foe_bug,foe_frog
@@ -16,7 +17,7 @@ bell 768,560,3
 gate 1136,1072,4,1
 spawner 1136,848,4 foe_bug,foe_bug,foe_bug,foe_bat,foe_bat,foe_bat;foe_frog,foe_frog
 bell 1120,880,4
-ladder 1120,1168,1,0 maps/demo02
+ladder 1120,1168,0 maps/demo02
 foe_bug 160,1072,-1
 foe_bat 112,1088,-1
 foe_bug 80,1136,-1
@@ -25,3 +26,4 @@ foe_bug 144,1200,-1
 foe_bat 208,1184,-1
 foe_bug 240,1136,-1
 foe_bat 208,1088,-1
+billboard 1104,1136,11,0,32,48,32,tiles/dirtclutter.bmp

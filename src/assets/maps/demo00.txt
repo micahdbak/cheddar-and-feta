@@ -4,8 +4,8 @@ B4
 2
 ./tiles/dirttunnel.bmp
 ./tiles/dirtclutter.bmp
-32
-mouse 0 120,1198,0 1224,912,0
+33
+mouse 0 120,1198,0 1224,920,0
 gate 1008,1152,1
 spawner 976,1040,1 foe_bug;foe_bug,foe_bug;foe_bat
 bell 848,1008,1
@@ -36,4 +36,5 @@ foe_bug 1056,160,-1
 foe_bug 1104,128,-1
 foe_bug 1152,176,-1
 foe_bug 1072,464,-1
-ladder 1224,896,1,0 maps/demo01
+ladder 1224,904,0 maps/demo01
+billboard 1208,864,11,0,32,48,32,./tiles/dirtclutter.bmp

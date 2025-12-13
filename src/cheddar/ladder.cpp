@@ -3,16 +3,7 @@
 #include "mouse.h"
 #include "save_data.h"
 
-Ladder::Ladder(int x, int y, int is_up, std::string next_map, int which_coord) {
-    this->sprite = new Sprite("sprites/ladder.bmp", 32, 48, 0);
-
-    if (is_up) {
-        this->sprite->set_frame(1);
-    }
-
-    this->dst_rect.w = 32.0f;
-    this->dst_rect.h = 48.0f;
-
+Ladder::Ladder(int x, int y, std::string next_map, int which_coord) {
     this->x = (float)x;
     this->y = (float)y;
 
@@ -22,14 +13,10 @@ Ladder::Ladder(int x, int y, int is_up, std::string next_map, int which_coord) {
 }
 
 Ladder::~Ladder() {
-    delete this->sprite;
+    // pass
 }
 
 void Ladder::step() {
-    this->dst_rect.x = this->x - game->corner_x - 16.0f;
-    this->dst_rect.y = this->y - game->corner_y - 38.0f;
-    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 28);
-
     Mouse *mouse = closest_mouse(this->x, this->y, 8, true);
 
     if (mouse != nullptr) {

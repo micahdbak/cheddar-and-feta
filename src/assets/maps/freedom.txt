@@ -1,0 +1,10 @@
+Freedom
+Forest
+16,16,32,32
+3
+tiles/forest.bmp
+tiles/dirttunnel.bmp
+tiles/dirtclutter.bmp
+2
+mouse 0 280,280,4
+ladder 280,296,1 maps/demo04

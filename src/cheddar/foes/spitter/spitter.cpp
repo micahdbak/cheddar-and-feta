@@ -114,11 +114,9 @@ void Spitter::step() {
     } break;
 
     case Foe::State::HURT:
-        if (game->ticks - this->hurt_timer > 500) {
+        if (game->ticks - this->hurt_timer > 100) {
             this->state = Foe::State::WALKING;
         }
-
-        game->push_health_bar(this->health, this->max_health, this->x, this->y - 16.0f, &this->icon_src, &this->icon_dst);
 
         break;
 
@@ -139,6 +137,10 @@ void Spitter::step() {
         }
 
         break;
+    }
+
+    if (game->ticks - this->hurt_timer < 500 && this->state != Foe::State::DEAD) {
+        game->push_health_bar(this->health, this->max_health, this->x, this->y - 16.0f, &this->icon_src, &this->icon_dst);
     }
 
     if (game->ticks - this->direction_timer > 100 && this->displayed_direction != this->direction) {

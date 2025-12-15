@@ -1,4 +1,5 @@
 #include "save_data.h"
+#include "game.h"
 
 #include <cerrno>
 #include <cstdio>
@@ -105,8 +106,12 @@ void SaveData::write_file(int file_i) {
     std::string line;
     unsigned long hash = 0;
 
-    // first line is summary
-    line = "Game :)\n";
+    if (this->geti(GAME_DONE)) {
+        line = "! Score: 999\n";
+    } else {
+        line = game->map_title + ", " + game->map_description + "\n";
+    }
+
     hash = _djb2_hash(hash, line.c_str());
     fputs(line.c_str(), save_file);
 
@@ -158,29 +163,33 @@ int SaveData::load_file(int file_i) {
     while (fgets(line, sizeof(line), save_file) != NULL) {
         // remove last newline
         size_t len = strnlen(line, MAX_LINE_LENGTH);
-        if (len > 0 && line[len-1] == '\n')
-            line[len-1] = '\0';
+
+        if (len == 0)
+            continue;
 
         char *key = line, *val;
         bool is_kvp = false;
 
         for (char *ptr = line; *ptr != '\0'; ptr++) {
             if (*ptr == '=') {
+                // hash this line; must include the = and \n chars
+                hash = _djb2_hash(hash, line);
                 *ptr = '\0';
                 val = ptr + 1;
                 is_kvp = true;
             }
         }
 
-        if (is_kvp) {
-            hash = _djb2_hash(hash, line);
-        } else if (line[0] >= '0' && line[0] < '9') {
+        // remove newline from line so val is just the chars between = and \n
+        if (line[len-1] == '\n')
+            line[len-1] = '\0';
+
+        if (!is_kvp && line[0] >= '0' && line[0] < '9') {
             // last line of file - hash
             unsigned long hash_in_file;
             sscanf(line, "%lu\n", &hash_in_file);
             fclose(save_file);
-
-            return hash != hash_in_file ? LOAD_TAMPER : LOAD_SUCCESS;
+            return hash == hash_in_file ? LOAD_SUCCESS : LOAD_TAMPER;
         }
 
         this->data[key] = val;

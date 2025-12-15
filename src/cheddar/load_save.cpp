@@ -23,18 +23,24 @@ void LoadSave::step() {
         } else return;
     } else if (local_controller.is_hit(Button::SELECT)) {
         int ret = save.load_file(this->sel_save);
+
+        if (ret != LOAD_SUCCESS && ret != LOAD_NEW) {
+            textbox = new Textbox("Save file is corrupted.", LOAD_SAVE_OBJ, DEFAULT_FONT, 0);
+            return;
+        }
+
+        if (save.geti(GAME_DONE)) {
+            textbox = new Textbox("Game is already complete. Create new save.", LOAD_SAVE_OBJ, DEFAULT_FONT, 0);
+            return;
+        }
+
         save.puti(LOAD_SAVE, 1);
         save.puti(SAVE_FILE, this->sel_save);
 
-        if (/* ret == LOAD_SUCCESS || ret == LOAD_NEW */ true) {
-            if (!save.has(LOAD_MAP))
-                save.data[LOAD_MAP] = "maps/demo00";
+        if (!save.has(LOAD_MAP))
+            save.data[LOAD_MAP] = "maps/demo00";
 
-            game->map = save.data[LOAD_MAP];
-        } else {
-            textbox = new Textbox("Save file is corrupted.", LOAD_SAVE_OBJ, DEFAULT_FONT, 50);
-        }
-
+        game->map = save.data[LOAD_MAP];
         return;
     }
 
@@ -64,7 +70,7 @@ void LoadSave::step() {
             highlight_rect.h = 14.0f;
 
             game->draw_ui_box(game->ui, this->sel_save == i ? BOX_OUT_SEL : BOX_OUT, &highlight_rect);
-            game->draw_text(game->ui, this->summaries[i], this->sel_save == i ? BOLD_FONT : DEFAULT_FONT, x + PADDING + 2, save_y + 2, 0);
+            game->draw_text(game->ui, this->summaries[i], DEFAULT_FONT, x + PADDING + 2, save_y + 2, 0);
         }
 
         game->draw_text(game->ui, "[^/}] to select; [Enter] to load", SMALL_FONT, x + PADDING + 2, y + UI_HEIGHT - PADDING - 8, 0);

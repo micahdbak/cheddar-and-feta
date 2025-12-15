@@ -164,6 +164,12 @@ void Game::draw_text(SDL_Texture *texture, std::string str, int font, int x, int
                 _y += line_height;
                 running_width = 0;
                 break;
+            case '\t': {
+                int tabline = ((_x / 32) + 1) * 32;
+                int rem = tabline - _x;
+                running_width += rem;
+                _x += rem;
+            } break;
             default: /* pass */ break;
             }
         }
@@ -349,7 +355,10 @@ void Game::draw_overlay() {
         force_render = true;
     }
 
-    if (this->current_map == "maps/splash" || this->current_map == "maps/init" || this->current_map == "maps/dead") {
+    if (this->current_map == "maps/splash" ||
+        this->current_map == "maps/init" ||
+        this->current_map == "maps/dead" ||
+        this->current_map == "maps/credits") {
         if (!force_render) {
             force_render = true;
             this->draw_rect(this->overlay, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);

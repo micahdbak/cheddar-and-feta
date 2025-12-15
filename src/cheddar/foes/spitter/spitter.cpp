@@ -1,6 +1,7 @@
 #include "abdomen.h"
 #include "segment.h"
 #include "spitter.h"
+#include "save_data.h"
 #include "../../mouse.h"
 #include "../../items/fire.h"
 
@@ -20,6 +21,8 @@ Spitter::Spitter(float x, float y, int spawner_id)
 
     this->sprite = new Sprite("sprites/foe_spitter_head.bmp", 32, 32, 0);
     this->dst_rect.w = this->dst_rect.h = 32.0f;
+
+    this->start_timer = game->ticks;
 }
 
 Spitter::~Spitter() {
@@ -41,6 +44,8 @@ void Spitter::attack_internal(int damage) {
         this->health = 0;
         this->state = Foe::State::DEAD;
         this->remove_from_foes();
+
+        save.puti(FOE_SPITTER_OBJ STATS, game->ticks - this->start_timer);
     } else {
         this->state = Foe::State::HURT;
     }

@@ -3,6 +3,7 @@
 #include "game.h"
 #include "hurtbox.h"
 #include "mouse.h"
+#include "save_data.h"
 #include "../items/cheese.h"
 #include "../items/toothpick.h"
 
@@ -41,6 +42,9 @@ void FoePorcupine::attack_internal(int damage) {
         this->health = 0;
         this->state = Foe::State::DEAD;
         this->remove_from_foes();
+
+        int kills = save.geti(FOE_PORCUPINE_OBJ STATS) + 1;
+        save.puti(FOE_PORCUPINE_OBJ STATS, kills);
     } else {
         this->state = Foe::State::HURT;
     }

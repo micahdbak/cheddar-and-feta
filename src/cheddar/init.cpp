@@ -7,6 +7,8 @@
 
 // objects
 #include "billboard.h"
+#include "credits.h"
+#include "freedom.h"
 #include "foes/bat.h"
 #include "foes/bell.h"
 #include "foes/bug.h"
@@ -48,6 +50,8 @@ void Game::init() {
     // objects
     this->factories[BELL_OBJ] = new BellFactory();
     this->factories[BILLBOARD_OBJ] = new BillboardFactory();
+    this->factories[CREDITS_OBJ] = new CreditsFactory();
+    this->factories[FREEDOM_OBJ] = new FreedomFactory();
     this->factories[FOE_BAT_OBJ] = new FoeBatFactory();
     this->factories[FOE_BUG_OBJ] = new FoeBugFactory();
     this->factories[FOE_FROG_OBJ] = new FoeFrogFactory();

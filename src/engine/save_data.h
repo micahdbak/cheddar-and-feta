@@ -15,6 +15,9 @@
 #define LOAD_SAVE  DONT_WRITE "load_save"
 #define LOAD_MAP   "map"
 #define SAVE_FILE  DONT_WRITE "save_file"
+#define GAME_DONE  "game_done"
+
+#define STATS "_stats"
 
 void float_to_str(float f, char *str, size_t str_size);
 float str_to_float(std::string str);

@@ -1,6 +1,7 @@
 #include "frog.h"
 #include "game.h"
 #include "hurtbox.h"
+#include "save_data.h"
 #include "../items/cheese.h"
 #include "../items/cannon_ball.h"
 
@@ -45,6 +46,9 @@ void FoeFrog::attack_internal(int damage) {
         this->health = 0;
         this->state = Foe::State::DEAD;
         this->remove_from_foes();
+
+        int kills = save.geti(FOE_FROG_OBJ STATS) + 1;
+        save.puti(FOE_FROG_OBJ STATS, kills);
     } else {
         this->state = Foe::State::HURT;
     }

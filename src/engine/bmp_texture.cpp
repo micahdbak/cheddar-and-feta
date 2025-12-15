@@ -53,8 +53,41 @@ static SDL_Texture *render_cheese(const std::string &args) {
     return texture;
 }
 
+static SDL_Texture *render_credits(const std::string &args) {
+    int ants = 0, drones = 0, tanks = 0, agents = 0, queen_time = 0;
+    sscanf(args.c_str(), "%d.%d.%d.%d.%d", &ants, &drones, &tanks, &agents, &queen_time);
+
+    SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
+    if (texture == nullptr) {
+        std::cerr << "render_credits error: " << SDL_GetError() << std::endl;
+        exit(1);
+    }
+
+    SDL_SetRenderTarget(renderer, texture);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_PIXELART);
+    SDL_RenderClear(renderer); // make sure texture is cleared
+
+    game->draw_text(texture, "Cheddar & Feta", TITLE_FONT, 120, 24, 0);
+    std::string results = std::string("}} Results }}\n\n")
+        + "Ant Kills:\t" + std::to_string(ants) + "\tDrone Kills:\t" + std::to_string(drones) + "\n"
+        + "Tank Kills:\t" + std::to_string(tanks) + "\tAgent Kills:\t" + std::to_string(agents) + "\n\n"
+        + "Time to Kill the Queen:\t\t" + std::to_string(queen_time) + " (s)\n"
+        + "Total Time:\t\t\t" + std::to_string(999) + " (s)\n\n"
+        + "Score:\t\t" + std::to_string(999) + "\n\n"
+        + "}} Credits }}\n\n"
+        + "Made with { by Micah Baker\n\n"
+        + "Thanks for playing!\n(Press [Enter] to return to Main Menu.)";
+    game->draw_text(texture, results.c_str(), DEFAULT_FONT, 64, 40, 0);
+    SDL_SetRenderTarget(renderer, game->screen);
+
+    return texture;
+}
+
 void load_render_functions() {
     render_functions[FUNC_CHEESE] = &render_cheese;
+    render_functions[FUNC_CREDITS] = &render_credits;
 }
 
 SDL_Texture *load_bmp_texture(const std::string &bmp_path) {
@@ -101,4 +134,10 @@ void free_textures() {
     for (auto pair : bmp_textures) {
         SDL_DestroyTexture(pair.second);
     }
+}
+
+std::string credits_args(int ants, int drones, int tanks, int agents, int queen_time) {
+    char buf[256];
+    snprintf(buf, sizeof(buf), "%d.%d.%d.%d.%d", ants, drones, tanks, agents, queen_time);
+    return std::string(buf);
 }

@@ -15,7 +15,7 @@ void NetSender::step() {
     if (feta != nullptr) {
         snprintf(line, sizeof(line), "%d,%d\n", int(feta->x), int(feta->y));
     } else {
-        snprintf(line, sizeof(line), "0,0\n");
+        snprintf(line, sizeof(line), "%d,%d\n", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
     }
     frame_msg += line;
 

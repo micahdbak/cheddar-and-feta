@@ -202,14 +202,8 @@ void Mouse::step() {
         if (x_dir == 0 && y_dir == 0) {
             mov_speed = 0.0f;
         } else if (this->is_running) {
-            // if (game->ticks - this->running_ticks < 200) {
-            //     mov_speed = 0;
-            //     this->sprite->set_animation(RUNPREP_ANIMATION + direction_from_dirs(x_dir, y_dir));
-            //     this->sprite->set_frame((game->ticks - this->running_ticks) / 50);
-            // } else {
-                mov_speed = this->max_mov_speed;
-                this->sprite->interval_ms = 100;
-            // }
+            mov_speed = this->max_mov_speed;
+            this->sprite->interval_ms = 100;
         } else {
             mov_speed = this->max_mov_speed / 2.0f;
             this->sprite->interval_ms = 250;
@@ -386,6 +380,23 @@ void Mouse::step() {
             // set animation to walking/running
             this->sprite->set_animation(this->sprite->animation % 8);
         }
+
+        break;
+
+    case FORCED_DANCE:
+        this->sprite->update_frame();
+        this->sprite->interval_ms = 200;
+
+        if (this->sprite->animation != DANCING_ANIMATION) {
+            this->sprite->set_animation(DANCING_ANIMATION);
+        }
+
+        if (game->ticks - this->busy_ticks > this->dance_until) {
+            this->is_busy = FALSE;
+            this->sprite->set_animation(0);
+        }
+
+        break;
     }
 
     // you get 5 seconds after being "downed" before enemies will attack you again
@@ -483,7 +494,7 @@ void Mouse::step() {
 // will be called by a foe
 void Mouse::attack(int damage) {
     // don't get attacked if was already attacked / down
-    if (this->is_busy == ATTACKED || this->is_busy == DOWNED)
+    if (this->is_busy == ATTACKED || this->is_busy == DOWNED || this->is_busy == FORCED_DANCE)
         return;
 
     this->is_busy = ATTACKED;
@@ -572,6 +583,11 @@ int Mouse::add_cheese(int amount) {
         this->push_item(ITEM_CHEESE);
     }
     return amount;
+}
+
+void Mouse::force_dance(Uint64 timeout_ms) {
+    this->is_busy = Mouse::Busy::FORCED_DANCE;
+    this->dance_until = timeout_ms;
 }
 
 Mouse *closest_mouse(float x, float y, float min_distance, bool forced) {

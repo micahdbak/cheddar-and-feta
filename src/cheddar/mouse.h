@@ -40,6 +40,8 @@ public:
     void remove_item(const std::string &item_id);
     int add_cheese(int amount);
 
+    void force_dance(Uint64 timeout_ms);
+
     float hitsource_x() override { return this->x; }
     float hitsource_y() override { return this->y; }
 
@@ -71,8 +73,8 @@ private:
     SDL_FRect dst_rect, icon_src, icon_dst;
     Sprite *sprite;
 
-    enum Busy { FALSE, ATTACKING, ATTACKED, THROWING, EATING, DOWNED } is_busy = FALSE;
-    Uint64 busy_ticks = 0, is_down_ticks = 0, running_ticks = 0;
+    enum Busy { FALSE, ATTACKING, ATTACKED, THROWING, EATING, DOWNED, FORCED_DANCE } is_busy = FALSE;
+    Uint64 busy_ticks = 0, is_down_ticks = 0, running_ticks = 0, dance_until = 0;
 
     int tile_x, tile_y;
 

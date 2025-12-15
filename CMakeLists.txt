@@ -34,6 +34,8 @@ set(FETA_SRC
 
 set(CHEDDAR_SRC
     src/cheddar/billboard.cpp
+    src/cheddar/credits.cpp
+    src/cheddar/freedom.cpp
     src/cheddar/foes/bat.cpp
     src/cheddar/foes/bell.cpp
     src/cheddar/foes/bug.cpp

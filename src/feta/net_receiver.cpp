@@ -95,7 +95,7 @@ void NetReceiver::step() {
         if (*line == '\0') return;
 
         // read view information
-        int view_x, view_y;
+        int view_x = SCREEN_WIDTH / 2, view_y = SCREEN_HEIGHT / 2;
         sscanf(line, "%d,%d", &view_x, &view_y);
         game->set_view(view_x, view_y);
         line = next_line(line);
@@ -107,9 +107,16 @@ void NetReceiver::step() {
         if (*line == '\0') return;
 
         // read hud information
+        
+        if (game->current_map != "maps/splash" &&
+            game->current_map != "maps/init" &&
+            game->current_map != "maps/dead" &&
+            game->current_map != "maps/credits") {
         int sel_item, health, max_health;
-        sscanf(line, "%d,%d,%d", &sel_item, &health, &max_health);
-        game->draw_hud(game->ui, items, sel_item, health, max_health);
+            sscanf(line, "%d,%d,%d", &sel_item, &health, &max_health);
+            game->draw_hud(game->ui, items, sel_item, health, max_health);
+        }
+
         line = next_line(line);
         if (*line == '\0') return;
 

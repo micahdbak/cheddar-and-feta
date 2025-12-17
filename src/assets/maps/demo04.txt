@@ -1,6 +1,8 @@
 Ant hill
 Finale
 16,16,40,40
+36,32,28
+music/chillmood.wav
 2
 tiles/dirttunnel.bmp
 tiles/dirtclutter.bmp

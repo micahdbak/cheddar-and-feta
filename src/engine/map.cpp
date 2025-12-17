@@ -67,7 +67,7 @@ void Map::make_empty(int tile_width, int tile_height, int cols, int rows) {
     }
 
     SDL_SetRenderTarget(renderer, this->bg);
-    SDL_SetRenderDrawColor(renderer, game->bg_r, game->bg_g, game->bg_b, 255);
+    SDL_SetRenderDrawColor(renderer, this->bg_r, this->bg_g, this->bg_b, 255);
     SDL_RenderFillRect(renderer, NULL);
     SDL_SetRenderTarget(renderer, this->fg);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
@@ -97,6 +97,15 @@ void Map::read(const char *map_path) {
     if (feof(txt_file)) CORRUPTED_EXIT;
     fgets(buff, sizeof(buff), txt_file);
     sscanf(buff, "%d,%d,%d,%d", &this->tile_width, &this->tile_height, &this->cols, &this->rows);
+
+    if (feof(txt_file)) CORRUPTED_EXIT;
+    fgets(buff, sizeof(buff), txt_file);
+    sscanf(buff, "%d,%d,%d", &this->bg_r, &this->bg_g, &this->bg_b);
+
+    if (feof(txt_file)) CORRUPTED_EXIT;
+    fgets(buff, sizeof(buff), txt_file);
+    buff[strlen(buff) - 1] = '\0'; // remove newline
+    this->ambience = buff;
 
     // allocate the necessary memory
     this->make_empty(this->tile_width, this->tile_height, this->cols, this->rows);
@@ -210,6 +219,8 @@ void Map::write(const char *map_path) {
 
     fprintf(txt_file, "%s\n%s\n", this->title.c_str(), this->description.c_str());
     fprintf(txt_file, "%d,%d,%d,%d\n", this->tile_width, this->tile_height, this->cols, this->rows);
+    fprintf(txt_file, "%d,%d,%d\n", this->bg_r, this->bg_g, this->bg_b);
+    fprintf(txt_file, "%s\n", this->ambience.c_str());
     fprintf(txt_file, "%d\n", int(this->tilesheets.size()));
 
     // write tilesheet info
@@ -295,7 +306,7 @@ void Map::render_tile(int x, int y) {
     dst_rect.h = float(this->tile_height);
 
     SDL_SetRenderTarget(renderer, this->bg);
-    SDL_SetRenderDrawColor(renderer, 24, 24, 24, 255);
+    SDL_SetRenderDrawColor(renderer, this->bg_r, this->bg_g, this->bg_b, 255);
     SDL_RenderFillRect(renderer, &dst_rect); // fill a black square
 
     // render bg tiles

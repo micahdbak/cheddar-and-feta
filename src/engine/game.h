@@ -83,10 +83,6 @@
 #define FIRST_OBJ "_first"
 #define LAST_OBJ "_last"
 
-#define DEFAULT_BG_R 36
-#define DEFAULT_BG_G 32
-#define DEFAULT_BG_B 28
-
 // hud coordinates
 #define HUD_ITEMS_X 32
 #define HUD_ITEMS_Y 204
@@ -216,10 +212,9 @@ public:
 
     NetworkAgent::State net_state;
 
-    Uint8 bg_r, bg_g, bg_b;
+    Uint8 bg_r = 0, bg_g = 0, bg_b = 0;
 
 private:
-
     // for Game::texts
     struct Text {
         std::string str;
@@ -251,6 +246,8 @@ private:
     bool force_notif_rerender = false;
 
     bool display_controls_menu = false;
+
+    std::string ambience;
 };
 
 extern SDL_Renderer *renderer;

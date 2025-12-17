@@ -91,6 +91,8 @@ public:
     // handled by Map
     std::string title = "Unnamed map", description = "Floor 1";
     int tile_width, tile_height, cols, rows;
+    int bg_r = 0, bg_g = 0, bg_b = 0;
+    std::string ambience = "";
     std::vector<Tilesheet *> tilesheets;
     std::vector<std::pair<std::string, std::string>> objects;
     std::vector<Tile> **bg_tiles = nullptr;

@@ -1,6 +1,8 @@
 Freedom
 Ending
 16,16,32,32
+108,164,108
+
 3
 tiles/forest.bmp
 tiles/dirttunnel.bmp

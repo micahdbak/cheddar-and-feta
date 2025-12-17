@@ -102,7 +102,7 @@ void Game::draw_text(SDL_Texture *texture, std::string str, int font, int x, int
     int _x = x, _y = y, line_height = int(_font->src_rect[0].h) + 1;
     int running_width = 0;
     SDL_FRect dst_rect;
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 24, 24, 24, 255);
 
     for (int i = 0; i < str.size(); i++) {
         char c = str[i];

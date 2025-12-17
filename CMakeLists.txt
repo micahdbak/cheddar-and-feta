@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 set(ENGINE_SRC
+    src/engine/audio_playback.cpp
     src/engine/bmp_texture.cpp
     src/engine/font.cpp
     src/engine/game_const.cpp

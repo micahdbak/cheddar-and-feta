@@ -1,6 +1,7 @@
 #include "SDL3/SDL_blendmode.h"
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_timer.h"
+#include "audio_playback.h"
 #include "bmp_texture.h"
 #include "controller.h"
 #include "font.h"
@@ -55,15 +56,17 @@ Game::Game() {
     this->ticks = SDL_GetTicks();
 
     Font::load_fonts(this->fonts);
-    load_render_functions(); // bmp_texture.h
 
     this->item_count_icon = { HUD_MAIN_X + 18, HUD_MAIN_Y - 2, 16.0f, 16.0f };
     this->item_cooldown_icon = { HUD_MAIN_X + 8, HUD_MAIN_Y + 4, 16.0f, 16.0f };
+
+    load_render_functions(); // bmp_texture.h
+
+    init_playback(); // audio_stream.h
 }
 
 Game::~Game() {
     this->unload();
-    free_textures();
 
     // destroy the screen
     SDL_DestroyTexture(this->screen);
@@ -93,6 +96,10 @@ Game::~Game() {
     for (auto font : this->fonts)
         delete font;
     this->fonts.clear();
+
+    free_textures(); // bmp_texture.h
+
+    free_playback(); // audio_stream.h
 }
 
 void Game::unload() {
@@ -145,6 +152,16 @@ void Game::load_map(const char *map_path) {
     this->tile_height = map.tile_height;
     this->cols = map.cols;
     this->rows = map.rows;
+    this->bg_r = map.bg_r;
+    this->bg_g = map.bg_g;
+    this->bg_b = map.bg_b;
+
+    if (this->ambience != map.ambience) {
+        load_audio(map.ambience);
+        loop_audio(map.ambience);
+    }
+
+    this->ambience = map.ambience;
 
     // assemble appropriately sized quads for each predefined map collider
     for (int i = 0; i < n_MapColliders; i++) {

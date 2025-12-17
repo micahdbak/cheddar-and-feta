@@ -30,9 +30,6 @@ Splash::Splash() {
 
     this->animations = 7;
 
-    game->bg_r = 24;
-    game->bg_g = 24;
-    game->bg_b = 24;
     game->corner_x = 0;
     game->corner_y = 0;
 }
@@ -42,10 +39,6 @@ Splash::~Splash() {
     delete this->ant;
     SDL_DestroyTexture(this->overlay);
     SDL_DestroyTexture(this->tunnel);
-
-    game->bg_r = DEFAULT_BG_R;
-    game->bg_g = DEFAULT_BG_G;
-    game->bg_b = DEFAULT_BG_B;
 }
 
 #define DISPLAY_FOR 4000

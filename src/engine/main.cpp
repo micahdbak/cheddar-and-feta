@@ -20,7 +20,7 @@ void cleanup();
 void scale_screen_rect(SDL_FRect *screen_rect, const int window_width, const int window_height);
 
 int main(int argc, const char **argv) {
-    if (!SDL_Init(SDL_INIT_VIDEO|SDL_INIT_GAMEPAD)) {
+    if (!SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_GAMEPAD)) {
         std::cerr << "SDL_Init error: " << SDL_GetError() << std::endl;
         return 1;
     }

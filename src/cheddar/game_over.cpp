@@ -22,7 +22,7 @@ void GameOver::step() {
     game->push_sprite("", this->ui, &this->src, &this->dst, 0);
 
     if (local_controller.is_hit(Button::SELECT)) {
-        game->map = "maps/splash";
+        game->map = "maps/init";
         save.clear();
     }
 }

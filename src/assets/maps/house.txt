@@ -1,6 +1,8 @@
 Developer's Room
 Test Room
 16,16,32,32
+0,0,0
+
 2
 tiles/house.bmp
 tiles/dungeon.bmp

@@ -39,7 +39,7 @@ void Textbox::step() {
             this->running_text += text[j];
         }
         this->i = j;
-        game->draw_rect(game->ui, &this->text_rect, DEFAULT_BG_R, DEFAULT_BG_G, DEFAULT_BG_B, 255, SDL_BLENDMODE_NONE);
+        game->draw_rect(game->ui, &this->text_rect, 24, 24, 24, 255, SDL_BLENDMODE_NONE);
         game->draw_text(game->ui, this->running_text, this->font, this->text_rect.x, this->text_rect.y, this->text_rect.w);
         return;
     }
@@ -70,7 +70,7 @@ void Textbox::step() {
             return;
         }
 
-        game->draw_rect(game->ui, &this->text_rect, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+        game->draw_rect(game->ui, &this->text_rect, 24, 24, 24, 255, SDL_BLENDMODE_NONE);
         game->draw_text(game->ui, this->running_text, this->font, this->text_rect.x, this->text_rect.y, this->text_rect.w);
     }
 }

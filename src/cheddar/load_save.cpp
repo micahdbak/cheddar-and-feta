@@ -30,7 +30,7 @@ void LoadSave::step() {
         }
 
         if (save.geti(GAME_DONE)) {
-            textbox = new Textbox("Game is already complete. Create new save.", LOAD_SAVE_OBJ, DEFAULT_FONT, 0);
+            textbox = new Textbox("Cannot load this game. Create a new save.", LOAD_SAVE_OBJ, DEFAULT_FONT, 0);
             return;
         }
 

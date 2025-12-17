@@ -1,6 +1,8 @@
 Credits
 Ending
 16,16,20,15
+24,24,24
+
 0
 1
-credits
+credits 0

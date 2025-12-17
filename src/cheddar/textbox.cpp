@@ -1,6 +1,7 @@
 #include "game.h"
 #include "controller.h"
 #include "textbox.h"
+#include "audio_playback.h"
 
 Textbox *textbox;
 
@@ -48,11 +49,19 @@ void Textbox::step() {
         this->last_ticks = game->ticks;
         
         char c;
+        bool space = false;
         do {
             c = i >= this->text.size() ? '\0' : this->text[i++];
             if (c != '\n' && c != '\0')
                 this->running_text += c;
+            if (c == ' ')
+                space = true;
         } while (c == ' ');
+
+        // don't blip if there was a space
+        if (!space) {
+            play_audio("sfx/blip.wav", 0.5f, 0.0f, 0.0f);
+        }
 
         // display prompt arrow
         if (c == '\n' || c == '\0') {

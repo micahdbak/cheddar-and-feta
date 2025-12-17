@@ -16,6 +16,8 @@ public:
     void remember_item(const std::string &item_id, float x, float y, int id);
     void forget_item(int id);
 
+    bool creating_items = false;
+
 private:
     void save_items();
 

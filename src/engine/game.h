@@ -77,9 +77,6 @@
 #define ITEM_COOLDOWN_7       SDL_FRect{112.05f, 56.05f, 16.0f, 16.0f}
 
 // forces one object to the be the first/last object run per frame
-// should only be used by something like:
-// - cheddar/frame_compiler(.h|.cpp)
-// - cheddar/remote_controller(.h|.cpp)
 #define FIRST_OBJ "_first"
 #define LAST_OBJ "_last"
 

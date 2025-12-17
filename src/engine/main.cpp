@@ -31,7 +31,7 @@ int main(int argc, const char **argv) {
         return 1;
     }
 
-    std::cout << "Renderer: " << SDL_GetRendererName(renderer) << std::endl;
+    // std::cout << "Renderer: " << SDL_GetRendererName(renderer) << std::endl;
 
     SDL_SetRenderVSync(renderer, 1);
 

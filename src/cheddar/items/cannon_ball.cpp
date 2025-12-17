@@ -5,17 +5,17 @@
 
 ThrownCannonBall::ThrownCannonBall(float x, float y, int x_dir, int y_dir, int from_id)
     : x(x), y(y), x_dir(x_dir), y_dir(y_dir) {
-    int dx, dy;
-    if (this->x_dir != 0 && this->y_dir != 0) {
-        dx = this->x_dir * 12;
-        dy = this->y_dir * 12;
-    } else {
-        dx = this->x_dir * 16;
-        dy = this->y_dir * 16;
-    }
-
-    this->x += (float)dx;
-    this->y += (float)dy;
+    // int dx, dy;
+    // if (this->x_dir != 0 && this->y_dir != 0) {
+    //     dx = this->x_dir * 12;
+    //     dy = this->y_dir * 12;
+    // } else {
+    //     dx = this->x_dir * 16;
+    //     dy = this->y_dir * 16;
+    // }
+    // 
+    // this->x += (float)dx;
+    // this->y += (float)dy;
 
     Object *obj = game->get_object(from_id);
     Mouse *mouse;

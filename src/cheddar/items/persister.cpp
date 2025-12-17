@@ -44,6 +44,15 @@ ItemPersister::~ItemPersister() {
 }
 
 void ItemPersister::step() {
+    if (this->items_to_spawn.empty()) {
+        if (this->creating_items)
+            this->creating_items = false;
+
+        return;
+    }
+
+    this->creating_items = true;
+
     while (!this->items_to_spawn.empty()) {
         ItemSave item = this->items_to_spawn.front();
         this->items_to_spawn.pop();

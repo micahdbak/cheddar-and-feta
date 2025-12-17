@@ -8,6 +8,7 @@
 #include "mouse.h"
 #include "net_agent.h"
 #include "save_data.h"
+#include "audio_playback.h"
 
 #include "items/save.h"
 #include "items/toothpick.h"
@@ -148,8 +149,10 @@ void Mouse::step() {
     std::string sel_item_id = this->sel_item < 0 ? ITEM_NONE : this->items[this->sel_item].item_id;
     int sel_item_count = sel_item_id == ITEM_NONE ? 1 : this->items[this->sel_item].count;
 
-    if (!this->is_feta)
+    if (!this->is_feta) {
+        set_listener(this->x, this->y);
         game->draw_hud(game->ui, this->items, this->sel_item, this->health, this->max_health);
+    }
 
     // note that this is done after the above draw hud; using an item with count 0 = using no item
     if (sel_item_count == 0 && sel_item_id != ITEM_NONE) {
@@ -235,6 +238,8 @@ void Mouse::step() {
                     this->sprite->set_animation((this->sprite->animation % 8) + THROWING_ANIMATION);
                     this->sprite->set_frame(0);
                     this->sprite->interval_ms = 125;
+
+                    play_audio("sfx/throw.wav", 1.0f, this->x, this->y);
                 }
 
                 break;
@@ -272,6 +277,8 @@ void Mouse::step() {
 
                 // set animation to attacking
                 this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
+
+                play_audio("sfx/kick.wav", 1.0f, this->x, this->y);
             } break;
 
             default: break;
@@ -293,6 +300,8 @@ void Mouse::step() {
             this->sprite->set_animation((this->sprite->animation % 8) + THROWING_ANIMATION);
             this->sprite->set_frame(0);
             this->sprite->interval_ms = 125;
+
+            play_audio("sfx/throw.wav", 1.0f, this->x, this->y);
         }
 
         break;
@@ -513,6 +522,7 @@ void Mouse::attack(int damage) {
 
     if (damage > 0) {
         this->health -= damage;
+        play_audio("sfx/hurt.wav", 1.0f, this->x, this->y);
     }
 
     // if dead, go down

@@ -5,6 +5,7 @@
 #include "items/persister.h"
 #include "save_data.h"
 #include "textbox.h"
+#include "audio_playback.h"
 
 #include <iostream>
 
@@ -31,8 +32,11 @@ DroppedItem::DroppedItem(std::string item_id, float x, float y, const char *spri
             game->delete_object = true;
         }
     } else if (item_persister != nullptr) {
-        // item dropped by enemy/player
         item_persister->remember_item(item_id, x, y, this->id);
+
+        if (!item_persister->creating_items) {
+            play_audio("sfx/settle.wav", 0.5f, this->x, this->y);
+        }
     }
 }
 
@@ -40,6 +44,7 @@ DroppedItem::~DroppedItem() {
     if (!game->deleting_objects && item_persister != nullptr) {
         // item picked up by player, most likely
         item_persister->forget_item(this->id);
+        play_audio("sfx/pickup.wav", 0.5f, this->x, this->y);
     }
 
     delete this->sprite;

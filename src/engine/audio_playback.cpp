@@ -1,9 +1,18 @@
 #include "audio_playback.h"
+#include "game.h"
 
 #include <unordered_map>
 #include <iostream>
 
 #define NUM_VOICES 32
+
+#define IDLE_THRESHOLD 4096 // 4KiB
+#define LOOP_THRESHOLD 4096 * 8 // 32KiB
+
+// essentially, audio < LISTEN_NEAR px of the listener is at max volume
+// audio > LISTEN_NEAR & < LISTEN_FAR are quieter, audio > LISTEN_FAR are silent
+#define LISTEN_NEAR 160.0f
+#define LISTEN_FAR  320.0f
 
 struct audio_source {
     SDL_AudioSpec spec;
@@ -17,6 +26,7 @@ static SDL_AudioSpec playback_spec;
 static SDL_AudioStream *voices[NUM_VOICES] = {0};
 static SDL_AudioSpec voice_spec[NUM_VOICES];
 static struct audio_source *ambience = NULL;
+static float listener_x = 0.0f, listener_y = 0.0f;
 
 void init_playback() {
     playback_device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
@@ -68,11 +78,29 @@ void load_audio(const std::string &wav_path) {
     audio_sources[wav_path] = src;
 }
 
-void play_audio(const std::string &wav_path, float gain) {
+void set_listener(float x, float y) {
+    listener_x = x;
+    listener_y = y;
+}
+
+void play_audio(const std::string &wav_path, float gain, float x, float y) {
     auto it = audio_sources.find(wav_path);
 
     if (it == audio_sources.end()) {
         return;
+    }
+
+    float dist = distance_between_points(listener_x, listener_y, x, y);
+
+    // too far
+    if (dist > LISTEN_FAR) {
+        return;
+    }
+
+    if (dist > LISTEN_NEAR) {
+        float mult = (dist - LISTEN_NEAR) / (LISTEN_FAR - LISTEN_NEAR);
+        mult = 1.0f - mult;
+        gain *= mult;
     }
 
     struct audio_source &src = (*it).second;
@@ -80,7 +108,7 @@ void play_audio(const std::string &wav_path, float gain) {
     // voices[0] is reserved for ambient audio
     for (int i = 1; i < NUM_VOICES; i++) {
         // find an idle audio stream
-        if (SDL_GetAudioStreamQueued(voices[i]) > 0) {
+        if (SDL_GetAudioStreamQueued(voices[i]) > IDLE_THRESHOLD) {
             continue;
         }
 
@@ -123,7 +151,7 @@ void loop_audio(const std::string &wav_path) {
 
 void ambience_step() {
     // wait until < approx 32kb of audio remains
-    if (ambience == NULL || SDL_GetAudioStreamQueued(voices[0]) >= 32000) {
+    if (ambience == NULL || SDL_GetAudioStreamQueued(voices[0]) >= LOOP_THRESHOLD) {
         return;
     }
 

@@ -130,20 +130,20 @@ std::string NetworkConnection::receive() {
 }
 
 void NetworkConnection::on_description(int, const char *sdp, const char *type, void *user_ptr) {
-    std::cout << "NetworkConnection::on_description" << std::endl;
+    // std::cout << "NetworkConnection::on_description" << std::endl;
     NetworkConnection *connection = (NetworkConnection *)user_ptr;
     connection->description.first = sdp;
     connection->description.second = type;
 }
 
 void NetworkConnection::on_candidate(int, const char *cand, const char *mid, void *user_ptr) {
-    std::cout << "NetworkConnection::on_candidate" << std::endl;
+    // std::cout << "NetworkConnection::on_candidate" << std::endl;
     NetworkConnection *connection = (NetworkConnection *)user_ptr;
     connection->candidates.push(std::pair<std::string, std::string>(cand, mid));
 }
 
 void NetworkConnection::on_datachannel(int, int dc, void *user_ptr) {
-    std::cout << "NetworkConnection::on_datachannel" << std::endl;
+    // std::cout << "NetworkConnection::on_datachannel" << std::endl;
     NetworkConnection *connection = (NetworkConnection *)user_ptr;
     connection->dc = dc;
     rtcSetOpenCallback(dc, NetworkConnection::on_open);
@@ -154,13 +154,13 @@ void NetworkConnection::on_datachannel(int, int dc, void *user_ptr) {
 }
 
 void NetworkConnection::on_open(int, void *user_ptr) {
-    std::cout << "NetworkConnection::on_open" << std::endl;
+    // std::cout << "NetworkConnection::on_open" << std::endl;
     NetworkConnection *connection = (NetworkConnection *)user_ptr;
     connection->state = NetworkConnection::State::ALIVE;
 }
 
 void NetworkConnection::on_close(int, void *user_ptr) {
-    std::cout << "NetworkConnection::on_close" << std::endl;
+    // std::cout << "NetworkConnection::on_close" << std::endl;
     NetworkConnection *connection = (NetworkConnection *)user_ptr;
     connection->kill();
 }

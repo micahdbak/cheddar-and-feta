@@ -2,6 +2,7 @@
 #include "controller.h"
 #include "mouse.h"
 #include "spawner.h"
+#include "audio_playback.h"
 
 Bell::Bell(int x, int y, int spawner_id) {
     this->x = x;
@@ -23,10 +24,11 @@ void Bell::attack(int damage) {
 
     if (spawner != nullptr && !spawner->empty && !this->triggered) {
         spawners[this->spawner_id]->trigger();
-        this->triggered = true;
     }
 
+    this->triggered = true;
     this->timer = game->ticks;
+    play_audio("sfx/bell.wav", 1.0f, this->x, this->y);
 }
 
 void Bell::step() {

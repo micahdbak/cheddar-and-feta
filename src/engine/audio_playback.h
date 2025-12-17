@@ -8,7 +8,8 @@
 void init_playback();
 void free_playback();
 void load_audio(const std::string &wav_path);
-void play_audio(const std::string &wav_path, float gain);
+void set_listener(float x, float y);
+void play_audio(const std::string &wav_path, float gain, float x, float y);
 void loop_audio(const std::string &wav_path);
 void ambience_step();
 

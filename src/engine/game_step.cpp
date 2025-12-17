@@ -263,6 +263,9 @@ void Game::step() {
         return;
     }
 
+    // loops ambient track
+    ambience_step();
+
     // get ticks and calculate delta
     Uint64 new_ticks = SDL_GetTicks();
     this->delta = float(new_ticks - this->ticks) / 1000.0f;

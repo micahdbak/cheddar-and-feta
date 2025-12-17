@@ -45,7 +45,7 @@ void NetReceiver::step() {
     if (state != NetworkAgent::State::CONNECTED) {
         // if currently in a map other than the init map, reset the network agent and go to that
         if (game->current_map != "maps/init") {
-            std::cout << "resetting" << std::endl;
+            // std::cout << "resetting" << std::endl;
             net_agent->try_reset();
             game->map = "maps/init";
             last_frame_ticks = 0;
@@ -137,7 +137,7 @@ void NetReceiver::step() {
             sprite.texture = load_bmp_texture(sprite.tex_id);
 
             if (sprite.texture == nullptr) {
-                std::cout << "FrameConsumer::step error: bad texture id from Cheddar: " << buff << std::endl;
+                // std::cout << "FrameConsumer::step error: bad texture id from Cheddar: " << buff << std::endl;
                 line = next_line(line);
                 continue;
             }

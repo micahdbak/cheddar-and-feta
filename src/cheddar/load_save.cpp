@@ -25,12 +25,12 @@ void LoadSave::step() {
         int ret = save.load_file(this->sel_save);
 
         if (ret != LOAD_SUCCESS && ret != LOAD_NEW) {
-            textbox = new Textbox("Save file is corrupted.", LOAD_SAVE_OBJ, DEFAULT_FONT, 0);
+            textbox = new Textbox("Save file is corrupted.", LOAD_SAVE_OBJ, DEFAULT_FONT, 35);
             return;
         }
 
         if (save.geti(GAME_DONE)) {
-            textbox = new Textbox("Cannot load this game. Create a new save.", LOAD_SAVE_OBJ, DEFAULT_FONT, 0);
+            textbox = new Textbox("Cannot load this game. Create a new save.", LOAD_SAVE_OBJ, DEFAULT_FONT, 35);
             return;
         }
 

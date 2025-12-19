@@ -2,6 +2,8 @@
 
 #include "game.h"
 #include "spawner.h"
+#include "save_data.h"
+#include "audio_playback.h"
 
 #include <iostream>
 
@@ -16,6 +18,13 @@ FoeGate::FoeGate(int x, int y, int spawner_id, int animation):
     y = y - (y % game->tile_height);
     this->x = float(x);
     this->y = float(y);
+
+    char key[256];
+    snprintf(key, sizeof(key), "spawner_%d", this->spawner_id);
+    if (save.geti(key) == 1) {
+        this->opened = true;
+        return;
+    }
 
     /* gates are 48x48; tiles are 16x16; therefore a gate should look like:
      * @ - + - + - + <- @ is gate coordinate
@@ -50,6 +59,8 @@ void FoeGate::step() {
 
         this->sprite->set_frame(1); // opened frame
         this->opened = true;
+
+        play_audio("sfx/door.wav", 1.0f, this->x, this->y);
     }
 
     this->dst_rect.x = this->x - game->corner_x;

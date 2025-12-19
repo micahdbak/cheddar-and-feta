@@ -2,7 +2,7 @@ Tunnel of DOOM
 Floor 1
 16,16,32,32
 0,0,0
-
+music/noise.wav
 2
 tiles/dirttunnel.bmp
 sprites/cheddar.bmp

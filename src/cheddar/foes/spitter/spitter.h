@@ -29,6 +29,8 @@ public:
     int displayed_direction = 0;
     float abdomen_distance = 256.0f;
 
+    Foe::State prev_state = Foe::State::IDLE;
+
 private:
     Sprite *sprite;
     SDL_FRect dst_rect;

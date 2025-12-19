@@ -195,7 +195,9 @@ void Mouse::step() {
         // update sprite frame and animation only if moving
         if (x_dir != 0 || y_dir != 0) {
             this->sprite->set_animation(direction_from_dirs(x_dir, y_dir));
-            this->sprite->update_frame();
+            if (this->sprite->update_frame() && (this->sprite->frame_i % 2) == 1) {
+                play_audio("sfx/step.wav", 0.5, this->x, this->y);
+            }
         } else {
             // otherwise show only the first frame
             this->sprite->set_frame(0);
@@ -255,8 +257,11 @@ void Mouse::step() {
                     // set animation to eating cheese
                     this->sprite->set_animation(EATING_ANIMATION);
                     this->sprite->interval_ms = 75;
+
+                    play_audio("sfx/cheese.wav", 1.0f, this->x, this->y);
                 } else {
                     // play sfx for already full?
+                    play_audio("sfx/full.wav", 1.0f, this->x, this->y);
                 }
 
                 break;

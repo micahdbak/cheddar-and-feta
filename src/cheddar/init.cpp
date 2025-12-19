@@ -103,15 +103,6 @@ void Game::init() {
     this->factories[FIRST_OBJ] = new NetReceiverFactory();
     this->factories[LAST_OBJ] = new NetSenderFactory();
 
-    load_audio("sfx/settle.wav");
-    load_audio("sfx/pickup.wav");
-    load_audio("sfx/throw.wav");
-    load_audio("sfx/kick.wav");
-    load_audio("sfx/hurt.wav");
-    load_audio("sfx/blip.wav");
-    load_audio("sfx/bell.wav");
-    load_audio("sfx/step.wav");
-
     this->title = "Playing as Cheddar";
 
     net_agent = new NetworkAgent(false);

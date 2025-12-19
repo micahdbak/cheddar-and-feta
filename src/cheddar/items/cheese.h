@@ -18,6 +18,8 @@ public:
 
     void step() override;
 
+    static void drop_cheese(int x, int y, int min_amount, int max_amount);
+
 private:
     void render_cheese();
 

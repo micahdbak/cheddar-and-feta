@@ -2,7 +2,7 @@ Freedom
 Ending
 16,16,32,32
 108,164,108
-
+music/noise.wav
 3
 tiles/forest.bmp
 tiles/dirttunnel.bmp

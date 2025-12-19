@@ -2,6 +2,7 @@
 #include "game.h"
 #include "mouse.h"
 #include "save_data.h"
+#include "audio_playback.h"
 
 Ladder::Ladder(int x, int y, std::string next_map, int which_coord) {
     this->x = (float)x;
@@ -22,5 +23,6 @@ void Ladder::step() {
     if (mouse != nullptr) {
         game->map = this->next_map;
         save.puti(MOUSE_SPAWN_AT, this->which_coord);
+        play_audio("sfx/ladder.wav", 1.0f, this->x, this->y);
     }
 }

@@ -4,6 +4,8 @@
 #include "net_agent.h"
 #include "net_sender.h"
 
+NetSender *net_sender = nullptr;
+
 void NetSender::step() {
     if (net_agent->get_state() != NetworkAgent::State::CONNECTED)
         return;
@@ -29,6 +31,10 @@ void NetSender::step() {
 
         snprintf(line, sizeof(line), "\n-1,0,0\n");
     }
+
+    frame_msg += line;
+
+    snprintf(line, sizeof(line), "%d\n", (int)game->sprites.size());
     frame_msg += line;
 
     // sprites
@@ -66,6 +72,15 @@ void NetSender::step() {
             sprite.y - dst_rect.y
         );
 
+        frame_msg += line;
+    }
+
+    snprintf(line, sizeof(line), "%d\n", (int)game->audio.size());
+    frame_msg += line;
+
+    for (Game::AudioMsg &msg : game->audio) {
+        snprintf(line, sizeof(line), "%s %d,%d,%d\n", msg.wav_path.c_str(),
+            (int)(10.0f * msg.gain), (int)msg.x, (int)msg.y);
         frame_msg += line;
     }
 

@@ -14,6 +14,8 @@ public:
 
     void step() override;
 
+    Foe::State prev_state = Foe::State::IDLE;
+
 private:
     Sprite *sprite;
     SDL_FRect dst_rect, icon_src, icon_dst;

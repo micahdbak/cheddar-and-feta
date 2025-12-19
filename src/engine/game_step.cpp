@@ -263,7 +263,7 @@ void Game::step() {
         return;
     }
 
-    // loops ambient track
+    this->audio.clear();
     ambience_step();
 
     // get ticks and calculate delta

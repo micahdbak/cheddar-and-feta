@@ -2,6 +2,7 @@
 #include "segment.h"
 #include "spitter.h"
 #include "save_data.h"
+#include "audio_playback.h"
 #include "../../mouse.h"
 #include "../../items/fire.h"
 
@@ -57,6 +58,20 @@ void Spitter::step() {
     this->foe_step();
 
     switch (this->state) {
+    case Foe::State::IDLE:
+        if (this->prev_state != this->state) {
+            switch (SDL_rand(6)) {
+            case 0: play_audio("sfx/spitter_walk1.wav", 1.0f, this->x, this->y); break;
+            case 1: play_audio("sfx/spitter_walk2.wav", 1.0f, this->x, this->y); break;
+            case 2: play_audio("sfx/spitter_walk3.wav", 1.0f, this->x, this->y); break;
+            case 3: play_audio("sfx/spitter_walk4.wav", 1.0f, this->x, this->y); break;
+            case 4: play_audio("sfx/ant_walk3.wav", 1.0f, this->x, this->y); break;
+            default: break;
+            }
+        }
+
+        break;
+
     case Foe::State::ACTION: {
         Uint64 action_offset = game->ticks - this->timer;
         if (action_offset > 2000) {
@@ -115,10 +130,20 @@ void Spitter::step() {
             int fire_x_dir, fire_y_dir;
             dirs_from_direction(this->direction, &fire_x_dir, &fire_y_dir);
             game->push_object(ITEM_FIRE USE_OBJ, UseItem::Options(fire_x, fire_y, fire_x_dir * 2, fire_y_dir * 2, -1));
+            
+            if (SDL_rand(2)) {
+                play_audio("sfx/fire_short1.wav", 1.0f, this->x, this->y);
+            } else {
+                play_audio("sfx/fire_short2.wav", 1.0f, this->x, this->y);
+            }
         }
     } break;
 
     case Foe::State::HURT:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/spitter_hurt.wav", 1.0f, this->x, this->y);
+        }
+
         if (game->ticks - this->hurt_timer > 100) {
             this->state = Foe::State::WALKING;
         }
@@ -126,6 +151,10 @@ void Spitter::step() {
         break;
 
     case Foe::State::DEAD:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/spitter_die.wav", 1.0f, this->x, this->y);
+        }
+
         if (game->ticks - this->hurt_timer > 2000) {
             // delete this object
             game->delete_object = true;
@@ -143,6 +172,8 @@ void Spitter::step() {
 
         break;
     }
+
+    this->prev_state = this->state;
 
     if (game->ticks - this->hurt_timer < 500 && this->state != Foe::State::DEAD) {
         game->push_health_bar(this->health, this->max_health, this->x, this->y - 16.0f, &this->icon_src, &this->icon_dst);

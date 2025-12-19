@@ -2,6 +2,7 @@
 #include "game.h"
 #include "net_agent.h"
 #include "net_receiver.h"
+#include "audio_playback.h"
 
 #include <iostream>
 #include <vector>
@@ -98,6 +99,8 @@ void NetReceiver::step() {
         int view_x = SCREEN_WIDTH / 2, view_y = SCREEN_HEIGHT / 2;
         sscanf(line, "%d,%d", &view_x, &view_y);
         game->set_view(view_x, view_y);
+        set_listener(view_x, view_y);
+
         line = next_line(line);
         if (*line == '\0') return;
 
@@ -120,8 +123,14 @@ void NetReceiver::step() {
         line = next_line(line);
         if (*line == '\0') return;
 
-        // for all subsequent lines
-        while (*line != '\0') {
+        int num_sprites = 0;
+        sscanf(line, "%d", &num_sprites);
+
+        // read sprites
+        for (int i = 0; i < num_sprites; i++) {
+            line = next_line(line);
+            if (*line == '\0') return;
+
             SDL_Rect src_rect, dst_rect;
             int depth_offset;
 
@@ -160,7 +169,26 @@ void NetReceiver::step() {
 
             game->push_sprite(sprite.tex_id, sprite.texture, sprite.src_rect, sprite.dst_rect, sprite.y);
             this->sprites.push_back(sprite);
+        }
+
+        line = next_line(line);
+        if (*line == '\0') return;
+
+        int num_audio = 0;
+        sscanf(line, "%d", &num_audio);
+
+        // read audios
+        for (int i = 0; i < num_audio; i++) {
             line = next_line(line);
+            if (*line == '\0') return;
+
+            int gain_i, x, y;
+            float gain;
+
+            sscanf(line, "%1023s %d,%d,%d", buff, &gain_i, &x, &y);
+            gain = (float)gain_i / 10.0f;
+
+            play_audio(std::string(buff), gain, (float)x, (float)y);
         }
     }
 }

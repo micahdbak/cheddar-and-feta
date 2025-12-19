@@ -4,6 +4,7 @@
 #include "hurtbox.h"
 #include "mouse.h"
 #include "save_data.h"
+#include "audio_playback.h"
 #include "../items/cheese.h"
 #include "../items/toothpick.h"
 
@@ -67,11 +68,16 @@ void FoePorcupine::step() {
             snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d", (int)(this->x + this->off_x), (int)(this->y + this->off_y), this->spine_x_dir, this->spine_y_dir, this->id);
             game->push_object(ITEM_TOOTHPICK USE_OBJ, std::string(buff));
             this->spine_x_dir = this->spine_y_dir = 0;
+            play_audio("sfx/throw.wav", 1.0f, this->x, this->y);
         }
 
         break;
 
     case Foe::State::HURT:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/ant_hurt.wav", 1.0f, this->x, this->y);
+        }
+
         if (game->ticks - this->timer > 250) {
             this->state = Foe::State::WALKING;
         }
@@ -81,19 +87,15 @@ void FoePorcupine::step() {
         break;
 
     case Foe::State::DEAD:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/ant_die.wav", 1.0f, this->x, this->y);
+        }
+
         this->sprite->set_animation(DEAD_ANIMATION + this->direction);
         if (game->ticks - this->timer > 2000) {
             // delete this object
             game->delete_object = true;
-
-            int cheese_amount = SDL_rand(8); // 0..7
-
-            // add cheese for the player to pick up
-            if (cheese_amount > 4) { // 5..7
-                cheese_amount -= 4; // 1..3
-                char cheese_opt[256];
-                game->push_object(ITEM_CHEESE DROPPED_OBJ, Cheese::Options(this->x, this->y, cheese_amount));
-            }
+            Cheese::drop_cheese(this->x, this->y, 3, 5);
 
             return;
         }
@@ -113,7 +115,12 @@ void FoePorcupine::step() {
         break;
     }
 
-    this->sprite->update_frame();
+    this->prev_state = this->state;
+
+    if (this->sprite->update_frame() && this->state == Foe::State::WALKING && (this->sprite->frame_i % 2) == 1) {
+        play_audio("sfx/step.wav", 1.0f, this->x, this->y);
+    }
+
     this->dst_rect.x = this->x - float(game->corner_x) - 16.0f + this->off_x;
     this->dst_rect.y = this->y - float(game->corner_y) - 16.0f + this->off_y;
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);

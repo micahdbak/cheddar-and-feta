@@ -45,6 +45,40 @@ void init_playback() {
         voices[i] = SDL_CreateAudioStream(&playback_spec, &playback_spec);
         SDL_BindAudioStream(playback_device, voices[i]);
     }
+
+    load_audio("sfx/ant_attack.wav");
+    load_audio("sfx/ant_die.wav");
+    load_audio("sfx/ant_fly.wav");
+    load_audio("sfx/ant_hurt.wav");
+    load_audio("sfx/ant_walk1.wav");
+    load_audio("sfx/ant_walk2.wav");
+    load_audio("sfx/ant_walk3.wav");
+    load_audio("sfx/bell.wav");
+    load_audio("sfx/blip.wav");
+    load_audio("sfx/cannon.wav");
+    load_audio("sfx/cheese.wav");
+    load_audio("sfx/door.wav");
+    load_audio("sfx/fire.wav");
+    load_audio("sfx/fire_short1.wav");
+    load_audio("sfx/fire_short2.wav");
+    load_audio("sfx/full.wav");
+    load_audio("sfx/hurt.wav");
+    load_audio("sfx/kick.wav");
+    load_audio("sfx/ladder.wav");
+    load_audio("sfx/pickup.wav");
+    load_audio("sfx/settle.wav");
+    load_audio("sfx/spitter_die.wav");
+    load_audio("sfx/spitter_hurt.wav");
+    load_audio("sfx/spitter_walk1.wav");
+    load_audio("sfx/spitter_walk2.wav");
+    load_audio("sfx/spitter_walk3.wav");
+    load_audio("sfx/spitter_walk4.wav");
+    load_audio("sfx/step.wav");
+    load_audio("sfx/tank_die.wav");
+    load_audio("sfx/tank_hurt.wav");
+    load_audio("sfx/tank_roll1.wav");
+    load_audio("sfx/tank_roll2.wav");
+    load_audio("sfx/throw.wav");
 }
 
 void free_playback() {
@@ -89,6 +123,8 @@ void play_audio(const std::string &wav_path, float gain, float x, float y) {
     if (it == audio_sources.end()) {
         return;
     }
+
+    game->audio.push_back(Game::AudioMsg{wav_path, gain, x, y});
 
     float dist = distance_between_points(listener_x, listener_y, x, y);
 

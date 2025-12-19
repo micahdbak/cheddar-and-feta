@@ -100,7 +100,6 @@ void Foe::foe_step() {
 
         // will be walking if not action'ing
         this->state = Foe::State::WALKING;
-        play_audio("sfx/step.wav", 1.0f, this->x, this->y);
 
         int current_x = this->target_x;
         int current_y = this->target_y;

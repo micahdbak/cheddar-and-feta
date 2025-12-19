@@ -211,6 +211,13 @@ public:
 
     Uint8 bg_r = 0, bg_g = 0, bg_b = 0;
 
+    struct AudioMsg {
+        std::string wav_path;
+        float gain, x, y;
+    };
+
+    std::vector<AudioMsg> audio;
+
 private:
     // for Game::texts
     struct Text {

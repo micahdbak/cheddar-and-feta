@@ -2,6 +2,7 @@
 #include "game.h"
 #include "hurtbox.h"
 #include "save_data.h"
+#include "audio_playback.h"
 #include "../items/cheese.h"
 #include "../items/cannon_ball.h"
 
@@ -30,6 +31,8 @@ void FoeFrog::action(Mouse *mouse) {
 
     this->state = Foe::State::ACTION;
     this->timer = game->ticks;
+
+    play_audio("sfx/cannon.wav", 1.0, this->x, this->y);
 
     char options[256];
     snprintf(options, sizeof(options), "%d,%d,%d,%d,%d", (int)(this->x + this->off_x), (int)(this->y + this->off_y), this->x_dir, this->y_dir, this->id);
@@ -63,6 +66,16 @@ void FoeFrog::step() {
     this->foe_step();
 
     switch (this->state) {
+    case Foe::State::IDLE:
+        if (this->prev_state != this->state) {
+            switch (SDL_rand(2)) {
+            case 0: play_audio("sfx/tank_roll1.wav", 0.5, this->x, this->y); break;
+            case 1: play_audio("sfx/tank_roll2.wav", 0.5, this->x, this->y); break;
+            }
+        }
+
+        break;
+
     case Foe::State::ACTION:
         this->sprite->set_animation(ACTION_ANIMATION + this->_displayed_direction);
         if (game->ticks - this->timer > 500) {
@@ -72,6 +85,10 @@ void FoeFrog::step() {
         break;
 
     case Foe::State::HURT:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/tank_hurt.wav", 1.0, this->x, this->y);
+        }
+
         this->sprite->set_animation(ACTION_ANIMATION + this->_displayed_direction);
         this->sprite->set_frame(0);
         if (game->ticks - this->timer > 250) {
@@ -83,20 +100,16 @@ void FoeFrog::step() {
         break;
 
     case Foe::State::DEAD:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/tank_die.wav", 1.0, this->x, this->y);
+        }
+
         this->sprite->set_animation(ACTION_ANIMATION + this->_displayed_direction);
         this->sprite->set_frame(0);
         if (game->ticks - this->timer > 2000) {
             // delete this object
             game->delete_object = true;
-
-            int cheese_amount = SDL_rand(8); // 0..7
-
-            // add cheese for the player to pick up
-            if (cheese_amount > 4) { // 5..7
-                cheese_amount -= 4; // 1..3
-                char cheese_opt[256];
-                game->push_object(ITEM_CHEESE DROPPED_OBJ, Cheese::Options(this->x, this->y, cheese_amount));
-            }
+            Cheese::drop_cheese(this->x, this->y, 3, 5);
 
             char options[256];
             snprintf(options, sizeof(options), "%d,%d", int(this->x + this->off_x), int(this->y + this->off_y));
@@ -114,6 +127,8 @@ void FoeFrog::step() {
 
         break;
     }
+
+    this->prev_state = this->state;
 
     this->sprite->update_frame();
     this->dst_rect.x = this->x - float(game->corner_x) - 24.0f + this->off_x;

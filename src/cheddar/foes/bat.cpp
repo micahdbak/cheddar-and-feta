@@ -4,6 +4,7 @@
 #include "mouse.h"
 #include "hurtbox.h"
 #include "save_data.h"
+#include "audio_playback.h"
 #include "../items/cheese.h"
 #include "../items/toothpick.h"
 
@@ -67,7 +68,18 @@ void FoeBat::step() {
     this->foe_step();
 
     switch (this->state) {
+    case Foe::State::IDLE:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/ant_fly.wav", 0.5, this->x, this->y);
+        }
+
+        break;
+
     case Foe::State::ACTION:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/ant_attack.wav", 1.0, this->x, this->y);
+        }
+        
         if (game->ticks - this->timer > 250) {
             this->state = State::FORCE_RANDOM_TILE;
         }
@@ -75,6 +87,10 @@ void FoeBat::step() {
         break;
 
     case Foe::State::HURT:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/ant_hurt.wav", 1.0, this->x, this->y);
+        }
+
         this->sprite->set_animation(WALK_ANIMATION + this->_displayed_direction);
         if (game->ticks - this->timer > 250) {
             this->state = Foe::State::WALKING;
@@ -85,20 +101,16 @@ void FoeBat::step() {
         break;
 
     case Foe::State::DEAD:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/ant_die.wav", 1.0, this->x, this->y);
+        }
+
         this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
 
         if (game->ticks - this->timer > 2000) {
             // delete this object
             game->delete_object = true;
-
-            int cheese_amount = SDL_rand(8); // 0..7
-
-            // add cheese for the player to pick up
-            if (cheese_amount > 4) { // 5..7
-                cheese_amount -= 4; // 1..3
-                char cheese_opt[256];
-                game->push_object(ITEM_CHEESE DROPPED_OBJ, Cheese::Options(this->x, this->y, cheese_amount));
-            }
+            Cheese::drop_cheese(this->x, this->y, 1, 3);
 
             return;
         }
@@ -127,6 +139,8 @@ void FoeBat::step() {
     } else {
         this->ticks_offset = game->ticks - this->timer + base_ticks_offset;
     }
+
+    this->prev_state = this->state;
 
     this->sprite->update_frame();
     this->dst_rect.x = this->x - float(game->corner_x) - 16.0f + this->off_x;

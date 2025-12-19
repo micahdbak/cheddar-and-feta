@@ -1,6 +1,7 @@
 #include "game.h"
 #include "molotov.h"
 #include "fire.h"
+#include "audio_playback.h"
 
 #include <map>
 
@@ -34,6 +35,9 @@ void ThrownMolotov::step() {
         game->push_object(ITEM_FIRE USE_OBJ, UseItem::Options(this->x, this->y, 0, 0, -1));
 
         game->delete_object = true;
+
+        play_audio("sfx/fire.wav", 1.0f, this->x, this->y);
+
         return;
     }
 

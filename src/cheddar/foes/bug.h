@@ -18,6 +18,8 @@ public:
     float hitsource_x() override { return this->x + this->off_x; }
     float hitsource_y() override { return this->y + this->off_y; }
 
+    Foe::State prev_state = Foe::State::IDLE;
+
 private:
     Sprite *sprite;
     SDL_FRect dst_rect, icon_src, icon_dst;

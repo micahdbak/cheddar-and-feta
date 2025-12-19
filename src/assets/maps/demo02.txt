@@ -2,7 +2,7 @@ Ant hill
 B2
 16,16,80,80
 36,32,28
-music/chillmood.wav
+music/noise.wav
 2
 tiles/dirttunnel.bmp
 tiles/dirtclutter.bmp

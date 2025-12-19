@@ -32,7 +32,7 @@ void Sprite::set_animation(int animation) {
     this->frame.y = float(this->frame_h * animation) + 0.01f;
 }
 
-void Sprite::update_frame() {
+bool Sprite::update_frame() {
     if (game->ticks - this->frame_last_set > this->interval_ms) {
         this->frame_i++;
         if (this->frame_i * this->frame_w >= this->sheet_w) {
@@ -40,7 +40,11 @@ void Sprite::update_frame() {
         }
         this->frame.x = float(this->frame_i * this->frame_w) + 0.01f;
         this->frame_last_set = game->ticks;
+
+        return true;
     }
+
+    return false;
 }
 
 void Sprite::set_frame(int frame_i) {

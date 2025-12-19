@@ -1,5 +1,5 @@
 #include "fire.h"
-#include "SDL3/SDL_stdinc.h"
+#include "audio_playback.h"
 
 static int fire_counter = 0;
 

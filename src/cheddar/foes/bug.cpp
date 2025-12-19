@@ -4,6 +4,7 @@
 #include "hurtbox.h"
 #include "mouse.h"
 #include "save_data.h"
+#include "audio_playback.h"
 #include "../items/cheese.h"
 #include "../items/toothpick.h"
 
@@ -59,7 +60,23 @@ void FoeBug::step() {
     this->foe_step();
 
     switch (this->state) {
+    case Foe::State::IDLE:
+        if (this->prev_state != this->state) {
+            switch (SDL_rand(4)) {
+            case 0: play_audio("sfx/ant_walk1.wav", 0.5, this->x, this->y); break;
+            case 1: play_audio("sfx/ant_walk2.wav", 0.5, this->x, this->y); break;
+            case 2: play_audio("sfx/ant_walk3.wav", 0.5, this->x, this->y); break;
+            default: break; // no sound
+            }
+        }
+
+        break;
+
     case Foe::State::ACTION:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/ant_attack.wav", 1.0, this->x, this->y);
+        }
+
         this->sprite->set_animation(ATTACK_ANIMATION + this->_displayed_direction);
         this->sprite->interval_ms = 50;
         if (game->ticks - this->timer > 1000) {
@@ -69,6 +86,10 @@ void FoeBug::step() {
         break;
 
     case Foe::State::HURT:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/ant_hurt.wav", 1.0, this->x, this->y);
+        }
+
         this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
         if (game->ticks - this->timer > 500) {
             this->state = Foe::State::WALKING;
@@ -79,15 +100,15 @@ void FoeBug::step() {
         break;
 
     case Foe::State::DEAD:
+        if (this->prev_state != this->state) {
+            play_audio("sfx/ant_die.wav", 1.0, this->x, this->y);
+        }
+
         this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
         if (game->ticks - this->timer > 2000) {
             // delete this object
             game->delete_object = true;
-
-            if (SDL_rand(2) > 0) {
-                char cheese_opt[256];
-                game->push_object(ITEM_CHEESE DROPPED_OBJ, Cheese::Options(this->x, this->y, 1));
-            }
+            Cheese::drop_cheese(this->x, this->y, 1, 1);
 
             return;
         }
@@ -102,6 +123,8 @@ void FoeBug::step() {
 
         break;
     }
+
+    this->prev_state = this->state;
 
     this->sprite->update_frame();
     this->dst_rect.x = this->x - float(game->corner_x) - 16.0f + this->off_x;

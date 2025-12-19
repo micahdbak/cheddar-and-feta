@@ -41,3 +41,17 @@ void Cheese::step() {
     this->dst_rect.y = float(this->y - game->corner_y - this->depth_offset);
     game->push_sprite(this->tex_id, this->texture, NULL, &this->dst_rect, this->depth_offset);
 }
+
+void Cheese::drop_cheese(int x, int y, int min_amount, int max_amount) {
+    static int consecutive_fails = 0;
+
+    if (consecutive_fails < 4 && SDL_rand((1 + consecutive_fails) * 2) == 0) {
+        consecutive_fails++;
+        return;
+    }
+
+    consecutive_fails = 0;
+    int amount = min_amount + ((max_amount - min_amount) > 0 ? SDL_rand(max_amount - min_amount) : 0);
+    char cheese_opt[256];
+    game->push_object(ITEM_CHEESE DROPPED_OBJ, Cheese::Options(x, y, amount));
+}

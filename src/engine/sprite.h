@@ -9,15 +9,15 @@ public:
     ~Sprite();
 
     void set_animation(int animation);
-    void update_frame();
+    bool update_frame(); // true on frame update
     void set_frame(int frame_i);
 
     std::string tex_id;
     SDL_FRect frame;
     SDL_Texture *texture;
-    int frame_w, frame_h, interval_ms, animation = 0;
+    int frame_w, frame_h, interval_ms, frame_i, animation = 0;
 private:
-    int sheet_w, sheet_h, frame_i;
+    int sheet_w, sheet_h;
     Uint64 frame_last_set;
 };
 

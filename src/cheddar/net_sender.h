@@ -3,6 +3,9 @@
 
 #include "object.h"
 
+#include <string>
+#include <vector>
+
 class NetSender : public Object {
 public:
     NetSender() {}

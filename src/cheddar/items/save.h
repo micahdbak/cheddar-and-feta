@@ -1,5 +1,5 @@
 #ifndef ITEM_SAVE
-#define ITEM_SAVE "item__save"
+#define ITEM_SAVE "item_save"
 // an extra _ is used to make sure it's ordered before other items
 
 #include "game.h"
@@ -23,7 +23,7 @@ public:
             cheddar->push_item(ITEM_SAVE);
 
         game->save_objects();
-        game->display_notification("Saved to file " + save.value(SAVE_FILE) + ".");
+        game->display_notification("Saved to file " + std::to_string(save.geti(SAVE_FILE) + 1) + ".");
         save.write_file(save.geti(SAVE_FILE));
 
         // all done

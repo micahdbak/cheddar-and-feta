@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#define NUM_SAVE_FILES 3
-
 #define LOAD_SUCCESS 0
 #define LOAD_NEW     1
 #define LOAD_TAMPER  2
@@ -18,6 +16,8 @@
 #define GAME_DONE  "game_done"
 
 #define STATS "_stats"
+
+#define NEW_SAVE_STR "<New Save>"
 
 void float_to_str(float f, char *str, size_t str_size);
 float str_to_float(std::string str);

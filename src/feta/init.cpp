@@ -103,24 +103,21 @@ void Init::step() {
 
             game->draw_rect(this->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
 
-            SDL_FRect code_ui_box = { 76.0f, 56.0f, 168.0f, 40.0f };
-            game->draw_ui_box(this->ui, BOX_CHAR_CONT, &code_ui_box);
-
-            SDL_FRect code_box = { 84.0f, 64.0f, 152.0f, 24.0f };
-            game->draw_ui_box(this->ui, BOX_CHAR_DISP, &code_box);
+            SDL_FRect code_ui_box = { 80.0f, 64.0f, 160.0f, 32.0f };
+            game->draw_ui_box(this->ui, BOX_CONTAINER, &code_ui_box);
 
             std::string prompt = "Please enter the connection code.";
             int prompt_w = game->fonts[DEFAULT_FONT]->text_width(prompt);
-            game->draw_text(this->ui, prompt, DEFAULT_FONT, 160 - prompt_w / 2, 66, 0);
+            game->draw_text(this->ui, prompt, DEFAULT_FONT, 160 - prompt_w / 2, 70, 0);
 
-            game->draw_text(this->ui, "Code:", SMALL_FONT, 130, 78, 0);
-            game->draw_text(this->ui, this->code, CODE_FONT, 154, 77, 0);
+            game->draw_text(this->ui, "Code:", SMALL_FONT, 130, 82, 0);
+            game->draw_text(this->ui, this->code, CODE_FONT, 154, 81, 0);
 
-            SDL_FRect ui_box = { 76.0f, 100.0f, 168.0f, 96.0f };
+            SDL_FRect ui_box = { 80.0f, 104.0f, 160.0f, 64.0f };
             game->draw_ui_box(this->ui, BOX_CHAR_CONT, &ui_box);
 
             const int start_x = 100;
-            const int start_y = 108;
+            const int start_y = 112;
 
             for (int i = 0; i < 36; i++) {
                 int x = start_x + (i % cols) * 12;
@@ -146,15 +143,6 @@ void Init::step() {
                 game->draw_ui_box(this->ui, 36 == this->sel_c ? BOX_CHAR_SEL : BOX_CHAR_BOX, &enter_box);
                 game->draw_text(this->ui, "OK", 36 == this->sel_c ? CODE_FONT : CODE_GRAY_FONT, 175, 145, 0);
             }
-
-            game->draw_text(this->ui, "SEL:", SMALL_FONT, 100, 164, 0);
-            game->draw_text(this->ui, "0/A/W", CONTROLS_FONT, 116, 160, 0);
-
-            game->draw_text(this->ui, "DEL:", SMALL_FONT, 168, 164, 0);
-            game->draw_text(this->ui, "1/B/X", CONTROLS_FONT, 184, 160, 0);
-
-            game->draw_text(this->ui, "NAV:", SMALL_FONT, 122, 180, 0);
-            game->draw_text(this->ui, "45/EF/[\\", CONTROLS_FONT, 140, 176, 0);
 
             if (this->sel_c == 36) {
                 if (select && valid_code) {

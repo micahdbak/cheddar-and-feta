@@ -13,7 +13,7 @@ public:
     void step();
 
     std::vector<std::string> summaries;
-    int sel_save = 0;
+    int sel_save = 0, save_start = 0, save_end = 0;
     bool render = true;
 };
 

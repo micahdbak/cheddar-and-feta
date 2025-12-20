@@ -149,24 +149,20 @@ void Splash::step() {
         case 5: {
             float perc = (float)this->timer / (float)DISPLAY_FOR;
 
-            float cos_res = cosf((2.0f * perc * 2.0f * (float)M_PI) + M_PI);
-            float sin_res = sinf((2.0f * perc * 2.0f * (float)M_PI) + M_PI);
-            bool settled = perc * 224.0f > 112.0f;
-
-            if (settled) {
-                this->ched_dst.x = 160.0f - 16.0f - 20.0f;
-                this->ched_dst.y = 112.0f - 16.0f;
-                this->feta_dst.x = 160.0f - 16.0f + 20.0f;
-                this->feta_dst.y = 112.0f - 16.0f;
-            } else {
-                this->ched_dst.x = 160.0f - 16.0f + (20.0f * cos_res);
-                this->ched_dst.y = (perc * 224.0f) - 16.0f + (6.0f * sin_res);
-                this->feta_dst.x = 160.0f - 16.0f - (20.0f * cos_res);
-                this->feta_dst.y = (perc * 224.0f) - 16.0f - (6.0f * sin_res);
-
-                this->ched_src.x = sin_res < 0.0f ? 48.0f : 16.0f;
-                this->feta_src.x = sin_res > 0.0f ? 48.0f : 16.0f;
+            if (perc * 224.0f > 112.0f) {
+                perc = 0.5f;
             }
+
+            float cos_res = cosf((2.4f * perc * 2.0f * (float)M_PI) + M_PI);
+            float sin_res = sinf((2.4f * perc * 2.0f * (float)M_PI) + M_PI);
+
+            this->ched_dst.x = 160.0f - 16.0f + (20.0f * cos_res);
+            this->ched_dst.y = (perc * 244.0f) - 16.0f + (6.0f * sin_res);
+            this->feta_dst.x = 160.0f - 16.0f - (20.0f * cos_res);
+            this->feta_dst.y = (perc * 244.0f) - 16.0f - (6.0f * sin_res);
+
+            this->ched_src.x = sin_res < 0.0f ? 48.0f : 16.0f;
+            this->feta_src.x = sin_res > 0.0f ? 48.0f : 16.0f;
 
             game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->ched_src, &this->ched_dst, 32);
             game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->feta_src, &this->feta_dst, 32);

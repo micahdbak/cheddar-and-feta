@@ -305,7 +305,7 @@ SDL_Texture *debug_tiles_texture = nullptr;
 void foe_debug_tile(int x, int y) {
     if (debug_dst_rect == nullptr) {
         debug_dst_rect = (SDL_FRect *)malloc(sizeof(SDL_FRect) * rows * cols);
-        debug_tiles_texture = load_bmp_texture("sprites/foedebug.bmp");
+        debug_tiles_texture = load_bmp_texture("sprites/foe_debug.bmp");
     }
 
     float center_x = CENTER_TILE_X(x);
@@ -350,5 +350,5 @@ void foe_debug_tile(int x, int y) {
     };
     dst_rect = &debug_dst_rect[COORD(x, y)];
 
-    game->push_sprite("sprites/foedebug.bmp", debug_tiles_texture, src_rect, dst_rect, 0);
+    game->push_sprite("sprites/foe_debug.bmp", debug_tiles_texture, src_rect, dst_rect, 0);
 }

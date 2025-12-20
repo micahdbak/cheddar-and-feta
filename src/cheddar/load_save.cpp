@@ -6,10 +6,11 @@
 
 #define PADDING   8
 #define UI_WIDTH  (128 + (2*PADDING))
-#define UI_HEIGHT ((16*(NUM_SAVE_FILES+2)) + (2*PADDING))
+#define UI_HEIGHT (48 + (2*PADDING))
 
 LoadSave::LoadSave() {
     this->summaries = save.file_summaries();
+    this->save_end = cnf_min(this->summaries.size(), 2);
 }
 
 void LoadSave::step() {
@@ -47,33 +48,50 @@ void LoadSave::step() {
     int diff = local_controller.is_hit(Button::DOWN) - local_controller.is_hit(Button::UP);
     if (diff != 0) {
         this->sel_save += diff;
-        this->sel_save = cnf_clamp(this->sel_save, 0, NUM_SAVE_FILES - 1);
+        this->sel_save = cnf_clamp(this->sel_save, 0, this->summaries.size());
+
+        if (this->sel_save > this->save_end) {
+            this->save_start++;
+            this->save_end++;
+        } else if (this->sel_save < this->save_start) {
+            this->save_start--;
+            this->save_end--;
+        }
+
         this->render = true;
     }
 
     if (this->render) {
-        game->draw_rect(game->ui, NULL, 96, 128, 160, 255, SDL_BLENDMODE_NONE);
+        game->draw_rect(game->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
 
         const int x = (SCREEN_WIDTH - UI_WIDTH) / 2;
-        const int y = (SCREEN_HEIGHT - UI_HEIGHT) / 2 - 8;
+        const int y = (SCREEN_HEIGHT - UI_HEIGHT) / 2;
         SDL_FRect ui_rect = { float(x), float(y), UI_WIDTH, UI_HEIGHT };
         game->draw_ui_box(game->ui, BOX_CONTAINER, &ui_rect);
-        game->draw_text(game->ui, "--- Cheddar & Feta ---", SMALL_FONT, x + PADDING + 2, y + PADDING, 0);
 
-        for (int i = 0; i < NUM_SAVE_FILES; i++) {
-            const int save_y = y + PADDING + (16*i) + 16;
+        for (int i = save_start; i <= save_end; i++) {
+            const int save_y = y + PADDING + (16 * (i - save_start));
 
             SDL_FRect highlight_rect;
             highlight_rect.x = float(x + PADDING - 2);
-            highlight_rect.y = float(save_y);
+            highlight_rect.y = float(save_y + 1);
             highlight_rect.w = float(4 + UI_WIDTH - (2*PADDING));
             highlight_rect.h = 14.0f;
 
             game->draw_ui_box(game->ui, this->sel_save == i ? BOX_OUT_SEL : BOX_OUT, &highlight_rect);
-            game->draw_text(game->ui, this->summaries[i], DEFAULT_FONT, x + PADDING + 2, save_y + 2, 0);
+            std::string save_text = i >= this->summaries.size() ? NEW_SAVE_STR : this->summaries[i];
+            save_text = std::to_string(i + 1) + ": " + save_text;
+            game->draw_text(game->ui, save_text, DEFAULT_FONT, x + PADDING + 2, save_y + 3, 0);
         }
 
-        game->draw_text(game->ui, "[^/}] to select; [Enter] to load", SMALL_FONT, x + PADDING + 2, y + UI_HEIGHT - PADDING - 8, 0);
+        if (save_start > 0) {
+            game->draw_text(game->ui, "^", SMALL_FONT, (SCREEN_WIDTH / 2) - 3, y + 3, 0);
+        }
+
+        if (save_end < this->summaries.size()) {
+            game->draw_text(game->ui, "}", SMALL_FONT, (SCREEN_WIDTH / 2) - 3, y + UI_HEIGHT - 9, 0);
+        }
+
         this->render = false;
     }
 }

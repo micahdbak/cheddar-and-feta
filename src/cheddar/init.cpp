@@ -15,7 +15,6 @@
 #include "foes/bug.h"
 #include "foes/frog.h"
 #include "foes/gate.h"
-#include "foes/mole.h"
 #include "foes/porcupine.h"
 #include "foes/spawner.h"
 #include "foes/spitter/abdomen.h"
@@ -28,7 +27,6 @@
 #include "items/cheese.h"
 #include "items/coffee.h"
 #include "items/fire.h"
-#include "items/frog_tongue.h"
 #include "items/hermes_boot.h"
 #include "items/molotov.h"
 #include "items/persister.h"
@@ -56,7 +54,6 @@ void Game::init() {
     this->factories[FOE_BAT_OBJ] = new FoeBatFactory();
     this->factories[FOE_BUG_OBJ] = new FoeBugFactory();
     this->factories[FOE_FROG_OBJ] = new FoeFrogFactory();
-    this->factories[FOE_MOLE_OBJ] = new FoeMoleFactory();
     this->factories[FOE_PORCUPINE_OBJ] = new FoePorcupineFactory();
     this->factories[FOE_SPITTER_ABDOMEN_OBJ] = new SpitterAbdomenFactory();
     this->factories[FOE_SPITTER_SEGMENT_OBJ] = new SpitterSegmentFactory();
@@ -71,8 +68,6 @@ void Game::init() {
     this->factories[ITEM_COFFEE_BEAN DROPPED_OBJ] = new DroppedCoffeeBeanFactory();
     this->factories[ITEM_COFFEE_BEAN USE_OBJ] = new UsedCoffeeBeanFactory();
     this->factories[ITEM_FIRE USE_OBJ] = new FireFactory();
-    this->factories[ITEM_FROG_TONGUE DROPPED_OBJ] = new DroppedFrogTongueFactory();
-    this->factories[ITEM_FROG_TONGUE USE_OBJ] = new FrogTongueFactory();
     this->factories[ITEM_HERMES_BOOT DROPPED_OBJ] = new DroppedHermesBootFactory();
     this->factories[ITEM_MOLOTOV DROPPED_OBJ] = new DroppedMolotovFactory();
     this->factories[ITEM_MOLOTOV USE_OBJ] = new ThrownMolotovFactory();
@@ -93,7 +88,6 @@ void Game::init() {
     item_info[ITEM_CHEESE] = Item{EDIBLE, "Cheese"};
     item_info[ITEM_COFFEE_BEAN] = Item{USEFUL, "Coffee Bean"};
     item_info[ITEM_FIRE] = Item{THROWABLE, "Fire"};
-    item_info[ITEM_FROG_TONGUE] = Item{THROWABLE, "Frog Tongue"};
     item_info[ITEM_HERMES_BOOT] = Item{HELD_EFFECT, "Hermes Boot", .damage = 0, .speed = 1.75f};
     item_info[ITEM_MOLOTOV] = Item{THROWABLE, "Molotov Cocktail"};
     item_info[ITEM_SAVE] = Item{USEFUL, "Save Game"};

@@ -1,9 +1,9 @@
 Game Start
 Main Menu
 16,16,20,15
-24,24,24
-music/noise.wav
+0,128,160
+
 1
-tiles/tunnels.bmp
+tiles/menu.bmp
 1
 load_save 0

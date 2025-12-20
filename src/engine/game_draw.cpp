@@ -343,8 +343,8 @@ void Game::draw_overlay() {
 
                 SDL_FRect control_rect = { 20.0f, (float)y, 28.0f, 8.0f };
                 SDL_FRect input_rect = { 52.0f, (float)y, 64.0f, 8.0f };
-                game->draw_rect(this->overlay, &control_rect, 0, 0, 0, control_opacity, SDL_BLENDMODE_BLEND);
-                game->draw_rect(this->overlay, &input_rect, 0, 0, 0, input_opacity, SDL_BLENDMODE_BLEND);
+                game->draw_rect(this->overlay, &control_rect, 24, 24, 24, control_opacity, SDL_BLENDMODE_BLEND);
+                game->draw_rect(this->overlay, &input_rect, 24, 24, 24, input_opacity, SDL_BLENDMODE_BLEND);
             }
         }
 

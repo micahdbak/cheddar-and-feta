@@ -58,19 +58,19 @@ std::vector<std::string> SaveData::file_summaries() {
     _mkdir_if_not_exists(save_root, sizeof(save_root));
     std::vector<std::string> summaries;
 
-    for (int i = 0; i < NUM_SAVE_FILES; i++) {
+    for (int i = 0;; i++) {
         // open save file
         snprintf(save_file_name, sizeof(save_file_name), "%s/save%d.txt", save_root, i);
         FILE *save_file = fopen(save_file_name, "r");
         if (save_file == NULL) {
-            // if file doesn't exist, push back "Empty." summary
-            summaries.push_back("Empty.");
-            continue;
+            break;
         }
 
         // read first line of file
         char line[1024];
-        if (fgets(line, sizeof(line), save_file) == NULL) CORRUPTED_EXIT
+        if (fgets(line, sizeof(line), save_file) == NULL)
+            break;
+
         line[strcspn(line, "\n")] = '\0';
 
         // first line of file is save summary
@@ -93,7 +93,7 @@ static unsigned long _djb2_hash(unsigned long starting_hash, const char *str) {
 }
 
 void SaveData::write_file(int file_i) {
-    if (file_i < 0 || file_i >= NUM_SAVE_FILES) CORRUPTED_EXIT
+    if (file_i < 0) CORRUPTED_EXIT
 
     char save_root[1024], save_file_name[1024];
     _mkdir_if_not_exists(save_root, sizeof(save_root));
@@ -139,7 +139,7 @@ void SaveData::write_file(int file_i) {
 #define MAX_LINE_LENGTH 10240 // 10kb
 
 int SaveData::load_file(int file_i) {
-    if (file_i < 0 || file_i >= NUM_SAVE_FILES) CORRUPTED_EXIT
+    if (file_i < 0) CORRUPTED_EXIT
 
     char save_root[1024], save_file_name[1024];
     _mkdir_if_not_exists(save_root, sizeof(save_root));

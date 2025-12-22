@@ -298,7 +298,13 @@ void Game::draw_overlay() {
             }
         } else {
             int y_dir = captured_controller.is_hit(DOWN) - captured_controller.is_hit(UP);
-            int new_sel_control = cnf_clamp(_sel_control + y_dir, 0, (int)Button::DIGIT-1);
+            int new_sel_control = cnf_clamp(_sel_control + y_dir, 0, (int)Button::DIGIT);
+
+            int x_dir = captured_controller.is_hit(RIGHT) - captured_controller.is_hit(LEFT);
+            if (_sel_control == 0 && x_dir != 0) {
+                game->volume = cnf_clamp(game->volume + (5 * x_dir), 0, 100);
+                should_render = true;
+            }
 
             if (_sel_control != new_sel_control) {
                 _sel_control = new_sel_control;
@@ -316,14 +322,24 @@ void Game::draw_overlay() {
             SDL_FRect config_rect = { 8.0f, 8.0f, 112.0f, 136.0f };
             this->draw_ui_box(this->overlay, BOX_CONTAINER, &config_rect);
 
-            SDL_FRect title_shadow = { 16.0f, 16.0f, 96.0f, 8.0f };
-            this->draw_text(this->overlay, "Controls", SMALL_FONT, 20, 16, 0);
+            this->draw_text(this->overlay, "Sound Settings", SMALL_FONT, 16, 16, 0);
 
-            int start_y = 28;
+            game->draw_text(this->overlay, "Volume", SMALL_FONT, 20, 28, 0);
+            game->draw_text(this->overlay, std::to_string(game->volume), SMALL_FONT, 52, 28, 0);
+
+            if (_sel_control != 0) {
+                SDL_FRect sound_rect = { 20.0f, 28.0f, 96.0f, 8.0f };
+                game->draw_rect(this->overlay, &sound_rect, 24, 24, 24, 96, SDL_BLENDMODE_BLEND);
+            }
+
+            this->draw_text(this->overlay, "Controls", SMALL_FONT, 16, 40, 0);
+
+            int start_y = 52;
+            int key_sel_control = _sel_control - 1;
 
             for (int i = 0; i < (int)Button::DIGIT; i++) {
                 std::string control_name = btostring_map[(Button)i];
-                std::string input_name = _waiting_for_key && i == _sel_control ? "<Press a Key>" : SDL_GetKeyName(btokeycode_map[(Button)i]);
+                std::string input_name = _waiting_for_key && i == key_sel_control ? "<Press a Key>" : SDL_GetKeyName(btokeycode_map[(Button)i]);
 
                 int y = start_y + (i * 8);
                 game->draw_text(this->overlay, control_name, SMALL_FONT, 20, y, 0);
@@ -331,7 +347,7 @@ void Game::draw_overlay() {
 
                 int control_opacity = 128;
                 int input_opacity = 192;
-                if (i == _sel_control) {
+                if (i == key_sel_control) {
                     if (_waiting_for_key) {
                         control_opacity = 96;
                         input_opacity = 0;
@@ -369,7 +385,6 @@ void Game::draw_overlay() {
 
     // network agent overlay (only cheddar can "create objects" so that is used to check if cheddar)
     if (game->create_objects && net_agent != nullptr) {
-        this->net_state = net_agent->get_state();
         std::string code = net_agent->get_connection_code();
 
         // draw if state changed, code changed, or if a second has passed since last rendered

@@ -57,7 +57,7 @@ void SpitterAbdomen::step() {
         this->cur_dir = this->dirs[0];
     }
 
-    Mouse *mouse = closest_mouse(this->x, this->y, 64.0f, true);
+    Mouse *mouse = Mouse::closest_mouse(this->x, this->y, 64.0f, true);
 
     if (mouse == nullptr) {
         this->parent->abdomen_distance = 256.0f;
@@ -65,8 +65,8 @@ void SpitterAbdomen::step() {
         this->parent->abdomen_distance = distance_between_points(mouse->x, mouse->y, this->x, this->y);
     }
 
-    this->dst_rect.x = this->x - 16.0f - game->corner_x;
-    this->dst_rect.y = this->y - 16.0f - game->corner_y;
+    this->dst_rect.x = this->x - 16.0f;
+    this->dst_rect.y = this->y - 16.0f;
 
     this->sprite->set_animation(this->cur_dir);
     this->sprite->update_frame();

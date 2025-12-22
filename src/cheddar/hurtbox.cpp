@@ -78,16 +78,19 @@ void HurtBox::hurt(int damage, HitBox *hitbox, int cooldown_ms) {
             this->mouse->attack(damage);
 
             // throw mouse away from source
+            int throw_x, throw_y;
             float hitbox_x = (float)(hitbox->bounding_box.x + hitbox->bounding_box.w/2);
             float hitbox_y = (float)(hitbox->bounding_box.y + hitbox->bounding_box.h/2);
 
             if (hitbox->throw_away) {
                 // throws away from hitbox
-                dir_to_point(hitbox_x, hitbox_y, this->mouse->x, this->mouse->y, &this->mouse->throw_x, &this->mouse->throw_y);
+                dir_to_point(hitbox_x, hitbox_y, this->mouse->x, this->mouse->y, &throw_x, &throw_y);
             } else {
                 // pulls toward hitbox
-                dir_to_point(this->mouse->x, this->mouse->y, hitbox_x, hitbox_y, &this->mouse->throw_x, &this->mouse->throw_y);
+                dir_to_point(this->mouse->x, this->mouse->y, hitbox_x, hitbox_y, &throw_x, &throw_y);
             }
+
+            this->mouse->set_throw(throw_x, throw_y);
         } break;
 
         case HurtBox::OwnerClass::FOE:
@@ -126,8 +129,8 @@ void HurtBox::step() {
 
     #ifdef ONSCREEN_DEBUG
     this->dst_rect = {
-        (float)(this->bounding_box.x - game->corner_x),
-        (float)(this->bounding_box.y - game->corner_y),
+        (float)this->bounding_box.x,
+        (float)this->bounding_box.y,
         (float)this->bounding_box.w,
         (float)this->bounding_box.h
     };

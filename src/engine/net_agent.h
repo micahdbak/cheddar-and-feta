@@ -9,6 +9,30 @@
 #include <string>
 #include <thread>
 
+// shared message codes between cheddar and feta
+
+// feta -> cheddar
+#define MSG_USE_ITEM    '0'
+#define MSG_TOSS_ITEM   '1'
+#define MSG_PUSH_HITBOX '2'
+#define MSG_FETA_INFO   '3'
+#define MSG_EAT_CHEESE  '4'
+#define MSG_IS_DOWN     '5'
+
+// cheddar -> feta
+#define MSG_MAP         '6'
+#define MSG_SPRITE      '7'
+#define MSG_AUDIO       '8'
+#define MSG_SYNC        '9'
+#define MSG_ATTACK      'a'
+#define MSG_PUSH_ITEM   'b'
+#define MSG_PUSH_CHEESE 'c'
+#define MSG_FORCE_DANCE 'd'
+#define MSG_DID_HIT     'e'
+#define MSG_THROW       'f'
+#define MSG_MAX_SPEED   'g'
+#define MSG_COLLISION   'h'
+
 class NetworkAgent {
 public:
     enum State { NO_CONNECTION, WAITING_FOR_PEER, CONNECTED, TRY_RESET };
@@ -58,6 +82,19 @@ public:
         while (!this->received_messages.empty())
             this->received_messages.pop();
         return message;
+    }
+
+    std::queue<std::string> all_messages() {
+        std::lock_guard<std::mutex> guard(this->received_messages_mutex);
+        if (this->received_messages.empty()) {
+            return std::queue<std::string>();
+        }
+
+        std::queue<std::string> cpy(this->received_messages);
+        // clear
+        while (!this->received_messages.empty())
+            this->received_messages.pop();
+        return cpy;
     }
 
     void send_message(std::string message) {

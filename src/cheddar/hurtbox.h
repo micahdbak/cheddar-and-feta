@@ -65,7 +65,8 @@ class HurtBoxFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) {
         int owner_id, x_off, y_off, w, h;
-        sscanf(options.c_str(), "%d,%d,%d,%d,%d", &owner_id, &x_off, &y_off, &w, &h);
+        if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &owner_id, &x_off, &y_off, &w, &h)) FATAL_ERROR
+
         return new HurtBox(owner_id, x_off, y_off, w, h);
     }
 };

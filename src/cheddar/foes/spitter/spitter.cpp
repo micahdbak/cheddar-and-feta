@@ -80,7 +80,7 @@ void Spitter::step() {
             break;
         }
 
-        Mouse *mouse = closest_mouse(this->x, this->y, 80.0f, true);
+        Mouse *mouse = Mouse::closest_mouse(this->x, this->y, 80.0f, true);
 
         if (mouse == nullptr) {
             this->state = Foe::State::IDLE;
@@ -206,7 +206,7 @@ void Spitter::step() {
     }
 
     this->sprite->set_animation(this->displayed_direction);
-    this->dst_rect.x = this->x - 16.0f - game->corner_x;
-    this->dst_rect.y = this->y - 16.0f - game->corner_y;
+    this->dst_rect.x = this->x - 16.0f;
+    this->dst_rect.y = this->y - 16.0f;
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 16);
 }

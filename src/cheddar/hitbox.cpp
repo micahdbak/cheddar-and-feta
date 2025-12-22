@@ -71,8 +71,8 @@ void HitBox::step() {
 
     #ifdef ONSCREEN_DEBUG
     this->dst_rect = {
-        (float)(this->bounding_box.x - game->corner_x),
-        (float)(this->bounding_box.y - game->corner_y),
+        (float)this->bounding_box.x,
+        (float)this->bounding_box.y,
         (float)this->bounding_box.w,
         (float)this->bounding_box.h
     };

@@ -20,115 +20,45 @@
 #define MOUSE_ITEMS     "_items"
 #define MOUSE_SPAWN_AT  DONT_WRITE "spawn_at"
 
-class Mouse : public Object, public HitSource {
+// animations
+#define RUNPREP_ANIMATION   8
+#define ATTACKING_ANIMATION 16
+#define ATTACKED_ANIMATION  24
+#define THROWING_ANIMATION  32
+#define DOWN_ANIMATION      40
+#define EATING_ANIMATION    48
+#define DANCING_ANIMATION   49
+#define SLEEPING_ANIMATION  50
+
+class Mouse : public Object {
 public:
     struct SpawnCoord {
         float x, y;
         int animation;
     };
 
-    Mouse(std::vector<SpawnCoord> &coordinates, bool is_feta, std::string options);
-    ~Mouse();
+    Mouse() = default;
+    ~Mouse() = default;
 
-    void step() override;
+    virtual void attack(int damage) = 0;
+    virtual void push_item(const std::string &item_id) = 0;
+    virtual void push_cheese(int amount) = 0;
+    virtual void remove_item(const std::string &item_id) = 0;
+    virtual void force_dance(Uint64 timeout_ms) = 0;
+    virtual void set_throw(int throw_x, int throw_y) = 0;
+    virtual void set_max_mov_speed(float max_mov_speed) = 0;
+    virtual void signal_down() = 0;
 
-    void save_data() override;
-
-    void attack(int damage);
-
-    void push_item(const std::string &item_id);
-    void remove_item(const std::string &item_id);
-    int add_cheese(int amount);
-
-    void force_dance(Uint64 timeout_ms);
-
-    float hitsource_x() override { return this->x; }
-    float hitsource_y() override { return this->y; }
-
-    void hitsource_notify() override {
-        this->did_hit = true;
-    }
-
-    std::vector<Game::HudItem> items;
-    int sel_item = -1;
-
-    int health = 10, max_health = 10;
-
-    bool is_feta = true, is_down = false;
-    float x, y;
-
-    int throw_x = 0, throw_y = 0;
-
-    float max_mov_speed = MOUSE_DEFAULT_SPEED;
-
+    static bool check_collision(float x, float y);
     static std::string encode_items(const std::vector<Game::HudItem> &items);
-
     static std::vector<Game::HudItem> read_items(const std::string &items_s);
+    static Mouse *closest_mouse(float x, float y, float min_distance, bool forced);
 
-private:
-    std::string name = "Cheddar";
-
-    bool is_running = false;
-
-    SDL_FRect dst_rect, icon_src, icon_dst;
-    Sprite *sprite;
-
-    enum Busy { FALSE, ATTACKING, ATTACKED, THROWING, EATING, DOWNED, FORCED_DANCE } is_busy = FALSE;
-    Uint64 busy_ticks = 0, is_down_ticks = 0, running_ticks = 0, dance_until = 0;
-
-    int tile_x, tile_y;
-
-    bool did_hit = false;
+    float x, y;
+    bool is_down, is_feta;
 };
 
-#define MOUSEFACTORY_FAIL(str) {\
-    std::cerr << "MouseFactory::create: bad options: " << (str) << std::endl;\
-    std::exit(1);\
-}
-
-class MouseFactory : public ObjectFactory {
-public:
-    MouseFactory() {}
-    ~MouseFactory() {}
-
-    // options:
-    // [is_feta] [x1,y1,a1] [x2,y2,a2]
-    // e.g., 0 32,32,0 1600,640,2
-    Object *create(const std::string &options) override {
-        const char *arr = options.c_str();
-        int is_feta;
-        std::vector<Mouse::SpawnCoord> coordinates;
-
-        if (sscanf(arr, "%d", &is_feta) < 1) MOUSEFACTORY_FAIL(options.c_str())
-        if (*++arr == '\0' || *++arr == '\0') MOUSEFACTORY_FAIL(options.c_str())
-
-        int i = 0;
-        do {
-            int x = 0, y = 0, animation = 0;
-            if (sscanf(arr, "%d,%d,%d", &x, &y, &animation) < 3)
-                break;
-
-            Mouse::SpawnCoord coord;
-            coord.x = (float)x;
-            coord.y = (float)y;
-            coord.animation = animation;
-            coordinates.push_back(coord);
-
-            while (*arr != '\0' && *arr != ' ')
-                arr++;
-            if (*arr == '\0') break;
-            while (*++arr == ' ')
-                arr++;
-            if (*arr == '\0') break;
-        } while (++i < 10); // max ten coords, incase something really breaks
-
-        return new Mouse(coordinates, is_feta != 0, options);
-    }
-};
-
-Mouse *closest_mouse(float x, float y, float min_distance, bool forced);
-
-extern bool mice_locked;
 extern Mouse *cheddar, *feta;
+extern bool mice_locked;
 
 #endif

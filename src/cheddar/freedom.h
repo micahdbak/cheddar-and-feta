@@ -2,6 +2,7 @@
 #define FREEDOM_OBJ "freedom"
 
 #include "object.h"
+#include "game.h"
 
 class Freedom : public Object {
 public:
@@ -19,8 +20,7 @@ class FreedomFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) {
         int x = 0, y = 0;
-
-        sscanf(options.c_str(), "%d,%d", &x, &y);
+        if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
 
         return new Freedom(x, y);
     }

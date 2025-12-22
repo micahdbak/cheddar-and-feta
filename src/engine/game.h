@@ -8,6 +8,7 @@
 #include <queue>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include <SDL3/SDL.h>
 
@@ -207,7 +208,7 @@ public:
     std::vector<SpriteRender> sprites;
     std::vector<SpriteRender> push_sprites;
 
-    NetworkAgent::State net_state;
+    NetworkAgent::State net_state = NetworkAgent::State::NO_CONNECTION;
 
     Uint8 bg_r = 0, bg_g = 0, bg_b = 0;
 
@@ -217,6 +218,9 @@ public:
     };
 
     std::vector<AudioMsg> audio;
+
+    // 0..100
+    int volume = 100;
 
 private:
     // for Game::texts

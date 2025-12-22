@@ -19,7 +19,6 @@ public:
     }
 
     virtual void step() = 0;
-
     virtual void save_data() {}
 
     std::shared_ptr<bool> get_deleted_ptr() {

@@ -139,6 +139,11 @@ void Game::unload() {
 }
 
 void Game::load_map(const char *map_path) {
+    // if cheddar and connected, notify feta that we are changing maps
+    if (this->create_objects && this->net_state == NetworkAgent::State::CONNECTED) {
+        net_agent->send_message(MSG_MAP + std::string(map_path) + '\n');
+    }
+
     Map map;
     map.read(map_path);
 
@@ -196,6 +201,9 @@ void Game::load_map(const char *map_path) {
     save.data[LOAD_MAP] = this->current_map;
 
     this->display_notification(this->map_title + ", " + this->map_description);
+
+    this->corner_x = 0;
+    this->corner_y = 0;
 }
 
 void Game::create_object(const std::string &id, const std::string &options) {
@@ -271,6 +279,7 @@ void Game::step() {
     this->delta = float(new_ticks - this->ticks) / 1000.0f;
     this->ticks = new_ticks;
 
+    this->net_state = net_agent->get_state();
     this->draw_overlay();
 
     if (this->first_obj != nullptr) {
@@ -315,8 +324,9 @@ void Game::step() {
 
     // render background
     SDL_FRect map_src, map_dst;
+    this->make_map_rect(this->corner_x, this->corner_y, this->bg->w, this->bg->h, &map_src, &map_dst);
+
     if (this->bg != nullptr) {
-        this->make_map_rect(this->corner_x, this->corner_y, this->bg->w, this->bg->h, &map_src, &map_dst);
         SDL_RenderTexture(renderer, this->bg, &map_src, &map_dst);
     }
 
@@ -324,8 +334,16 @@ void Game::step() {
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     // render objects to the screen
-    for (SpriteRender &sprite : this->sprites)
-        SDL_RenderTexture(renderer, sprite.texture, sprite.src_rect, sprite.dst_rect);
+    for (SpriteRender &sprite : this->sprites) {
+        // note: returns false if either is NULL, e.g., sprite.dst_rect
+        if (SDL_HasRectIntersectionFloat(&map_src, sprite.dst_rect)) {
+            SDL_FRect dst_rect = *sprite.dst_rect;
+            dst_rect.x -= game->corner_x;
+            dst_rect.y -= game->corner_y;
+            SDL_RenderTexture(renderer, sprite.texture, sprite.src_rect, &dst_rect);
+        }
+    }
+
     this->sprites.clear(); // clear sprites; next frame will repopulate
 
     // render foreground

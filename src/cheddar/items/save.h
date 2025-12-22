@@ -38,12 +38,9 @@ class ItemSaveUseFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) {
         int obj_id;
-        sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &obj_id);
+        if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &obj_id)) FATAL_ERROR
 
-        bool is_feta = false;
-
-        if (feta != nullptr && feta->id == obj_id)
-            is_feta = true;
+        bool is_feta = feta != nullptr && feta->id == obj_id;
 
         return new ItemSaveUse(is_feta);
     }

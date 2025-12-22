@@ -43,7 +43,7 @@ void Bell::step() {
         this->sprite->set_frame(0);
     }
 
-    this->dst_rect.x = this->x - 16.0f - game->corner_x;
-    this->dst_rect.y = this->y - 16.0f - game->corner_y;
+    this->dst_rect.x = this->x - 16.0f;
+    this->dst_rect.y = this->y - 16.0f;
     game->push_sprite("sprites/bell.bmp", this->sprite->texture, &this->sprite->frame, &this->dst_rect, 16);
 }

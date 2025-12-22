@@ -8,10 +8,16 @@
 
 class NetSender : public Object {
 public:
-    NetSender() {}
-    ~NetSender() {}
+    NetSender();
+    ~NetSender();
 
     void step() override;
+
+    static void send_message(char func, const std::string &arg);
+
+private:
+    std::vector<std::string> messages;
+    bool was_disconnected = true;
 };
 
 class NetSenderFactory : public ObjectFactory {

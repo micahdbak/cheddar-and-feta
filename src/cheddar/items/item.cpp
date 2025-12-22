@@ -52,7 +52,7 @@ DroppedItem::~DroppedItem() {
 }
 
 void DroppedItem::dropped_step() {
-    Mouse *mouse = closest_mouse(this->x, this->y, 12.0f, true);
+    Mouse *mouse = Mouse::closest_mouse(this->x, this->y, 12.0f, true);
     if (!mice_locked && mouse != nullptr) {
         this->take(mouse);
         game->delete_object = true;
@@ -71,7 +71,7 @@ void DroppedItem::dropped_step() {
     if (this->sprite->interval_ms > 0)
         this->sprite->update_frame();
 
-    this->dst_rect.x = this->x - (float)(int)(this->sprite->frame_w/2) - game->corner_x;
-    this->dst_rect.y = this->y - (float)(int)(this->sprite->frame_h/2) - game->corner_y;
+    this->dst_rect.x = this->x - (float)(this->sprite->frame_w / 2);
+    this->dst_rect.y = this->y - (float)(this->sprite->frame_h / 2);
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, this->sprite->frame_h/2);
 }

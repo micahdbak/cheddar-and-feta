@@ -11,7 +11,7 @@ static std::unordered_map<std::string, SDL_Texture *> bmp_textures;
 
 static SDL_Texture *render_cheese(const std::string &args) {
     int amount = 0;
-    sscanf(args.c_str(), "%d", &amount);
+    if (1 != sscanf(args.c_str(), "%d", &amount)) FATAL_ERROR
 
     SDL_Texture *cheese_texture = load_bmp_texture("sprites/cheese.bmp");
 
@@ -55,7 +55,7 @@ static SDL_Texture *render_cheese(const std::string &args) {
 
 static SDL_Texture *render_credits(const std::string &args) {
     int ants = 0, drones = 0, tanks = 0, agents = 0, queen_time = 0;
-    sscanf(args.c_str(), "%d.%d.%d.%d.%d", &ants, &drones, &tanks, &agents, &queen_time);
+    if (5 != sscanf(args.c_str(), "%d.%d.%d.%d.%d", &ants, &drones, &tanks, &agents, &queen_time)) FATAL_ERROR
 
     SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
     if (texture == nullptr) {
@@ -74,8 +74,7 @@ static SDL_Texture *render_credits(const std::string &args) {
         + "Ant Kills:\t" + std::to_string(ants) + "\tDrone Kills:\t" + std::to_string(drones) + "\n"
         + "Tank Kills:\t" + std::to_string(tanks) + "\tAgent Kills:\t" + std::to_string(agents) + "\n\n"
         + "Time to Kill the Queen:\t\t" + std::to_string(queen_time) + " (s)\n"
-        + "Total Time:\t\t\t" + std::to_string(999) + " (s)\n\n"
-        + "Score:\t\t" + std::to_string(999) + "\n\n"
+        + "Total Time:\t\t\t" + std::to_string(game->ticks / 1000) + " (s)\n\n"
         + "}} Credits }}\n\n"
         + "Made with { by Micah Baker\n\n"
         + "Thanks for playing!\n(Press [Enter] to return to Main Menu.)";
@@ -97,10 +96,12 @@ SDL_Texture *load_bmp_texture(const std::string &bmp_path) {
 
     char buff[1024];
     sscanf(bmp_path.c_str(), "%1023[^/]", buff);
+    buff[1023] = '\0';
 
     if (std::string(buff) == "render") {
         size_t offset = strlen(buff) + 1; // + 1 for '/'
         sscanf(bmp_path.c_str() + offset, "%1023[^/]", buff);
+        buff[1023] = '\0';
 
         if (render_functions.find(buff) == render_functions.end()) {
             std::cerr << "load_bmp_texture error: render function " << buff << " does not exist." << std::endl;
@@ -110,6 +111,7 @@ SDL_Texture *load_bmp_texture(const std::string &bmp_path) {
         char args[1024];
         offset += strlen(buff) + 1;
         sscanf(bmp_path.c_str() + offset, "%1023[^/]", args);
+        args[1023] = '\0';
 
         SDL_Texture *texture = render_functions[buff](args);
         bmp_textures[bmp_path] = texture;

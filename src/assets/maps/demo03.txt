@@ -7,18 +7,18 @@ B1
 tiles/dirttunnel.bmp
 tiles/dirtclutter.bmp
 15
-mouse 0 1200,72,0 1192,536,4 56,1192,4
+cheddar 1200,72,0 1192,536,4 56,1192,4
 ladder 1200,56,1 maps/demo02
 ladder 1192,552,2 maps/demo02
 gate 256,976,7,1
 gate 192,1072,8,1
-gate 208,1136,9
+gate 208,1136,9,0
 bell 256,752,7
 bell 768,992,8
 bell 656,688,9
-spawner 224,752,7 foe_porc,foe_bug;foe_porc;foe_porc,foe_bat
-spawner 736,992,8 foe_porc,foe_bat;foe_porc;foe_porc,foe_bat
-spawner 688,688,9 foe_porc;foe_frog,foe_bug;foe_porc,foe_bat
+spawner 224,752,7,0 foe_porc,foe_bug;foe_porc;foe_porc,foe_bat
+spawner 736,992,8,0 foe_porc,foe_bat;foe_porc;foe_porc,foe_bat
+spawner 688,688,9,0 foe_porc;foe_frog,foe_bug;foe_porc,foe_bat
 ladder 56,1176,0 maps/demo04
 billboard 1184,16,11,0,32,48,32,tiles/dirtclutter.bmp
 billboard 40,1136,11,0,32,48,32,tiles/dirtclutter.bmp

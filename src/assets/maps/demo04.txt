@@ -8,10 +8,10 @@ tiles/dirttunnel.bmp
 tiles/dirtclutter.bmp
 8
 ladder 544,616,2 maps/demo03
-mouse 0 544,600,4 72,76,0
-spawner 336,320,10 foe_spitter
+cheddar 544,600,4 72,76,0
+spawner 336,320,10,0 foe_spitter
 bell 416,384,10
-gate 64,144,10
+gate 64,144,10,0
 item_shield_dropped 416,400
 ladder 72,60,0 maps/freedom
 billboard 56,20,11,0,32,48,32,tiles/dirtclutter.bmp

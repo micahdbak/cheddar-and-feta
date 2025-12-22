@@ -26,19 +26,15 @@ void Cheese::render_cheese() {
 }
 
 void Cheese::step() {
-    Mouse *mouse = closest_mouse(this->x, this->y, 8.0f, true);
+    Mouse *mouse = Mouse::closest_mouse(this->x, this->y, 8.0f, true);
     if (mouse != nullptr) {
-        this->amount -= mouse->add_cheese(this->amount);
-        if (this->amount == 0) {
-            game->delete_object = true;
-            return;
-        } else {
-            this->render_cheese();
-        }
+        mouse->push_cheese(this->amount);
+        game->delete_object = true;
+        return;
     }
 
-    this->dst_rect.x = float(this->x - game->corner_x - 9);
-    this->dst_rect.y = float(this->y - game->corner_y - this->depth_offset);
+    this->dst_rect.x = float(this->x - 9);
+    this->dst_rect.y = float(this->y - this->depth_offset);
     game->push_sprite(this->tex_id, this->texture, NULL, &this->dst_rect, this->depth_offset);
 }
 

@@ -63,8 +63,8 @@ void ThrownCannonBall::step() {
     this->x = new_x;
     this->y = new_y;
 
-    this->dst_rect.x = float(this->x - game->corner_x - 8);
-    this->dst_rect.y = float(this->y - game->corner_y - 8);
+    this->dst_rect.x = float(this->x - 8);
+    this->dst_rect.y = float(this->y - 8);
 
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 16);
 }

@@ -21,7 +21,8 @@ class DroppedHermesBootFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) override {
         int x, y;
-        sscanf(options.c_str(), "%d,%d", &x, &y);
+        if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
+
         return new DroppedHermesBoot(float(x), float(y));
     }
 };

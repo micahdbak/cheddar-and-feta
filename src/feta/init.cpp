@@ -1,14 +1,18 @@
+#include "feta.h"
 #include "font.h"
 #include "game.h"
 #include "controller.h"
 #include "net_agent.h"
 #include "net_receiver.h"
 #include "net_sender.h"
+#include "item.h"
 
 #include <iostream>
 #include <string>
 
 #define INIT_OBJ "load_save"
+
+std::unordered_map<std::string, Item> item_info;
 
 class Init : public Object {
 public:
@@ -49,6 +53,19 @@ void Game::init() {
 
     this->factories[FIRST_OBJ] = new NetReceiverFactory();
     this->factories[LAST_OBJ] = new NetSenderFactory();
+
+    this->factories[FETA_OBJ] = new FetaFactory();
+
+    // items
+    item_info[ITEM_NONE] = Item{HELD_EFFECT, "Kick", .damage = 1, .armour = 0};
+    item_info[ITEM_CANNON_BALL] = Item{THROWABLE, "Cannon Ball"};
+    item_info[ITEM_CHEESE] = Item{EDIBLE, "Cheese"};
+    item_info[ITEM_COFFEE_BEAN] = Item{USEFUL, "Coffee Bean"};
+    item_info[ITEM_FIRE] = Item{THROWABLE, "Fire"};
+    item_info[ITEM_HERMES_BOOT] = Item{HELD_EFFECT, "Hermes Boot", .damage = 0, .speed = 1.75f};
+    item_info[ITEM_MOLOTOV] = Item{THROWABLE, "Molotov Cocktail"};
+    item_info[ITEM_SHIELD] = Item{HELD_EFFECT, "Shield", .damage = 0, .armour = 1};
+    item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Porcu' Pine"};
 
     this->title = "Playing as Feta";
 
@@ -176,8 +193,11 @@ void Init::step() {
             game->draw_ui_box(this->ui, BOX_CHAR_DISP, &waiting_disp_box);
 
             std::string waiting = "Connecting with code " + this->code + "...";
-            int waiting_w = game->fonts[DEFAULT_FONT]->text_width(waiting);
+            if (net_state == NetworkAgent::State::CONNECTED) {
+                waiting = "Waiting for Cheddar...";
+            }
 
+            int waiting_w = game->fonts[DEFAULT_FONT]->text_width(waiting);
             game->draw_text(this->ui, waiting, DEFAULT_FONT, 160 - waiting_w / 2, 116, 0);
         }
 

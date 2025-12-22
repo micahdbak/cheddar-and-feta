@@ -8,6 +8,6 @@ tiles/forest.bmp
 tiles/dirttunnel.bmp
 tiles/dirtclutter.bmp
 3
-mouse 0 280,280,4
+cheddar 280,280,4
 ladder 280,296,1 maps/demo04
 freedom 280,296

@@ -6,6 +6,7 @@
 
 #include "object.h"
 #include "sprite.h"
+#include "game.h"
 
 class Billboard : public Object {
 public:
@@ -24,11 +25,8 @@ class BillboardFactory : public ObjectFactory {
 public:
     static void ParseOptions(const std::string &options, int *x, int *y, int *ts_x, int *ts_y, int *w, int *h, int *depth, std::string &tilesheet) {
         char buff[1024];
-        if (sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%1023[^\n]",
-            x, y, ts_x, ts_y, w, h, depth, buff) < 8) {
-            std::cerr << "BillboardFactory::ParseOptions error: bad options: " << options << std::endl;
-            std::exit(1);
-        }
+        if (8 != sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%1023[^\n]",
+            x, y, ts_x, ts_y, w, h, depth, buff)) FATAL_ERROR
 
         tilesheet = buff;
     }

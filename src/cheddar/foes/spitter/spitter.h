@@ -76,7 +76,8 @@ class SpitterFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) {
         int x, y, spawner_id;
-        sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id);
+        if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) FATAL_ERROR
+
         return new Spitter(x, y, spawner_id);
     }
 };

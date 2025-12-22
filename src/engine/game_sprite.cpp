@@ -9,8 +9,9 @@ void Game::set_view(int x, int y) {
 
 void Game::push_sprite(const std::string &tex_id, SDL_Texture *texture, SDL_FRect *src_rect, SDL_FRect *dst_rect, int depth_offset) {
     int sprite_y = 0;
+
     if (dst_rect != nullptr)
-        sprite_y = int(dst_rect->y) + depth_offset;
+        sprite_y = (int)dst_rect->y + depth_offset;
 
     SpriteRender sprite;
     sprite.tex_id = tex_id;
@@ -27,8 +28,8 @@ void Game::push_sprite(const std::string &tex_id, SDL_Texture *texture, SDL_FRec
 void Game::push_icon(SDL_FRect icon_rect, float x, float y, SDL_FRect *src_rect, SDL_FRect *dst_rect) {
     *src_rect = icon_rect;
 
-    dst_rect->x = x - (src_rect->w / 2.0f) - (float)game->corner_x;
-    dst_rect->y = y - (src_rect->h / 2.0f) - (float)game->corner_y;
+    dst_rect->x = x - (src_rect->w / 2.0f);
+    dst_rect->y = y - (src_rect->h / 2.0f);
     dst_rect->w = src_rect->w;
     dst_rect->h = src_rect->h;
 
@@ -48,8 +49,8 @@ void Game::push_health_bar(int health, int max_health, float x, float y, SDL_FRe
         *src_rect = HEALTH_100_ICON;
     }
 
-    dst_rect->x = x - (src_rect->w / 2.0f) - (float)game->corner_x;
-    dst_rect->y = y - (src_rect->h / 2.0f) - (float)game->corner_y;
+    dst_rect->x = x - (src_rect->w / 2.0f);
+    dst_rect->y = y - (src_rect->h / 2.0f);
     dst_rect->w = src_rect->w;
     dst_rect->h = src_rect->h;
 

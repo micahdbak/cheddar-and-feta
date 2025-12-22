@@ -344,8 +344,8 @@ void foe_debug_tile(int x, int y) {
     }
 
     debug_dst_rect[COORD(x, y)] = SDL_FRect{
-        float((x * game->tile_width) - game->corner_x),
-        float((y * game->tile_height) - game->corner_y),
+        (float)(x * game->tile_width),
+        (float)(y * game->tile_height),
         16.0f, 16.0f
     };
     dst_rect = &debug_dst_rect[COORD(x, y)];

@@ -3,9 +3,20 @@
 #include "credits.h"
 #include "game.h"
 #include "save_data.h"
+#include "foes/bug.h"
+#include "foes/bat.h"
+#include "foes/frog.h"
+#include "foes/porcupine.h"
+#include "foes/spitter/spitter.h"
 
 Credits::Credits() {
-    this->tex_id = RENDER_CREDITS + credits_args(1, 1, 1, 1, 60);
+    int ant_kills = save.geti(FOE_BUG_OBJ STATS);
+    int drone_kills = save.geti(FOE_BAT_OBJ STATS);
+    int tank_kills = save.geti(FOE_FROG_OBJ STATS);
+    int agent_kills = save.geti(FOE_PORCUPINE_OBJ STATS);
+    int spitter_time = save.geti(FOE_SPITTER_OBJ STATS) / 1000;
+
+    this->tex_id = RENDER_CREDITS + credits_args(ant_kills, drone_kills, tank_kills, agent_kills, spitter_time);
     this->texture = load_bmp_texture(tex_id);
 
     this->src_rect = this->dst_rect = SDL_FRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};

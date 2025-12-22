@@ -30,7 +30,8 @@ class BellFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) {
         int x = 0, y = 0, spawner_id = 0;
-        sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id);
+        if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) FATAL_ERROR
+
         return new Bell(x, y, spawner_id);
     }
 };

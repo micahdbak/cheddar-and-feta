@@ -3,6 +3,7 @@
 
 #include "foe.h"
 #include "sprite.h"
+#include "game.h"
 
 class FoePorcupine : public Foe {
 public:
@@ -29,7 +30,8 @@ class FoePorcupineFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) override {
         int x = 0, y = 0, spawner_id = 0;
-        sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id);
+        if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) FATAL_ERROR
+
         return new FoePorcupine(x, y, spawner_id);
     }
 };

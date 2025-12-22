@@ -23,7 +23,8 @@ class DroppedCoffeeBeanFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) override {
         int x, y;
-        sscanf(options.c_str(), "%d,%d", &x, &y);
+        if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
+
         return new DroppedCoffeeBean(float(x), float(y));
     }
 };
@@ -35,7 +36,7 @@ public:
 
         Mouse *mouse = is_feta ? feta : cheddar;
         if (mouse != nullptr)
-            mouse->max_mov_speed = MOUSE_DEFAULT_SPEED * 2.0f;
+            mouse->set_max_mov_speed(MOUSE_DEFAULT_SPEED * 2.0f);
     }
     ~UsedCoffeeBean() = default;
 
@@ -48,7 +49,7 @@ public:
         }
 
         if (game->ticks > this->timer) {
-            mouse->max_mov_speed = MOUSE_DEFAULT_SPEED;
+            mouse->set_max_mov_speed(MOUSE_DEFAULT_SPEED);
             game->delete_object = true;
         }
     }
@@ -62,12 +63,9 @@ class UsedCoffeeBeanFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) override {
         int from_id;
-        sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &from_id);
+        if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &from_id)) FATAL_ERROR
 
-        bool is_feta = false;
-
-        if (feta != nullptr && feta->id == from_id)
-            is_feta = true;
+        bool is_feta = feta != nullptr && feta->id == from_id;
 
         return new UsedCoffeeBean(is_feta);
     }

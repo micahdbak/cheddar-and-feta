@@ -22,7 +22,7 @@ Billboard::~Billboard() {
 }
 
 void Billboard::step() {
-    this->dst_rect.x = float(this->x - game->corner_x);
-    this->dst_rect.y = float(this->y - game->corner_y);
+    this->dst_rect.x = (float)this->x;
+    this->dst_rect.y = (float)this->y;
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, this->depth);
 }

@@ -143,7 +143,7 @@ void FoeBat::step() {
     this->prev_state = this->state;
 
     this->sprite->update_frame();
-    this->dst_rect.x = this->x - float(game->corner_x) - 16.0f + this->off_x;
-    this->dst_rect.y = this->y - float(game->corner_y) - 16.0f + this->off_y;
+    this->dst_rect.x = this->x - 16.0f + this->off_x;
+    this->dst_rect.y = this->y - 16.0f + this->off_y;
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 26);
 }

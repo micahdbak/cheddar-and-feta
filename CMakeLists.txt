@@ -28,14 +28,18 @@ set(MAP_EDITOR_SRC
 )
 
 set(FETA_SRC
+    src/feta/feta.cpp
+    src/feta/init.cpp
+    src/feta/mouse.cpp
     src/feta/net_receiver.cpp
     src/feta/net_sender.cpp
-    src/feta/init.cpp
 )
 
 set(CHEDDAR_SRC
     src/cheddar/billboard.cpp
+    src/cheddar/cheddar.cpp
     src/cheddar/credits.cpp
+    src/cheddar/feta.cpp
     src/cheddar/freedom.cpp
     src/cheddar/foes/bat.cpp
     src/cheddar/foes/bell.cpp

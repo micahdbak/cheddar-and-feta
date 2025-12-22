@@ -38,7 +38,7 @@ public:
         const char *arr = options.c_str();
 
         int x = 0, y = 0, spawner_id = 0, animation = 0;
-        sscanf(arr, "%d,%d,%d,%d", &x, &y, &spawner_id, &animation);
+        if (4 != sscanf(arr, "%d,%d,%d,%d", &x, &y, &spawner_id, &animation)) FATAL_ERROR
 
         // skip until null byte or space
         while (*arr != '\0' && *arr != ' ')

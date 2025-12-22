@@ -5,8 +5,8 @@
 
 class NetReceiver : public Object {
 public:
-    NetReceiver() {}
-    ~NetReceiver() {}
+    NetReceiver() = default;
+    ~NetReceiver() = default;
 
     void step() override;
 };

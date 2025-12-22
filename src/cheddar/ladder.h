@@ -5,6 +5,7 @@
 
 #include "object.h"
 #include "sprite.h"
+#include "game.h"
 
 class Ladder : public Object {
 public:
@@ -23,7 +24,7 @@ class LadderFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) override {
         int x, y, which_coord;
-        sscanf(options.c_str(), "%d,%d,%d", &x, &y, &which_coord);
+        if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &which_coord)) FATAL_ERROR
 
         const char *map = options.c_str();
         while (*map != '\0' && *map != ' ')

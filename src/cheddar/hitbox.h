@@ -94,9 +94,9 @@ public:
     Object *create(const std::string &options) {
         int hitsource_owner_id, hurtbox_owner_id, x_off, y_off, w, h,
             damage, cooldown_ms, delete_after_ms, shared_cooldowns, shared_id, single_use;
-        sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+        if (12 != sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
             &hitsource_owner_id, &hurtbox_owner_id, &x_off, &y_off, &w, &h,
-            &damage, &cooldown_ms, &delete_after_ms, &shared_cooldowns, &shared_id, &single_use);
+            &damage, &cooldown_ms, &delete_after_ms, &shared_cooldowns, &shared_id, &single_use)) FATAL_ERROR
 
         Object *source_obj = game->get_object(hitsource_owner_id);
         if (source_obj == nullptr)

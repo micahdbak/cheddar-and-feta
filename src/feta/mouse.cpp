@@ -1,9 +1,5 @@
-#include "mouse.h"
-#include "items/item.h"
-
-Mouse *cheddar = nullptr;
-Mouse *feta = nullptr;
-bool mice_locked = false;
+#include "feta.h"
+#include "item.h"
 
 bool Mouse::check_collision(float x, float y) {
     return game->point_in_collider(x+2.0f, y) ||
@@ -36,12 +32,12 @@ std::vector<Game::HudItem> Mouse::read_items(const std::string &items_s) {
         int i = 0;
         do {
             char item_id[256];
-            int count;
+            int count = 1;
             if (2 != sscanf(arr, "%255[^*] * %d", item_id, &count)) FATAL_ERROR
-            item_id[255] = '\0';
 
             // validate item
-            if (item_info.find(item_id) == item_info.end() || count <= 0) FATAL_ERROR
+            if (item_info.find(item_id) == item_info.end() || count <= 0)
+                continue;
 
             Game::HudItem item{ item_id, count };
             ret.push_back(item);
@@ -60,17 +56,8 @@ std::vector<Game::HudItem> Mouse::read_items(const std::string &items_s) {
     return ret;
 }
 
-Mouse *Mouse::closest_mouse(float x, float y, float min_distance, bool forced) {
-    float distance_cheddar = (cheddar->is_down && !forced) ? FLT_MAX : distance_between_points(x, y, cheddar->x, cheddar->y);
-    float distance_feta = (feta->is_down && !forced) ? FLT_MAX : distance_between_points(x, y, feta->x, feta->y);
-
-    if (distance_cheddar < distance_feta) {
-        if (min_distance < 0.1f || distance_cheddar < min_distance) {
-            return cheddar;
-        }
-    } else if (min_distance < 0.1f || distance_feta < min_distance) {
-        return feta;
-    }
-
-    return nullptr; // no close-enough mouse
+std::string Mouse::audio_msg(const char *wav_path, float gain, int x, int y) {
+    char buff[256];
+    snprintf(buff, sizeof(buff), "%s %d,%d,%d\n", wav_path, (int)(10.0f * gain), (int)x, (int)y);
+    return std::string(buff);
 }

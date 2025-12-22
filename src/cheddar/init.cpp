@@ -8,7 +8,9 @@
 
 // objects
 #include "billboard.h"
+#include "cheddar.h"
 #include "credits.h"
+#include "feta.h"
 #include "freedom.h"
 #include "foes/bat.h"
 #include "foes/bell.h"
@@ -49,7 +51,9 @@ void Game::init() {
     // objects
     this->factories[BELL_OBJ] = new BellFactory();
     this->factories[BILLBOARD_OBJ] = new BillboardFactory();
+    this->factories[CHEDDAR_OBJ] = new CheddarFactory();
     this->factories[CREDITS_OBJ] = new CreditsFactory();
+    this->factories[FETA_OBJ] = new FetaFactory();
     this->factories[FREEDOM_OBJ] = new FreedomFactory();
     this->factories[FOE_BAT_OBJ] = new FoeBatFactory();
     this->factories[FOE_BUG_OBJ] = new FoeBugFactory();
@@ -77,7 +81,6 @@ void Game::init() {
     this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
     this->factories[ITEM_TOOTHPICK USE_OBJ] = new ThrownToothpickFactory();
     this->factories[LADDER_OBJ] = new LadderFactory();
-    this->factories[MOUSE_OBJ] = new MouseFactory();
     this->factories[SPAWNER_OBJ] = new FoeSpawnerFactory();
     this->factories[SPLASH_OBJ] = new SplashFactory();
     this->factories[TOSSED_ITEM_OBJ] = new TossedItemFactory();

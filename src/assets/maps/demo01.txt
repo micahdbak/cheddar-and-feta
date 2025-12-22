@@ -7,17 +7,17 @@ B3
 tiles/dirttunnel.bmp
 tiles/dirtclutter.bmp
 22
-mouse 0 128,216,4 1120,1184,0
+cheddar 128,216,4 1120,1184,0
 ladder 128,232,1 maps/demo00
 item_toothpick_dropped 312,448
-gate 160,560,2
+gate 160,560,2,0
 spawner 112,432,2,1 foe_bug,foe_bug,foe_bug,foe_bat;foe_bug,foe_bug,foe_bug,foe_frog
 bell 72,560,2
 gate 1120,528,3,1
-spawner 1152,432,3 foe_bug,foe_bug,foe_bug,foe_bug,foe_bug
+spawner 1152,432,3,0 foe_bug,foe_bug,foe_bug,foe_bug,foe_bug
 bell 768,560,3
 gate 1136,1072,4,1
-spawner 1136,848,4 foe_bug,foe_bug,foe_bug,foe_bat,foe_bat,foe_bat;foe_frog,foe_frog
+spawner 1136,848,4,0 foe_bug,foe_bug,foe_bug,foe_bat,foe_bat,foe_bat;foe_frog,foe_frog
 bell 1120,880,4
 ladder 1120,1168,0 maps/demo02
 foe_bug 160,1072,-1

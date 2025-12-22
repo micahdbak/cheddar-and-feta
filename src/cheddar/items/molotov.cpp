@@ -48,8 +48,8 @@ void ThrownMolotov::step() {
 
     this->dst_rect.w = this->sprite->frame_w;
     this->dst_rect.h = this->sprite->frame_h;
-    this->dst_rect.x = this->x - (float)(int)(this->sprite->frame_w/2) - game->corner_x;
-    this->dst_rect.y = this->y - (float)(int)(this->sprite->frame_h/2) - game->corner_y;
+    this->dst_rect.x = this->x - (float)(this->sprite->frame_w / 2);
+    this->dst_rect.y = this->y - (float)(this->sprite->frame_h / 2);
 
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 8);
 }

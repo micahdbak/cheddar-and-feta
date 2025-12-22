@@ -37,8 +37,8 @@ void FoeSpawner::step() {
     // 
     // float horiz_offset = this->sprite->animation == 0 ? 8.0f : 0.0f;
     // 
-    // this->dst_rect.x = this->x - horiz_offset - (float)game->corner_x;
-    // this->dst_rect.y = this->y - (float)game->corner_y;
+    // this->dst_rect.x = this->x - horiz_offset;
+    // this->dst_rect.y = this->y;
     // game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 0.0f);
 
     if (!this->to_spawn.empty() && game->ticks - this->spawned_ticks > 500)

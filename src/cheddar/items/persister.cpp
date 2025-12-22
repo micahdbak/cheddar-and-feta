@@ -25,6 +25,7 @@ ItemPersister::ItemPersister() {
 
         while (*arr != '\0') {
             sscanf(arr, "%255[^;]", buff);
+            buff[255] = '\0';
 
             arr += strlen(buff);
             if (*arr == ';')
@@ -32,7 +33,9 @@ ItemPersister::ItemPersister() {
 
             char item_id[128];
             int item_x, item_y;
-            sscanf(buff, "%127[^,],%d,%d", item_id, &item_x, &item_y);
+            if (3 != sscanf(buff, "%127[^,],%d,%d", item_id, &item_x, &item_y)) FATAL_ERROR
+
+            item_id[127] = '\0';
 
             this->items_to_spawn.push(ItemSave{item_id, (float)item_x, (float)item_y});
         }

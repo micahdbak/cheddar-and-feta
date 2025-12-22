@@ -18,7 +18,7 @@ Ladder::~Ladder() {
 }
 
 void Ladder::step() {
-    Mouse *mouse = closest_mouse(this->x, this->y, 8, true);
+    Mouse *mouse = Mouse::closest_mouse(this->x, this->y, 8, true);
 
     if (mouse != nullptr) {
         game->map = this->next_map;

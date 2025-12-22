@@ -196,19 +196,23 @@ void Game::random_target(int x, int y, int *next_x, int *next_y) const {
     *next_y = target.second * this->tile_height;
 }
 
-static char _zero = '\0';
+static char nullbyte = '\0';
 
 const char *next_line(const char *arr) {
-    int i = 0;
-    while (*arr != '\n' && *arr != '\0' && i < 1024)
-        arr++;
+    size_t i = 0;
 
-    // garbage data was input, return a forced zero
-    if (i >= 1024)
-        return &_zero;
-
-    if (*arr == '\n')
+    while (*arr != '\n' && *arr != '\0' && i < 1024) {
         arr++;
+        i++;
+    }
+
+    if (i >= 1024) {
+        return &nullbyte;
+    }
+
+    if (*arr == '\n') {
+        arr++;
+    }
 
     return arr;
 }

@@ -87,20 +87,23 @@ void Map::read(const char *map_path) {
     if (feof(txt_file)) CORRUPTED_EXIT;
     fgets(buff, sizeof(buff), txt_file);
     sscanf(buff, "%1023[^\n]", buff2);
+    buff2[1023] = '\0';
     this->title = buff2;
 
     if (feof(txt_file)) CORRUPTED_EXIT;
     fgets(buff, sizeof(buff), txt_file);
     sscanf(buff, "%1023[^\n]", buff2);
+    buff2[1023] = '\0';
     this->description = buff2;
 
     if (feof(txt_file)) CORRUPTED_EXIT;
     fgets(buff, sizeof(buff), txt_file);
-    sscanf(buff, "%d,%d,%d,%d", &this->tile_width, &this->tile_height, &this->cols, &this->rows);
+    if (4 != sscanf(buff, "%d,%d,%d,%d", &this->tile_width, &this->tile_height, &this->cols, &this->rows)) CORRUPTED_EXIT
+    if (tile_width <= 0 || tile_height <= 0) CORRUPTED_EXIT
 
     if (feof(txt_file)) CORRUPTED_EXIT;
     fgets(buff, sizeof(buff), txt_file);
-    sscanf(buff, "%d,%d,%d", &this->bg_r, &this->bg_g, &this->bg_b);
+    if (3 != sscanf(buff, "%d,%d,%d", &this->bg_r, &this->bg_g, &this->bg_b)) CORRUPTED_EXIT
 
     if (feof(txt_file)) CORRUPTED_EXIT;
     fgets(buff, sizeof(buff), txt_file);
@@ -113,12 +116,13 @@ void Map::read(const char *map_path) {
     if (feof(txt_file)) CORRUPTED_EXIT;
     fgets(buff, sizeof(buff), txt_file);
     int ntilesheets = 0;
-    sscanf(buff, "%d", &ntilesheets);
+    if (1 != sscanf(buff, "%d", &ntilesheets)) CORRUPTED_EXIT
 
     for (int i = 0; i < ntilesheets; i++) {
         if (feof(txt_file)) CORRUPTED_EXIT;
         fgets(buff, sizeof(buff), txt_file);
         sscanf(buff, "%1023[^\n]", buff2);
+        buff2[1023] = '\0';
         Tilesheet *tilesheet = new Tilesheet(buff2, this->tile_width, this->tile_height);
         if (tilesheet->texture == nullptr) CORRUPTED_EXIT
         this->tilesheets.push_back(tilesheet);
@@ -127,13 +131,14 @@ void Map::read(const char *map_path) {
     if (feof(txt_file)) CORRUPTED_EXIT;
     fgets(buff, sizeof(buff), txt_file);
     int nobjects = 0;
-    sscanf(buff, "%d", &nobjects);
+    if (1 != sscanf(buff, "%d", &nobjects)) CORRUPTED_EXIT
 
     for (int i = 0; i < nobjects; i++) {
         if (feof(txt_file)) CORRUPTED_EXIT;
         fgets(buff, sizeof(buff), txt_file);
         char buff3[1024];
-        sscanf(buff, "%s %1023[^\n]", buff2, buff3);
+        if (2 != sscanf(buff, "%1023s %1023[^\n]", buff2, buff3)) CORRUPTED_EXIT
+        buff2[1023] = buff3[1023] = '\0';
         this->objects.push_back(std::pair<std::string, std::string>(buff2, buff3));
     }
 

@@ -139,6 +139,8 @@ void play_audio(const std::string &wav_path, float gain, float x, float y) {
         gain *= mult;
     }
 
+    gain *= (float)game->volume / 100.0f;
+
     struct audio_source &src = (*it).second;
 
     // voices[0] is reserved for ambient audio

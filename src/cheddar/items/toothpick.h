@@ -27,7 +27,8 @@ class DroppedToothpickFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) override {
         int x, y;
-        sscanf(options.c_str(), "%d,%d", &x, &y);
+        if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
+
         return new DroppedToothpick(float(x), float(y));
     }
 };
@@ -61,7 +62,8 @@ class ThrownToothpickFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) {
         int x, y, x_dir, y_dir, from_id;
-        sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir, &from_id);
+        if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir, &from_id)) FATAL_ERROR
+
         return new ThrownToothpick((float)x, (float)y, x_dir, y_dir, from_id);
     }
 };

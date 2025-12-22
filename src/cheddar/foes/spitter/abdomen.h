@@ -36,7 +36,7 @@ class SpitterAbdomenFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) {
         int parent_id;
-        sscanf(options.c_str(), "%d", &parent_id);
+        if (1 != sscanf(options.c_str(), "%d", &parent_id)) FATAL_ERROR
 
         Object *obj = game->get_object(parent_id);
         Spitter *spitter;

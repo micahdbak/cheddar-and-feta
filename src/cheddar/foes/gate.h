@@ -5,6 +5,7 @@
 
 #include "object.h"
 #include "sprite.h"
+#include "game.h"
 
 class FoeGate: public Object {
 public:
@@ -21,13 +22,16 @@ private:
     SDL_FRect dst_rect;
 
     std::vector<int> colliders;
+
+    bool synchronized = false;
 };
 
 class FoeGateFactory: public ObjectFactory {
 public:
     Object *create(const std::string &options) {
         int x = 0, y = 0, spawner_id = 0, animation = 0;
-        sscanf(options.c_str(), "%d,%d,%d,%d", &x, &y, &spawner_id, &animation);
+        if (4 != sscanf(options.c_str(), "%d,%d,%d,%d", &x, &y, &spawner_id, &animation)) FATAL_ERROR
+
         return new FoeGate(x, y, spawner_id, animation);
     }
 };

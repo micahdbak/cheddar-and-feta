@@ -41,7 +41,7 @@ Splash::~Splash() {
     SDL_DestroyTexture(this->tunnel);
 }
 
-#define DISPLAY_FOR 4000
+#define DISPLAY_FOR 4500
 
 void Splash::step() {
     this->timer = game->ticks - this->initial_timer;

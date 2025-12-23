@@ -4,6 +4,7 @@
 #include "font.h"
 #include "game.h"
 #include "map.h"
+#include "save_data.h"
 
 #include <SDL3/SDL.h>
 
@@ -264,7 +265,7 @@ static bool _displaying_netagent = false;
 static bool _displaying_notification = false;
 static bool _displaying_controls_menu = false;
 static bool _second_pass = false;
-static int _sel_control = 0;
+static int _sel_control = -3;
 static bool _waiting_for_key = false;
 
 void Game::draw_overlay() {
@@ -298,18 +299,33 @@ void Game::draw_overlay() {
             }
         } else {
             int y_dir = captured_controller.is_hit(DOWN) - captured_controller.is_hit(UP);
-            int new_sel_control = cnf_clamp(_sel_control + y_dir, 0, (int)Button::DIGIT);
+            int new_sel_control = cnf_clamp(_sel_control + y_dir, -3, (int)Button::DIGIT - 1);
+
+            if (captured_controller.is_hit(Button::SELECT) && _sel_control == -3) {
+                game->map = "maps/init";
+                save.clear();
+
+                // return from this menu
+                capture_controls = false;
+                this->display_controls_menu = false;
+                captured_controller.clear_all();
+
+                return;
+            }
 
             int x_dir = captured_controller.is_hit(RIGHT) - captured_controller.is_hit(LEFT);
-            if (_sel_control == 0 && x_dir != 0) {
-                game->volume = cnf_clamp(game->volume + (5 * x_dir), 0, 100);
+            if (_sel_control == -2 && x_dir != 0) {
+                game->volume = cnf_clamp(game->volume + (10 * x_dir), 0, 200);
+                should_render = true;
+            } else if (_sel_control == -1 && x_dir != 0) {
+                game->music_volume = cnf_clamp(game->music_volume + (10 * x_dir), 0, 200);
                 should_render = true;
             }
 
             if (_sel_control != new_sel_control) {
                 _sel_control = new_sel_control;
                 should_render = true;
-            } else if (captured_controller.is_hit(Button::SELECT)) {
+            } else if (captured_controller.is_hit(Button::SELECT) && _sel_control >= 0) {
                 captured_controller.last_input = SDLK_UNKNOWN;
                 _waiting_for_key = true;
                 should_render = true;
@@ -319,27 +335,50 @@ void Game::draw_overlay() {
         if (should_render) {
             this->draw_rect(this->overlay, nullptr, this->bg_r, this->bg_g, this->bg_b, 128, SDL_BLENDMODE_NONE);
 
-            SDL_FRect config_rect = { 8.0f, 8.0f, 112.0f, 136.0f };
+            SDL_FRect config_rect = { 8.0f, 8.0f, 112.0f, 168.0f };
             this->draw_ui_box(this->overlay, BOX_CONTAINER, &config_rect);
 
-            this->draw_text(this->overlay, "Sound Settings", SMALL_FONT, 16, 16, 0);
+            this->draw_text(this->overlay, "Game", SMALL_FONT, 16, 16, 0);
 
-            game->draw_text(this->overlay, "Volume", SMALL_FONT, 20, 28, 0);
-            game->draw_text(this->overlay, std::to_string(game->volume), SMALL_FONT, 52, 28, 0);
-
-            if (_sel_control != 0) {
-                SDL_FRect sound_rect = { 20.0f, 28.0f, 96.0f, 8.0f };
-                game->draw_rect(this->overlay, &sound_rect, 24, 24, 24, 96, SDL_BLENDMODE_BLEND);
+            game->draw_text(this->overlay, "Exit to Main Menu", SMALL_FONT, 20, 28, 0);
+            if (_sel_control != -3) {
+                SDL_FRect option_rect = { 20.0f, 28.0f, 96.0f, 8.0f };
+                game->draw_rect(this->overlay, &option_rect, 24, 24, 24, 96, SDL_BLENDMODE_BLEND);
             }
 
-            this->draw_text(this->overlay, "Controls", SMALL_FONT, 16, 40, 0);
+            this->draw_text(this->overlay, "Volume Settings", SMALL_FONT, 16, 40, 0);
 
-            int start_y = 52;
-            int key_sel_control = _sel_control - 1;
+            game->draw_text(this->overlay, "Sounds", SMALL_FONT, 20, 52, 0);
+            game->draw_text(this->overlay, std::to_string(game->volume), SMALL_FONT, 52, 52, 0);
+            if (_sel_control != -2) {
+                SDL_FRect sound_rect = { 20.0f, 52.0f, 96.0f, 8.0f };
+                game->draw_rect(this->overlay, &sound_rect, 24, 24, 24, 96, SDL_BLENDMODE_BLEND);
+                SDL_FRect volume_rect = { 52.0f, 52.0f, 64.0f, 8.0f };
+                game->draw_rect(this->overlay, &volume_rect, 24, 24, 24, 128, SDL_BLENDMODE_BLEND);
+            } else {
+                SDL_FRect volume_rect = { 52.0f, 52.0f, 64.0f, 8.0f };
+                game->draw_rect(this->overlay, &volume_rect, 24, 24, 24, 96, SDL_BLENDMODE_BLEND);
+            }
+
+            game->draw_text(this->overlay, "Music", SMALL_FONT, 20, 60, 0);
+            game->draw_text(this->overlay, std::to_string(game->music_volume), SMALL_FONT, 52, 60, 0);
+            if (_sel_control != -1) {
+                SDL_FRect music_rect = { 20.0f, 60.0f, 96.0f, 8.0f };
+                game->draw_rect(this->overlay, &music_rect, 24, 24, 24, 96, SDL_BLENDMODE_BLEND);
+                SDL_FRect volume_rect = { 52.0f, 60.0f, 64.0f, 8.0f };
+                game->draw_rect(this->overlay, &volume_rect, 24, 24, 24, 128, SDL_BLENDMODE_BLEND);
+            } else {
+                SDL_FRect volume_rect = { 52.0f, 60.0f, 64.0f, 8.0f };
+                game->draw_rect(this->overlay, &volume_rect, 24, 24, 24, 96, SDL_BLENDMODE_BLEND);
+            }
+
+            this->draw_text(this->overlay, "Controls", SMALL_FONT, 16, 72, 0);
+
+            int start_y = 84;
 
             for (int i = 0; i < (int)Button::DIGIT; i++) {
                 std::string control_name = btostring_map[(Button)i];
-                std::string input_name = _waiting_for_key && i == key_sel_control ? "<Press a Key>" : SDL_GetKeyName(btokeycode_map[(Button)i]);
+                std::string input_name = _waiting_for_key && i == _sel_control ? "<Press a Key>" : SDL_GetKeyName(btokeycode_map[(Button)i]);
 
                 int y = start_y + (i * 8);
                 game->draw_text(this->overlay, control_name, SMALL_FONT, 20, y, 0);
@@ -347,7 +386,7 @@ void Game::draw_overlay() {
 
                 int control_opacity = 128;
                 int input_opacity = 192;
-                if (i == key_sel_control) {
+                if (i == _sel_control) {
                     if (_waiting_for_key) {
                         control_opacity = 96;
                         input_opacity = 0;

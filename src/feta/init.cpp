@@ -156,9 +156,9 @@ void Init::step() {
             }
 
             if (valid_code) {
-                SDL_FRect enter_box = { 172.0f, 144.0f, 18.0f, 12.0f };
+                SDL_FRect enter_box = { 172.0f, 147.0f, 18.0f, 12.0f };
                 game->draw_ui_box(this->ui, 36 == this->sel_c ? BOX_CHAR_SEL : BOX_CHAR_BOX, &enter_box);
-                game->draw_text(this->ui, "OK", 36 == this->sel_c ? CODE_FONT : CODE_GRAY_FONT, 175, 145, 0);
+                game->draw_text(this->ui, "OK", 36 == this->sel_c ? CODE_FONT : CODE_GRAY_FONT, 175, 148, 0);
             }
 
             if (this->sel_c == 36) {

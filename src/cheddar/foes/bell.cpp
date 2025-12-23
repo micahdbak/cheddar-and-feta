@@ -33,7 +33,7 @@ void Bell::attack(int damage) {
 
     this->triggered = true;
     this->timer = game->ticks;
-    play_audio("sfx/bell.wav", 1.0f, this->x, this->y);
+    play_audio("sfx/bell.wav", 1.0f, this->x, this->y, false);
 }
 
 void Bell::step() {

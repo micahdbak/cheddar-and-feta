@@ -2,7 +2,7 @@ Splash Screen
 -
 16,16,20,15
 24,24,24
-
+music/menu.wav
 1
 tiles/tunnels.bmp
 1

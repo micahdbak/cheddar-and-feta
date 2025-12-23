@@ -11,7 +11,7 @@
 #include <iostream>
 
 FoeBug::FoeBug(int x, int y, int spawner_id):
-    Foe(float(x), float(y), spawner_id, spawner_id == -2 ? 1000 : 500, 256.0f, 16.0f) {
+    Foe(float(x), float(y), spawner_id, spawner_id == -2 ? 1000 : 500, 100, 256.0f, 16.0f) {
     this->sprite = new Sprite("sprites/foe_bug.bmp", 32, 32, 100);
 
     this->dst_rect.w = 32.0f;
@@ -26,6 +26,11 @@ FoeBug::~FoeBug() {
 }
 
 void FoeBug::action(Mouse *mouse) {
+    if (game->ticks - this->hurt_timer < 500) {
+        this->state = Foe::State::FORCE_RANDOM_TILE;
+        return;
+    }
+
     this->state = Foe::State::ACTION;
     this->timer = game->ticks;
 
@@ -46,7 +51,8 @@ void FoeBug::attack_internal(int damage) {
         int kills = save.geti(FOE_BUG_OBJ STATS) + 1;
         save.puti(FOE_BUG_OBJ STATS, kills);
     } else {
-        this->state = Foe::State::HURT;
+        this->state = Foe::State::THROW_AWAY_FROM;
+        this->hurt_timer = game->ticks;
     }
 
     this->timer = game->ticks;
@@ -63,9 +69,9 @@ void FoeBug::step() {
     case Foe::State::IDLE:
         if (this->prev_state != this->state) {
             switch (SDL_rand(4)) {
-            case 0: play_audio("sfx/ant_walk1.wav", 0.5, this->x, this->y); break;
-            case 1: play_audio("sfx/ant_walk2.wav", 0.5, this->x, this->y); break;
-            case 2: play_audio("sfx/ant_walk3.wav", 0.5, this->x, this->y); break;
+            case 0: play_audio("sfx/ant_walk1.wav", 0.5, this->x, this->y, false); break;
+            case 1: play_audio("sfx/ant_walk2.wav", 0.5, this->x, this->y, false); break;
+            case 2: play_audio("sfx/ant_walk3.wav", 0.5, this->x, this->y, false); break;
             default: break; // no sound
             }
         }
@@ -74,7 +80,7 @@ void FoeBug::step() {
 
     case Foe::State::ACTION:
         if (this->prev_state != this->state) {
-            play_audio("sfx/ant_attack.wav", 1.0, this->x, this->y);
+            play_audio("sfx/ant_attack.wav", 1.0, this->x, this->y, false);
         }
 
         this->sprite->set_animation(ATTACK_ANIMATION + this->_displayed_direction);
@@ -85,23 +91,18 @@ void FoeBug::step() {
 
         break;
 
-    case Foe::State::HURT:
+    case Foe::State::THROWN:
         if (this->prev_state != this->state) {
-            play_audio("sfx/ant_hurt.wav", 1.0, this->x, this->y);
+            play_audio("sfx/ant_hurt.wav", 1.0, this->x, this->y, false);
         }
 
-        this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
-        if (game->ticks - this->timer > 500) {
-            this->state = Foe::State::WALKING;
-        }
-
-        game->push_health_bar(this->health, this->max_health, this->x + this->off_x, this->y - 16.0f + this->off_y, &this->icon_src, &this->icon_dst);
+        // foe internally exits the thrown state
 
         break;
 
     case Foe::State::DEAD:
         if (this->prev_state != this->state) {
-            play_audio("sfx/ant_die.wav", 1.0, this->x, this->y);
+            play_audio("sfx/ant_die.wav", 1.0, this->x, this->y, false);
         }
 
         this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
@@ -122,6 +123,11 @@ void FoeBug::step() {
         this->sprite->interval_ms = 100;
 
         break;
+    }
+
+    if (game->ticks - this->hurt_timer < 333 && this->state != Foe::State::DEAD) {
+        this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
+        game->push_health_bar(this->health, this->max_health, this->x + this->off_x, this->y - 16.0f + this->off_y, &this->icon_src, &this->icon_dst);
     }
 
     this->prev_state = this->state;

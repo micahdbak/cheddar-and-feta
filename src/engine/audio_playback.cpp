@@ -27,6 +27,7 @@ static SDL_AudioStream *voices[NUM_VOICES] = {0};
 static SDL_AudioSpec voice_spec[NUM_VOICES];
 static struct audio_source *ambience = NULL;
 static float listener_x = 0.0f, listener_y = 0.0f;
+static int current_music_volume = 100;
 
 void init_playback() {
     playback_device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
@@ -117,14 +118,16 @@ void set_listener(float x, float y) {
     listener_y = y;
 }
 
-void play_audio(const std::string &wav_path, float gain, float x, float y) {
+void play_audio(const std::string &wav_path, float gain, float x, float y, bool from_feta) {
     auto it = audio_sources.find(wav_path);
 
     if (it == audio_sources.end()) {
         return;
     }
 
-    game->audio.push_back(Game::AudioMsg{wav_path, gain, x, y});
+    if (!from_feta) {
+        game->audio.push_back(Game::AudioMsg{wav_path, gain, x, y});
+    }
 
     float dist = distance_between_points(listener_x, listener_y, x, y);
 
@@ -139,11 +142,11 @@ void play_audio(const std::string &wav_path, float gain, float x, float y) {
         gain *= mult;
     }
 
-    gain *= (float)game->volume / 100.0f;
+    gain *= (float)game->volume / 200.0f;
 
     struct audio_source &src = (*it).second;
 
-    // voices[0] is reserved for ambient audio
+    // voices[0] & voices[1] is reserved for ambient audio
     for (int i = 1; i < NUM_VOICES; i++) {
         // find an idle audio stream
         if (SDL_GetAudioStreamQueued(voices[i]) > IDLE_THRESHOLD) {
@@ -169,6 +172,7 @@ void loop_audio(const std::string &wav_path) {
 
     if (wav_path.empty()) {
         ambience = NULL;
+        SDL_ClearAudioStream(voices[0]);
         return;
     }
 
@@ -179,8 +183,10 @@ void loop_audio(const std::string &wav_path) {
     }
 
     ambience = &(*it).second;
+    float music_gain = (float)game->music_volume / 200.0f;
 
     if (!SDL_SetAudioStreamFormat(voices[0], &ambience->spec, NULL) ||
+        !SDL_SetAudioStreamGain(voices[0], music_gain) ||
         !SDL_PutAudioStreamData(voices[0], ambience->buf, ambience->len)) {
         std::cerr << "loop_audio: " << SDL_GetError() << std::endl;
         std::exit(1);
@@ -188,6 +194,14 @@ void loop_audio(const std::string &wav_path) {
 }
 
 void ambience_step() {
+    float music_gain = (float)game->music_volume / 200.0f;
+
+    if (current_music_volume != game->music_volume && !SDL_SetAudioStreamGain(voices[0], music_gain)) {
+        current_music_volume = game->music_volume;
+        std::cerr << "loop_audio: " << SDL_GetError() << std::endl;
+        std::exit(1);
+    }
+
     // wait until < approx 32kb of audio remains
     if (ambience == NULL || SDL_GetAudioStreamQueued(voices[0]) >= LOOP_THRESHOLD) {
         return;

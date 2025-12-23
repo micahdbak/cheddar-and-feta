@@ -107,7 +107,7 @@ void SaveData::write_file(int file_i) {
     unsigned long hash = 0;
 
     if (this->geti(GAME_DONE)) {
-        line = "! Score: 999\n";
+        line = "(Game Complete.)\n";
     } else {
         line = game->map_title + ", " + game->map_description + "\n";
     }

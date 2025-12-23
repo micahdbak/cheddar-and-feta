@@ -36,6 +36,7 @@ private:
     void render_objects();
 
     SDL_Texture *texture = nullptr;
+    SDL_FRect src_rect, dst_rect;
 
     std::string map_path;
     Map map;
@@ -77,6 +78,8 @@ void Game::init() {
 
     this->title = "Map Editor - ";
     this->title += this->argv[1];
+
+    net_agent = new NetworkAgent(false);
 }
 
 Editor::Editor(const char *map_path) {
@@ -125,6 +128,7 @@ Editor::Editor(const char *map_path) {
     }
 
     this->texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
+    this->src_rect = this->dst_rect = SDL_FRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
     this->map_path = map_path;
 
@@ -395,7 +399,7 @@ void Editor::step() {
         }
     }
 
-    game->push_sprite("EDITOR", this->texture, NULL, NULL, 0);
+    game->push_sprite("EDITOR", this->texture, &this->src_rect, &this->dst_rect, 0);
 }
 
 void Editor::input_tile() {

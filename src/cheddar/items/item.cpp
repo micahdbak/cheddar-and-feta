@@ -35,7 +35,7 @@ DroppedItem::DroppedItem(std::string item_id, float x, float y, const char *spri
         item_persister->remember_item(item_id, x, y, this->id);
 
         if (!item_persister->creating_items) {
-            play_audio("sfx/settle.wav", 0.5f, this->x, this->y);
+            play_audio("sfx/settle.wav", 0.5f, this->x, this->y, false);
         }
     }
 }
@@ -44,7 +44,7 @@ DroppedItem::~DroppedItem() {
     if (!game->deleting_objects && item_persister != nullptr) {
         // item picked up by player, most likely
         item_persister->forget_item(this->id);
-        play_audio("sfx/pickup.wav", 0.5f, this->x, this->y);
+        play_audio("sfx/pickup.wav", 0.5f, this->x, this->y, false);
     }
 
     delete this->sprite;

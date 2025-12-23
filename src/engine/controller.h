@@ -34,6 +34,7 @@ public:
     ~Controller() = default;
 
     void clear_hits();
+    void clear_all();
     bool is_hit(Button button);
     bool is_down(Button button);
 

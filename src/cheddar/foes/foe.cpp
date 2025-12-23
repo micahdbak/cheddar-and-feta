@@ -11,8 +11,8 @@ std::vector<Foe *> foes;
 static std::vector<int> speed_offsets = { 0, 4, 8, 4, 2, -2, -4, -8, -4 };
 static int speed_offsets_i = 0;
 
-Foe::Foe(float x, float y, int spawner_id, int speed, float stalking_distance, float action_distance):
-    spawner_id(spawner_id), speed(speed), stalking_distance(stalking_distance), action_distance(action_distance) {
+Foe::Foe(float x, float y, int spawner_id, int speed, int throw_speed, float stalking_distance, float action_distance):
+    spawner_id(spawner_id), speed(speed), throw_speed(throw_speed), stalking_distance(stalking_distance), action_distance(action_distance) {
     this->target_x = (int)x / game->tile_width;
     this->target_y = (int)y / game->tile_height;
 
@@ -59,6 +59,10 @@ void Foe::remove_from_foes() {
 }
 
 void Foe::attack(int damage) {
+    if (this->state == Foe::State::HURT || this->state == Foe::State::THROWN || this->state == Foe::State::DEAD) {
+        return;
+    }
+
     this->attack_internal(damage);
     this->walk_offset = game->ticks - this->start_ticks;
 }
@@ -84,7 +88,7 @@ void Foe::foe_step() {
             if (new_mouse != this->target_mouse
                 && (this->target_mouse->is_down
                 || this->current_distance > this->stalking_distance
-                || game->ticks - this->target_ticks > 10000)) {
+                || game->ticks - this->target_ticks > 5000)) {
                 this->target_ticks = game->ticks;
                 this->target_mouse = new_mouse;
                 this->current_distance = distance_between_points(this->x, this->y, new_mouse->x, new_mouse->y);
@@ -92,7 +96,7 @@ void Foe::foe_step() {
         }
 
         // perform action and stay on this tile if close enough and not running away
-        if (this->current_distance < this->action_distance && this->tile_choice != TileChoice::SPAZZ) {
+        if (this->tile_choice != TileChoice::SPAZZ && this->current_distance < this->action_distance) {
             this->action(this->target_mouse);
             this->state = Foe::State::ACTION;
             break;
@@ -101,8 +105,17 @@ void Foe::foe_step() {
         // will be walking if not action'ing
         this->state = Foe::State::WALKING;
 
-        int current_x = this->target_x;
-        int current_y = this->target_y;
+        int current_x = (int)this->x / game->tile_width;
+        int current_y = (int)this->y / game->tile_height;
+        int coord = (current_y * game->cols) + current_x;
+
+        if (coord >= 0 && coord < game->cols * game->rows && game->collision[coord] < 0) {
+            this->target_x = current_x;
+            this->target_y = current_y;
+        } else {
+            current_x = this->target_x;
+            current_y = this->target_y;
+        }
 
         // move towards closest mouse
         if (this->target_mouse != nullptr) {
@@ -143,19 +156,33 @@ void Foe::foe_step() {
             this->state = Foe::State::IDLE;
         }
 
-        this->start_x = CENTER_TILE_X(current_x);
-        this->start_y = CENTER_TILE_Y(current_y);
+        this->start_x = this->x;
+        this->start_y = this->y;
         this->start_ticks = game->ticks;
 
         bool diagonal = this->x_dir != 0 && this->y_dir != 0;
         this->walking_time = diagonal ? (int)((float)this->speed * DIAG_MULTIPLIER2) : this->speed;
+
+        float target_center_x = CENTER_TILE_X(this->target_x);
+        float target_center_y = CENTER_TILE_X(this->target_y);
+        this->travel_w = target_center_x - this->start_x;
+        this->travel_h = target_center_y - this->start_y;
     } break;
 
     case Foe::State::FORCE_RANDOM_TILE: {
         this->state = Foe::State::WALKING;
 
-        int current_x = this->target_x;
-        int current_y = this->target_y;
+        int current_x = (int)this->x / game->tile_width;
+        int current_y = (int)this->y / game->tile_height;
+        int coord = (current_y * game->cols) + current_x;
+
+        if (coord >= 0 && coord < game->cols * game->rows && game->collision[coord] < 0) {
+            this->target_x = current_x;
+            this->target_y = current_y;
+        } else {
+            current_x = this->target_x;
+            current_y = this->target_y;
+        }
 
         foe_pick_random(&this->target_x, &this->target_y);
 
@@ -167,23 +194,64 @@ void Foe::foe_step() {
             this->state = Foe::State::IDLE;
         }
 
-        this->start_x = CENTER_TILE_X(current_x);
-        this->start_y = CENTER_TILE_Y(current_y);
+        this->start_x = this->x;
+        this->start_y = this->y;
         this->start_ticks = game->ticks;
 
         bool diagonal = this->x_dir != 0 && this->y_dir != 0;
         this->walking_time = diagonal ? (int)((float)this->speed * DIAG_MULTIPLIER2) : this->speed;
+
+        float target_center_x = CENTER_TILE_X(this->target_x);
+        float target_center_y = CENTER_TILE_X(this->target_y);
+        this->travel_w = target_center_x - this->start_x;
+        this->travel_h = target_center_y - this->start_y;
     } break;
 
-    case Foe::State::WALKING: {
+    case Foe::State::THROW_AWAY_FROM: {
+        this->state = Foe::State::THROWN;
+
+        int current_x = (int)this->x / game->tile_width;
+        int current_y = (int)this->y / game->tile_height;
+        int coord = (current_y * game->cols) + current_x;
+
+        if (coord >= 0 && coord < game->cols * game->rows && game->collision[coord] < 0) {
+            this->target_x = current_x;
+            this->target_y = current_y;
+        } else {
+            current_x = this->target_x;
+            current_y = this->target_y;
+        }
+
+        foe_move_direction(&this->target_x, &this->target_y, this->throw_x, this->throw_y);
+
+        this->x_dir = this->target_x - current_x;
+        this->y_dir = this->target_y - current_y;
+        this->direction = direction_from_dirs(x_dir, y_dir);
+
+        if (this->x_dir == 0 && this->y_dir == 0) {
+            this->state = Foe::State::IDLE;
+        }
+
+        this->start_x = this->x;
+        this->start_y = this->y;
+        this->start_ticks = game->ticks;
+
+        bool diagonal = this->x_dir != 0 && this->y_dir != 0;
+        this->walking_time = diagonal ? (int)((float)this->throw_speed * DIAG_MULTIPLIER2) : this->throw_speed;
+
+        float target_center_x = CENTER_TILE_X(this->target_x);
+        float target_center_y = CENTER_TILE_X(this->target_y);
+        this->travel_w = target_center_x - this->x;
+        this->travel_h = target_center_y - this->y;
+    }; break;
+
+    case Foe::State::WALKING:
+    case Foe::State::THROWN: {
         int elapsed = game->ticks - this->start_ticks;
         float perc = (float)elapsed / (float)this->walking_time;
 
-        float dx = (float)this->x_dir * perc * 16.0f;
-        float dy = (float)this->y_dir * perc * 16.0f;
-
-        this->x = this->start_x + dx;
-        this->y = this->start_y + dy;
+        this->x = this->start_x + (perc * this->travel_w);
+        this->y = this->start_y + (perc * this->travel_h);
 
         if (elapsed > this->walking_time) {
             this->x = CENTER_TILE_X(this->target_x);
@@ -191,7 +259,10 @@ void Foe::foe_step() {
             this->state = Foe::State::IDLE; // next step will select a new tile
         }
 
-        if (game->ticks - this->direction_timer > 100 && this->_displayed_direction != this->direction) {
+        // exclusive to WALKING: update this->_displayed_direction
+        if (this->state == Foe::State::WALKING &&
+            this->_displayed_direction != this->direction &&
+            game->ticks - this->direction_timer > 100) {
             this->direction_timer = game->ticks;
 
             int diff_up = (this->direction < this->_displayed_direction ? this->direction + 8 : this->direction) - this->_displayed_direction;

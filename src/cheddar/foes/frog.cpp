@@ -7,7 +7,7 @@
 #include "../items/cannon_ball.h"
 
 FoeFrog::FoeFrog(int x, int y, int spawner_id):
-    Foe(float(x), float(y), spawner_id, 500, 128.0f, 64.0f) {
+    Foe(float(x), float(y), spawner_id, 500, 250, 128.0f, 64.0f) {
     this->sprite = new Sprite("sprites/foe_frog.bmp", 48, 48, 125);
     this->dst_rect.w = 48.0f;
     this->dst_rect.h = 48.0f;
@@ -22,7 +22,7 @@ FoeFrog::~FoeFrog() {
 }
 
 void FoeFrog::action(Mouse *mouse) {
-    if (game->ticks - this->attack_timer < 2000) {
+    if (game->ticks - this->attack_timer < 2000 || game->ticks - this->hurt_timer < 750) {
         this->state = Foe::State::FORCE_RANDOM_TILE;
         return;
     }
@@ -32,7 +32,7 @@ void FoeFrog::action(Mouse *mouse) {
     this->state = Foe::State::ACTION;
     this->timer = game->ticks;
 
-    play_audio("sfx/cannon.wav", 1.0, this->x, this->y);
+    play_audio("sfx/cannon.wav", 1.0, this->x, this->y, false);
 
     char options[256];
     snprintf(options, sizeof(options), "%d,%d,%d,%d,%d", (int)(this->x + this->off_x), (int)(this->y + this->off_y), this->x_dir, this->y_dir, this->id);
@@ -53,7 +53,8 @@ void FoeFrog::attack_internal(int damage) {
         int kills = save.geti(FOE_FROG_OBJ STATS) + 1;
         save.puti(FOE_FROG_OBJ STATS, kills);
     } else {
-        this->state = Foe::State::HURT;
+        this->state = Foe::State::THROW_AWAY_FROM;
+        this->hurt_timer = game->ticks;
     }
 
     this->timer = game->ticks;
@@ -69,8 +70,8 @@ void FoeFrog::step() {
     case Foe::State::IDLE:
         if (this->prev_state != this->state) {
             switch (SDL_rand(2)) {
-            case 0: play_audio("sfx/tank_roll1.wav", 0.5, this->x, this->y); break;
-            case 1: play_audio("sfx/tank_roll2.wav", 0.5, this->x, this->y); break;
+            case 0: play_audio("sfx/tank_roll1.wav", 0.5, this->x, this->y, false); break;
+            case 1: play_audio("sfx/tank_roll2.wav", 0.5, this->x, this->y, false); break;
             }
         }
 
@@ -84,24 +85,16 @@ void FoeFrog::step() {
 
         break;
 
-    case Foe::State::HURT:
+    case Foe::State::THROWN:
         if (this->prev_state != this->state) {
-            play_audio("sfx/tank_hurt.wav", 1.0, this->x, this->y);
+            play_audio("sfx/tank_hurt.wav", 1.0, this->x, this->y, false);
         }
-
-        this->sprite->set_animation(ACTION_ANIMATION + this->_displayed_direction);
-        this->sprite->set_frame(0);
-        if (game->ticks - this->timer > 250) {
-            this->state = Foe::State::WALKING;
-        }
-
-        game->push_health_bar(this->health, this->max_health, this->x + this->off_x, this->y - 24.0f + this->off_y, &this->icon_src, &this->icon_dst);
 
         break;
 
     case Foe::State::DEAD:
         if (this->prev_state != this->state) {
-            play_audio("sfx/tank_die.wav", 1.0, this->x, this->y);
+            play_audio("sfx/tank_die.wav", 1.0, this->x, this->y, false);
         }
 
         this->sprite->set_animation(ACTION_ANIMATION + this->_displayed_direction);
@@ -126,6 +119,12 @@ void FoeFrog::step() {
         this->sprite->set_animation(WALK_ANIMATION + this->_displayed_direction);
 
         break;
+    }
+
+    if (game->ticks - this->hurt_timer < 500 && this->state != Foe::State::DEAD) {
+        this->sprite->set_animation(ACTION_ANIMATION + this->_displayed_direction);
+        this->sprite->set_frame(0);
+        game->push_health_bar(this->health, this->max_health, this->x + this->off_x, this->y - 24.0f + this->off_y, &this->icon_src, &this->icon_dst);
     }
 
     this->prev_state = this->state;

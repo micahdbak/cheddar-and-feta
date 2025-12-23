@@ -45,9 +45,7 @@ public:
     float hitsource_x() override { return this->x; }
     float hitsource_y() override { return this->y; }
 
-    void hitsource_notify() override {
-        this->did_hit = true;
-    }
+    void hitsource_notify() override;
 
 private:
     Uint64 spawned_ticks;

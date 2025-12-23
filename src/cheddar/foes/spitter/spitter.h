@@ -37,7 +37,7 @@ private:
 
     Uint64 timer, hurt_timer, direction_timer = 0, start_timer;
     int last_direction = 0;
-    int max_health = 10, health = 10;
+    int max_health = 16, health = 16;
     SDL_FRect icon_src, icon_dst;
 
     // circular queue

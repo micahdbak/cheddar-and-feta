@@ -14,7 +14,7 @@
 #define CIRCLE_TICKS 2000
 
 FoeBat::FoeBat(int x, int y, int spawner_id):
-    Foe(float(x), float(y), spawner_id, 333, 256.0f, 16.0f) {
+    Foe(float(x), float(y), spawner_id, 175, 100, 256.0f, 16.0f) {
     this->sprite = new Sprite("sprites/foe_bat.bmp", 32, 32, 45); // approx every 3 frames
 
     this->dst_rect.w = 32.0f;
@@ -33,6 +33,7 @@ FoeBat::~FoeBat() {
 
 void FoeBat::action(Mouse *mouse) {
     if (game->ticks - this->timer < 500) {
+        this->state = Foe::State::FORCE_RANDOM_TILE;
         return;
     }
 
@@ -55,7 +56,8 @@ void FoeBat::attack_internal(int damage) {
         int kills = save.geti(FOE_BAT_OBJ STATS) + 1;
         save.puti(FOE_BAT_OBJ STATS, kills);
     } else {
-        this->state = Foe::State::HURT;
+        this->state = Foe::State::THROW_AWAY_FROM;
+        this->hurt_timer = game->ticks;
     }
 
     this->timer = game->ticks;
@@ -69,15 +71,16 @@ void FoeBat::step() {
 
     switch (this->state) {
     case Foe::State::IDLE:
-        if (this->prev_state != this->state) {
-            play_audio("sfx/ant_fly.wav", 0.5, this->x, this->y);
+        if (this->prev_state != this->state && game->ticks - this->audio_timer > 500) {
+            this->audio_timer = game->ticks;
+            play_audio("sfx/ant_fly.wav", 0.5, this->x, this->y, false);
         }
 
         break;
 
     case Foe::State::ACTION:
         if (this->prev_state != this->state) {
-            play_audio("sfx/ant_attack.wav", 1.0, this->x, this->y);
+            play_audio("sfx/ant_attack.wav", 1.0, this->x, this->y, false);
         }
         
         if (game->ticks - this->timer > 250) {
@@ -86,23 +89,16 @@ void FoeBat::step() {
 
         break;
 
-    case Foe::State::HURT:
+    case Foe::State::THROWN:
         if (this->prev_state != this->state) {
-            play_audio("sfx/ant_hurt.wav", 1.0, this->x, this->y);
+            play_audio("sfx/ant_hurt.wav", 1.0, this->x, this->y, false);
         }
-
-        this->sprite->set_animation(WALK_ANIMATION + this->_displayed_direction);
-        if (game->ticks - this->timer > 250) {
-            this->state = Foe::State::WALKING;
-        }
-
-        game->push_health_bar(this->health, this->max_health, this->x + this->off_x, this->y - 16.0f + this->off_y, &this->icon_src, &this->icon_dst);
 
         break;
 
     case Foe::State::DEAD:
         if (this->prev_state != this->state) {
-            play_audio("sfx/ant_die.wav", 1.0, this->x, this->y);
+            play_audio("sfx/ant_die.wav", 1.0, this->x, this->y, false);
         }
 
         this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
@@ -124,11 +120,16 @@ void FoeBat::step() {
 
         if (this->tile_choice == Foe::TileChoice::TOWARDS && this->current_distance <= 32.0f) {
             this->tile_choice = Foe::TileChoice::CIRCLE;
-        } else if (this->tile_choice == Foe::TileChoice::CIRCLE && this->current_distance >= 80.0f) {
+        } else if (this->tile_choice == Foe::TileChoice::CIRCLE && this->current_distance >= 128.0f) {
             this->tile_choice = Foe::TileChoice::TOWARDS;
         }
 
         break;
+    }
+
+    if (game->ticks - this->hurt_timer < 333 && this->state != Foe::State::DEAD) {
+        this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
+        game->push_health_bar(this->health, this->max_health, this->x + this->off_x, this->y - 16.0f + this->off_y, &this->icon_src, &this->icon_dst);
     }
 
     if (this->state != Foe::State::HURT && this->state != Foe::State::DEAD) {

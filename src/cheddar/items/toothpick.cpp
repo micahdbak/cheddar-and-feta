@@ -39,7 +39,7 @@ void ThrownToothpick::step() {
     float new_x = this->x + dx;
     float new_y = this->y + dy;
 
-    if (this->did_hit || game->point_in_collider(new_x, new_y) || game->ticks - this->spawned_ticks > 1000) {
+    if (game->point_in_collider(new_x, new_y) || game->ticks - this->spawned_ticks > 1000) {
         game->delete_object = true;
 
         if (this->drop_item) {
@@ -56,4 +56,9 @@ void ThrownToothpick::step() {
     this->dst_rect.y = this->y - 8.0f;
 
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 16);
+}
+
+void ThrownToothpick::hitsource_notify() {
+    this->did_hit = true;
+    this->spawned_ticks = game->ticks - 750; // 250ms until dropped
 }

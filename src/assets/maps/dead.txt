@@ -2,7 +2,7 @@ Game Over
 -
 16,16,20,15
 24,24,24
-
+music/dead.wav
 1
 tiles/menu.bmp
 1

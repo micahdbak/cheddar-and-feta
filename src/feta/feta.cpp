@@ -102,7 +102,7 @@ void Feta::step() {
             this->sprite->set_animation(direction_from_dirs(x_dir, y_dir));
 
             if (this->sprite->update_frame() && (this->sprite->frame_i % 2) == 1) {
-                play_audio("sfx/step.wav", 0.5, this->x, this->y);
+                play_audio("sfx/step.wav", 0.5, this->x, this->y, true);
                 NetSender::send_message(MSG_AUDIO, Mouse::audio_msg("sfx/step.wav", 0.5, this->x, this->y));
             }
 
@@ -141,7 +141,7 @@ void Feta::step() {
                     this->sprite->set_frame(0);
                     this->sprite->interval_ms = 125;
 
-                    play_audio("sfx/throw.wav", 1.0f, this->x, this->y);
+                    play_audio("sfx/throw.wav", 1.0f, this->x, this->y, true);
                     NetSender::send_message(MSG_AUDIO, Mouse::audio_msg("sfx/throw.wav", 1.0, this->x, this->y));
                 }
             } break;
@@ -161,10 +161,10 @@ void Feta::step() {
                     this->sprite->set_animation(EATING_ANIMATION);
                     this->sprite->interval_ms = 75;
 
-                    play_audio("sfx/cheese.wav", 1.0f, this->x, this->y);
+                    play_audio("sfx/cheese.wav", 1.0f, this->x, this->y, true);
                     NetSender::send_message(MSG_AUDIO, Mouse::audio_msg("sfx/cheese.wav", 1.0, this->x, this->y));
                 } else {
-                    play_audio("sfx/full.wav", 1.0f, this->x, this->y);
+                    play_audio("sfx/full.wav", 1.0f, this->x, this->y, true);
                     NetSender::send_message(MSG_AUDIO, Mouse::audio_msg("sfx/full.wav", 1.0, this->x, this->y));
                 }
 
@@ -187,7 +187,7 @@ void Feta::step() {
                 // set animation to attacking
                 this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
 
-                play_audio("sfx/kick.wav", 1.0f, this->x, this->y);
+                play_audio("sfx/kick.wav", 1.0f, this->x, this->y, true);
                 NetSender::send_message(MSG_AUDIO, Mouse::audio_msg("sfx/kick.wav", 1.0, this->x, this->y));
             } break;
 
@@ -211,7 +211,7 @@ void Feta::step() {
             this->sprite->set_frame(0);
             this->sprite->interval_ms = 125;
 
-            play_audio("sfx/throw.wav", 1.0f, this->x, this->y);
+            play_audio("sfx/throw.wav", 1.0f, this->x, this->y, true);
             NetSender::send_message(MSG_AUDIO, Mouse::audio_msg("sfx/throw.wav", 1.0, this->x, this->y));
         }
 
@@ -429,7 +429,7 @@ void Feta::attack(int damage) {
     }
 
     this->health -= damage;
-    play_audio("sfx/hurt.wav", 1.0f, this->x, this->y);
+    play_audio("sfx/hurt.wav", 1.0f, this->x, this->y, true);
     NetSender::send_message(MSG_AUDIO, Mouse::audio_msg("sfx/hurt.wav", 1.0, this->x, this->y));
 
     // if dead, go down

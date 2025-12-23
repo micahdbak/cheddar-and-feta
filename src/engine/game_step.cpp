@@ -253,6 +253,7 @@ void Game::step() {
     // toggle controls menu
     Controller *cur_controller = capture_controls ? &captured_controller : &local_controller;
     if (cur_controller->is_hit(Button::MENU)) {
+        cur_controller->clear_all();
         this->display_controls_menu = !this->display_controls_menu;
         capture_controls = this->display_controls_menu;
     }
@@ -323,10 +324,11 @@ void Game::step() {
     SDL_RenderClear(renderer);
 
     // render background
-    SDL_FRect map_src, map_dst;
-    this->make_map_rect(this->corner_x, this->corner_y, this->bg->w, this->bg->h, &map_src, &map_dst);
+    SDL_FRect map_src = SDL_FRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_FRect map_dst = SDL_FRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
     if (this->bg != nullptr) {
+        this->make_map_rect(this->corner_x, this->corner_y, this->bg->w, this->bg->h, &map_src, &map_dst);
         SDL_RenderTexture(renderer, this->bg, &map_src, &map_dst);
     }
 

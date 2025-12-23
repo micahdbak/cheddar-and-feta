@@ -81,7 +81,6 @@ void foe_path_find(Mouse *mouse) {
     int *prev = mouse->is_feta ? _feta_prev : _cheddar_prev;
 
     std::priority_queue<_QItem> queue;
-    std::vector<bool> visited(rows * cols, false);
     std::vector<_Neighbour> neighbours;
 
     // starting coordinates
@@ -103,10 +102,6 @@ void foe_path_find(Mouse *mouse) {
         _QItem u = queue.top();
         queue.pop();
         int u_i = COORD(u.coord.first, u.coord.second);
-
-        // don't re-visit tiles
-        if (visited[u_i]) continue;
-        //visited[u_i] = true;
 
         neighbours.clear();
         _neighbours(u.coord.first, u.coord.second, neighbours);
@@ -284,6 +279,17 @@ void foe_pick_random(int *x, int *y) {
         int i = SDL_rand(neighbours.size());
         *x = neighbours[i].coord.first;
         *y = neighbours[i].coord.second;
+    }
+}
+
+void foe_move_direction(int *x, int *y, int x_dir, int y_dir) {
+    int x_goal = *x + x_dir, y_goal = *y + y_dir;
+
+    if (game->collision[COORD(x_goal, y_goal)] < 0) {
+        *x = x_goal;
+        *y = y_goal;
+    } else {
+        foe_pick_random(x, y);
     }
 }
 

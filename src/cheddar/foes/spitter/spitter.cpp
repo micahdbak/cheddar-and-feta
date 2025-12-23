@@ -7,7 +7,7 @@
 #include "../../items/fire.h"
 
 Spitter::Spitter(float x, float y, int spawner_id)
-    : Foe(x, y, spawner_id, 200, 256.0f, 80.0f) {
+    : Foe(x, y, spawner_id, 200, 250, 256.0f, 80.0f) {
     // make NUM_SEGMENTS-1 segments (the NUM_SEGMENTS'th segment is the abdomen)
     for (int i = 1; i < NUM_SEGMENTS; i++) {
         game->push_object(FOE_SPITTER_SEGMENT_OBJ, std::to_string(this->id) + "," + std::to_string(i));
@@ -61,11 +61,11 @@ void Spitter::step() {
     case Foe::State::IDLE:
         if (this->prev_state != this->state) {
             switch (SDL_rand(6)) {
-            case 0: play_audio("sfx/spitter_walk1.wav", 1.0f, this->x, this->y); break;
-            case 1: play_audio("sfx/spitter_walk2.wav", 1.0f, this->x, this->y); break;
-            case 2: play_audio("sfx/spitter_walk3.wav", 1.0f, this->x, this->y); break;
-            case 3: play_audio("sfx/spitter_walk4.wav", 1.0f, this->x, this->y); break;
-            case 4: play_audio("sfx/ant_walk3.wav", 1.0f, this->x, this->y); break;
+            case 0: play_audio("sfx/spitter_walk1.wav", 1.0f, this->x, this->y, false); break;
+            case 1: play_audio("sfx/spitter_walk2.wav", 1.0f, this->x, this->y, false); break;
+            case 2: play_audio("sfx/spitter_walk3.wav", 1.0f, this->x, this->y, false); break;
+            case 3: play_audio("sfx/spitter_walk4.wav", 1.0f, this->x, this->y, false); break;
+            case 4: play_audio("sfx/ant_walk3.wav", 1.0f, this->x, this->y, false); break;
             default: break;
             }
         }
@@ -132,16 +132,16 @@ void Spitter::step() {
             game->push_object(ITEM_FIRE USE_OBJ, UseItem::Options(fire_x, fire_y, fire_x_dir * 2, fire_y_dir * 2, -1));
             
             if (SDL_rand(2)) {
-                play_audio("sfx/fire_short1.wav", 1.0f, this->x, this->y);
+                play_audio("sfx/fire_short1.wav", 1.0f, this->x, this->y, false);
             } else {
-                play_audio("sfx/fire_short2.wav", 1.0f, this->x, this->y);
+                play_audio("sfx/fire_short2.wav", 1.0f, this->x, this->y, false);
             }
         }
     } break;
 
     case Foe::State::HURT:
         if (this->prev_state != this->state) {
-            play_audio("sfx/spitter_hurt.wav", 1.0f, this->x, this->y);
+            play_audio("sfx/spitter_hurt.wav", 1.0f, this->x, this->y, false);
         }
 
         if (game->ticks - this->hurt_timer > 100) {
@@ -152,7 +152,7 @@ void Spitter::step() {
 
     case Foe::State::DEAD:
         if (this->prev_state != this->state) {
-            play_audio("sfx/spitter_die.wav", 1.0f, this->x, this->y);
+            play_audio("sfx/spitter_die.wav", 1.0f, this->x, this->y, false);
         }
 
         if (game->ticks - this->hurt_timer > 2000) {

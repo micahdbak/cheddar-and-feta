@@ -77,7 +77,7 @@ void FoeGate::step() {
 
         this->synchronized = false;
 
-        play_audio("sfx/door.wav", 1.0f, this->x, this->y);
+        play_audio("sfx/door.wav", 1.0f, this->x, this->y, false);
     }
 
     this->dst_rect.x = this->x;

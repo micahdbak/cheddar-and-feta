@@ -34,7 +34,11 @@ class CheeseFactory : public ObjectFactory {
 public:
     Object *create(const std::string &options) {
         int x, y, amount;
-        if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &amount)) FATAL_ERROR
+        int fields = sscanf(options.c_str(), "%d,%d,%d", &x, &y, &amount);
+
+        if (fields == 2) {
+            amount = 1;
+        } else if (fields != 3) FATAL_ERROR
 
         return new Cheese(float(x), float(y), amount);
     }

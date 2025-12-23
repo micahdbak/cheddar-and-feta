@@ -60,7 +60,7 @@ void Textbox::step() {
 
         // don't blip if there was a space
         if (!space) {
-            play_audio("sfx/blip.wav", 0.5f, 0.0f, 0.0f);
+            play_audio("sfx/blip.wav", 0.5f, 0.0f, 0.0f, true);
         }
 
         // display prompt arrow

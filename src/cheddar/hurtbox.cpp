@@ -93,9 +93,21 @@ void HurtBox::hurt(int damage, HitBox *hitbox, int cooldown_ms) {
             this->mouse->set_throw(throw_x, throw_y);
         } break;
 
-        case HurtBox::OwnerClass::FOE:
+        case HurtBox::OwnerClass::FOE: {
             this->foe->attack(damage);
-            break;
+
+            // throw mouse away from source
+            float hitbox_x = (float)(hitbox->bounding_box.x + hitbox->bounding_box.w/2);
+            float hitbox_y = (float)(hitbox->bounding_box.y + hitbox->bounding_box.h/2);
+
+            if (hitbox->throw_away) {
+                // throws away from hitbox
+                dir_to_point(hitbox_x, hitbox_y, this->foe->x, this->foe->y, &this->foe->throw_x, &this->foe->throw_y);
+            } else {
+                // pulls toward hitbox
+                dir_to_point(this->foe->x, this->foe->y, hitbox_x, hitbox_y, &this->foe->throw_x, &this->foe->throw_y);
+            }
+        } break;
 
         case HurtBox::OwnerClass::HURTSOURCE:
             this->source->attack(damage);

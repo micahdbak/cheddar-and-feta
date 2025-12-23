@@ -219,8 +219,8 @@ public:
 
     std::vector<AudioMsg> audio;
 
-    // 0..100
-    int volume = 100;
+    // 0..200
+    int volume = 100, music_volume = 100;
 
 private:
     // for Game::texts

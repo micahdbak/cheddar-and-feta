@@ -176,7 +176,7 @@ void NetReceiver::step() {
             if (4 != sscanf(arr + 1, "%1023s %d,%d,%d", buff, &gain_i, &x, &y)) FATAL_ERROR
             gain = (float)gain_i / 10.0f;
 
-            play_audio(std::string(buff), gain, (float)x, (float)y);
+            play_audio(std::string(buff), gain, (float)x, (float)y, true);
         } break;
         }
     }

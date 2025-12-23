@@ -144,7 +144,7 @@ void Cheddar::step() {
             this->sprite->set_animation(direction_from_dirs(x_dir, y_dir));
 
             if (this->sprite->update_frame() && (this->sprite->frame_i % 2) == 1) {
-                play_audio("sfx/step.wav", 0.5, this->x, this->y);
+                play_audio("sfx/step.wav", 0.5, this->x, this->y, false);
             }
 
             mov_speed = this->max_mov_speed;
@@ -182,7 +182,7 @@ void Cheddar::step() {
                     this->sprite->set_frame(0);
                     this->sprite->interval_ms = 125;
 
-                    play_audio("sfx/throw.wav", 1.0f, this->x, this->y);
+                    play_audio("sfx/throw.wav", 1.0f, this->x, this->y, false);
                 }
 
                 break;
@@ -201,9 +201,9 @@ void Cheddar::step() {
                     this->sprite->set_animation(EATING_ANIMATION);
                     this->sprite->interval_ms = 75;
 
-                    play_audio("sfx/cheese.wav", 1.0f, this->x, this->y);
+                    play_audio("sfx/cheese.wav", 1.0f, this->x, this->y, false);
                 } else {
-                    play_audio("sfx/full.wav", 1.0f, this->x, this->y);
+                    play_audio("sfx/full.wav", 1.0f, this->x, this->y, false);
                 }
 
                 break;
@@ -226,7 +226,7 @@ void Cheddar::step() {
                 // set animation to attacking
                 this->sprite->set_animation((this->sprite->animation % 8) + ATTACKING_ANIMATION);
 
-                play_audio("sfx/kick.wav", 1.0f, this->x, this->y);
+                play_audio("sfx/kick.wav", 1.0f, this->x, this->y, false);
             } break;
 
             default: break;
@@ -249,7 +249,7 @@ void Cheddar::step() {
             this->sprite->set_frame(0);
             this->sprite->interval_ms = 125;
 
-            play_audio("sfx/throw.wav", 1.0f, this->x, this->y);
+            play_audio("sfx/throw.wav", 1.0f, this->x, this->y, false);
         }
 
         break;
@@ -489,7 +489,7 @@ void Cheddar::attack(int damage) {
     }
 
     this->health -= damage;
-    play_audio("sfx/hurt.wav", 1.0f, this->x, this->y);
+    play_audio("sfx/hurt.wav", 1.0f, this->x, this->y, false);
 
     // if dead, go down
     if (this->health <= 0) {

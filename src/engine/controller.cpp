@@ -61,6 +61,15 @@ void Controller::clear_hits() {
     this->digit = -1;
 }
 
+void Controller::clear_all() {
+    for (int i = 0; i < NUM_BUTTONS; i++) {
+        this->is_hit_map[i] = false;
+        this->is_down_map[i] = false;
+    }
+    this->c = NO_CHAR;
+    this->digit = -1;
+}
+
 bool Controller::is_hit(Button button) {
     if (this->is_hit_map[button]) {
         this->is_hit_map[button] = false;

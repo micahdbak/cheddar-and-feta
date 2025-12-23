@@ -36,7 +36,7 @@ void ThrownMolotov::step() {
 
         game->delete_object = true;
 
-        play_audio("sfx/fire.wav", 1.0f, this->x, this->y);
+        play_audio("sfx/fire.wav", 1.0f, this->x, this->y, false);
 
         return;
     }

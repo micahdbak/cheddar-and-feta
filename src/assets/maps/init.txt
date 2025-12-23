@@ -2,7 +2,7 @@ Game Start
 Main Menu
 16,16,20,15
 0,128,160
-
+music/menu.wav
 1
 tiles/menu.bmp
 1

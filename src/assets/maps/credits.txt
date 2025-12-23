@@ -2,7 +2,7 @@ Credits
 Ending
 16,16,20,15
 24,24,24
-
+music/victory.wav
 0
 1
 credits 0

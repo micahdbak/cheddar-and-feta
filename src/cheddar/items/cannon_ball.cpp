@@ -50,7 +50,7 @@ void ThrownCannonBall::step() {
     float new_x = this->x + dx;
     float new_y = this->y + dy;
 
-    if (this->did_hit || game->point_in_collider(new_x, new_y) || game->ticks - this->spawned_ticks > 750) {
+    if (game->point_in_collider(new_x, new_y) || game->ticks - this->spawned_ticks > 750) {
         game->delete_object = true;
 
         if (this->drop_item) {
@@ -67,4 +67,9 @@ void ThrownCannonBall::step() {
     this->dst_rect.y = float(this->y - 8);
 
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 16);
+}
+
+void ThrownCannonBall::hitsource_notify() {
+    this->did_hit = true;
+    this->spawned_ticks = game->ticks - 500; // 250ms until dropped
 }

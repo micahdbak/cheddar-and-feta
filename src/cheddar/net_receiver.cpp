@@ -87,7 +87,7 @@ void NetReceiver::step() {
 
                 gain = (float)gain_i / 10.0f;
 
-                play_audio(std::string(buff), gain, (float)x, (float)y);
+                play_audio(std::string(buff), gain, (float)x, (float)y, true);
             } break;
 
             case MSG_IS_DOWN:

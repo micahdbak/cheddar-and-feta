@@ -23,8 +23,6 @@ private:
     int spawner_id;
     std::vector<std::vector<std::string>> waves;
     std::vector<std::string> to_spawn;
-    Sprite *sprite;
-    SDL_FRect dst_rect;
     Uint64 spawned_ticks = 0;
 
     int wave = 0;

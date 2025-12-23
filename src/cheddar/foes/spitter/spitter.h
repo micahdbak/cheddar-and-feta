@@ -59,7 +59,7 @@ private:
         this->steps[idx] = pos;
     }
 
-    struct step_t get_step(ssize_t idx) {
+    struct step_t get_step(int idx) {
         if (idx < 0) {
             return { 0, 0, 0 };
         }

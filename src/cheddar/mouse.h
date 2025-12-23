@@ -55,7 +55,7 @@ public:
     static Mouse *closest_mouse(float x, float y, float min_distance, bool forced);
 
     float x, y;
-    bool is_down, is_feta;
+    bool is_down = false, is_feta = false;
 };
 
 extern Mouse *cheddar, *feta;

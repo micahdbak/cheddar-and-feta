@@ -68,6 +68,8 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord> &coordinates, std::string option
     // push item persister and hurtbox
     game->push_object(ITEM_PERSISTER_OBJ, "");
     game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 12));
+
+    this->is_down = false;
 }
 
 Cheddar::~Cheddar() {

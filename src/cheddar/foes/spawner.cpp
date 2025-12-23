@@ -10,11 +10,6 @@ FoeSpawner *spawners[20];
 
 FoeSpawner::FoeSpawner(float x, float y, int spawner_id, int animation, const std::vector<std::vector<std::string>> &waves):
     x(x), y(y), spawner_id(spawner_id), waves(waves) {
-    this->sprite = new Sprite("sprites/spawner.bmp", 24, 16, 0);
-    this->dst_rect.w = 24.0f;
-    this->dst_rect.h = 16.0f;
-    this->sprite->set_animation(animation);
-
     char key[256];
     snprintf(key, sizeof(key), "spawner_%d", this->spawner_id);
     if (save.geti(key) == 1) {
@@ -26,21 +21,10 @@ FoeSpawner::FoeSpawner(float x, float y, int spawner_id, int animation, const st
 }
 
 FoeSpawner::~FoeSpawner() {
-    delete this->sprite;
     spawners[this->spawner_id] = nullptr;
 }
 
 void FoeSpawner::step() {
-    // if (this->empty) {
-    //     // this->sprite->set_frame(1);
-    // }
-    // 
-    // float horiz_offset = this->sprite->animation == 0 ? 8.0f : 0.0f;
-    // 
-    // this->dst_rect.x = this->x - horiz_offset;
-    // this->dst_rect.y = this->y;
-    // game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 0.0f);
-
     if (!this->to_spawn.empty() && game->ticks - this->spawned_ticks > 500)
     {
         this->spawned_ticks = game->ticks;

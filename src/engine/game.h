@@ -167,7 +167,7 @@ public:
 
     std::string title = "SDL3 Game";
     int argc;
-    const char **argv;
+    char **argv;
 
     Uint64 ticks = 0;
     float delta = 0;

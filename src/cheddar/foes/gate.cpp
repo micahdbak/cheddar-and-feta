@@ -21,6 +21,9 @@ FoeGate::FoeGate(int x, int y, int spawner_id, int animation):
     this->x = float(x);
     this->y = float(y);
 
+    this->colliders_offset = ((y / game->tile_height) + 1) * game->cols;
+    this->colliders_x = x / game->tile_width;
+
     char key[256];
     snprintf(key, sizeof(key), "spawner_%d", this->spawner_id);
     if (save.geti(key) == 1) {
@@ -38,8 +41,6 @@ FoeGate::FoeGate(int x, int y, int spawner_id, int animation):
      * | # | # | # | <- # is a collider
      */
 
-    this->colliders_offset = ((y/game->tile_height) + 1) * game->cols;
-    this->colliders_x = x / game->tile_width;
     for (int i = 0; i < 3; i++) {
         int coord = this->colliders_offset + this->colliders_x + i;
         this->colliders.push_back(game->collision[coord]);

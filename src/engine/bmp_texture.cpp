@@ -121,8 +121,6 @@ SDL_Texture *load_bmp_texture(const std::string &bmp_path) {
     SDL_Surface *surface = SDL_LoadBMP(bmp_path.c_str());
     if (surface == nullptr) {
         std::cerr << "SDL_LoadBMP error: " << bmp_path << " does not exist." << std::endl;
-        char *arr = nullptr;
-        int thing = *arr;
         exit(1);
     }
 

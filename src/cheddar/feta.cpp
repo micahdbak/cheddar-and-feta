@@ -40,6 +40,8 @@ Feta::Feta(int x, int y, int animation) {
 
     // push hurtbox
     game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 12));
+
+    this->is_down = false;
 }
 
 Feta::~Feta() {

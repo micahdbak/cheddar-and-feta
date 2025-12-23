@@ -2,6 +2,7 @@
 #include "game.h"
 #include "save_data.h"
 
+#include <SDL3/SDL_main.h>
 #include <SDL3/SDL.h>
 
 #include <iostream>
@@ -19,7 +20,7 @@ int _object_id_counter = 0;
 void cleanup();
 void scale_screen_rect(SDL_FRect *screen_rect, const int window_width, const int window_height);
 
-int main(int argc, const char **argv) {
+int main(int argc, char **argv) {
     if (!SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_GAMEPAD)) {
         std::cerr << "SDL_Init error: " << SDL_GetError() << std::endl;
         return 1;

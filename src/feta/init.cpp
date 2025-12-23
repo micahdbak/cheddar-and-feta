@@ -57,14 +57,20 @@ void Game::init() {
     this->factories[FETA_OBJ] = new FetaFactory();
 
     // items
-    item_info[ITEM_NONE] = Item{HELD_EFFECT, "Kick", .damage = 1, .armour = 0};
+    item_info[ITEM_NONE] = Item{HELD_EFFECT, "Kick"};
+    item_info[ITEM_NONE].damage = 1;
+    item_info[ITEM_NONE].armour = 0;
     item_info[ITEM_CANNON_BALL] = Item{THROWABLE, "Cannon Ball"};
     item_info[ITEM_CHEESE] = Item{EDIBLE, "Cheese"};
     item_info[ITEM_COFFEE_BEAN] = Item{USEFUL, "Coffee Bean"};
     item_info[ITEM_FIRE] = Item{THROWABLE, "Fire"};
-    item_info[ITEM_HERMES_BOOT] = Item{HELD_EFFECT, "Hermes Boot", .damage = 0, .speed = 1.75f};
+    item_info[ITEM_HERMES_BOOT] = Item{HELD_EFFECT, "Hermes Boot"};
+    item_info[ITEM_HERMES_BOOT].damage = 0;
+    item_info[ITEM_HERMES_BOOT].speed = 1.75f;
     item_info[ITEM_MOLOTOV] = Item{THROWABLE, "Molotov Cocktail"};
-    item_info[ITEM_SHIELD] = Item{HELD_EFFECT, "Shield", .damage = 0, .armour = 1};
+    item_info[ITEM_SHIELD] = Item{HELD_EFFECT, "Shield"};
+    item_info[ITEM_SHIELD].damage = 0;
+    item_info[ITEM_SHIELD].armour = 1;
     item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Porcu' Pine"};
 
     this->title = "Playing as Feta";
@@ -165,6 +171,7 @@ void Init::step() {
                 if (select && valid_code) {
                     net_agent->set_connection_code(this->code);
                     this->waiting_for_net_agent = true;
+                    this->waiting_ticks = game->ticks;
                     this->render = true;
                 }
             } else if (select && this->code.size() < 6) {
@@ -202,7 +209,7 @@ void Init::step() {
         }
 
         // no connection after 15 seconds
-        if (this->waiting_ticks != 0 && game->ticks - this->waiting_ticks > 15000) {
+        if (game->ticks - this->waiting_ticks > 15000) {
             net_agent->try_reset();
             game->display_notification("That code didn't work.");
             this->waiting_ticks = 0;

@@ -184,7 +184,7 @@ int SaveData::load_file(int file_i) {
         if (line[len-1] == '\n')
             line[len-1] = '\0';
 
-        if (!is_kvp && line[0] >= '0' && line[0] < '9') {
+        if (!is_kvp && line[0] >= '0' && line[0] <= '9') {
             // last line of file - hash
             unsigned long hash_in_file;
             if (1 != sscanf(line, "%lu\n", &hash_in_file)) FATAL_ERROR

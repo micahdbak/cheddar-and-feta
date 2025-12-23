@@ -231,7 +231,7 @@ void Game::draw_hud(SDL_Texture *texture, std::vector<Game::HudItem> items, int 
     SDL_FRect sel_outline_rect = { (float)(sel_offset - 1), (float)(HUD_ITEMS_Y + 3), 18.0f, 18.0f };
     this->draw_ui_box(texture, BOX_OUT_SEL, &sel_outline_rect);
 
-    for (int i = -1; i < (ssize_t)items.size(); i++) {
+    for (int i = -1; i < (int)items.size(); i++) {
         int x_offset = HUD_ITEMS_X + 5 + 18 * (i+1);
         SDL_FRect item_rect = { (float)x_offset, (float)(HUD_ITEMS_Y + 4), 16.0f, 16.0f };
 

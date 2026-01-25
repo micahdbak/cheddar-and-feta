@@ -20,18 +20,18 @@
 #define MSG_IS_DOWN     '5'
 
 // cheddar -> feta
-#define MSG_MAP         '6'
-#define MSG_SPRITE      '7'
-#define MSG_AUDIO       '8'
-#define MSG_SYNC        '9'
-#define MSG_ATTACK      'a'
-#define MSG_PUSH_ITEM   'b'
-#define MSG_PUSH_CHEESE 'c'
-#define MSG_FORCE_DANCE 'd'
-#define MSG_DID_HIT     'e'
-#define MSG_THROW       'f'
-#define MSG_MAX_SPEED   'g'
-#define MSG_COLLISION   'h'
+#define MSG_MAP         'a'
+#define MSG_SPRITE      'b'
+#define MSG_AUDIO       'c'
+#define MSG_SYNC        'd'
+#define MSG_ATTACK      'e'
+#define MSG_PUSH_ITEM   'f'
+#define MSG_PUSH_CHEESE 'g'
+#define MSG_FORCE_DANCE 'h'
+#define MSG_DID_HIT     'i'
+#define MSG_THROW       'j'
+#define MSG_MAX_SPEED   'k'
+#define MSG_COLLISION   'l'
 
 class NetworkAgent {
 public:

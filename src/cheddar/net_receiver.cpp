@@ -66,13 +66,14 @@ void NetReceiver::step() {
 
             case MSG_FETA_INFO: {
                 char x_str[256], y_str[256];
-                int animation, frame_i;
-                if (4 != sscanf(arr + 1, "%[^,],%[^,],%d,%d", x_str, y_str, &animation, &frame_i)) FATAL_ERROR
+                int animation, frame_i, which_emote;
+                if (5 != sscanf(arr + 1, "%[^,],%[^,],%d,%d,%d", x_str, y_str, &animation, &frame_i, &which_emote)) FATAL_ERROR
 
                 feta->x = str_to_float(x_str);
                 feta->y = str_to_float(y_str);
                 feta_inst->animation = animation;
                 feta_inst->frame_i = frame_i;
+                feta_inst->which_emote = which_emote;
             } break;
 
             case MSG_EAT_CHEESE:

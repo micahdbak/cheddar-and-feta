@@ -13,6 +13,7 @@ Feta::Feta(int x, int y, int animation) {
 
     this->sprite = new Sprite("sprites/feta.bmp", 32, 32, 250);
     this->sprite->set_animation(SLEEPING_ANIMATION);
+    this->emotes = new Sprite("sprites/emotes.bmp", 32, 32, 0);
 
     std::string items_s = save.value(FETA_OBJ MOUSE_ITEMS);
     if (!items_s.empty()) {
@@ -37,6 +38,8 @@ Feta::Feta(int x, int y, int animation) {
 
     this->dst_rect.w = 32.0f;
     this->dst_rect.h = 32.0f;
+    this->emote_rect.w = 32.0f;
+    this->emote_rect.h = 32.0f;
 
     // push hurtbox
     game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 12));
@@ -46,6 +49,7 @@ Feta::Feta(int x, int y, int animation) {
 
 Feta::~Feta() {
     delete this->sprite;
+    delete this->emotes;
     feta = nullptr;
 }
 
@@ -87,7 +91,15 @@ void Feta::step() {
     this->sprite->set_animation(this->animation);
     this->dst_rect.x = this->x - 16.0f;
     this->dst_rect.y = this->y - 24.0f;
-    game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
+    game->push_sprite("", this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
+
+    this->emote_rect.x = this->dst_rect.x;
+    this->emote_rect.y = this->dst_rect.y - 11.0f;
+
+    if (this->which_emote != -1) {
+        this->emotes->set_frame(this->which_emote % 8);
+        game->push_sprite("", this->emotes->texture, &this->emotes->frame, &this->emote_rect, 34);
+    }
 }
 
 void Feta::save_data() {

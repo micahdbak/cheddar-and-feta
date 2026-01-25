@@ -26,8 +26,8 @@ void NetSender::step() {
     float_to_str(feta->x, x_str, sizeof(x_str));
     float_to_str(feta->y, y_str, sizeof(y_str));
 
-    snprintf(buff, sizeof(buff), "%c%s,%s,%d,%d\n", MSG_FETA_INFO,
-        x_str, y_str, feta->sprite->animation, feta->sprite->frame_i);
+    snprintf(buff, sizeof(buff), "%c%s,%s,%d,%d,%d\n", MSG_FETA_INFO,
+        x_str, y_str, feta->sprite->animation, feta->sprite->frame_i, feta->which_emote);
 
     frame_msg += buff;
 

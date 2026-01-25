@@ -47,6 +47,9 @@ public:
     void handle_key_down(SDL_Keycode keycode);
     void handle_key_up(SDL_Keycode keycode);
 
+    bool cheat_code(int a, int b, int c, int d);
+    int cheat_last(int a, int b, int c);
+
     char c = NO_CHAR;
     int digit = 0;
 
@@ -56,6 +59,10 @@ public:
     Sint16 stick_x, stick_y;
 
     SDL_Keycode last_input;
+
+private:
+    std::vector<int> digit_string;
+    Uint64 last_digit_hit = 0;
 };
 
 extern Controller local_controller, remote_controller, captured_controller;

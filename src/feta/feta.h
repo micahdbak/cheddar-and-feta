@@ -19,7 +19,8 @@
 #define DOWN_ANIMATION      40
 #define EATING_ANIMATION    48
 #define DANCING_ANIMATION   49
-#define SLEEPING_ANIMATION  50
+#define DANCING2_ANIMATION  50
+#define SLEEPING_ANIMATION  51
 
 namespace Mouse {
     bool check_collision(float x, float y);
@@ -49,12 +50,13 @@ public:
     float x, y;
     bool is_down = false, did_hit = false;
     bool mice_locked = false;
-    Sprite *sprite;
+    Sprite *sprite, *emotes;
+    int which_emote = -1;
 
 private:
     int tile_x, tile_y;
 
-    SDL_FRect dst_rect;
+    SDL_FRect dst_rect, emote_rect;
 
     int health = 10, max_health = 10;
     std::vector<Game::HudItem> items;

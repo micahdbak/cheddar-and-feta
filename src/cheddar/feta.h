@@ -36,15 +36,15 @@ public:
 
     // directly acted on by net_receiver
     // Mouse: x, y, is_down
-    int frame_i = 0, animation = 0;
+    int frame_i = 0, animation = 0, which_emote = -1;
     std::vector<std::pair<std::string, std::string>> new_objects;
     bool synchronized = false;
 
 private:
     int tile_x, tile_y;
 
-    Sprite *sprite;
-    SDL_FRect dst_rect;
+    Sprite *sprite, *emotes;
+    SDL_FRect dst_rect, emote_rect;
 
     std::vector<Game::HudItem> items;
 };

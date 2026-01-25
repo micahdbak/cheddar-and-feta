@@ -32,8 +32,9 @@ public:
 private:
     int tile_x, tile_y;
 
-    Sprite *sprite;
-    SDL_FRect dst_rect;
+    Sprite *sprite, *emotes;
+    SDL_FRect dst_rect, emote_rect;
+    int which_emote = -1;
 
     int health = 10, max_health = 10;
     std::vector<Game::HudItem> items;

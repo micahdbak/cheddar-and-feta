@@ -103,7 +103,23 @@ void Controller::handle_key_down(SDL_Keycode keycode) {
     Button button = NULL_BUTTON;
 
     if (keycode >= (uint32_t)'0' && keycode <= (uint32_t)'9') {
+        // digits added to the digit string must be enterred within <1s
+        if (game->ticks - this->last_digit_hit > 1000) {
+            this->digit_string.clear();
+            this->last_digit_hit = game->ticks;
+        }
+
         this->digit = keycode - '0';
+        this->digit_string.push_back(this->digit);
+
+        if (this->digit_string.size() > 4) {
+            this->digit_string[0] = this->digit_string[1];
+            this->digit_string[1] = this->digit_string[2];
+            this->digit_string[2] = this->digit_string[3];
+            this->digit_string[3] = this->digit_string[4];
+            this->digit_string.pop_back();
+        }
+
         button = DIGIT;
     } else {
         button = _keycode_to_button(keycode);
@@ -131,4 +147,22 @@ void Controller::handle_key_up(SDL_Keycode keycode) {
     }
 
     this->is_down_map[button] = false;
+}
+
+bool Controller::cheat_code(int a, int b, int c, int d) {
+    return this->digit_string.size() == 4 &&
+        this->digit_string[0] == a &&
+        this->digit_string[1] == b &&
+        this->digit_string[2] == c &&
+        this->digit_string[3] == d;
+}
+
+int Controller::cheat_last(int a, int b, int c) {
+    if (this->digit_string.size() == 4 &&
+        this->digit_string[0] == a &&
+        this->digit_string[1] == b &&
+        this->digit_string[2] == c)
+        return this->digit_string[3];
+
+    return -1;
 }

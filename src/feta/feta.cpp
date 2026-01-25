@@ -19,6 +19,7 @@ Feta::Feta(float x, float y, int animation, std::vector<Game::HudItem> items) {
 
     this->sprite = new Sprite("sprites/feta.bmp", 32, 32, 250);
     this->sprite->set_animation(animation);
+    this->emotes = new Sprite("sprites/emotes.bmp", 32, 32, 0);
 
     this->items = items;
 
@@ -26,10 +27,13 @@ Feta::Feta(float x, float y, int animation, std::vector<Game::HudItem> items) {
 
     this->dst_rect.w = 32.0f;
     this->dst_rect.h = 32.0f;
+    this->emote_rect.w = 32.0f;
+    this->emote_rect.h = 32.0f;
 }
 
 Feta::~Feta() {
     delete this->sprite;
+    delete this->emotes;
     feta = nullptr;
 }
 
@@ -76,6 +80,8 @@ void Feta::step() {
     float mov_speed = 0.0f;
     int x_dir = 0, y_dir = 0;
 
+    int dancing_animation = local_controller.cheat_code(1, 2, 3, 4) ? DANCING2_ANIMATION : DANCING_ANIMATION;
+
     switch (this->is_busy) {
 
     // ---- not busy ----
@@ -83,14 +89,14 @@ void Feta::step() {
     case FALSE:
         // dancing
         if (local_controller.is_down(Button::DANCE)) {
-            this->sprite->set_animation(DANCING_ANIMATION);
+            this->sprite->set_animation(dancing_animation);
             this->sprite->update_frame();
             this->sprite->interval_ms = 200;
             break; // don't do anything but dance
         }
 
         // when no longer dancing, face down
-        if (this->sprite->animation == DANCING_ANIMATION) {
+        if (this->sprite->animation == dancing_animation) {
             this->sprite->set_animation(0);
         }
 
@@ -313,8 +319,8 @@ void Feta::step() {
     // ---- forced dancing (ending) ----
 
     case FORCED_DANCE:
-        if (this->sprite->animation != DANCING_ANIMATION) {
-            this->sprite->set_animation(DANCING_ANIMATION);
+        if (this->sprite->animation != dancing_animation) {
+            this->sprite->set_animation(dancing_animation);
         }
 
         this->sprite->interval_ms = 200;
@@ -400,6 +406,15 @@ void Feta::step() {
     this->dst_rect.x = (float)(game->corner_x + SCREEN_WIDTH / 2) - 16.0f;
     this->dst_rect.y = (float)(game->corner_y + SCREEN_HEIGHT / 2) - 24.0f;
     game->push_sprite(this->sprite->tex_id, this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
+
+    this->which_emote = local_controller.cheat_last(9, 8, 7);
+    this->emote_rect.x = this->dst_rect.x;
+    this->emote_rect.y = this->dst_rect.y - 11.0f;
+
+    if (this->which_emote != -1) {
+        this->emotes->set_frame(this->which_emote % 8);
+        game->push_sprite(this->emotes->tex_id, this->emotes->texture, &this->emotes->frame, &this->emote_rect, 34);
+    }
 }
 
 void Feta::attack(int damage) {

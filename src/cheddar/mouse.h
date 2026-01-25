@@ -28,7 +28,8 @@
 #define DOWN_ANIMATION      40
 #define EATING_ANIMATION    48
 #define DANCING_ANIMATION   49
-#define SLEEPING_ANIMATION  50
+#define DANCING2_ANIMATION  50
+#define SLEEPING_ANIMATION  51
 
 class Mouse : public Object {
 public:

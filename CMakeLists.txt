@@ -4,6 +4,7 @@ project(CheddarAndFeta VERSION 0.1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Default install path" FORCE)
 
 set(ENGINE_SRC
     src/engine/audio_playback.cpp
@@ -84,9 +85,9 @@ target_include_directories(MapEditor PRIVATE src/engine src/map_editor)
 target_include_directories(FetaLauncher PRIVATE src/engine src/feta)
 target_include_directories(CheddarLauncher PRIVATE src/engine src/cheddar)
 
-# build options for macOS (NOT WIN32) or Windows (WIN32)
-if(NOT WIN32)
+if(APPLE)
     set(BUILD_SHARED_LIBS OFF)
+    set(OPENSSL_USE_STATIC_LIBS TRUE)
 
     if(NOT CMAKE_BUILD_TYPE)
         set(CMAKE_BUILD_TYPE "Debug")
@@ -109,7 +110,9 @@ if(NOT WIN32)
     add_subdirectory(libdatachannel EXCLUDE_FROM_ALL)
     add_subdirectory(SDL EXCLUDE_FROM_ALL)
     set(DEPS LibDataChannel::LibDataChannelStatic SDL3::SDL3)
-else()
+endif()
+
+if(WIN32)
     set(BUILD_SHARED_LIBS ON)
 
     # VS generator generates both Debug and Release

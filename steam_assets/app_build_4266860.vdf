@@ -1,0 +1,16 @@
+"AppBuild"
+{
+	"AppID" "4266860"
+	"Desc" "Cheddar and Feta 0.1"
+
+	"verbose" "0"
+	"preview" "0"
+
+	"ContentRoot" "..\content\"
+	"BuildOutput" "..\build\"
+
+	"Depots"
+	{
+		"4266861" "depot_build_4266861.vdf"
+	}
+}

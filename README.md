@@ -90,3 +90,9 @@ Audio is handled via `audio_playback.(h|cpp)`, supporting sound effects and loop
 ### Save Data
 
 `save_data.(h|cpp)` provides a simple dictionary for save data. Objects can store and retrieve integer, float, or string data.
+
+## Copyright and License
+
+Copyright (c) 2026 Micah Baker
+
+This project is licensed under the terms of the GPL-3.0 license. See the [LICENSE](LICENSE) file for full license details.

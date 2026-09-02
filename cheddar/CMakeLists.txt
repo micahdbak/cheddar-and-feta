@@ -1,0 +1,41 @@
+add_executable(cheddar
+  billboard.cc
+  cheddar.cc
+  credits.cc
+  feta.cc
+  foes/bat.cc
+  foes/bell.cc
+  foes/bug.cc
+  foes/foe.cc
+  foes/foe_dijkstra.cc
+  foes/frog.cc
+  foes/gate.cc
+  foes/porcupine.cc
+  foes/spawner.cc
+  foes/spitter/abdomen.cc
+  foes/spitter/segment.cc
+  foes/spitter/spitter.cc
+  freedom.cc
+  game_over.cc
+  hitbox.cc
+  hurtbox.cc
+  init.cc
+  items/cannon_ball.cc
+  items/cheese.cc
+  items/fire.cc
+  items/item.cc
+  items/molotov.cc
+  items/persister.cc
+  items/toothpick.cc
+  items/tossed.cc
+  ladder.cc
+  load_save.cc
+  mouse.cc
+  net_receiver.cc
+  net_sender.cc
+  splash.cc
+  textbox.cc
+)
+target_include_directories(cheddar PRIVATE .)
+target_link_libraries(cheddar engine)
+#target_compile_definitions(cheddar PRIVATE ONSCREEN_DEBUG)

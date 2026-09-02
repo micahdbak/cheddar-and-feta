@@ -1,6 +1,7 @@
-.vscode
-.cache
-screenshot.bmp
-**/*.backup.*
-build
 **/*.DS_Store
+**/*.backup.*
+.cache
+.vscode
+build
+build-rel
+screenshot.bmp

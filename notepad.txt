@@ -1,8 +1,0 @@
-July 27th
-- Running is toggled
-- Auto select items on pick-up
-- Auto select kick when item is fully used
-- Make cheese an item
-- All items (except kick and save) are tossable
-- Use hurtbox for bell
-- Configurable [keyboard] controls

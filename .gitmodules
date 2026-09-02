@@ -1,6 +1,6 @@
 [submodule "SDL"]
-	path = SDL
+	path = engine/deps/SDL
 	url = https://github.com/libsdl-org/SDL
 [submodule "libdatachannel"]
-	path = libdatachannel
+	path = engine/deps/libdatachannel
 	url = https://github.com/paullouisageneau/libdatachannel

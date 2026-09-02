@@ -1,0 +1,23 @@
+# https://editorconfig.org
+
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+[*.cc]
+indent_style = space
+indent_size = 2
+max_line_length = 80
+
+[*.{h,hh,hpp}]
+indent_style = space
+indent_size = 2
+max_line_length = 80
+
+[{CMakeLists.txt,*.cmake,*.cmake.in}]
+indent_style = space
+indent_size = 2

@@ -37,5 +37,5 @@ add_executable(cheddar
   textbox.cc
 )
 target_include_directories(cheddar PRIVATE .)
-target_link_libraries(cheddar engine)
+target_link_libraries(cheddar PRIVATE engine sanitizers)
 #target_compile_definitions(cheddar PRIVATE ONSCREEN_DEBUG)

@@ -8,6 +8,15 @@
 #include <iostream>
 #include <cstdlib>
 
+#if defined(__SANITIZE_ADDRESS__) || (defined(__has_feature) && __has_feature(address_sanitizer))
+#include <sanitizer/lsan_interface.h>
+#define LSAN_DISABLE() __lsan_disable()
+#define LSAN_ENABLE() __lsan_enable()
+#else
+#define LSAN_DISABLE()
+#define LSAN_ENABLE()
+#endif
+
 SDL_Window *window;
 SDL_Renderer *renderer;
 
@@ -21,7 +30,13 @@ void cleanup();
 void scale_screen_rect(SDL_FRect *screen_rect, const int window_width, const int window_height);
 
 int main(int argc, char **argv) {
-    if (!SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_GAMEPAD)) {
+    bool init_ok;
+
+    LSAN_DISABLE();
+    init_ok = SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_GAMEPAD);
+    LSAN_ENABLE();
+
+    if (!init_ok) {
         std::cerr << "SDL_Init error: " << SDL_GetError() << std::endl;
         return 1;
     }

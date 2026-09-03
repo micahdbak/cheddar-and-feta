@@ -3,7 +3,20 @@ if(WIN32)
   set(SDL3_DISABLE_WINDOWS_GAMEINPUT TRUE CACHE BOOL "" FORCE)
 else()
   set(BUILD_SHARED_LIBS OFF)
-  set(OPENSSL_USE_STATIC_LIBS TRUE)
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  find_package(PkgConfig REQUIRED)
+  find_package(X11 REQUIRED)
+  pkg_check_modules(ALSA REQUIRED alsa)
+  pkg_check_modules(DBUS REQUIRED dbus-1)
+  pkg_check_modules(IBUS REQUIRED ibus-1.0)
+  pkg_check_modules(LIBDECOR REQUIRED libdecor-0)
+  pkg_check_modules(LIBUSB REQUIRED libusb-1.0)
+  pkg_check_modules(PIPEWIRE REQUIRED libpipewire-0.3>=0.3.44)
+  pkg_check_modules(PULSEAUDIO REQUIRED libpulse)
+  pkg_check_modules(WAYLAND REQUIRED wayland-client)
+  pkg_check_modules(XKBCOMMON REQUIRED xkbcommon)
 endif()
 
 add_subdirectory(deps/libdatachannel EXCLUDE_FROM_ALL)
@@ -27,7 +40,9 @@ add_library(engine
   src/sprite.cc
 )
 target_include_directories(engine PUBLIC src)
-target_link_libraries(engine LibDataChannel::LibDataChannel SDL3::SDL3)
+target_link_libraries(engine
+  PUBLIC LibDataChannel::LibDataChannel SDL3::SDL3
+  PRIVATE sanitizers)
 
 if(WIN32)
   add_custom_command(TARGET engine POST_BUILD

@@ -1,67 +1,68 @@
 #ifndef ITEM_CANNON_BALL
 #define ITEM_CANNON_BALL "item_cannon_ball"
 
-#include "items/item.h"
-#include "hitbox.h"
-
 #include <iostream>
+
+#include "hitbox.h"
+#include "items/item.h"
 
 // ---- dropped cannon ball ----
 
 class DroppedCannonBall : public DroppedItem {
-public:
-    DroppedCannonBall(float x, float y):
-        DroppedItem(ITEM_CANNON_BALL, x, y, "sprites/item_cannon_ball.bmp", 16, 16, 0) {}
-    ~DroppedCannonBall() = default;
+ public:
+  DroppedCannonBall(float x, float y)
+      : DroppedItem(ITEM_CANNON_BALL, x, y, "sprites/item_cannon_ball.bmp", 16,
+                    16, 0) {}
+  ~DroppedCannonBall() = default;
 
-    void step() override { this->dropped_step(); }
+  void step() override { this->dropped_step(); }
 
-    void take(Mouse *mouse) override {
-        mouse->push_item(ITEM_CANNON_BALL);
-    }
+  void take(Mouse* mouse) override { mouse->push_item(ITEM_CANNON_BALL); }
 };
 
 class DroppedCannonBallFactory : public ObjectFactory {
-public:
-    Object *create(const std::string &options) override {
-        int x, y;
-        if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
+ public:
+  Object* create(const std::string& options) override {
+    int x, y;
+    if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
 
-        return new DroppedCannonBall(float(x), float(y));
-    }
+    return new DroppedCannonBall(float(x), float(y));
+  }
 };
 
 // ---- thrown cannon ball ----
 
 class ThrownCannonBall : public Object, public HitSource {
-public:
-    ThrownCannonBall(float x, float y, int x_dir, int y_dir, int from_id);
-    ~ThrownCannonBall();
+ public:
+  ThrownCannonBall(float x, float y, int x_dir, int y_dir, int from_id);
+  ~ThrownCannonBall();
 
-    void step() override;
+  void step() override;
 
-    float hitsource_x() override { return this->x; }
-    float hitsource_y() override { return this->y; }
+  float hitsource_x() override { return this->x; }
+  float hitsource_y() override { return this->y; }
 
-    void hitsource_notify() override;
+  void hitsource_notify() override;
 
-private:
-    Uint64 spawned_ticks;
-    bool drop_item, did_hit;
-    float x, y;
-    int x_dir, y_dir;
-    Sprite *sprite;
-    SDL_FRect dst_rect;
+ private:
+  Uint64 spawned_ticks;
+  bool drop_item, did_hit;
+  float x, y;
+  int x_dir, y_dir;
+  Sprite* sprite;
+  SDL_FRect dst_rect;
 };
 
 class ThrownCannonBallFactory : public ObjectFactory {
-public:
-    Object *create(const std::string &options) {
-        int x, y, x_dir, y_dir, from_id;
-        if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir, &from_id)) FATAL_ERROR
+ public:
+  Object* create(const std::string& options) {
+    int x, y, x_dir, y_dir, from_id;
+    if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
+                    &from_id))
+      FATAL_ERROR
 
-        return new ThrownCannonBall((float)x, (float)y, x_dir, y_dir, from_id);
-    }
+    return new ThrownCannonBall((float)x, (float)y, x_dir, y_dir, from_id);
+  }
 };
 
 #endif

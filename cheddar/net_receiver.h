@@ -4,18 +4,18 @@
 #include "object.h"
 
 class NetReceiver : public Object {
-public:
-    NetReceiver() = default;
-    ~NetReceiver() = default;
+ public:
+  NetReceiver() = default;
+  ~NetReceiver() = default;
 
-    void step() override;
+  void step() override;
 };
 
 class NetReceiverFactory : public ObjectFactory {
-public:
-    Object *create(const std::string &options) override {
-        return new NetReceiver();
-    }
+ public:
+  Object* create(const std::string& options) override {
+    return new NetReceiver();
+  }
 };
 
 #endif

@@ -7,212 +7,229 @@
 #include <iostream>
 #include <random>
 
-#define CANDIDATE_MSG   "candidate"
+#define CANDIDATE_MSG "candidate"
 #define DESCRIPTION_MSG "description"
-#define FAIL_MSG        "fail"
-#define PING_MSG        "ping"
+#define FAIL_MSG "fail"
+#define PING_MSG "ping"
 
 #define MSG_IS_NTS -1
 
-NetworkAgent *net_agent = nullptr;
+NetworkAgent* net_agent = nullptr;
 
 NetworkAgent::NetworkAgent(bool offerer) {
-    if (net_agent != nullptr) {
-        std::cerr << "NetworkAgent::NetworkAgent: a network agent already exists." << std::endl;
-        std::exit(1);
-    }
+  if (net_agent != nullptr) {
+    std::cerr << "NetworkAgent::NetworkAgent: a network agent already exists."
+              << std::endl;
+    std::exit(1);
+  }
 
-    net_agent = this;
-    this->offerer = offerer;
-    rtcPreload();
+  net_agent = this;
+  this->offerer = offerer;
+  rtcPreload();
 
-    // start message loop
-    this->message_thread = new std::thread(NetworkAgent::message_loop);
+  // start message loop
+  this->message_thread = new std::thread(NetworkAgent::message_loop);
 }
 
 NetworkAgent::~NetworkAgent() {
-    {
-        std::lock_guard<std::mutex> guard(this->stop_message_loop_mutex);
-        this->stop_message_loop = true;
-    }
-    this->message_thread->join();
-    this->message_thread = nullptr;
-    rtcCleanup();
+  {
+    std::lock_guard<std::mutex> guard(this->stop_message_loop_mutex);
+    this->stop_message_loop = true;
+  }
+  this->message_thread->join();
+  delete this->message_thread;
+  this->message_thread = nullptr;
+  rtcCleanup();
 }
 
 static std::string make_code() {
-    static char charset[] = "023456789ABCEFHLPRUXY";
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, sizeof(charset)-2);
+  static char charset[] = "023456789ABCEFHLPRUXY";
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(0, sizeof(charset) - 2);
 
-    std::string ret;
-    for (int i = 0; i < 6; i++) {
-        char c = charset[dis(gen)];
-        ret.push_back(c);
-    }
+  std::string ret;
+  for (int i = 0; i < 6; i++) {
+    char c = charset[dis(gen)];
+    ret.push_back(c);
+  }
 
-    return ret;
+  return ret;
 }
 
 void NetworkAgent::no_connection() {
-    switch (net_agent->signaller.state) {
+  switch (net_agent->signaller.state) {
     case NetworkSignaller::State::NOT_CONNECTED: {
-        std::string connection_code;
+      std::string connection_code;
 
-        if (net_agent->offerer) {
-            connection_code = net_agent->get_connection_code();
-            if (connection_code.empty())
-                break;
-        } else {
-            connection_code = make_code();
-            net_agent->set_connection_code(connection_code);
-        }
+      if (net_agent->offerer) {
+        connection_code = net_agent->get_connection_code();
+        if (connection_code.empty()) break;
+      } else {
+        connection_code = make_code();
+        net_agent->set_connection_code(connection_code);
+      }
 
-        net_agent->signaller.connect(connection_code, net_agent->offerer);
+      net_agent->signaller.connect(connection_code, net_agent->offerer);
 
     } break;
 
     case NetworkSignaller::State::CONNECTED:
-        net_agent->set_state(NetworkAgent::State::WAITING_FOR_PEER);
-        net_agent->got_ping = false;
+      net_agent->set_state(NetworkAgent::State::WAITING_FOR_PEER);
+      net_agent->got_ping = false;
 
-        break;
+      break;
 
-    default: break; // NetworkSignaller::State::CONNECTING
-    }
+    default:
+      break;  // NetworkSignaller::State::CONNECTING
+  }
 
-    // wait half a second before checking on the connection
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  // wait half a second before checking on the connection
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 
-#define START_OVER {\
-    net_agent->connection.kill();\
-    net_agent->signaller.disconnect();\
-    net_agent->set_state(NetworkAgent::State::NO_CONNECTION);\
-    /* sleep an additional 500ms for good luck */\
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));\
-    return;\
-}
+#define START_OVER                                               \
+  {                                                              \
+    net_agent->connection.kill();                                \
+    net_agent->signaller.disconnect();                           \
+    net_agent->set_state(NetworkAgent::State::NO_CONNECTION);    \
+    /* sleep an additional 500ms for good luck */                \
+    std::this_thread::sleep_for(std::chrono::milliseconds(500)); \
+    return;                                                      \
+  }
 
 void NetworkAgent::waiting_for_peer() {
-    // std::cout << "NetworkAgent::waiting_for_peer" << std::endl;
-    // when the connection is alive, we are no longer waiting for peer
-    if (net_agent->connection.state == NetworkConnection::State::ALIVE) {
-        net_agent->signaller.disconnect(); // no longer needed
-        net_agent->set_state(NetworkAgent::State::CONNECTED);
-        return;
+  // std::cout << "NetworkAgent::waiting_for_peer" << std::endl;
+  // when the connection is alive, we are no longer waiting for peer
+  if (net_agent->connection.state == NetworkConnection::State::ALIVE) {
+    net_agent->signaller.disconnect();  // no longer needed
+    net_agent->set_state(NetworkAgent::State::CONNECTED);
+    return;
+  }
+
+  // if signaller disconnected or connection error'd
+  if (net_agent->signaller.state != NetworkSignaller::State::CONNECTED ||
+      net_agent->connection.state == NetworkConnection::State::ERROR)
+    START_OVER
+
+  std::string msg = net_agent->signaller.receive();
+
+  // signaller is connected, but no peer yet
+  if (!net_agent->got_ping) {
+    // std::cout << "NetworkAgent::waiting_for_peer: ping..." << std::endl;
+    net_agent->signaller.send(PING_MSG);
+
+    if (msg == PING_MSG || msg == DESCRIPTION_MSG || msg == CANDIDATE_MSG) {
+      // std::cout << "NetworkAgent::waiting_for_peer: PONG!" << std::endl;
+      net_agent->got_ping = true;
+      net_agent->connection.start_collecting(net_agent->offerer);
+    } else {
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      return;
     }
+  }
 
-    // if signaller disconnected or connection error'd
-    if (net_agent->signaller.state != NetworkSignaller::State::CONNECTED ||
-        net_agent->connection.state == NetworkConnection::State::ERROR) START_OVER
+  // net_agent->got_ping is true past here
 
-    std::string msg = net_agent->signaller.receive();
+  if (!msg.empty()) {
+    if (msg == DESCRIPTION_MSG) {
+      // std::cout << "NetworkAgent::waiting_for_peer: got description" <<
+      // std::endl;
+      std::string sdp = net_agent->signaller.block_receive();
+      std::string type = net_agent->signaller.block_receive();
+      if (sdp.empty() || type.empty()) START_OVER
 
-    // signaller is connected, but no peer yet
-    if (!net_agent->got_ping) {
-        // std::cout << "NetworkAgent::waiting_for_peer: ping..." << std::endl;
-        net_agent->signaller.send(PING_MSG);
+      net_agent->connection.set_remote_description(sdp, type);
+    } else if (msg == CANDIDATE_MSG) {
+      // std::cout << "NetworkAgent::waiting_for_peer: got candidate" <<
+      // std::endl;
+      std::string cand = net_agent->signaller.block_receive();
+      std::string mid = net_agent->signaller.block_receive();
+      if (cand.empty() || mid.empty()) START_OVER
 
-        if (msg == PING_MSG || msg == DESCRIPTION_MSG || msg == CANDIDATE_MSG) {
-            // std::cout << "NetworkAgent::waiting_for_peer: PONG!" << std::endl;
-            net_agent->got_ping = true;
-            net_agent->connection.start_collecting(net_agent->offerer);
-        } else {
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            return;
-        }
-    }
+      net_agent->connection.add_candidate(cand, mid);
+    } else if (msg == FAIL_MSG)
+      START_OVER  // peer gave up, lol
+          else {
+        // std::cout << "NetworkAgent::waiting_for_peer: (?) got " << msg <<
+        // std::endl;
+      }
+  }
 
-    // net_agent->got_ping is true past here
+  // offer will be generated by the offerer when ready, answer when ready
+  std::pair<std::string, std::string> pair =
+      net_agent->connection.get_local_description();
+  if (!pair.first.empty()) {
+    // std::cout << "NetworkAgent::waiting_for_peer: sending description" <<
+    // std::endl;
+    net_agent->signaller.send(DESCRIPTION_MSG);
+    net_agent->signaller.send(pair.first);   // sdp
+    net_agent->signaller.send(pair.second);  // type
+  }
 
-    if (!msg.empty()) {
-        if (msg == DESCRIPTION_MSG) {
-            // std::cout << "NetworkAgent::waiting_for_peer: got description" << std::endl;
-            std::string sdp = net_agent->signaller.block_receive();
-            std::string type = net_agent->signaller.block_receive();
-            if (sdp.empty() || type.empty()) START_OVER
+  // candidate
+  pair = net_agent->connection.get_candidate();
+  if (!pair.first.empty()) {
+    // std::cout << "NetworkAgent::waiting_for_peer: sending candidate" <<
+    // std::endl;
+    net_agent->signaller.send(CANDIDATE_MSG);
+    net_agent->signaller.send(pair.first);
+    net_agent->signaller.send(pair.second);
+  }
 
-            net_agent->connection.set_remote_description(sdp, type);
-        } else if (msg == CANDIDATE_MSG) {
-            // std::cout << "NetworkAgent::waiting_for_peer: got candidate" << std::endl;
-            std::string cand = net_agent->signaller.block_receive();
-            std::string mid = net_agent->signaller.block_receive();
-            if (cand.empty() || mid.empty()) START_OVER
-
-            net_agent->connection.add_candidate(cand, mid);
-        } else if (msg == FAIL_MSG)
-            START_OVER // peer gave up, lol
-        else {
-            // std::cout << "NetworkAgent::waiting_for_peer: (?) got " << msg << std::endl;
-        }
-    }
-
-    // offer will be generated by the offerer when ready, answer when ready
-    std::pair<std::string, std::string> pair = net_agent->connection.get_local_description();
-    if (!pair.first.empty()) {
-        // std::cout << "NetworkAgent::waiting_for_peer: sending description" << std::endl;
-        net_agent->signaller.send(DESCRIPTION_MSG);
-        net_agent->signaller.send(pair.first); // sdp
-        net_agent->signaller.send(pair.second); // type
-    }
-
-    // candidate
-    pair = net_agent->connection.get_candidate();
-    if (!pair.first.empty()) {
-        // std::cout << "NetworkAgent::waiting_for_peer: sending candidate" << std::endl;
-        net_agent->signaller.send(CANDIDATE_MSG);
-        net_agent->signaller.send(pair.first);
-        net_agent->signaller.send(pair.second);
-    }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 void NetworkAgent::connected() {
-    // if connection died, start over
-    if (net_agent->connection.state != NetworkConnection::State::ALIVE) START_OVER
+  // if connection died, start over
+  if (net_agent->connection.state != NetworkConnection::State::ALIVE)
+    START_OVER
 
     // connection is alive, send messages
     {
-        std::lock_guard<std::mutex> guard(net_agent->send_messages_mutex);
+      std::lock_guard<std::mutex> guard(net_agent->send_messages_mutex);
 
-        while (!net_agent->send_messages.empty()) {
-            // std::cout << "NetworkAgent::connected: sending message" << std::endl;
-            std::string msg = net_agent->send_messages.front();
-            net_agent->send_messages.pop();
-            net_agent->connection.send(msg);
-        }
+      while (!net_agent->send_messages.empty()) {
+        // std::cout << "NetworkAgent::connected: sending message" << std::endl;
+        std::string msg = net_agent->send_messages.front();
+        net_agent->send_messages.pop();
+        net_agent->connection.send(msg);
+      }
     }
 
-    // receive messages
-    std::string msg = net_agent->connection.receive();
-    if (!msg.empty()) {
-        // std::cout << "NetworkAgent::connected: receiving message" << std::endl;
-        net_agent->push_message(msg);
-    }
+  // receive messages
+  std::string msg = net_agent->connection.receive();
+  if (!msg.empty()) {
+    // std::cout << "NetworkAgent::connected: receiving message" << std::endl;
+    net_agent->push_message(msg);
+  }
 }
 
 void NetworkAgent::message_loop() {
-    while (!net_agent->should_stop()) {
-        switch (net_agent->get_state()) {
-        case NetworkAgent::State::NO_CONNECTION:    NetworkAgent::no_connection();    break;
-        case NetworkAgent::State::WAITING_FOR_PEER: NetworkAgent::waiting_for_peer(); break;
-        case NetworkAgent::State::CONNECTED:        NetworkAgent::connected();        break;
-        case NetworkAgent::State::TRY_RESET: {
-            // disconnect everything and clear connection code
-            net_agent->connection.kill();
-            net_agent->signaller.disconnect();
-            net_agent->set_connection_code("");
+  while (!net_agent->should_stop()) {
+    switch (net_agent->get_state()) {
+      case NetworkAgent::State::NO_CONNECTION:
+        NetworkAgent::no_connection();
+        break;
+      case NetworkAgent::State::WAITING_FOR_PEER:
+        NetworkAgent::waiting_for_peer();
+        break;
+      case NetworkAgent::State::CONNECTED:
+        NetworkAgent::connected();
+        break;
+      case NetworkAgent::State::TRY_RESET: {
+        // disconnect everything and clear connection code
+        net_agent->connection.kill();
+        net_agent->signaller.disconnect();
+        net_agent->set_connection_code("");
 
-            // reset state to NO_CONNECTION
-            std::lock_guard<std::mutex> guard(net_agent->state_mutex);
-            net_agent->state = NetworkAgent::State::NO_CONNECTION;
-        } break;
-        }
+        // reset state to NO_CONNECTION
+        std::lock_guard<std::mutex> guard(net_agent->state_mutex);
+        net_agent->state = NetworkAgent::State::NO_CONNECTION;
+      } break;
     }
+  }
 
-    net_agent->connection.kill();
-    net_agent->signaller.disconnect();
+  net_agent->connection.kill();
+  net_agent->signaller.disconnect();
 }

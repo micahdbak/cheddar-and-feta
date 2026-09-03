@@ -1,43 +1,41 @@
 #ifndef ITEM_PERSISTER_OBJ
 #define ITEM_PERSISTER_OBJ "item_persister"
 
-#include <unordered_map>
 #include <queue>
+#include <unordered_map>
 
 #include "object.h"
 
 class ItemPersister : public Object {
-public:
-    ItemPersister();
-    ~ItemPersister();
+ public:
+  ItemPersister();
+  ~ItemPersister();
 
-    void step() override;
+  void step() override;
 
-    void remember_item(const std::string &item_id, float x, float y, int id);
-    void forget_item(int id);
+  void remember_item(const std::string& item_id, float x, float y, int id);
+  void forget_item(int id);
 
-    bool creating_items = false;
+  bool creating_items = false;
 
-private:
-    void save_items();
+ private:
+  void save_items();
 
-    struct ItemSave {
-        std::string item_id;
-        float x, y;
-        int id;
-    };
+  struct ItemSave {
+    std::string item_id;
+    float x, y;
+    int id;
+  };
 
-    std::unordered_map<int, ItemSave> items_to_save;
-    std::queue<ItemSave> items_to_spawn;
+  std::unordered_map<int, ItemSave> items_to_save;
+  std::queue<ItemSave> items_to_spawn;
 };
 
 class ItemPersisterFactory : public ObjectFactory {
-public:
-    Object *create(const std::string &) override {
-        return new ItemPersister();
-    }
+ public:
+  Object* create(const std::string&) override { return new ItemPersister(); }
 };
 
-extern ItemPersister *item_persister;
+extern ItemPersister* item_persister;
 
 #endif

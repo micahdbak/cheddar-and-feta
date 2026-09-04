@@ -3,11 +3,12 @@
 #include <iostream>
 
 #include "item.h"
+#include "utils.h"
 
 ThrownToothpick::ThrownToothpick(float x, float y, int x_dir, int y_dir,
                                  int from_id)
     : x(x), y(y), x_dir(x_dir), y_dir(y_dir) {
-  Object* obj = game->get_object(from_id);
+  thoom::Object* obj = thoom::game->get_object(from_id);
   Mouse* mouse;
   if (obj != nullptr && (mouse = dynamic_cast<Mouse*>(obj)) != nullptr) {
     // only drop if thrown by a mouse
@@ -18,17 +19,17 @@ ThrownToothpick::ThrownToothpick(float x, float y, int x_dir, int y_dir,
 
   this->did_hit = false;
 
-  this->sprite = new Sprite("sprites/item_toothpick.bmp", 16, 16, 0);
-  this->sprite->set_animation(direction_from_dirs(x_dir, y_dir));
+  this->sprite = new thoom::Sprite("sprites/item_toothpick.bmp", 16, 16, 0);
+  this->sprite->set_animation(thoom::direction_from_dirs(x_dir, y_dir));
   this->dst_rect.w = 16.0f;
   this->dst_rect.h = 16.0f;
 
-  this->spawned_ticks = game->ticks;
+  this->spawned_ticks = thoom::game->ticks;
 
   HitBox::Properties props = {1, 1000, 1000};
   props.single_use = true;
-  game->push_object(HITBOX_OBJ,
-                    HitBox::Options(this->id, from_id, -8, -8, 16, 16, props));
+  thoom::game->push_object(
+      HITBOX_OBJ, HitBox::Options(this->id, from_id, -8, -8, 16, 16, props));
 }
 
 ThrownToothpick::~ThrownToothpick() {
@@ -37,20 +38,22 @@ ThrownToothpick::~ThrownToothpick() {
 }
 
 void ThrownToothpick::step() {
-  float dx = float(this->x_dir) * (this->y_dir != 0 ? DIAG_MULTIPLIER : 1.0f) *
-             128.0f * game->delta;
-  float dy = float(this->y_dir) * (this->x_dir != 0 ? DIAG_MULTIPLIER : 1.0f) *
-             128.0f * game->delta;
+  float dx = float(this->x_dir) *
+             (this->y_dir != 0 ? THOOM_DIAG_MULTIPLIER : 1.0f) * 128.0f *
+             thoom::game->delta;
+  float dy = float(this->y_dir) *
+             (this->x_dir != 0 ? THOOM_DIAG_MULTIPLIER : 1.0f) * 128.0f *
+             thoom::game->delta;
   float new_x = this->x + dx;
   float new_y = this->y + dy;
 
-  if (game->point_in_collider(new_x, new_y) ||
-      game->ticks - this->spawned_ticks > 1000) {
-    game->delete_object = true;
+  if (thoom::game->point_in_collider(new_x, new_y) ||
+      thoom::game->ticks - this->spawned_ticks > 1000) {
+    thoom::game->delete_object = true;
 
     if (this->drop_item) {
-      game->push_object(ITEM_TOOTHPICK DROPPED_OBJ,
-                        DroppedItem::Options(this->x, this->y));
+      thoom::game->push_object(ITEM_TOOTHPICK DROPPED_OBJ,
+                               DroppedItem::Options(this->x, this->y));
     }
 
     return;
@@ -62,11 +65,11 @@ void ThrownToothpick::step() {
   this->dst_rect.x = this->x - 8.0f;
   this->dst_rect.y = this->y - 8.0f;
 
-  game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                    &this->sprite->frame, &this->dst_rect, 16);
+  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
+                           &this->sprite->frame, &this->dst_rect, 16);
 }
 
 void ThrownToothpick::hitsource_notify() {
   this->did_hit = true;
-  this->spawned_ticks = game->ticks - 750;  // 250ms until dropped
+  this->spawned_ticks = thoom::game->ticks - 750;  // 250ms until dropped
 }

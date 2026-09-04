@@ -1,11 +1,12 @@
-#ifndef BELL_OBJ
-#define BELL_OBJ "bell"
+#pragma once
 
 #include "../hurtbox.h"
 #include "object.h"
 #include "sprite.h"
 
-class Bell : public Object, public HurtSource {
+#define BELL_OBJ "bell"
+
+class Bell : public thoom::Object, public HurtSource {
  public:
   Bell(int x, int y, int spawner_id);
   ~Bell();
@@ -18,7 +19,7 @@ class Bell : public Object, public HurtSource {
   void attack(int damage) override;
 
  private:
-  Sprite* sprite;
+  thoom::Sprite* sprite;
   SDL_FRect dst_rect;
   float x, y;
   int spawner_id;
@@ -26,9 +27,9 @@ class Bell : public Object, public HurtSource {
   Uint64 timer = 0;
 };
 
-class BellFactory : public ObjectFactory {
+class BellFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int x = 0, y = 0, spawner_id = 0;
     if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id))
       FATAL_ERROR
@@ -36,5 +37,3 @@ class BellFactory : public ObjectFactory {
     return new Bell(x, y, spawner_id);
   }
 };
-
-#endif

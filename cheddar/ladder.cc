@@ -22,8 +22,8 @@ void Ladder::step() {
   Mouse* mouse = Mouse::closest_mouse(this->x, this->y, 8, true);
 
   if (mouse != nullptr) {
-    game->map = this->next_map;
-    save.puti(MOUSE_SPAWN_AT, this->which_coord);
-    play_audio("sfx/ladder.wav", 1.0f, this->x, this->y, false);
+    thoom::game->map = this->next_map;
+    thoom::save.puti(MOUSE_SPAWN_AT, this->which_coord);
+    thoom::play_audio("sfx/ladder.wav", 1.0f, this->x, this->y, false);
   }
 }

@@ -1,5 +1,4 @@
-#ifndef LADDER_OBJ
-#define LADDER_OBJ "ladder"
+#pragma once
 
 #include <iostream>
 
@@ -7,7 +6,9 @@
 #include "object.h"
 #include "sprite.h"
 
-class Ladder : public Object {
+#define LADDER_OBJ "ladder"
+
+class Ladder : public thoom::Object {
  public:
   Ladder(int x, int y, std::string next_map, int which_coord);
   ~Ladder();
@@ -20,9 +21,9 @@ class Ladder : public Object {
   std::string next_map;
 };
 
-class LadderFactory : public ObjectFactory {
+class LadderFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     int x, y, which_coord;
     if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &which_coord))
       FATAL_ERROR
@@ -41,5 +42,3 @@ class LadderFactory : public ObjectFactory {
     return new Ladder(x, y, std::string(map), which_coord);
   }
 };
-
-#endif

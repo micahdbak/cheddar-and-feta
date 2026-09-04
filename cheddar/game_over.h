@@ -1,10 +1,11 @@
-#ifndef GAME_OVER_OBJ
-#define GAME_OVER_OBJ "game_over"
+#pragma once
 
 #include "game.h"
 #include "object.h"
 
-class GameOver : public Object {
+#define GAME_OVER_OBJ "game_over"
+
+class GameOver : public thoom::Object {
  public:
   GameOver();
   ~GameOver();
@@ -16,9 +17,7 @@ class GameOver : public Object {
   SDL_FRect src, dst;
 };
 
-class GameOverFactory : public ObjectFactory {
+class GameOverFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) { return new GameOver(); }
+  thoom::Object* create(const std::string& options) { return new GameOver(); }
 };
-
-#endif

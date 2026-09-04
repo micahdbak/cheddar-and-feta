@@ -1,12 +1,11 @@
-#ifndef NET_SENDER_H
-#define NET_SENDER_H
+#pragma once
 
 #include <string>
 #include <vector>
 
 #include "object.h"
 
-class NetSender : public Object {
+class NetSender : public thoom::Object {
  public:
   NetSender();
   ~NetSender();
@@ -20,11 +19,9 @@ class NetSender : public Object {
   bool was_disconnected = true;
 };
 
-class NetSenderFactory : public ObjectFactory {
+class NetSenderFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     return new NetSender();
   }
 };
-
-#endif

@@ -1,10 +1,11 @@
-#ifndef ITEM_TOOTHPICK
-#define ITEM_TOOTHPICK "item_toothpick"
+#pragma once
 
 #include <iostream>
 
 #include "hitbox.h"
 #include "items/item.h"
+
+#define ITEM_TOOTHPICK "item_toothpick"
 
 // ---- dropped toothpick ----
 
@@ -22,9 +23,9 @@ class DroppedToothpick : public DroppedItem {
   void take(Mouse* mouse) override { mouse->push_item(ITEM_TOOTHPICK); }
 };
 
-class DroppedToothpickFactory : public ObjectFactory {
+class DroppedToothpickFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     int x, y;
     if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
 
@@ -34,7 +35,7 @@ class DroppedToothpickFactory : public ObjectFactory {
 
 // ---- thrown toothpick ----
 
-class ThrownToothpick : public Object, public HitSource {
+class ThrownToothpick : public thoom::Object, public HitSource {
  public:
   ThrownToothpick(float x, float y, int x_dir, int y_dir, int from_id);
   ~ThrownToothpick();
@@ -51,13 +52,13 @@ class ThrownToothpick : public Object, public HitSource {
   bool drop_item, did_hit;
   float x, y;
   int x_dir, y_dir;
-  Sprite* sprite;
+  thoom::Sprite* sprite;
   SDL_FRect dst_rect;
 };
 
-class ThrownToothpickFactory : public ObjectFactory {
+class ThrownToothpickFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int x, y, x_dir, y_dir, from_id;
     if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
                     &from_id))
@@ -66,5 +67,3 @@ class ThrownToothpickFactory : public ObjectFactory {
     return new ThrownToothpick((float)x, (float)y, x_dir, y_dir, from_id);
   }
 };
-
-#endif

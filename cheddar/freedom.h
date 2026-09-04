@@ -1,10 +1,11 @@
-#ifndef FREEDOM_OBJ
-#define FREEDOM_OBJ "freedom"
+#pragma once
 
 #include "game.h"
 #include "object.h"
 
-class Freedom : public Object {
+#define FREEDOM_OBJ "freedom"
+
+class Freedom : public thoom::Object {
  public:
   Freedom(int x, int y);
   ~Freedom();
@@ -16,14 +17,12 @@ class Freedom : public Object {
   Uint64 timer_start = 0;
 };
 
-class FreedomFactory : public ObjectFactory {
+class FreedomFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int x = 0, y = 0;
     if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
 
     return new Freedom(x, y);
   }
 };
-
-#endif

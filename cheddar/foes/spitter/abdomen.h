@@ -1,13 +1,14 @@
-#ifndef FOE_SPITTER_ABDOMEN_OBJ
-#define FOE_SPITTER_ABDOMEN_OBJ "foe_spitter_abdomen"
+#pragma once
 
 #include "hurtbox.h"
 #include "spitter.h"
 #include "sprite.h"
 
+#define FOE_SPITTER_ABDOMEN_OBJ "foe_spitter_abdomen"
+
 #define FRAMES_TO_SET_CUR_DIR 4
 
-class SpitterAbdomen : public Object, public HurtSource {
+class SpitterAbdomen : public thoom::Object, public HurtSource {
  public:
   SpitterAbdomen(Spitter* parent, std::shared_ptr<bool> deleted_ptr);
   ~SpitterAbdomen();
@@ -28,17 +29,17 @@ class SpitterAbdomen : public Object, public HurtSource {
   float x, y;
   Spitter* parent;
   std::shared_ptr<bool> deleted_ptr;
-  Sprite* sprite;
+  thoom::Sprite* sprite;
   SDL_FRect dst_rect;
 };
 
-class SpitterAbdomenFactory : public ObjectFactory {
+class SpitterAbdomenFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int parent_id;
     if (1 != sscanf(options.c_str(), "%d", &parent_id)) FATAL_ERROR
 
-    Object* obj = game->get_object(parent_id);
+    thoom::Object* obj = thoom::game->get_object(parent_id);
     Spitter* spitter;
 
     if (obj != nullptr && (spitter = dynamic_cast<Spitter*>(obj)) != nullptr) {
@@ -49,5 +50,3 @@ class SpitterAbdomenFactory : public ObjectFactory {
     }
   }
 };
-
-#endif

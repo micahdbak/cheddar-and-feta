@@ -1,8 +1,9 @@
-#ifndef ITEM_HERMES_BOOT
-#define ITEM_HERMES_BOOT "item_hermes_boot"
+#pragma once
 
 #include "item.h"
 #include "object.h"
+
+#define ITEM_HERMES_BOOT "item_hermes_boot"
 
 class DroppedHermesBoot : public DroppedItem {
  public:
@@ -16,14 +17,12 @@ class DroppedHermesBoot : public DroppedItem {
   void take(Mouse* mouse) override { mouse->push_item(ITEM_HERMES_BOOT); }
 };
 
-class DroppedHermesBootFactory : public ObjectFactory {
+class DroppedHermesBootFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     int x, y;
     if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
 
     return new DroppedHermesBoot(float(x), float(y));
   }
 };
-
-#endif

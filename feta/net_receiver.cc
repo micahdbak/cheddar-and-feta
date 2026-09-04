@@ -9,6 +9,7 @@
 #include "feta.h"
 #include "game.h"
 #include "net_agent.h"
+#include "utils.h"
 
 #define BUFF_SIZE 1024
 
@@ -16,7 +17,7 @@ char nullbyte = '\0';
 
 NetReceiver::~NetReceiver() {
   if (!this->sprites.empty()) {
-    for (Game::SpriteRender& sprite : this->sprites) {
+    for (thoom::Game::SpriteRender& sprite : this->sprites) {
       delete sprite.src_rect;
       delete sprite.dst_rect;
     }
@@ -26,12 +27,12 @@ NetReceiver::~NetReceiver() {
 
 void NetReceiver::step() {
   // ensure we are in maps/init if disconnected, and do nothing else
-  if (game->net_state != NetworkAgent::State::CONNECTED) {
+  if (thoom::game->net_state != thoom::NetworkAgent::State::CONNECTED) {
     // if currently in a map other than the init map, reset the network agent
     // and go to that
-    if (game->current_map != "maps/init") {
-      net_agent->try_reset();
-      game->map = "maps/init";
+    if (thoom::game->current_map != "maps/init") {
+      thoom::net_agent->try_reset();
+      thoom::game->map = "maps/init";
       last_frame_ticks = 0;
     }
 
@@ -45,24 +46,24 @@ void NetReceiver::step() {
     this->skipped_messages.clear();
 
     for (const char* arr = skipped_copy.c_str(); *arr != '\0';
-         arr = next_line(arr)) {
+         arr = thoom::next_line(arr)) {
       this->handle_important_message(arr);  // disregards other message types
     }
   }
 
   // get all unread messages
-  std::queue<std::string> msgs = net_agent->all_messages();
+  std::queue<std::string> msgs = thoom::net_agent->all_messages();
 
   // if empty, reuse last frame
   if (msgs.empty()) {
-    for (Game::SpriteRender& sprite : this->sprites) {
-      game->push_sprite(sprite.tex_id, sprite.texture, sprite.src_rect,
-                        sprite.dst_rect, sprite.y);
+    for (thoom::Game::SpriteRender& sprite : this->sprites) {
+      thoom::game->push_sprite(sprite.tex_id, sprite.texture, sprite.src_rect,
+                               sprite.dst_rect, sprite.y);
     }
 
     // 5 seconds of no frames; disconnect
-    if (game->ticks - last_frame_ticks > 5000 && last_frame_ticks != 0) {
-      net_agent->try_reset();
+    if (thoom::game->ticks - last_frame_ticks > 5000 && last_frame_ticks != 0) {
+      thoom::net_agent->try_reset();
       last_frame_ticks = 0;
     }
 
@@ -70,10 +71,10 @@ void NetReceiver::step() {
   }
 
   // set this as we have new frame(s) to parse
-  last_frame_ticks = game->ticks;
+  last_frame_ticks = thoom::game->ticks;
 
   // free stuff
-  for (Game::SpriteRender& sprite : this->sprites) {
+  for (thoom::Game::SpriteRender& sprite : this->sprites) {
     delete sprite.src_rect;
     delete sprite.dst_rect;
   }
@@ -88,13 +89,14 @@ void NetReceiver::step() {
 
     const char* arr = msg.c_str();
 
-    for (const char* arr = msg.c_str(); *arr != '\0'; arr = next_line(arr)) {
+    for (const char* arr = msg.c_str(); *arr != '\0';
+         arr = thoom::next_line(arr)) {
       if (arr[0] == MSG_MAP) {
         sscanf(arr + 1, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
 
-        if (game->current_map != buff) {
-          this->load_map(std::string(buff), next_line(arr));
+        if (thoom::game->current_map != buff) {
+          this->load_map(std::string(buff), thoom::next_line(arr));
           return;  // don't read rest of messages
         }
       }
@@ -107,7 +109,8 @@ void NetReceiver::step() {
   std::string msg = msgs.front();
   msgs.pop();
 
-  for (const char* arr = msg.c_str(); *arr != '\0'; arr = next_line(arr)) {
+  for (const char* arr = msg.c_str(); *arr != '\0';
+       arr = thoom::next_line(arr)) {
     if (this->handle_important_message(arr)) {
       continue;
     }
@@ -117,9 +120,9 @@ void NetReceiver::step() {
         sscanf(arr + 1, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
 
-        if (game->current_map != buff) {
-          if (game->current_map != buff) {
-            this->load_map(std::string(buff), next_line(arr));
+        if (thoom::game->current_map != buff) {
+          if (thoom::game->current_map != buff) {
+            this->load_map(std::string(buff), thoom::next_line(arr));
             return;  // don't read rest of messages
           }
         }
@@ -141,7 +144,7 @@ void NetReceiver::step() {
           FATAL_ERROR
         buff[1023] = '\0';
 
-        Game::SpriteRender sprite;
+        thoom::Game::SpriteRender sprite;
         sprite.tex_id = buff;  // buff is tex_id and sprite path
 
         // don't double render feta
@@ -149,7 +152,7 @@ void NetReceiver::step() {
           continue;
         }
 
-        sprite.texture = load_bmp_texture(sprite.tex_id);
+        sprite.texture = thoom::load_bmp_texture(sprite.tex_id);
 
         if (sprite.texture == nullptr) {
           continue;
@@ -163,8 +166,8 @@ void NetReceiver::step() {
                                     (float)dst_rect.w, (float)dst_rect.h});
         sprite.y = depth_offset;
 
-        game->push_sprite(sprite.tex_id, sprite.texture, sprite.src_rect,
-                          sprite.dst_rect, sprite.y);
+        thoom::game->push_sprite(sprite.tex_id, sprite.texture, sprite.src_rect,
+                                 sprite.dst_rect, sprite.y);
         this->sprites.push_back(sprite);
       } break;
 
@@ -176,7 +179,7 @@ void NetReceiver::step() {
           FATAL_ERROR
         gain = (float)gain_i / 10.0f;
 
-        play_audio(std::string(buff), gain, (float)x, (float)y, true);
+        thoom::play_audio(std::string(buff), gain, (float)x, (float)y, true);
       } break;
     }
   }
@@ -201,14 +204,14 @@ bool NetReceiver::handle_important_message(const char* arr) {
           FATAL_ERROR
         x_str[255] = y_str[255] = buff[1023] = '\0';
 
-        feta->x = str_to_float(x_str);
-        feta->y = str_to_float(y_str);
+        feta->x = thoom::str_to_float(x_str);
+        feta->y = thoom::str_to_float(y_str);
         feta->set_animation(animation);
         feta->set_items(std::string(buff));
       } else {
         sscanf(arr + 1, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
-        game->push_object(FETA_OBJ, std::string(buff));
+        thoom::game->push_object(FETA_OBJ, std::string(buff));
         this->just_pushed_feta = true;
       }
     } break;
@@ -298,9 +301,9 @@ bool NetReceiver::handle_important_message(const char* arr) {
       int coord, collider;
       if (2 != sscanf(arr + 1, "%d,%d", &coord, &collider)) FATAL_ERROR
 
-      if (coord >= 0 && coord < game->cols * game->rows && collider >= 0 &&
-          collider < n_MapColliders) {
-        game->collision[coord] = collider;
+      if (coord >= 0 && coord < thoom::game->cols * thoom::game->rows &&
+          collider >= 0 && collider < thoom::n_MapColliders) {
+        thoom::game->collision[coord] = collider;
       }
 
       break;
@@ -317,13 +320,13 @@ void NetReceiver::load_map(const std::string& map, const char* remaining_msgs) {
     this->skipped_messages += remaining_msgs;
   }
 
-  for (Game::SpriteRender& sprite : this->sprites) {
+  for (thoom::Game::SpriteRender& sprite : this->sprites) {
     delete sprite.src_rect;
     delete sprite.dst_rect;
   }
   this->sprites.clear();
 
-  game->map = map;
+  thoom::game->map = map;
 
   this->just_loaded_map = true;
 }

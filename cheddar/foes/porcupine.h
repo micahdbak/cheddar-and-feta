@@ -1,9 +1,10 @@
-#ifndef FOE_PORCUPINE_OBJ
-#define FOE_PORCUPINE_OBJ "foe_porc"
+#pragma once
 
 #include "foe.h"
 #include "game.h"
 #include "sprite.h"
+
+#define FOE_PORCUPINE_OBJ "foe_porc"
 
 class FoePorcupine : public Foe {
  public:
@@ -18,7 +19,7 @@ class FoePorcupine : public Foe {
   Foe::State prev_state = Foe::State::IDLE;
 
  private:
-  Sprite* sprite;
+  thoom::Sprite* sprite;
   SDL_FRect dst_rect, icon_src, icon_dst;
   Uint64 timer = 0, hurt_timer = 0;
 
@@ -26,9 +27,9 @@ class FoePorcupine : public Foe {
   int spine_x_dir = 0, spine_y_dir = 0;
 };
 
-class FoePorcupineFactory : public ObjectFactory {
+class FoePorcupineFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     int x = 0, y = 0, spawner_id = 0;
     if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id))
       FATAL_ERROR
@@ -36,5 +37,3 @@ class FoePorcupineFactory : public ObjectFactory {
     return new FoePorcupine(x, y, spawner_id);
   }
 };
-
-#endif

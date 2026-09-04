@@ -17,7 +17,7 @@ HitBox::HitBox(int hurtbox_owner_id, HitSource* source,
       shared_cooldowns(props.shared_cooldowns),
       shared_id(props.shared_id),
       single_use(props.single_use) {
-  this->created_ticks = game->ticks;
+  this->created_ticks = thoom::game->ticks;
   this->src_rect = DEBUG_HITBOX_ICON;
 
   // if not from a foe, hit all hurtboxes
@@ -25,7 +25,7 @@ HitBox::HitBox(int hurtbox_owner_id, HitSource* source,
 
   if (hurtbox_owner_id != -1) {
     // if from a foe, hit only mice
-    Object* owner_obj = game->get_object(hurtbox_owner_id);
+    thoom::Object* owner_obj = thoom::game->get_object(hurtbox_owner_id);
     Foe* foe;
     if ((foe = dynamic_cast<Foe*>(owner_obj)) != nullptr) {
       this->from_foe = true;
@@ -40,8 +40,8 @@ HitBox::~HitBox() {
 void HitBox::step() {
   if (*this->source_deleted ||
       (this->delete_after_ms > 0 &&
-       game->ticks - this->created_ticks > this->delete_after_ms)) {
-    game->delete_object = true;
+       thoom::game->ticks - this->created_ticks > this->delete_after_ms)) {
+    thoom::game->delete_object = true;
     return;
   }
 
@@ -60,7 +60,8 @@ void HitBox::step() {
 
       if (this->single_use) {
         // will be deleted on next loop
-        this->created_ticks = game->ticks - (this->delete_after_ms + 1000);
+        this->created_ticks =
+            thoom::game->ticks - (this->delete_after_ms + 1000);
         break;  // end for loop
       }
     }
@@ -69,7 +70,8 @@ void HitBox::step() {
 #ifdef ONSCREEN_DEBUG
   this->dst_rect = {(float)this->bounding_box.x, (float)this->bounding_box.y,
                     (float)this->bounding_box.w, (float)this->bounding_box.h};
-  game->push_sprite("sprites/icons.bmp", game->icons, &this->src_rect,
-                    &this->dst_rect, SCREEN_HEIGHT);
+  thoom::game->push_sprite("sprites/icons.bmp", thoom::game->icons,
+                           &this->src_rect, &this->dst_rect,
+                           THOOM_SCREEN_HEIGHT);
 #endif
 }

@@ -1,8 +1,9 @@
-#ifndef ITEM_MOLOTOV
-#define ITEM_MOLOTOV "item_molotov"
+#pragma once
 
 #include "hitbox.h"
 #include "item.h"
+
+#define ITEM_MOLOTOV "item_molotov"
 
 class DroppedMolotov : public DroppedItem {
  public:
@@ -16,9 +17,9 @@ class DroppedMolotov : public DroppedItem {
   void take(Mouse* mouse) override { mouse->push_item(ITEM_MOLOTOV); }
 };
 
-class DroppedMolotovFactory : public ObjectFactory {
+class DroppedMolotovFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     int x, y;
     if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
 
@@ -28,7 +29,7 @@ class DroppedMolotovFactory : public ObjectFactory {
 
 // ----
 
-class ThrownMolotov : public Object, public HitSource {
+class ThrownMolotov : public thoom::Object, public HitSource {
  public:
   ThrownMolotov(float x, float y, int x_dir, int y_dir, int from_id);
   ~ThrownMolotov();
@@ -43,15 +44,15 @@ class ThrownMolotov : public Object, public HitSource {
  private:
   float x, y;
   bool did_hit;
-  Sprite* sprite;
+  thoom::Sprite* sprite;
   SDL_FRect dst_rect;
   int x_dir, y_dir;
   Uint64 timer;
 };
 
-class ThrownMolotovFactory : public ObjectFactory {
+class ThrownMolotovFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int x, y, x_dir = 0, y_dir = 0, from_id = -1;
     if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
                     &from_id))
@@ -60,5 +61,3 @@ class ThrownMolotovFactory : public ObjectFactory {
     return new ThrownMolotov((float)x, (float)y, x_dir, y_dir, from_id);
   }
 };
-
-#endif

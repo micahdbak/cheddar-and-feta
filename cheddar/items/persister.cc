@@ -17,10 +17,10 @@ ItemPersister::ItemPersister() {
 
   item_persister = this;
 
-  std::string key = game->current_map + "_items";
+  std::string key = thoom::game->current_map + "_items";
 
-  if (save.has(key)) {
-    std::string items = save.data[key];
+  if (thoom::save.has(key)) {
+    std::string items = thoom::save.data[key];
     const char* arr = items.c_str();
 
     char buff[256] = {0};
@@ -62,13 +62,13 @@ void ItemPersister::step() {
 
     std::string dropped_item_id = item.item_id;
     dropped_item_id += DROPPED_OBJ;
-    game->push_object(dropped_item_id,
-                      DroppedItem::Options((float)item.x, (float)item.y));
+    thoom::game->push_object(
+        dropped_item_id, DroppedItem::Options((float)item.x, (float)item.y));
   }
 }
 
 void ItemPersister::save_items() {
-  std::string key = game->current_map + "_items";
+  std::string key = thoom::game->current_map + "_items";
   std::string data;
 
   auto it = this->items_to_save.begin();
@@ -87,7 +87,7 @@ void ItemPersister::save_items() {
     data += ";";
   }
 
-  save.data[key] = data;
+  thoom::save.data[key] = data;
 }
 
 void ItemPersister::remember_item(const std::string& item_id, float x, float y,

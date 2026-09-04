@@ -1,5 +1,4 @@
-#ifndef MOUSE_OBJ
-#define MOUSE_OBJ "mouse"
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -10,6 +9,8 @@
 #include "hitbox.h"
 #include "object.h"
 #include "sprite.h"
+
+#define MOUSE_OBJ "mouse"
 
 #define MOUSE_DEFAULT_SPEED 80.0f
 
@@ -31,7 +32,7 @@
 #define DANCING2_ANIMATION 50
 #define SLEEPING_ANIMATION 51
 
-class Mouse : public Object {
+class Mouse : public thoom::Object {
  public:
   struct SpawnCoord {
     float x, y;
@@ -51,8 +52,10 @@ class Mouse : public Object {
   virtual void signal_down() = 0;
 
   static bool check_collision(float x, float y);
-  static std::string encode_items(const std::vector<Game::HudItem>& items);
-  static std::vector<Game::HudItem> read_items(const std::string& items_s);
+  static std::string encode_items(
+      const std::vector<thoom::Game::HudItem>& items);
+  static std::vector<thoom::Game::HudItem> read_items(
+      const std::string& items_s);
   static Mouse* closest_mouse(float x, float y, float min_distance,
                               bool forced);
 
@@ -62,5 +65,3 @@ class Mouse : public Object {
 
 extern Mouse *cheddar, *feta;
 extern bool mice_locked;
-
-#endif

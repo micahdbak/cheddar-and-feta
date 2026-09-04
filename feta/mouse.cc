@@ -2,12 +2,13 @@
 #include "item.h"
 
 bool Mouse::check_collision(float x, float y) {
-  return game->point_in_collider(x + 2.0f, y) ||
-         game->point_in_collider(x - 2.0f, y) ||
-         game->point_in_collider(x, y - 2.0f);
+  return thoom::game->point_in_collider(x + 2.0f, y) ||
+         thoom::game->point_in_collider(x - 2.0f, y) ||
+         thoom::game->point_in_collider(x, y - 2.0f);
 }
 
-std::string Mouse::encode_items(const std::vector<Game::HudItem>& items) {
+std::string Mouse::encode_items(
+    const std::vector<thoom::Game::HudItem>& items) {
   std::string items_s = "";
   for (int i = 0; i < items.size(); i++) {
     if (items[i].count <= 0) continue;
@@ -24,8 +25,9 @@ std::string Mouse::encode_items(const std::vector<Game::HudItem>& items) {
   return items_s;
 }
 
-std::vector<Game::HudItem> Mouse::read_items(const std::string& items_s) {
-  std::vector<Game::HudItem> ret;
+std::vector<thoom::Game::HudItem> Mouse::read_items(
+    const std::string& items_s) {
+  std::vector<thoom::Game::HudItem> ret;
 
   if (!items_s.empty()) {
     const char* arr = items_s.c_str();
@@ -38,7 +40,7 @@ std::vector<Game::HudItem> Mouse::read_items(const std::string& items_s) {
       // validate item
       if (item_info.find(item_id) == item_info.end() || count <= 0) continue;
 
-      Game::HudItem item{item_id, count};
+      thoom::Game::HudItem item{item_id, count};
       ret.push_back(item);
 
       while (*arr != '\0' && *arr != ',') arr++;

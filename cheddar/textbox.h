@@ -1,5 +1,4 @@
-#ifndef TEXTBOX_H
-#define TEXTBOX_H
+#pragma once
 
 #include <SDL3/SDL.h>
 
@@ -24,5 +23,3 @@ class Textbox {
 };
 
 extern Textbox* textbox;
-
-#endif

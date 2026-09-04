@@ -1,5 +1,4 @@
-#ifndef ITEM_H
-#define ITEM_H
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -26,7 +25,7 @@ struct Item {
 
 extern std::unordered_map<std::string, Item> item_info;
 
-class DroppedItem : public virtual Object {
+class DroppedItem : public virtual thoom::Object {
  public:
   static std::string Options(int x, int y) {
     char buff[256];
@@ -46,7 +45,7 @@ class DroppedItem : public virtual Object {
   std::string item_id;
   float x, y;
 
-  Sprite* sprite;
+  thoom::Sprite* sprite;
 
   bool spawned_item = false;
 
@@ -61,5 +60,3 @@ static std::string Options(int x, int y, int x_dir, int y_dir, int from_id) {
   return std::string(buff);
 }
 }  // namespace UseItem
-
-#endif

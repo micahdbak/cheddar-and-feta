@@ -1,9 +1,10 @@
-#ifndef CHEDDAR_OBJ
-#define CHEDDAR_OBJ "cheddar"
+#pragma once
 
 #include "hitbox.h"
 #include "mouse.h"
 #include "object.h"
+
+#define CHEDDAR_OBJ "cheddar"
 
 class Cheddar : public Mouse, public HitSource {
  public:
@@ -32,12 +33,12 @@ class Cheddar : public Mouse, public HitSource {
  private:
   int tile_x, tile_y;
 
-  Sprite *sprite, *emotes;
+  thoom::Sprite *sprite, *emotes;
   SDL_FRect dst_rect, emote_rect;
   int which_emote = -1;
 
   int health = 10, max_health = 10;
-  std::vector<Game::HudItem> items;
+  std::vector<thoom::Game::HudItem> items;
   int sel_item = -1;
 
   int throw_x = 0, throw_y = 0;
@@ -56,12 +57,12 @@ class Cheddar : public Mouse, public HitSource {
   bool did_hit = false;
 };
 
-class CheddarFactory : public ObjectFactory {
+class CheddarFactory : public thoom::ObjectFactory {
  public:
   // options:
   // [x1,y1,a1] [x2,y2,a2]
   // e.g., 32,32,0 1600,640,2
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     const char* arr = options.c_str();
     std::vector<Mouse::SpawnCoord> coordinates;
 
@@ -85,5 +86,3 @@ class CheddarFactory : public ObjectFactory {
     return new Cheddar(coordinates, options);
   }
 };
-
-#endif

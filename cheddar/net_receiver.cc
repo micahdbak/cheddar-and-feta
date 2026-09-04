@@ -10,7 +10,7 @@
 #include "net_agent.h"
 
 void NetReceiver::step() {
-  std::queue<std::string> msgs = net_agent->all_messages();
+  std::queue<std::string> msgs = thoom::net_agent->all_messages();
   char buff[1024];
 
   // shouldn't be receiving any messages; ignore
@@ -29,7 +29,8 @@ void NetReceiver::step() {
     std::string msg = msgs.front();
     msgs.pop();
 
-    for (const char* arr = msg.c_str(); *arr != '\0'; arr = next_line(arr)) {
+    for (const char* arr = msg.c_str(); *arr != '\0';
+         arr = thoom::next_line(arr)) {
       switch (arr[0]) {
         case MSG_USE_ITEM: {
           int x, y, x_dir, y_dir;
@@ -38,7 +39,7 @@ void NetReceiver::step() {
             FATAL_ERROR
 
           std::string options = UseItem::Options(x, y, x_dir, y_dir, feta->id);
-          game->push_object(std::string(buff) + USE_OBJ, options);
+          thoom::game->push_object(std::string(buff) + USE_OBJ, options);
           feta->remove_item(std::string(buff));
         } break;
 
@@ -50,7 +51,7 @@ void NetReceiver::step() {
 
           std::string options =
               TossedItem::Options(x, y, x_dir, y_dir, true, buff);
-          game->push_object(TOSSED_ITEM_OBJ, options);
+          thoom::game->push_object(TOSSED_ITEM_OBJ, options);
           feta->remove_item(std::string(buff));
         } break;
 
@@ -68,9 +69,9 @@ void NetReceiver::step() {
           HitBox::Properties props = {item_info[sel_item_id].damage, 200, 100};
           props.single_use = true;
 
-          game->push_object(HITBOX_OBJ,
-                            HitBox::Options(feta->id, feta->id, x_off - 16,
-                                            y_off - 18, 32, 32, props));
+          thoom::game->push_object(
+              HITBOX_OBJ, HitBox::Options(feta->id, feta->id, x_off - 16,
+                                          y_off - 18, 32, 32, props));
         } break;
 
         case MSG_FETA_INFO: {
@@ -80,8 +81,8 @@ void NetReceiver::step() {
                           &animation, &frame_i, &which_emote))
             FATAL_ERROR
 
-          feta->x = str_to_float(x_str);
-          feta->y = str_to_float(y_str);
+          feta->x = thoom::str_to_float(x_str);
+          feta->y = thoom::str_to_float(y_str);
           feta_inst->animation = animation;
           feta_inst->frame_i = frame_i;
           feta_inst->which_emote = which_emote;
@@ -100,7 +101,7 @@ void NetReceiver::step() {
 
           gain = (float)gain_i / 10.0f;
 
-          play_audio(std::string(buff), gain, (float)x, (float)y, true);
+          thoom::play_audio(std::string(buff), gain, (float)x, (float)y, true);
         } break;
 
         case MSG_IS_DOWN:

@@ -1,14 +1,17 @@
-#ifndef FOE_H
-#define FOE_H
+#pragma once
 
 #include <vector>
 
 #include "object.h"
 
-#define CENTER_TILE_X(_x) \
-  ((float)(int)((_x * game->tile_width) + (game->tile_width / 2)) + 0.5f)
-#define CENTER_TILE_Y(_y) \
-  ((float)(int)((_y * game->tile_height) + (game->tile_height / 2)) + 0.5f)
+#define CENTER_TILE_X(_x)                        \
+  ((float)(int)((_x * thoom::game->tile_width) + \
+                (thoom::game->tile_width / 2)) + \
+   0.5f)
+#define CENTER_TILE_Y(_y)                         \
+  ((float)(int)((_y * thoom::game->tile_height) + \
+                (thoom::game->tile_height / 2)) + \
+   0.5f)
 
 class Mouse;  // forward declaration
 
@@ -22,7 +25,7 @@ void foe_pick_random(int* x, int* y);
 void foe_move_direction(int* x, int* y, int x_dir, int y_dir);
 void foe_debug_tile(int x, int y);
 
-class Foe : public virtual Object {
+class Foe : public virtual thoom::Object {
  public:
   Foe(float x, float y, int spawner_id, int speed, int throw_speed,
       float stalking_distance, float action_distance);
@@ -76,5 +79,3 @@ class Foe : public virtual Object {
 };
 
 extern std::vector<Foe*> foes;
-
-#endif

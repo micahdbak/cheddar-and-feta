@@ -1,11 +1,12 @@
-#ifndef ITEM_CHEESE
-#define ITEM_CHEESE "item_cheese"
+#pragma once
 
 #include "item.h"
 #include "object.h"
 
+#define ITEM_CHEESE "item_cheese"
+
 // dropped cheese
-class Cheese : public Object {
+class Cheese : public thoom::Object {
  public:
   static std::string Options(int x, int y, int amount) {
     char buff[256];
@@ -30,9 +31,9 @@ class Cheese : public Object {
   int amount, depth_offset;
 };
 
-class CheeseFactory : public ObjectFactory {
+class CheeseFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int x, y, amount;
     int fields = sscanf(options.c_str(), "%d,%d,%d", &x, &y, &amount);
 
@@ -44,5 +45,3 @@ class CheeseFactory : public ObjectFactory {
     return new Cheese(float(x), float(y), amount);
   }
 };
-
-#endif

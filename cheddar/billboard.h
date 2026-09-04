@@ -1,5 +1,4 @@
-#ifndef BILLBOARD_OBJ
-#define BILLBOARD_OBJ "billboard"
+#pragma once
 
 #include <cstdio>
 #include <iostream>
@@ -8,7 +7,9 @@
 #include "object.h"
 #include "sprite.h"
 
-class Billboard : public Object {
+#define BILLBOARD_OBJ "billboard"
+
+class Billboard : public thoom::Object {
  public:
   Billboard(int x, int y, int ts_x, int ts_y, int w, int h, int depth,
             std::string tilesheet);
@@ -18,11 +19,11 @@ class Billboard : public Object {
 
  private:
   int x, y, depth;
-  Sprite* sprite;
+  thoom::Sprite* sprite;
   SDL_FRect dst_rect;
 };
 
-class BillboardFactory : public ObjectFactory {
+class BillboardFactory : public thoom::ObjectFactory {
  public:
   static void ParseOptions(const std::string& options, int* x, int* y,
                            int* ts_x, int* ts_y, int* w, int* h, int* depth,
@@ -35,7 +36,7 @@ class BillboardFactory : public ObjectFactory {
     tilesheet = buff;
   }
 
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int x, y, ts_x, ts_y, w, h, depth;
     std::string tilesheet;
 
@@ -44,5 +45,3 @@ class BillboardFactory : public ObjectFactory {
     return new Billboard(x, y, ts_x, ts_y, w, h, depth, tilesheet);
   }
 };
-
-#endif

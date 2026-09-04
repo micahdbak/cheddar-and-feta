@@ -44,7 +44,7 @@
 #include "net_sender.h"
 #include "splash.h"
 
-void Game::init() {
+void thoom::Game::init() {
   this->factories[LOAD_SAVE_OBJ] = new LoadSaveFactory();
 
   // objects
@@ -110,7 +110,7 @@ void Game::init() {
 
   this->title = "Playing as Cheddar";
 
-  net_agent = new NetworkAgent(false);
+  thoom::net_agent = new thoom::NetworkAgent(false);
 
   this->create_object(FIRST_OBJ, "");
   this->create_object(LAST_OBJ, "");

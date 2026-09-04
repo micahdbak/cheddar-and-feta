@@ -20,8 +20,8 @@ void NetSender::step() {
   char x_str[256], y_str[256], buff[1024];
   std::string frame_msg;
 
-  float_to_str(feta->x, x_str, sizeof(x_str));
-  float_to_str(feta->y, y_str, sizeof(y_str));
+  thoom::float_to_str(feta->x, x_str, sizeof(x_str));
+  thoom::float_to_str(feta->y, y_str, sizeof(y_str));
 
   snprintf(buff, sizeof(buff), "%c%s,%s,%d,%d,%d\n", MSG_FETA_INFO, x_str,
            y_str, feta->sprite->animation, feta->sprite->frame_i,
@@ -35,7 +35,7 @@ void NetSender::step() {
 
   this->messages.clear();
 
-  net_agent->send_message(frame_msg);
+  thoom::net_agent->send_message(frame_msg);
 }
 
 void NetSender::send_message(char func, const std::string& arg) {
@@ -43,7 +43,7 @@ void NetSender::send_message(char func, const std::string& arg) {
     return;
   }
 
-  if (game->net_state != NetworkAgent::State::CONNECTED) {
+  if (thoom::game->net_state != thoom::NetworkAgent::State::CONNECTED) {
     if (!net_sender->messages.empty()) {
       net_sender->messages.clear();
     }

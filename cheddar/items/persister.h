@@ -1,12 +1,13 @@
-#ifndef ITEM_PERSISTER_OBJ
-#define ITEM_PERSISTER_OBJ "item_persister"
+#pragma once
 
 #include <queue>
 #include <unordered_map>
 
 #include "object.h"
 
-class ItemPersister : public Object {
+#define ITEM_PERSISTER_OBJ "item_persister"
+
+class ItemPersister : public thoom::Object {
  public:
   ItemPersister();
   ~ItemPersister();
@@ -31,11 +32,11 @@ class ItemPersister : public Object {
   std::queue<ItemSave> items_to_spawn;
 };
 
-class ItemPersisterFactory : public ObjectFactory {
+class ItemPersisterFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string&) override { return new ItemPersister(); }
+  thoom::Object* create(const std::string&) override {
+    return new ItemPersister();
+  }
 };
 
 extern ItemPersister* item_persister;
-
-#endif

@@ -1,12 +1,16 @@
 #include "abdomen.h"
 
+#include "utils.h"
+
 SpitterAbdomen::SpitterAbdomen(Spitter* parent,
                                std::shared_ptr<bool> deleted_ptr)
     : parent(parent), deleted_ptr(deleted_ptr) {
-  this->sprite = new Sprite("sprites/foe_spitter_abdomen.bmp", 32, 32, 250);
+  this->sprite =
+      new thoom::Sprite("sprites/foe_spitter_abdomen.bmp", 32, 32, 250);
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
-  game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -16, -16, 32, 32));
+  thoom::game->push_object(HURTBOX_OBJ,
+                           HurtBox::Options(this->id, -16, -16, 32, 32));
 
   this->cur_dir = 0;
   for (int i = 0; i < FRAMES_TO_SET_CUR_DIR; i++) this->dirs[i] = 0;
@@ -17,7 +21,7 @@ SpitterAbdomen::~SpitterAbdomen() { delete this->sprite; }
 
 void SpitterAbdomen::step() {
   if (*this->deleted_ptr) {
-    game->delete_object = true;
+    thoom::game->delete_object = true;
     return;
   }
 
@@ -40,8 +44,8 @@ void SpitterAbdomen::step() {
   this->y = (float)this_y;
 
   int x_dir, y_dir;
-  dir_to_point(this_x, this_y, next_x, next_y, &x_dir, &y_dir);
-  direction = direction_from_dirs(x_dir, y_dir);
+  thoom::dir_to_point(this_x, this_y, next_x, next_y, &x_dir, &y_dir);
+  direction = thoom::direction_from_dirs(x_dir, y_dir);
 
   this->dirs[this->dirs_i] = direction;
   this->dirs_i = (++this->dirs_i) % FRAMES_TO_SET_CUR_DIR;
@@ -60,7 +64,7 @@ void SpitterAbdomen::step() {
     this->parent->abdomen_distance = 256.0f;
   } else {
     this->parent->abdomen_distance =
-        distance_between_points(mouse->x, mouse->y, this->x, this->y);
+        THOOM_DISTANCE_BETWEEN_POINTS(mouse->x, mouse->y, this->x, this->y);
   }
 
   this->dst_rect.x = this->x - 16.0f;
@@ -68,6 +72,6 @@ void SpitterAbdomen::step() {
 
   this->sprite->set_animation(this->cur_dir);
   this->sprite->update_frame();
-  game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                    &this->sprite->frame, &this->dst_rect, 16);
+  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
+                           &this->sprite->frame, &this->dst_rect, 16);
 }

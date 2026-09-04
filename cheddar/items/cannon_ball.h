@@ -1,10 +1,11 @@
-#ifndef ITEM_CANNON_BALL
-#define ITEM_CANNON_BALL "item_cannon_ball"
+#pragma once
 
 #include <iostream>
 
 #include "hitbox.h"
 #include "items/item.h"
+
+#define ITEM_CANNON_BALL "item_cannon_ball"
 
 // ---- dropped cannon ball ----
 
@@ -20,9 +21,9 @@ class DroppedCannonBall : public DroppedItem {
   void take(Mouse* mouse) override { mouse->push_item(ITEM_CANNON_BALL); }
 };
 
-class DroppedCannonBallFactory : public ObjectFactory {
+class DroppedCannonBallFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     int x, y;
     if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
 
@@ -32,7 +33,7 @@ class DroppedCannonBallFactory : public ObjectFactory {
 
 // ---- thrown cannon ball ----
 
-class ThrownCannonBall : public Object, public HitSource {
+class ThrownCannonBall : public thoom::Object, public HitSource {
  public:
   ThrownCannonBall(float x, float y, int x_dir, int y_dir, int from_id);
   ~ThrownCannonBall();
@@ -49,13 +50,13 @@ class ThrownCannonBall : public Object, public HitSource {
   bool drop_item, did_hit;
   float x, y;
   int x_dir, y_dir;
-  Sprite* sprite;
+  thoom::Sprite* sprite;
   SDL_FRect dst_rect;
 };
 
-class ThrownCannonBallFactory : public ObjectFactory {
+class ThrownCannonBallFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int x, y, x_dir, y_dir, from_id;
     if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
                     &from_id))
@@ -64,5 +65,3 @@ class ThrownCannonBallFactory : public ObjectFactory {
     return new ThrownCannonBall((float)x, (float)y, x_dir, y_dir, from_id);
   }
 };
-
-#endif

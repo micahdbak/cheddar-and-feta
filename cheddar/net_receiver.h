@@ -1,9 +1,8 @@
-#ifndef NET_RECEIVER_H
-#define NET_RECEIVER_H
+#pragma once
 
 #include "object.h"
 
-class NetReceiver : public Object {
+class NetReceiver : public thoom::Object {
  public:
   NetReceiver() = default;
   ~NetReceiver() = default;
@@ -11,11 +10,9 @@ class NetReceiver : public Object {
   void step() override;
 };
 
-class NetReceiverFactory : public ObjectFactory {
+class NetReceiverFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     return new NetReceiver();
   }
 };
-
-#endif

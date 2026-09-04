@@ -1,5 +1,4 @@
-#ifndef ITEM_H
-#define ITEM_H
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -36,5 +35,3 @@ static std::string Options(int x, int y, int x_dir, int y_dir) {
 }  // namespace UseItem
 
 extern std::unordered_map<std::string, Item> item_info;
-
-#endif

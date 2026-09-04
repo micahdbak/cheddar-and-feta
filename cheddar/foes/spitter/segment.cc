@@ -1,15 +1,18 @@
 #include "segment.h"
 
+#include "utils.h"
+
 SpitterSegment::SpitterSegment(Spitter* parent, int segment_id,
                                std::shared_ptr<bool> deleted_ptr)
     : parent(parent), deleted_ptr(deleted_ptr) {
-  this->sprite = new Sprite("sprites/foe_spitter_segment.bmp", 32, 32,
-                            50 + (segment_id * 50));
+  this->sprite = new thoom::Sprite("sprites/foe_spitter_segment.bmp", 32, 32,
+                                   50 + (segment_id * 50));
   this->sprite->set_frame((segment_id * 2) % 4);
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
-  game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -12, -12, 24, 24));
-  game->push_object(
+  thoom::game->push_object(HURTBOX_OBJ,
+                           HurtBox::Options(this->id, -12, -12, 24, 24));
+  thoom::game->push_object(
       HITBOX_OBJ,
       HitBox::Options(this->id, -1, -8, -8, 16, 16,
                       HitBox::Properties{.damage = 2,
@@ -27,17 +30,20 @@ SpitterSegment::~SpitterSegment() { delete this->sprite; }
 
 void SpitterSegment::step() {
   if (*this->deleted_ptr) {
-    game->delete_object = true;
+    thoom::game->delete_object = true;
     return;
   }
 
   struct Spitter::step_t p1, p2, p3, p4;
   int direction;
 
-  p1 = this->parent->get_pos(cnf_clamp(this->segment_id + 1, 0, NUM_SEGMENTS));
+  p1 =
+      this->parent->get_pos(THOOM_CLAMP(this->segment_id + 1, 0, NUM_SEGMENTS));
   p2 = this->parent->get_pos(this->segment_id);
-  p3 = this->parent->get_pos(cnf_clamp(this->segment_id - 1, 0, NUM_SEGMENTS));
-  p4 = this->parent->get_pos(cnf_clamp(this->segment_id - 2, 0, NUM_SEGMENTS));
+  p3 =
+      this->parent->get_pos(THOOM_CLAMP(this->segment_id - 1, 0, NUM_SEGMENTS));
+  p4 =
+      this->parent->get_pos(THOOM_CLAMP(this->segment_id - 2, 0, NUM_SEGMENTS));
 
   if (p1.x == 0 || p2.x == 0 || p3.x == 0 || p4.x == 0) return;
 
@@ -50,8 +56,8 @@ void SpitterSegment::step() {
   this->y = (float)this_y;
 
   int x_dir, y_dir;
-  dir_to_point(this_x, this_y, next_x, next_y, &x_dir, &y_dir);
-  direction = direction_from_dirs(x_dir, y_dir);
+  thoom::dir_to_point(this_x, this_y, next_x, next_y, &x_dir, &y_dir);
+  direction = thoom::direction_from_dirs(x_dir, y_dir);
 
   this->dirs[this->dirs_i] = direction;
   this->dirs_i = (++this->dirs_i) % FRAMES_TO_SET_CUR_DIR;
@@ -69,6 +75,6 @@ void SpitterSegment::step() {
 
   this->sprite->set_animation(this->cur_dir);
   this->sprite->update_frame();
-  game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                    &this->sprite->frame, &this->dst_rect, 16);
+  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
+                           &this->sprite->frame, &this->dst_rect, 16);
 }

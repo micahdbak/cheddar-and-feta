@@ -1,14 +1,17 @@
-#ifndef FOE_SPITTER_SEGMENT_OBJ
-#define FOE_SPITTER_SEGMENT_OBJ "foe_spitter_segment"
+#pragma once
 
 #include "hitbox.h"
 #include "hurtbox.h"
 #include "spitter.h"
 #include "sprite.h"
 
+#define FOE_SPITTER_SEGMENT_OBJ "foe_spitter_segment"
+
 #define FRAMES_TO_SET_CUR_DIR 4
 
-class SpitterSegment : public Object, public HurtSource, public HitSource {
+class SpitterSegment : public thoom::Object,
+                       public HurtSource,
+                       public HitSource {
  public:
   SpitterSegment(Spitter* parent, int segment_id,
                  std::shared_ptr<bool> deleted_ptr);
@@ -29,18 +32,18 @@ class SpitterSegment : public Object, public HurtSource, public HitSource {
   float x, y;
   Spitter* parent;
   std::shared_ptr<bool> deleted_ptr;
-  Sprite* sprite;
+  thoom::Sprite* sprite;
   SDL_FRect dst_rect;
 };
 
-class SpitterSegmentFactory : public ObjectFactory {
+class SpitterSegmentFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int parent_id, segment_id;
     if (2 != sscanf(options.c_str(), "%d,%d", &parent_id, &segment_id))
       FATAL_ERROR
 
-    Object* obj = game->get_object(parent_id);
+    thoom::Object* obj = thoom::game->get_object(parent_id);
     Spitter* spitter;
 
     if (obj != nullptr && (spitter = dynamic_cast<Spitter*>(obj)) != nullptr) {
@@ -51,5 +54,3 @@ class SpitterSegmentFactory : public ObjectFactory {
     }
   }
 };
-
-#endif

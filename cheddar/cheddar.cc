@@ -18,29 +18,29 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
   cheddar = this;
   this->is_feta = false;
 
-  this->sprite = new Sprite("sprites/cheddar.bmp", 32, 32, 250);
-  this->emotes = new Sprite("sprites/emotes.bmp", 32, 32, 0);
+  this->sprite = new thoom::Sprite("sprites/cheddar.bmp", 32, 32, 250);
+  this->emotes = new thoom::Sprite("sprites/emotes.bmp", 32, 32, 0);
 
-  std::string items_s = save.value(CHEDDAR_OBJ MOUSE_ITEMS);
+  std::string items_s = thoom::save.value(CHEDDAR_OBJ MOUSE_ITEMS);
   if (!items_s.empty()) {
     this->items = Mouse::read_items(items_s);
   } else {
-    this->items.push_back(Game::HudItem{ITEM_SAVE, 1});
+    this->items.push_back(thoom::Game::HudItem{ITEM_SAVE, 1});
   }
 
   int feta_x = 0, feta_y = 0, feta_animation = 0;
 
   // if loading a save, read the location from the save file
-  if (save.geti(LOAD_SAVE) && save.has(CHEDDAR_OBJ MOUSE_X)) {
-    this->x = save.getf(CHEDDAR_OBJ MOUSE_X);
-    this->y = save.getf(CHEDDAR_OBJ MOUSE_Y);
-    this->sprite->set_animation(save.geti(CHEDDAR_OBJ MOUSE_ANIMATION));
+  if (thoom::save.geti(LOAD_SAVE) && thoom::save.has(CHEDDAR_OBJ MOUSE_X)) {
+    this->x = thoom::save.getf(CHEDDAR_OBJ MOUSE_X);
+    this->y = thoom::save.getf(CHEDDAR_OBJ MOUSE_Y);
+    this->sprite->set_animation(thoom::save.geti(CHEDDAR_OBJ MOUSE_ANIMATION));
 
     // don't set feta options, as feta will load from save as well
   } else {
     // get which coordinate to spawn at
-    int coord = save.geti(MOUSE_SPAWN_AT);
-    save.puti(MOUSE_SPAWN_AT, 0);  // unset
+    int coord = thoom::save.geti(MOUSE_SPAWN_AT);
+    thoom::save.puti(MOUSE_SPAWN_AT, 0);  // unset
 
     // validate
     if (coordinates.empty() || coord < 0 || coord >= coordinates.size())
@@ -55,11 +55,11 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
     feta_animation = coordinates[coord].animation;
   }
 
-  this->tile_x = (int)this->x / game->tile_width;
-  this->tile_y = (int)this->y / game->tile_height;
+  this->tile_x = (int)this->x / thoom::game->tile_width;
+  this->tile_y = (int)this->y / thoom::game->tile_height;
   foe_path_find(this);
 
-  game->set_view(this->x, this->y);
+  thoom::game->set_view(this->x, this->y);
 
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
@@ -70,11 +70,12 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
   char feta_options[256];
   snprintf(feta_options, sizeof(feta_options), "%d,%d,%d", feta_x, feta_y,
            feta_animation);
-  game->push_object(FETA_OBJ, std::string(feta_options));
+  thoom::game->push_object(FETA_OBJ, std::string(feta_options));
 
   // push item persister and hurtbox
-  game->push_object(ITEM_PERSISTER_OBJ, "");
-  game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 12));
+  thoom::game->push_object(ITEM_PERSISTER_OBJ, "");
+  thoom::game->push_object(HURTBOX_OBJ,
+                           HurtBox::Options(this->id, -8, -8, 16, 12));
 
   this->is_down = false;
 }
@@ -87,20 +88,20 @@ Cheddar::~Cheddar() {
 
 void Cheddar::step() {
   if (mice_locked) {
-    game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                      &this->sprite->frame, &this->dst_rect, 22);
+    thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
+                             &this->sprite->frame, &this->dst_rect, 22);
     return;
   }
 
-  set_listener(this->x, this->y);  // for audio
+  thoom::set_listener(this->x, this->y);  // for audio
 
   // ---- items ----
 
   if (!this->items.empty()) {
-    if (local_controller.is_hit(Button::DIGIT)) {
+    if (thoom::local_controller.is_hit(thoom::Button::DIGIT)) {
       // -1 reserved for no item; 0+ for indexing into this->items
       // (note that the first number key is 1, not 0, hence subtract 2)
-      int new_item = local_controller.digit - 2;
+      int new_item = thoom::local_controller.digit - 2;
 
       if (new_item >= -1 && new_item < (int)this->items.size()) {
         this->sel_item = new_item;
@@ -122,15 +123,15 @@ void Cheddar::step() {
     sel_item_count = this->items[this->sel_item].count;
   }
 
-  game->draw_hud(game->ui, this->items, this->sel_item, this->health,
-                 this->max_health);
+  thoom::game->draw_hud(thoom::game->ui, this->items, this->sel_item,
+                        this->health, this->max_health);
 
   // ---- state management ----
 
   float mov_speed = 0.0f;
   int x_dir = 0, y_dir = 0;
 
-  int dancing_animation = local_controller.cheat_code(1, 2, 3, 4)
+  int dancing_animation = thoom::local_controller.cheat_code(1, 2, 3, 4)
                               ? DANCING2_ANIMATION
                               : DANCING_ANIMATION;
 
@@ -139,7 +140,7 @@ void Cheddar::step() {
 
     case FALSE:
       // dancing
-      if (local_controller.is_down(Button::DANCE)) {
+      if (thoom::local_controller.is_down(thoom::Button::DANCE)) {
         this->sprite->set_animation(dancing_animation);
         this->sprite->update_frame();
         this->sprite->interval_ms = 200;
@@ -152,23 +153,23 @@ void Cheddar::step() {
       }
 
       // move using arrow keys
-      x_dir = int(local_controller.is_down(Button::RIGHT)) -
-              int(local_controller.is_down(Button::LEFT));
-      y_dir = int(local_controller.is_down(Button::DOWN)) -
-              int(local_controller.is_down(Button::UP));
+      x_dir = int(thoom::local_controller.is_down(thoom::Button::RIGHT)) -
+              int(thoom::local_controller.is_down(thoom::Button::LEFT));
+      y_dir = int(thoom::local_controller.is_down(thoom::Button::DOWN)) -
+              int(thoom::local_controller.is_down(thoom::Button::UP));
 
       if (x_dir != 0 || y_dir != 0) {
-        this->sprite->set_animation(direction_from_dirs(x_dir, y_dir));
+        this->sprite->set_animation(thoom::direction_from_dirs(x_dir, y_dir));
 
         if (this->sprite->update_frame() && (this->sprite->frame_i % 2) == 1) {
-          play_audio("sfx/step.wav", 0.5, this->x, this->y, false);
+          thoom::play_audio("sfx/step.wav", 0.5, this->x, this->y, false);
         }
 
         mov_speed = this->max_mov_speed;
         this->sprite->interval_ms = 100;
       } else {
         mov_speed = 0.0f;
-        dirs_from_direction(this->sprite->animation % 8, &x_dir, &y_dir);
+        thoom::dirs_from_direction(this->sprite->animation % 8, &x_dir, &y_dir);
         this->sprite->set_frame(0);
       }
 
@@ -177,8 +178,8 @@ void Cheddar::step() {
         mov_speed *= item_info[sel_item_id].speed;
       }
 
-      if (local_controller.is_hit(Button::ATTACK)) {
-        this->busy_ticks = game->ticks;
+      if (thoom::local_controller.is_hit(thoom::Button::ATTACK)) {
+        this->busy_ticks = thoom::game->ticks;
 
         switch (item_info[sel_item_id].type) {
             // ---- attack / use item ----
@@ -188,7 +189,8 @@ void Cheddar::step() {
             char options[256];
             snprintf(options, sizeof(options), "%d,%d,%d,%d,%d", int(this->x),
                      int(this->y), x_dir, y_dir, this->id);
-            game->push_object(sel_item_id + USE_OBJ, std::string(options));
+            thoom::game->push_object(sel_item_id + USE_OBJ,
+                                     std::string(options));
             this->remove_item(sel_item_id);
 
             if (item_info[sel_item_id].type == THROWABLE) {
@@ -200,7 +202,7 @@ void Cheddar::step() {
               this->sprite->set_frame(0);
               this->sprite->interval_ms = 125;
 
-              play_audio("sfx/throw.wav", 1.0f, this->x, this->y, false);
+              thoom::play_audio("sfx/throw.wav", 1.0f, this->x, this->y, false);
             }
 
             break;
@@ -213,15 +215,16 @@ void Cheddar::step() {
               this->remove_item(sel_item_id);
 
               this->is_busy = EATING;
-              this->busy_ticks = game->ticks;
+              this->busy_ticks = thoom::game->ticks;
 
               // set animation to eating cheese
               this->sprite->set_animation(EATING_ANIMATION);
               this->sprite->interval_ms = 75;
 
-              play_audio("sfx/cheese.wav", 1.0f, this->x, this->y, false);
+              thoom::play_audio("sfx/cheese.wav", 1.0f, this->x, this->y,
+                                false);
             } else {
-              play_audio("sfx/full.wav", 1.0f, this->x, this->y, false);
+              thoom::play_audio("sfx/full.wav", 1.0f, this->x, this->y, false);
             }
 
             break;
@@ -240,35 +243,36 @@ void Cheddar::step() {
             HitBox::Properties props = {item_info[sel_item_id].damage, 200,
                                         100};
             props.single_use = true;
-            game->push_object(HITBOX_OBJ,
-                              HitBox::Options(this->id, this->id, x_off - 16,
-                                              y_off - 18, 32, 32, props));
+            thoom::game->push_object(
+                HITBOX_OBJ, HitBox::Options(this->id, this->id, x_off - 16,
+                                            y_off - 18, 32, 32, props));
 
             // set animation to attacking
             this->sprite->set_animation((this->sprite->animation % 8) +
                                         ATTACKING_ANIMATION);
 
-            play_audio("sfx/kick.wav", 1.0f, this->x, this->y, false);
+            thoom::play_audio("sfx/kick.wav", 1.0f, this->x, this->y, false);
           } break;
 
           default:
             break;
         }
-      } else if (local_controller.is_hit(Button::TOSS) &&
+      } else if (thoom::local_controller.is_hit(thoom::Button::TOSS) &&
                  sel_item_id != ITEM_NONE && sel_item_id != ITEM_SAVE) {
-        this->busy_ticks = game->ticks;
+        this->busy_ticks = thoom::game->ticks;
 
         if (x_dir == 0 && y_dir == 0)
-          dirs_from_direction(this->sprite->animation % 8, &x_dir, &y_dir);
+          thoom::dirs_from_direction(this->sprite->animation % 8, &x_dir,
+                                     &y_dir);
 
         // toss item
-        game->push_object(TOSSED_ITEM_OBJ,
-                          TossedItem::Options(this->x, this->y, x_dir, y_dir,
-                                              false, sel_item_id));
+        thoom::game->push_object(
+            TOSSED_ITEM_OBJ, TossedItem::Options(this->x, this->y, x_dir, y_dir,
+                                                 false, sel_item_id));
         this->remove_item(sel_item_id);
 
         this->is_busy = THROWING;
-        this->busy_ticks = game->ticks;
+        this->busy_ticks = thoom::game->ticks;
 
         // set animation to throwing
         this->sprite->set_animation((this->sprite->animation % 8) +
@@ -276,7 +280,7 @@ void Cheddar::step() {
         this->sprite->set_frame(0);
         this->sprite->interval_ms = 125;
 
-        play_audio("sfx/throw.wav", 1.0f, this->x, this->y, false);
+        thoom::play_audio("sfx/throw.wav", 1.0f, this->x, this->y, false);
       }
 
       break;
@@ -285,17 +289,17 @@ void Cheddar::step() {
 
     case ATTACKING: {
       // move slower using arrow keys
-      x_dir = int(local_controller.is_down(Button::RIGHT)) -
-              int(local_controller.is_down(Button::LEFT));
-      y_dir = int(local_controller.is_down(Button::DOWN)) -
-              int(local_controller.is_down(Button::UP));
+      x_dir = int(thoom::local_controller.is_down(thoom::Button::RIGHT)) -
+              int(thoom::local_controller.is_down(thoom::Button::LEFT));
+      y_dir = int(thoom::local_controller.is_down(thoom::Button::DOWN)) -
+              int(thoom::local_controller.is_down(thoom::Button::UP));
       mov_speed = this->max_mov_speed / 2.0f;
 
       // longer cooldown when actually hit enemy
       int cooldown = this->did_hit ? 500 : 250;
 
       // will return to normal after << 250 or 500 ms >>
-      if (game->ticks - this->busy_ticks > cooldown) {
+      if (thoom::game->ticks - this->busy_ticks > cooldown) {
         this->is_busy = FALSE;
         this->did_hit = false;
 
@@ -313,7 +317,7 @@ void Cheddar::step() {
       mov_speed = MOUSE_DEFAULT_SPEED;
 
       // will return to normal after << 250 ms >>
-      if (game->ticks - this->busy_ticks > 250) {
+      if (thoom::game->ticks - this->busy_ticks > 250) {
         this->is_busy = FALSE;
 
         // set animation to walking/running
@@ -326,17 +330,17 @@ void Cheddar::step() {
 
     case THROWING:
       // move slower using arrow keys
-      x_dir = int(local_controller.is_down(Button::RIGHT)) -
-              int(local_controller.is_down(Button::LEFT));
-      y_dir = int(local_controller.is_down(Button::DOWN)) -
-              int(local_controller.is_down(Button::UP));
+      x_dir = int(thoom::local_controller.is_down(thoom::Button::RIGHT)) -
+              int(thoom::local_controller.is_down(thoom::Button::LEFT));
+      y_dir = int(thoom::local_controller.is_down(thoom::Button::DOWN)) -
+              int(thoom::local_controller.is_down(thoom::Button::UP));
       mov_speed = this->max_mov_speed / 2.0f;
 
       this->sprite->interval_ms = 125;
       this->sprite->update_frame();
 
       // will return to normal after << 500 ms >>
-      if (game->ticks - this->busy_ticks > 500) {
+      if (thoom::game->ticks - this->busy_ticks > 500) {
         this->is_busy = FALSE;
 
         // set animation to walking/running
@@ -352,7 +356,7 @@ void Cheddar::step() {
       this->sprite->update_frame();
 
       // will return to normal after << 750 ms >>
-      if (game->ticks - this->busy_ticks > 750) {
+      if (thoom::game->ticks - this->busy_ticks > 750) {
         this->is_busy = FALSE;
 
         // set animation to walking/running
@@ -368,7 +372,7 @@ void Cheddar::step() {
       this->sprite->update_frame();
 
       // will return to normal after << 2000 ms >>
-      if (game->ticks - this->busy_ticks > 2000) {
+      if (thoom::game->ticks - this->busy_ticks > 2000) {
         this->is_busy = FALSE;
         this->health = 5;
 
@@ -389,7 +393,7 @@ void Cheddar::step() {
       this->sprite->update_frame();
 
       // will return to normal after << [this->dance_until] ms >>
-      if (game->ticks - this->busy_ticks > this->dance_until) {
+      if (thoom::game->ticks - this->busy_ticks > this->dance_until) {
         this->is_busy = FALSE;
         this->sprite->set_animation(0);
       }
@@ -399,7 +403,7 @@ void Cheddar::step() {
 
   // you get 5 seconds after being "downed" before enemies will attack you again
   // (three seconds of movement)
-  if (this->is_down && game->ticks - this->is_down_ticks > 5000) {
+  if (this->is_down && thoom::game->ticks - this->is_down_ticks > 5000) {
     this->is_down = false;
   }
 
@@ -408,14 +412,14 @@ void Cheddar::step() {
   // new coordinates calculated with direction moving, movement speed, and
   // diagonal multiplier (if necessary)
   if (mov_speed > 0.0f && (x_dir != 0 || y_dir != 0)) {
-    float dx = float(x_dir) * (y_dir != 0 ? DIAG_MULTIPLIER : 1.0f) *
-               mov_speed * game->delta;
-    float dy = float(y_dir) * (x_dir != 0 ? DIAG_MULTIPLIER : 1.0f) *
-               mov_speed * game->delta;
+    float dx = float(x_dir) * (y_dir != 0 ? THOOM_DIAG_MULTIPLIER : 1.0f) *
+               mov_speed * thoom::game->delta;
+    float dy = float(y_dir) * (x_dir != 0 ? THOOM_DIAG_MULTIPLIER : 1.0f) *
+               mov_speed * thoom::game->delta;
 
     // prevents bad delta time movement (imagine a single frame lag spike)
-    dx = cnf_clamp(dx, -4.0f, 4.0f);
-    dy = cnf_clamp(dy, -4.0f, 4.0f);
+    dx = THOOM_CLAMP(dx, -4.0f, 4.0f);
+    dy = THOOM_CLAMP(dy, -4.0f, 4.0f);
 
     float new_x = this->x + dx;
     float new_y = this->y + dy;
@@ -464,8 +468,8 @@ void Cheddar::step() {
     }
 
     // if moved onto a new tile, update the path finding
-    int new_tile_x = (int)this->x / game->tile_width;
-    int new_tile_y = (int)this->y / game->tile_height;
+    int new_tile_x = (int)this->x / thoom::game->tile_width;
+    int new_tile_y = (int)this->y / thoom::game->tile_height;
     if (new_tile_x != this->tile_x || new_tile_y != this->tile_y) {
       foe_path_find(this);
       this->tile_x = new_tile_x;
@@ -483,28 +487,30 @@ void Cheddar::step() {
   }
 #endif
 
-  game->set_view(this->x, this->y);
-  this->dst_rect.x = (float)(game->corner_x + SCREEN_WIDTH / 2) - 16.0f;
-  this->dst_rect.y = (float)(game->corner_y + SCREEN_HEIGHT / 2) - 24.0f;
-  game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                    &this->sprite->frame, &this->dst_rect, 22);
+  thoom::game->set_view(this->x, this->y);
+  this->dst_rect.x =
+      (float)(thoom::game->corner_x + THOOM_SCREEN_WIDTH / 2) - 16.0f;
+  this->dst_rect.y =
+      (float)(thoom::game->corner_y + THOOM_SCREEN_HEIGHT / 2) - 24.0f;
+  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
+                           &this->sprite->frame, &this->dst_rect, 22);
 
-  this->which_emote = local_controller.cheat_last(9, 8, 7);
+  this->which_emote = thoom::local_controller.cheat_last(9, 8, 7);
   this->emote_rect.x = this->dst_rect.x;
   this->emote_rect.y = this->dst_rect.y - 11.0f;
 
   if (this->which_emote != -1) {
     this->emotes->set_frame(this->which_emote % 8);
-    game->push_sprite(this->emotes->tex_id, this->emotes->texture,
-                      &this->emotes->frame, &this->emote_rect, 34);
+    thoom::game->push_sprite(this->emotes->tex_id, this->emotes->texture,
+                             &this->emotes->frame, &this->emote_rect, 34);
   }
 }
 
 void Cheddar::save_data() {
-  save.putf(CHEDDAR_OBJ MOUSE_X, this->x);
-  save.putf(CHEDDAR_OBJ MOUSE_Y, this->y);
-  save.puti(CHEDDAR_OBJ MOUSE_ANIMATION, this->sprite->animation);
-  save.data[CHEDDAR_OBJ MOUSE_ITEMS] = Mouse::encode_items(this->items);
+  thoom::save.putf(CHEDDAR_OBJ MOUSE_X, this->x);
+  thoom::save.putf(CHEDDAR_OBJ MOUSE_Y, this->y);
+  thoom::save.puti(CHEDDAR_OBJ MOUSE_ANIMATION, this->sprite->animation);
+  thoom::save.data[CHEDDAR_OBJ MOUSE_ITEMS] = Mouse::encode_items(this->items);
 }
 
 void Cheddar::attack(int damage) {
@@ -514,7 +520,7 @@ void Cheddar::attack(int damage) {
     return;
 
   this->is_busy = ATTACKED;
-  this->busy_ticks = game->ticks;
+  this->busy_ticks = thoom::game->ticks;
   this->sprite->set_animation((this->sprite->animation % 8) +
                               ATTACKED_ANIMATION);
 
@@ -536,24 +542,25 @@ void Cheddar::attack(int damage) {
   }
 
   this->health -= damage;
-  play_audio("sfx/hurt.wav", 1.0f, this->x, this->y, false);
+  thoom::play_audio("sfx/hurt.wav", 1.0f, this->x, this->y, false);
 
   // if dead, go down
   if (this->health <= 0) {
     this->health = 0;
 
     this->is_busy = DOWNED;
-    this->busy_ticks = game->ticks;
-    this->is_down_ticks = game->ticks;
+    this->busy_ticks = thoom::game->ticks;
+    this->is_down_ticks = thoom::game->ticks;
     this->sprite->set_animation((this->sprite->animation % 8) + DOWN_ANIMATION);
 
     this->is_down = true;
 
     // game over if feta is down or disconnected
     if ((feta != nullptr && feta->is_down) ||
-        game->net_state == NetworkAgent::State::NO_CONNECTION ||
-        game->net_state == NetworkAgent::State::WAITING_FOR_PEER) {
-      game->map = "maps/dead";
+        thoom::game->net_state == thoom::NetworkAgent::State::NO_CONNECTION ||
+        thoom::game->net_state ==
+            thoom::NetworkAgent::State::WAITING_FOR_PEER) {
+      thoom::game->map = "maps/dead";
     }
   }
 }
@@ -561,7 +568,7 @@ void Cheddar::attack(int damage) {
 void Cheddar::push_item(const std::string& item_id) {
   if (item_info.find(item_id) == item_info.end()) FATAL_ERROR
 
-  Game::HudItem new_item;
+  thoom::Game::HudItem new_item;
   new_item.item_id = item_id;
   new_item.count = 1;
 
@@ -586,7 +593,7 @@ void Cheddar::push_item(const std::string& item_id) {
 }
 
 void Cheddar::push_cheese(int amount) {
-  Game::HudItem new_item;
+  thoom::Game::HudItem new_item;
   new_item.item_id = ITEM_CHEESE;
   new_item.count = amount;
 
@@ -639,6 +646,6 @@ void Cheddar::signal_down() {
   // signal implies that feta is down; check if we are down too
   if (this->is_down && this->is_busy == DOWNED && feta != nullptr &&
       feta->is_down) {
-    game->map = "maps/dead";
+    thoom::game->map = "maps/dead";
   }
 }

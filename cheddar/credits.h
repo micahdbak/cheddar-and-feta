@@ -1,10 +1,11 @@
-#ifndef CREDITS_OBJ
-#define CREDITS_OBJ "credits"
+#pragma once
 
 #include "object.h"
 #include "sprite.h"
 
-class Credits : public Object {
+#define CREDITS_OBJ "credits"
+
+class Credits : public thoom::Object {
  public:
   Credits();
   ~Credits() = default;
@@ -17,9 +18,7 @@ class Credits : public Object {
   SDL_FRect src_rect, dst_rect;
 };
 
-class CreditsFactory : public ObjectFactory {
+class CreditsFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& _) { return new Credits(); };
+  thoom::Object* create(const std::string& _) { return new Credits(); };
 };
-
-#endif

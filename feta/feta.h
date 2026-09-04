@@ -1,5 +1,4 @@
-#ifndef FETA_OBJ
-#define FETA_OBJ "feta"
+#pragma once
 
 #include <string>
 #include <vector>
@@ -8,6 +7,8 @@
 #include "object.h"
 #include "save_data.h"
 #include "sprite.h"
+
+#define FETA_OBJ "feta"
 
 #define MOUSE_DEFAULT_SPEED 80.0f
 
@@ -24,14 +25,15 @@
 
 namespace Mouse {
 bool check_collision(float x, float y);
-std::string encode_items(const std::vector<Game::HudItem>& items);
-std::vector<Game::HudItem> read_items(const std::string& items_s);
+std::string encode_items(const std::vector<thoom::Game::HudItem>& items);
+std::vector<thoom::Game::HudItem> read_items(const std::string& items_s);
 std::string audio_msg(const char* wav_path, float gain, int x, int y);
 };  // namespace Mouse
 
-class Feta : public Object {
+class Feta : public thoom::Object {
  public:
-  Feta(float x, float y, int animation, std::vector<Game::HudItem> items);
+  Feta(float x, float y, int animation,
+       std::vector<thoom::Game::HudItem> items);
   ~Feta();
 
   void step() override;
@@ -50,7 +52,7 @@ class Feta : public Object {
   float x, y;
   bool is_down = false, did_hit = false;
   bool mice_locked = false;
-  Sprite *sprite, *emotes;
+  thoom::Sprite *sprite, *emotes;
   int which_emote = -1;
 
  private:
@@ -59,7 +61,7 @@ class Feta : public Object {
   SDL_FRect dst_rect, emote_rect;
 
   int health = 10, max_health = 10;
-  std::vector<Game::HudItem> items;
+  std::vector<thoom::Game::HudItem> items;
   int sel_item = -1;
 
   int throw_x = 0, throw_y = 0;
@@ -77,9 +79,9 @@ class Feta : public Object {
   Uint64 busy_ticks = 0, is_down_ticks = 0, dance_until = 0;
 };
 
-class FetaFactory : public ObjectFactory {
+class FetaFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     int animation;
     char x_str[256], y_str[256], items_s[1024];
     int fields = sscanf(options.c_str(), "%255[^,],%255[^,],%d %1023s", x_str,
@@ -90,11 +92,9 @@ class FetaFactory : public ObjectFactory {
     } else if (fields != 4)
       FATAL_ERROR
 
-    return new Feta(str_to_float(x_str), str_to_float(y_str), animation,
-                    Mouse::read_items(items_s));
+    return new Feta(thoom::str_to_float(x_str), thoom::str_to_float(y_str),
+                    animation, Mouse::read_items(items_s));
   }
 };
 
 extern Feta* feta;
-
-#endif

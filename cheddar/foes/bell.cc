@@ -9,11 +9,12 @@ Bell::Bell(int x, int y, int spawner_id) {
   this->x = x;
   this->y = y;
   this->spawner_id = spawner_id;
-  this->sprite = new Sprite("sprites/bell.bmp", 32, 32, 125);
+  this->sprite = new thoom::Sprite("sprites/bell.bmp", 32, 32, 125);
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 16));
+  thoom::game->push_object(HURTBOX_OBJ,
+                           HurtBox::Options(this->id, -8, -8, 16, 16));
 }
 
 Bell::~Bell() { delete this->sprite; }
@@ -26,17 +27,17 @@ void Bell::attack(int damage) {
   }
 
   // don't ring while ringing
-  if (game->ticks - this->timer < 2250) {
+  if (thoom::game->ticks - this->timer < 2250) {
     return;
   }
 
   this->triggered = true;
-  this->timer = game->ticks;
-  play_audio("sfx/bell.wav", 1.0f, this->x, this->y, false);
+  this->timer = thoom::game->ticks;
+  thoom::play_audio("sfx/bell.wav", 1.0f, this->x, this->y, false);
 }
 
 void Bell::step() {
-  if (this->triggered && game->ticks - this->timer < 2250) {
+  if (this->triggered && thoom::game->ticks - this->timer < 2250) {
     this->sprite->update_frame();
   } else {
     this->sprite->set_frame(0);
@@ -44,6 +45,6 @@ void Bell::step() {
 
   this->dst_rect.x = this->x - 16.0f;
   this->dst_rect.y = this->y - 16.0f;
-  game->push_sprite("sprites/bell.bmp", this->sprite->texture,
-                    &this->sprite->frame, &this->dst_rect, 16);
+  thoom::game->push_sprite("sprites/bell.bmp", this->sprite->texture,
+                           &this->sprite->frame, &this->dst_rect, 16);
 }

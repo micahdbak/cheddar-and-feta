@@ -1,11 +1,12 @@
-#ifndef LOAD_SAVE_OBJ
-#define LOAD_SAVE_OBJ "load_save"
+#pragma once
 
 #include <vector>
 
 #include "object.h"
 
-class LoadSave : public Object {
+#define LOAD_SAVE_OBJ "load_save"
+
+class LoadSave : public thoom::Object {
  public:
   LoadSave();
   ~LoadSave() = default;
@@ -17,12 +18,12 @@ class LoadSave : public Object {
   bool render = true;
 };
 
-class LoadSaveFactory : public ObjectFactory {
+class LoadSaveFactory : public thoom::ObjectFactory {
  public:
   LoadSaveFactory() = default;
   ~LoadSaveFactory() = default;
 
-  Object* create(const std::string& options) override { return new LoadSave(); }
+  thoom::Object* create(const std::string& options) override {
+    return new LoadSave();
+  }
 };
-
-#endif

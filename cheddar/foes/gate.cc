@@ -11,22 +11,23 @@
 
 FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
     : spawner_id(spawner_id) {
-  this->sprite = new Sprite("sprites/gate.bmp", 48, 48, 0);
+  this->sprite = new thoom::Sprite("sprites/gate.bmp", 48, 48, 0);
   this->dst_rect.w = 48.0f;
   this->dst_rect.h = 48.0f;
   this->sprite->set_animation(animation);
 
-  x = x - (x % game->tile_width);
-  y = y - (y % game->tile_height);
+  x = x - (x % thoom::game->tile_width);
+  y = y - (y % thoom::game->tile_height);
   this->x = float(x);
   this->y = float(y);
 
-  this->colliders_offset = ((y / game->tile_height) + 1) * game->cols;
-  this->colliders_x = x / game->tile_width;
+  this->colliders_offset =
+      ((y / thoom::game->tile_height) + 1) * thoom::game->cols;
+  this->colliders_x = x / thoom::game->tile_width;
 
   char key[256];
   snprintf(key, sizeof(key), "spawner_%d", this->spawner_id);
-  if (save.geti(key) == 1) {
+  if (thoom::save.geti(key) == 1) {
     this->sprite->set_frame(1);
     this->opened = true;
     return;
@@ -43,22 +44,22 @@ FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
 
   for (int i = 0; i < 3; i++) {
     int coord = this->colliders_offset + this->colliders_x + i;
-    this->colliders.push_back(game->collision[coord]);
-    game->collision[coord] = 0;  // solid collider
+    this->colliders.push_back(thoom::game->collision[coord]);
+    thoom::game->collision[coord] = 0;  // solid collider
   }
 }
 
 FoeGate::~FoeGate() { delete this->sprite; }
 
 void FoeGate::step() {
-  if (game->net_state != NetworkAgent::State::CONNECTED) {
+  if (thoom::game->net_state != thoom::NetworkAgent::State::CONNECTED) {
     this->synchronized = false;
   } else if (!this->synchronized) {
     for (int i = 0; i < 3; i++) {
       int coord = this->colliders_offset + this->colliders_x + i;
       NetSender::send_message(
-          MSG_COLLISION,
-          std::to_string(coord) + ',' + std::to_string(game->collision[coord]));
+          MSG_COLLISION, std::to_string(coord) + ',' +
+                             std::to_string(thoom::game->collision[coord]));
     }
 
     this->synchronized = true;
@@ -69,7 +70,7 @@ void FoeGate::step() {
     // remove colliders
     for (int i = 0; i < 3; i++) {
       int coord = this->colliders_offset + this->colliders_x + i;
-      game->collision[coord] = this->colliders[i];
+      thoom::game->collision[coord] = this->colliders[i];
     }
 
     this->colliders.clear();
@@ -79,11 +80,11 @@ void FoeGate::step() {
 
     this->synchronized = false;
 
-    play_audio("sfx/door.wav", 1.0f, this->x, this->y, false);
+    thoom::play_audio("sfx/door.wav", 1.0f, this->x, this->y, false);
   }
 
   this->dst_rect.x = this->x;
   this->dst_rect.y = this->y;
-  game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                    &this->sprite->frame, &this->dst_rect, 24);
+  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
+                           &this->sprite->frame, &this->dst_rect, 24);
 }

@@ -1,9 +1,10 @@
-#ifndef FOE_BUG_OBJ
-#define FOE_BUG_OBJ "foe_bug"
+#pragma once
 
 #include "foe.h"
 #include "hitbox.h"
 #include "sprite.h"
+
+#define FOE_BUG_OBJ "foe_bug"
 
 class FoeBug : public Foe, public HitSource {
  public:
@@ -21,16 +22,16 @@ class FoeBug : public Foe, public HitSource {
   Foe::State prev_state = Foe::State::IDLE;
 
  private:
-  Sprite* sprite;
+  thoom::Sprite* sprite;
   SDL_FRect dst_rect, icon_src, icon_dst;
   Uint64 timer = 0, hurt_timer = 0;
 
   int max_health = 4, health = 4;
 };
 
-class FoeBugFactory : public ObjectFactory {
+class FoeBugFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     int x = 0, y = 0, spawner_id = 0;
     if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id))
       FATAL_ERROR
@@ -38,5 +39,3 @@ class FoeBugFactory : public ObjectFactory {
     return new FoeBug(x, y, spawner_id);
   }
 };
-
-#endif

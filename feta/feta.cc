@@ -8,23 +8,25 @@
 #include "net_receiver.h"
 #include "net_sender.h"
 #include "save_data.h"
+#include "utils.h"
 
 Feta* feta = nullptr;
 
-Feta::Feta(float x, float y, int animation, std::vector<Game::HudItem> items) {
+Feta::Feta(float x, float y, int animation,
+           std::vector<thoom::Game::HudItem> items) {
   if (feta != nullptr) FATAL_ERROR
   feta = this;
 
   this->x = x;
   this->y = y;
 
-  this->sprite = new Sprite("sprites/feta.bmp", 32, 32, 250);
+  this->sprite = new thoom::Sprite("sprites/feta.bmp", 32, 32, 250);
   this->sprite->set_animation(animation);
-  this->emotes = new Sprite("sprites/emotes.bmp", 32, 32, 0);
+  this->emotes = new thoom::Sprite("sprites/emotes.bmp", 32, 32, 0);
 
   this->items = items;
 
-  game->set_view(this->x, this->y);
+  thoom::game->set_view(this->x, this->y);
 
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
@@ -40,20 +42,20 @@ Feta::~Feta() {
 
 void Feta::step() {
   if (this->mice_locked) {
-    game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                      &this->sprite->frame, &this->dst_rect, 22);
+    thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
+                             &this->sprite->frame, &this->dst_rect, 22);
     return;
   }
 
-  set_listener(this->x, this->y);  // for audio
+  thoom::set_listener(this->x, this->y);  // for audio
 
   // ---- items ----
 
   if (!this->items.empty()) {
-    if (local_controller.is_hit(Button::DIGIT)) {
+    if (thoom::local_controller.is_hit(thoom::Button::DIGIT)) {
       // -1 reserved for no item; 0+ for indexing into this->items
       // (note that the first number key is 1, not 0, hence subtract 2)
-      int new_item = local_controller.digit - 2;
+      int new_item = thoom::local_controller.digit - 2;
 
       if (new_item >= -1 && new_item < (int)this->items.size()) {
         this->sel_item = new_item;
@@ -75,15 +77,15 @@ void Feta::step() {
     sel_item_count = this->items[this->sel_item].count;
   }
 
-  game->draw_hud(game->ui, this->items, this->sel_item, this->health,
-                 this->max_health);
+  thoom::game->draw_hud(thoom::game->ui, this->items, this->sel_item,
+                        this->health, this->max_health);
 
   // ---- state management ----
 
   float mov_speed = 0.0f;
   int x_dir = 0, y_dir = 0;
 
-  int dancing_animation = local_controller.cheat_code(1, 2, 3, 4)
+  int dancing_animation = thoom::local_controller.cheat_code(1, 2, 3, 4)
                               ? DANCING2_ANIMATION
                               : DANCING_ANIMATION;
 
@@ -92,7 +94,7 @@ void Feta::step() {
 
     case FALSE:
       // dancing
-      if (local_controller.is_down(Button::DANCE)) {
+      if (thoom::local_controller.is_down(thoom::Button::DANCE)) {
         this->sprite->set_animation(dancing_animation);
         this->sprite->update_frame();
         this->sprite->interval_ms = 200;
@@ -105,16 +107,16 @@ void Feta::step() {
       }
 
       // move using arrow keys
-      x_dir = int(local_controller.is_down(Button::RIGHT)) -
-              int(local_controller.is_down(Button::LEFT));
-      y_dir = int(local_controller.is_down(Button::DOWN)) -
-              int(local_controller.is_down(Button::UP));
+      x_dir = int(thoom::local_controller.is_down(thoom::Button::RIGHT)) -
+              int(thoom::local_controller.is_down(thoom::Button::LEFT));
+      y_dir = int(thoom::local_controller.is_down(thoom::Button::DOWN)) -
+              int(thoom::local_controller.is_down(thoom::Button::UP));
 
       if (x_dir != 0 || y_dir != 0) {
-        this->sprite->set_animation(direction_from_dirs(x_dir, y_dir));
+        this->sprite->set_animation(thoom::direction_from_dirs(x_dir, y_dir));
 
         if (this->sprite->update_frame() && (this->sprite->frame_i % 2) == 1) {
-          play_audio("sfx/step.wav", 0.5, this->x, this->y, true);
+          thoom::play_audio("sfx/step.wav", 0.5, this->x, this->y, true);
           NetSender::send_message(
               MSG_AUDIO,
               Mouse::audio_msg("sfx/step.wav", 0.5, this->x, this->y));
@@ -124,7 +126,7 @@ void Feta::step() {
         this->sprite->interval_ms = 100;
       } else {
         mov_speed = 0.0f;
-        dirs_from_direction(this->sprite->animation % 8, &x_dir, &y_dir);
+        thoom::dirs_from_direction(this->sprite->animation % 8, &x_dir, &y_dir);
         this->sprite->set_frame(0);
       }
 
@@ -133,8 +135,8 @@ void Feta::step() {
         mov_speed *= item_info[sel_item_id].speed;
       }
 
-      if (local_controller.is_hit(Button::ATTACK)) {
-        this->busy_ticks = game->ticks;
+      if (thoom::local_controller.is_hit(thoom::Button::ATTACK)) {
+        this->busy_ticks = thoom::game->ticks;
 
         switch (item_info[sel_item_id].type) {
             // ---- attack / use item ----
@@ -156,7 +158,7 @@ void Feta::step() {
               this->sprite->set_frame(0);
               this->sprite->interval_ms = 125;
 
-              play_audio("sfx/throw.wav", 1.0f, this->x, this->y, true);
+              thoom::play_audio("sfx/throw.wav", 1.0f, this->x, this->y, true);
               NetSender::send_message(
                   MSG_AUDIO,
                   Mouse::audio_msg("sfx/throw.wav", 1.0, this->x, this->y));
@@ -172,18 +174,18 @@ void Feta::step() {
               NetSender::send_message(MSG_EAT_CHEESE, std::string());
 
               this->is_busy = EATING;
-              this->busy_ticks = game->ticks;
+              this->busy_ticks = thoom::game->ticks;
 
               // set animation to eating cheese
               this->sprite->set_animation(EATING_ANIMATION);
               this->sprite->interval_ms = 75;
 
-              play_audio("sfx/cheese.wav", 1.0f, this->x, this->y, true);
+              thoom::play_audio("sfx/cheese.wav", 1.0f, this->x, this->y, true);
               NetSender::send_message(
                   MSG_AUDIO,
                   Mouse::audio_msg("sfx/cheese.wav", 1.0, this->x, this->y));
             } else {
-              play_audio("sfx/full.wav", 1.0f, this->x, this->y, true);
+              thoom::play_audio("sfx/full.wav", 1.0f, this->x, this->y, true);
               NetSender::send_message(
                   MSG_AUDIO,
                   Mouse::audio_msg("sfx/full.wav", 1.0, this->x, this->y));
@@ -210,7 +212,7 @@ void Feta::step() {
             this->sprite->set_animation((this->sprite->animation % 8) +
                                         ATTACKING_ANIMATION);
 
-            play_audio("sfx/kick.wav", 1.0f, this->x, this->y, true);
+            thoom::play_audio("sfx/kick.wav", 1.0f, this->x, this->y, true);
             NetSender::send_message(
                 MSG_AUDIO,
                 Mouse::audio_msg("sfx/kick.wav", 1.0, this->x, this->y));
@@ -219,12 +221,13 @@ void Feta::step() {
           default:
             break;
         }
-      } else if (local_controller.is_hit(Button::TOSS) &&
+      } else if (thoom::local_controller.is_hit(thoom::Button::TOSS) &&
                  sel_item_id != ITEM_NONE) {
-        this->busy_ticks = game->ticks;
+        this->busy_ticks = thoom::game->ticks;
 
         if (x_dir == 0 && y_dir == 0)
-          dirs_from_direction(this->sprite->animation % 8, &x_dir, &y_dir);
+          thoom::dirs_from_direction(this->sprite->animation % 8, &x_dir,
+                                     &y_dir);
 
         // toss item
         NetSender::send_message(
@@ -233,7 +236,7 @@ void Feta::step() {
         this->remove_item(sel_item_id);
 
         this->is_busy = THROWING;
-        this->busy_ticks = game->ticks;
+        this->busy_ticks = thoom::game->ticks;
 
         // set animation to throwing
         this->sprite->set_animation((this->sprite->animation % 8) +
@@ -241,7 +244,7 @@ void Feta::step() {
         this->sprite->set_frame(0);
         this->sprite->interval_ms = 125;
 
-        play_audio("sfx/throw.wav", 1.0f, this->x, this->y, true);
+        thoom::play_audio("sfx/throw.wav", 1.0f, this->x, this->y, true);
         NetSender::send_message(
             MSG_AUDIO,
             Mouse::audio_msg("sfx/throw.wav", 1.0, this->x, this->y));
@@ -253,17 +256,17 @@ void Feta::step() {
 
     case ATTACKING: {
       // move slower using arrow keys
-      x_dir = int(local_controller.is_down(Button::RIGHT)) -
-              int(local_controller.is_down(Button::LEFT));
-      y_dir = int(local_controller.is_down(Button::DOWN)) -
-              int(local_controller.is_down(Button::UP));
+      x_dir = int(thoom::local_controller.is_down(thoom::Button::RIGHT)) -
+              int(thoom::local_controller.is_down(thoom::Button::LEFT));
+      y_dir = int(thoom::local_controller.is_down(thoom::Button::DOWN)) -
+              int(thoom::local_controller.is_down(thoom::Button::UP));
       mov_speed = this->max_mov_speed / 2.0f;
 
       // longer cooldown when actually hit enemy
       int cooldown = this->did_hit ? 500 : 250;
 
       // will return to normal after << 250 or 500 ms >>
-      if (game->ticks - this->busy_ticks > cooldown) {
+      if (thoom::game->ticks - this->busy_ticks > cooldown) {
         this->is_busy = FALSE;
         this->did_hit = false;
 
@@ -281,7 +284,7 @@ void Feta::step() {
       mov_speed = MOUSE_DEFAULT_SPEED;
 
       // will return to normal after << 250 ms >>
-      if (game->ticks - this->busy_ticks > 250) {
+      if (thoom::game->ticks - this->busy_ticks > 250) {
         this->is_busy = FALSE;
 
         // set animation to walking/running
@@ -294,17 +297,17 @@ void Feta::step() {
 
     case THROWING:
       // move slower using arrow keys
-      x_dir = int(local_controller.is_down(Button::RIGHT)) -
-              int(local_controller.is_down(Button::LEFT));
-      y_dir = int(local_controller.is_down(Button::DOWN)) -
-              int(local_controller.is_down(Button::UP));
+      x_dir = int(thoom::local_controller.is_down(thoom::Button::RIGHT)) -
+              int(thoom::local_controller.is_down(thoom::Button::LEFT));
+      y_dir = int(thoom::local_controller.is_down(thoom::Button::DOWN)) -
+              int(thoom::local_controller.is_down(thoom::Button::UP));
       mov_speed = this->max_mov_speed / 2.0f;
 
       this->sprite->interval_ms = 125;
       this->sprite->update_frame();
 
       // will return to normal after << 500 ms >>
-      if (game->ticks - this->busy_ticks > 500) {
+      if (thoom::game->ticks - this->busy_ticks > 500) {
         this->is_busy = FALSE;
 
         // set animation to walking/running
@@ -320,7 +323,7 @@ void Feta::step() {
       this->sprite->update_frame();
 
       // will return to normal after << 750 ms >>
-      if (game->ticks - this->busy_ticks > 750) {
+      if (thoom::game->ticks - this->busy_ticks > 750) {
         this->is_busy = FALSE;
 
         // set animation to walking/running
@@ -336,7 +339,7 @@ void Feta::step() {
       this->sprite->update_frame();
 
       // will return to normal after << 2000 ms >>
-      if (game->ticks - this->busy_ticks > 2000) {
+      if (thoom::game->ticks - this->busy_ticks > 2000) {
         this->is_busy = FALSE;
         this->health = 5;
 
@@ -357,7 +360,7 @@ void Feta::step() {
       this->sprite->update_frame();
 
       // will return to normal after << [this->dance_until] ms >>
-      if (game->ticks - this->busy_ticks > this->dance_until) {
+      if (thoom::game->ticks - this->busy_ticks > this->dance_until) {
         this->is_busy = FALSE;
         this->sprite->set_animation(0);
       }
@@ -367,7 +370,7 @@ void Feta::step() {
 
   // you get 5 seconds after being "downed" before enemies will attack you again
   // (three seconds of movement)
-  if (this->is_down && game->ticks - this->is_down_ticks > 5000) {
+  if (this->is_down && thoom::game->ticks - this->is_down_ticks > 5000) {
     this->is_down = false;
     NetSender::send_message(MSG_IS_DOWN, std::to_string(0));
   }
@@ -377,14 +380,14 @@ void Feta::step() {
   // new coordinates calculated with direction moving, movement speed, and
   // diagonal multiplier (if necessary)
   if (mov_speed > 0.0f && (x_dir != 0 || y_dir != 0)) {
-    float dx = float(x_dir) * (y_dir != 0 ? DIAG_MULTIPLIER : 1.0f) *
-               mov_speed * game->delta;
-    float dy = float(y_dir) * (x_dir != 0 ? DIAG_MULTIPLIER : 1.0f) *
-               mov_speed * game->delta;
+    float dx = float(x_dir) * (y_dir != 0 ? THOOM_DIAG_MULTIPLIER : 1.0f) *
+               mov_speed * thoom::game->delta;
+    float dy = float(y_dir) * (x_dir != 0 ? THOOM_DIAG_MULTIPLIER : 1.0f) *
+               mov_speed * thoom::game->delta;
 
     // prevents bad delta time movement (imagine a single frame lag spike)
-    dx = cnf_clamp(dx, -4.0f, 4.0f);
-    dy = cnf_clamp(dy, -4.0f, 4.0f);
+    dx = THOOM_CLAMP(dx, -4.0f, 4.0f);
+    dy = THOOM_CLAMP(dy, -4.0f, 4.0f);
 
     float new_x = this->x + dx;
     float new_y = this->y + dy;
@@ -435,20 +438,22 @@ void Feta::step() {
 
   // ---- display ----
 
-  game->set_view(this->x, this->y);
-  this->dst_rect.x = (float)(game->corner_x + SCREEN_WIDTH / 2) - 16.0f;
-  this->dst_rect.y = (float)(game->corner_y + SCREEN_HEIGHT / 2) - 24.0f;
-  game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                    &this->sprite->frame, &this->dst_rect, 22);
+  thoom::game->set_view(this->x, this->y);
+  this->dst_rect.x =
+      (float)(thoom::game->corner_x + THOOM_SCREEN_WIDTH / 2) - 16.0f;
+  this->dst_rect.y =
+      (float)(thoom::game->corner_y + THOOM_SCREEN_HEIGHT / 2) - 24.0f;
+  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
+                           &this->sprite->frame, &this->dst_rect, 22);
 
-  this->which_emote = local_controller.cheat_last(9, 8, 7);
+  this->which_emote = thoom::local_controller.cheat_last(9, 8, 7);
   this->emote_rect.x = this->dst_rect.x;
   this->emote_rect.y = this->dst_rect.y - 11.0f;
 
   if (this->which_emote != -1) {
     this->emotes->set_frame(this->which_emote % 8);
-    game->push_sprite(this->emotes->tex_id, this->emotes->texture,
-                      &this->emotes->frame, &this->emote_rect, 34);
+    thoom::game->push_sprite(this->emotes->tex_id, this->emotes->texture,
+                             &this->emotes->frame, &this->emote_rect, 34);
   }
 }
 
@@ -459,7 +464,7 @@ void Feta::attack(int damage) {
     return;
 
   this->is_busy = ATTACKED;
-  this->busy_ticks = game->ticks;
+  this->busy_ticks = thoom::game->ticks;
   this->sprite->set_animation((this->sprite->animation % 8) +
                               ATTACKED_ANIMATION);
 
@@ -481,7 +486,7 @@ void Feta::attack(int damage) {
   }
 
   this->health -= damage;
-  play_audio("sfx/hurt.wav", 1.0f, this->x, this->y, true);
+  thoom::play_audio("sfx/hurt.wav", 1.0f, this->x, this->y, true);
   NetSender::send_message(
       MSG_AUDIO, Mouse::audio_msg("sfx/hurt.wav", 1.0, this->x, this->y));
 
@@ -490,8 +495,8 @@ void Feta::attack(int damage) {
     this->health = 0;
 
     this->is_busy = DOWNED;
-    this->busy_ticks = game->ticks;
-    this->is_down_ticks = game->ticks;
+    this->busy_ticks = thoom::game->ticks;
+    this->is_down_ticks = thoom::game->ticks;
     this->sprite->set_animation((this->sprite->animation % 8) + DOWN_ANIMATION);
 
     this->is_down = true;
@@ -502,7 +507,7 @@ void Feta::attack(int damage) {
 void Feta::push_item(const std::string& item_id) {
   if (item_info.find(item_id) == item_info.end()) FATAL_ERROR
 
-  Game::HudItem new_item;
+  thoom::Game::HudItem new_item;
   new_item.item_id = item_id;
   new_item.count = 1;
 
@@ -527,7 +532,7 @@ void Feta::push_item(const std::string& item_id) {
 }
 
 void Feta::push_cheese(int amount) {
-  Game::HudItem new_item;
+  thoom::Game::HudItem new_item;
   new_item.item_id = ITEM_CHEESE;
   new_item.count = amount;
 

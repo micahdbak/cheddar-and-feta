@@ -1,5 +1,4 @@
-#ifndef HURTBOX_OBJ
-#define HURTBOX_OBJ "hurtbox"
+#pragma once
 
 #include <map>
 #include <vector>
@@ -8,6 +7,8 @@
 #include "hitbox.h"
 #include "mouse.h"
 #include "object.h"
+
+#define HURTBOX_OBJ "hurtbox"
 
 class HurtSource {
  public:
@@ -27,7 +28,7 @@ class HurtSource {
  * hitboxes
  * - Can only be hurt by a hitbox once within a cooldown
  */
-class HurtBox : public Object {
+class HurtBox : public thoom::Object {
  public:
   static std::string Options(int owner_id, int x_off, int y_off, int w, int h) {
     char buff[256];
@@ -51,7 +52,7 @@ class HurtBox : public Object {
  private:
   int x_off, y_off;
 
-  Object* owner;
+  thoom::Object* owner;
   Mouse* mouse;
   Foe* foe;
   HurtSource* source;
@@ -64,9 +65,9 @@ class HurtBox : public Object {
   SDL_FRect src_rect, dst_rect;
 };
 
-class HurtBoxFactory : public ObjectFactory {
+class HurtBoxFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int owner_id, x_off, y_off, w, h;
     if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &owner_id, &x_off,
                     &y_off, &w, &h))
@@ -82,5 +83,3 @@ extern std::vector<HurtBox*> hurtboxes;
 // (yes this is ugly, but I don't wanna change all attack() signatures to
 // include the id cuz im lazy)
 extern int hurtbox_hitbox_id;
-
-#endif

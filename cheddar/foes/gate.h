@@ -1,5 +1,4 @@
-#ifndef GATE_OBJ
-#define GATE_OBJ "gate"
+#pragma once
 
 #include <vector>
 
@@ -7,7 +6,9 @@
 #include "object.h"
 #include "sprite.h"
 
-class FoeGate : public Object {
+#define GATE_OBJ "gate"
+
+class FoeGate : public thoom::Object {
  public:
   FoeGate(int x, int y, int spawner_id, int animation);
   ~FoeGate();
@@ -19,7 +20,7 @@ class FoeGate : public Object {
   int colliders_offset, colliders_x, spawner_id;
   bool opened = false;
 
-  Sprite* sprite;
+  thoom::Sprite* sprite;
   SDL_FRect dst_rect;
 
   std::vector<int> colliders;
@@ -27,9 +28,9 @@ class FoeGate : public Object {
   bool synchronized = false;
 };
 
-class FoeGateFactory : public ObjectFactory {
+class FoeGateFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int x = 0, y = 0, spawner_id = 0, animation = 0;
     if (4 !=
         sscanf(options.c_str(), "%d,%d,%d,%d", &x, &y, &spawner_id, &animation))
@@ -38,5 +39,3 @@ class FoeGateFactory : public ObjectFactory {
     return new FoeGate(x, y, spawner_id, animation);
   }
 };
-
-#endif

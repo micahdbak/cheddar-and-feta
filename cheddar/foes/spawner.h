@@ -1,5 +1,4 @@
-#ifndef SPAWNER_OBJ
-#define SPAWNER_OBJ "spawner"
+#pragma once
 
 #include <vector>
 
@@ -7,7 +6,9 @@
 #include "object.h"
 #include "sprite.h"
 
-class FoeSpawner : public Object {
+#define SPAWNER_OBJ "spawner"
+
+class FoeSpawner : public thoom::Object {
  public:
   FoeSpawner(float x, float y, int spawner_id, int animation,
              const std::vector<std::vector<std::string>>& waves);
@@ -32,10 +33,10 @@ class FoeSpawner : public Object {
   int foerefs = 0;
 };
 
-class FoeSpawnerFactory : public ObjectFactory {
+class FoeSpawnerFactory : public thoom::ObjectFactory {
  public:
   // e.g., 256,112,1,0 foe_bug;foe_bug,foe_bug,foe_bug;foe_mole
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     const char* arr = options.c_str();
 
     int x = 0, y = 0, spawner_id = 0, animation = 0;
@@ -74,5 +75,3 @@ class FoeSpawnerFactory : public ObjectFactory {
 };
 
 extern FoeSpawner* spawners[];
-
-#endif

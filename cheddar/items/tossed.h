@@ -1,11 +1,12 @@
-#ifndef TOSSED_ITEM_OBJ
-#define TOSSED_ITEM_OBJ "tossed_item"
+#pragma once
 
 #include "game.h"
 #include "object.h"
 #include "sprite.h"
 
-class TossedItem : public Object {
+#define TOSSED_ITEM_OBJ "tossed_item"
+
+class TossedItem : public thoom::Object {
  public:
   static std::string Options(int x, int y, int x_dir, int y_dir, bool from_feta,
                              std::string item_id) {
@@ -26,14 +27,14 @@ class TossedItem : public Object {
   int x_dir, y_dir;
   bool from_feta;
   std::string item_id;
-  Sprite* sprite;
+  thoom::Sprite* sprite;
   SDL_FRect dst_rect;
   Uint64 spawned_ticks;
 };
 
-class TossedItemFactory : public ObjectFactory {
+class TossedItemFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int x, y, x_dir, y_dir, from_feta;
     if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
                     &from_feta))
@@ -49,5 +50,3 @@ class TossedItemFactory : public ObjectFactory {
     return new TossedItem(x, y, x_dir, y_dir, from_feta == 1, std::string(arr));
   }
 };
-
-#endif

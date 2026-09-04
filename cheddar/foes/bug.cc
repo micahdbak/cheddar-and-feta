@@ -13,12 +13,13 @@
 FoeBug::FoeBug(int x, int y, int spawner_id)
     : Foe(float(x), float(y), spawner_id, spawner_id == -2 ? 1000 : 500, 100,
           256.0f, 16.0f) {
-  this->sprite = new Sprite("sprites/foe_bug.bmp", 32, 32, 100);
+  this->sprite = new thoom::Sprite("sprites/foe_bug.bmp", 32, 32, 100);
 
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 16));
+  thoom::game->push_object(HURTBOX_OBJ,
+                           HurtBox::Options(this->id, -8, -8, 16, 16));
 }
 
 FoeBug::~FoeBug() {
@@ -27,19 +28,20 @@ FoeBug::~FoeBug() {
 }
 
 void FoeBug::action(Mouse* mouse) {
-  if (game->ticks - this->hurt_timer < 500) {
+  if (thoom::game->ticks - this->hurt_timer < 500) {
     this->state = Foe::State::FORCE_RANDOM_TILE;
     return;
   }
 
   this->state = Foe::State::ACTION;
-  this->timer = game->ticks;
+  this->timer = thoom::game->ticks;
 
   int x_off, y_off;
   HitBox::MakeOffset(x_dir, y_dir, &x_off, &y_off, 8.0f);
   HitBox::Properties props = {1, 500, 250};
-  game->push_object(HITBOX_OBJ, HitBox::Options(this->id, this->id, x_off - 8,
-                                                y_off - 8, 16, 16, props));
+  thoom::game->push_object(
+      HITBOX_OBJ,
+      HitBox::Options(this->id, this->id, x_off - 8, y_off - 8, 16, 16, props));
 }
 
 void FoeBug::attack_internal(int damage) {
@@ -50,14 +52,14 @@ void FoeBug::attack_internal(int damage) {
     this->state = Foe::State::DEAD;
     this->remove_from_foes();
 
-    int kills = save.geti(FOE_BUG_OBJ STATS) + 1;
-    save.puti(FOE_BUG_OBJ STATS, kills);
+    int kills = thoom::save.geti(FOE_BUG_OBJ STATS) + 1;
+    thoom::save.puti(FOE_BUG_OBJ STATS, kills);
   } else {
     this->state = Foe::State::THROW_AWAY_FROM;
-    this->hurt_timer = game->ticks;
+    this->hurt_timer = thoom::game->ticks;
   }
 
-  this->timer = game->ticks;
+  this->timer = thoom::game->ticks;
 }
 
 #define WALK_ANIMATION 0
@@ -72,13 +74,16 @@ void FoeBug::step() {
       if (this->prev_state != this->state) {
         switch (SDL_rand(4)) {
           case 0:
-            play_audio("sfx/ant_walk1.wav", 0.5, this->x, this->y, false);
+            thoom::play_audio("sfx/ant_walk1.wav", 0.5, this->x, this->y,
+                              false);
             break;
           case 1:
-            play_audio("sfx/ant_walk2.wav", 0.5, this->x, this->y, false);
+            thoom::play_audio("sfx/ant_walk2.wav", 0.5, this->x, this->y,
+                              false);
             break;
           case 2:
-            play_audio("sfx/ant_walk3.wav", 0.5, this->x, this->y, false);
+            thoom::play_audio("sfx/ant_walk3.wav", 0.5, this->x, this->y,
+                              false);
             break;
           default:
             break;  // no sound
@@ -89,13 +94,13 @@ void FoeBug::step() {
 
     case Foe::State::ACTION:
       if (this->prev_state != this->state) {
-        play_audio("sfx/ant_attack.wav", 1.0, this->x, this->y, false);
+        thoom::play_audio("sfx/ant_attack.wav", 1.0, this->x, this->y, false);
       }
 
       this->sprite->set_animation(ATTACK_ANIMATION +
                                   this->_displayed_direction);
       this->sprite->interval_ms = 50;
-      if (game->ticks - this->timer > 1000) {
+      if (thoom::game->ticks - this->timer > 1000) {
         this->state = Foe::State::FORCE_RANDOM_TILE;
       }
 
@@ -103,7 +108,7 @@ void FoeBug::step() {
 
     case Foe::State::THROWN:
       if (this->prev_state != this->state) {
-        play_audio("sfx/ant_hurt.wav", 1.0, this->x, this->y, false);
+        thoom::play_audio("sfx/ant_hurt.wav", 1.0, this->x, this->y, false);
       }
 
       // foe internally exits the thrown state
@@ -112,21 +117,21 @@ void FoeBug::step() {
 
     case Foe::State::DEAD:
       if (this->prev_state != this->state) {
-        play_audio("sfx/ant_die.wav", 1.0, this->x, this->y, false);
+        thoom::play_audio("sfx/ant_die.wav", 1.0, this->x, this->y, false);
       }
 
       this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
-      if (game->ticks - this->timer > 2000) {
+      if (thoom::game->ticks - this->timer > 2000) {
         // delete this object
-        game->delete_object = true;
+        thoom::game->delete_object = true;
         Cheese::drop_cheese(this->x, this->y, 1, 1);
 
         return;
       }
 
-      game->push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
-                      this->y - 14.0f + this->off_y, &this->icon_src,
-                      &this->icon_dst);
+      thoom::game->push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
+                             this->y - 14.0f + this->off_y, &this->icon_src,
+                             &this->icon_dst);
 
       break;
 
@@ -137,11 +142,12 @@ void FoeBug::step() {
       break;
   }
 
-  if (game->ticks - this->hurt_timer < 333 && this->state != Foe::State::DEAD) {
+  if (thoom::game->ticks - this->hurt_timer < 333 &&
+      this->state != Foe::State::DEAD) {
     this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
-    game->push_health_bar(this->health, this->max_health, this->x + this->off_x,
-                          this->y - 16.0f + this->off_y, &this->icon_src,
-                          &this->icon_dst);
+    thoom::game->push_health_bar(
+        this->health, this->max_health, this->x + this->off_x,
+        this->y - 16.0f + this->off_y, &this->icon_src, &this->icon_dst);
   }
 
   this->prev_state = this->state;
@@ -149,6 +155,6 @@ void FoeBug::step() {
   this->sprite->update_frame();
   this->dst_rect.x = this->x - 16.0f + this->off_x;
   this->dst_rect.y = this->y - 16.0f + this->off_y;
-  game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                    &this->sprite->frame, &this->dst_rect, 18);
+  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
+                           &this->sprite->frame, &this->dst_rect, 18);
 }

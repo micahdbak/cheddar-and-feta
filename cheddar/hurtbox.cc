@@ -9,7 +9,7 @@ int hurtbox_hitbox_id;
 
 HurtBox::HurtBox(int owner_id, int x_off, int y_off, int w, int h)
     : owner_id(owner_id), x_off(x_off), y_off(y_off), bounding_box{0, 0, w, h} {
-  this->owner = game->get_object(owner_id);
+  this->owner = thoom::game->get_object(owner_id);
   if (this->owner == nullptr) return;
 
   if ((this->source = dynamic_cast<HurtSource*>(this->owner)) != nullptr) {
@@ -60,13 +60,13 @@ void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
   if (it != this->previous_hits.end()) {
     uint64_t when_ticks = it->second;
 
-    if (game->ticks - when_ticks > cooldown_ms) {
+    if (thoom::game->ticks - when_ticks > cooldown_ms) {
       should_hit = true;
-      this->previous_hits[hitbox_id] = game->ticks;
+      this->previous_hits[hitbox_id] = thoom::game->ticks;
     }
   } else {
     // hitbox hasn't attacked this yet
-    this->previous_hits[hitbox_id] = game->ticks;
+    this->previous_hits[hitbox_id] = thoom::game->ticks;
     should_hit = true;
   }
 
@@ -86,12 +86,12 @@ void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
 
         if (hitbox->throw_away) {
           // throws away from hitbox
-          dir_to_point(hitbox_x, hitbox_y, this->mouse->x, this->mouse->y,
-                       &throw_x, &throw_y);
+          thoom::dir_to_point(hitbox_x, hitbox_y, this->mouse->x,
+                              this->mouse->y, &throw_x, &throw_y);
         } else {
           // pulls toward hitbox
-          dir_to_point(this->mouse->x, this->mouse->y, hitbox_x, hitbox_y,
-                       &throw_x, &throw_y);
+          thoom::dir_to_point(this->mouse->x, this->mouse->y, hitbox_x,
+                              hitbox_y, &throw_x, &throw_y);
         }
 
         this->mouse->set_throw(throw_x, throw_y);
@@ -108,12 +108,12 @@ void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
 
         if (hitbox->throw_away) {
           // throws away from hitbox
-          dir_to_point(hitbox_x, hitbox_y, this->foe->x, this->foe->y,
-                       &this->foe->throw_x, &this->foe->throw_y);
+          thoom::dir_to_point(hitbox_x, hitbox_y, this->foe->x, this->foe->y,
+                              &this->foe->throw_x, &this->foe->throw_y);
         } else {
           // pulls toward hitbox
-          dir_to_point(this->foe->x, this->foe->y, hitbox_x, hitbox_y,
-                       &this->foe->throw_x, &this->foe->throw_y);
+          thoom::dir_to_point(this->foe->x, this->foe->y, hitbox_x, hitbox_y,
+                              &this->foe->throw_x, &this->foe->throw_y);
         }
       } break;
 
@@ -129,7 +129,7 @@ void HurtBox::step() {
       *this->owner_deleted ||
       (this->owner_class == HurtBox::OwnerClass::FOE &&
        this->foe->state == Foe::State::DEAD)) {
-    game->delete_object = true;
+    thoom::game->delete_object = true;
     return;
   }
 
@@ -154,7 +154,8 @@ void HurtBox::step() {
 #ifdef ONSCREEN_DEBUG
   this->dst_rect = {(float)this->bounding_box.x, (float)this->bounding_box.y,
                     (float)this->bounding_box.w, (float)this->bounding_box.h};
-  game->push_sprite("sprites/icons.bmp", game->icons, &this->src_rect,
-                    &this->dst_rect, SCREEN_HEIGHT);
+  thoom::game->push_sprite("sprites/icons.bmp", thoom::game->icons,
+                           &this->src_rect, &this->dst_rect,
+                           THOOM_SCREEN_HEIGHT);
 #endif
 }

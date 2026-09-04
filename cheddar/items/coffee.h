@@ -1,10 +1,11 @@
-#ifndef ITEM_COFFEE_BEAN
-#define ITEM_COFFEE_BEAN "item_coffee_bean"
+#pragma once
 
 #include <iostream>
 
 #include "item.h"
 #include "mouse.h"
+
+#define ITEM_COFFEE_BEAN "item_coffee_bean"
 
 class DroppedCoffeeBean : public DroppedItem {
  public:
@@ -18,9 +19,9 @@ class DroppedCoffeeBean : public DroppedItem {
   void take(Mouse* mouse) override { mouse->push_item(ITEM_COFFEE_BEAN); }
 };
 
-class DroppedCoffeeBeanFactory : public ObjectFactory {
+class DroppedCoffeeBeanFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     int x, y;
     if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
 
@@ -28,10 +29,10 @@ class DroppedCoffeeBeanFactory : public ObjectFactory {
   }
 };
 
-class UsedCoffeeBean : public Object {
+class UsedCoffeeBean : public thoom::Object {
  public:
   UsedCoffeeBean(bool is_feta) : is_feta(is_feta) {
-    this->timer = game->ticks + 5000;
+    this->timer = thoom::game->ticks + 5000;
 
     Mouse* mouse = is_feta ? feta : cheddar;
     if (mouse != nullptr) mouse->set_max_mov_speed(MOUSE_DEFAULT_SPEED * 2.0f);
@@ -42,13 +43,13 @@ class UsedCoffeeBean : public Object {
     Mouse* mouse = is_feta ? feta : cheddar;
 
     if (mouse == nullptr) {
-      game->delete_object = true;
+      thoom::game->delete_object = true;
       return;
     }
 
-    if (game->ticks > this->timer) {
+    if (thoom::game->ticks > this->timer) {
       mouse->set_max_mov_speed(MOUSE_DEFAULT_SPEED);
-      game->delete_object = true;
+      thoom::game->delete_object = true;
     }
   }
 
@@ -57,9 +58,9 @@ class UsedCoffeeBean : public Object {
   Uint64 timer = 0;
 };
 
-class UsedCoffeeBeanFactory : public ObjectFactory {
+class UsedCoffeeBeanFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     int from_id;
     if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &from_id))
       FATAL_ERROR
@@ -69,5 +70,3 @@ class UsedCoffeeBeanFactory : public ObjectFactory {
     return new UsedCoffeeBean(is_feta);
   }
 };
-
-#endif

@@ -12,20 +12,20 @@ Feta::Feta(int x, int y, int animation) {
   feta = this;
   this->is_feta = true;
 
-  this->sprite = new Sprite("sprites/feta.bmp", 32, 32, 250);
+  this->sprite = new thoom::Sprite("sprites/feta.bmp", 32, 32, 250);
   this->sprite->set_animation(SLEEPING_ANIMATION);
-  this->emotes = new Sprite("sprites/emotes.bmp", 32, 32, 0);
+  this->emotes = new thoom::Sprite("sprites/emotes.bmp", 32, 32, 0);
 
-  std::string items_s = save.value(FETA_OBJ MOUSE_ITEMS);
+  std::string items_s = thoom::save.value(FETA_OBJ MOUSE_ITEMS);
   if (!items_s.empty()) {
     this->items = Mouse::read_items(items_s);
   }
 
   // if loading a save, read the location from the save file
-  if (save.geti(LOAD_SAVE) && save.has(FETA_OBJ MOUSE_X)) {
-    this->x = save.getf(FETA_OBJ MOUSE_X);
-    this->y = save.getf(FETA_OBJ MOUSE_Y);
-    this->sprite->set_animation(save.geti(FETA_OBJ MOUSE_ANIMATION));
+  if (thoom::save.geti(LOAD_SAVE) && thoom::save.has(FETA_OBJ MOUSE_X)) {
+    this->x = thoom::save.getf(FETA_OBJ MOUSE_X);
+    this->y = thoom::save.getf(FETA_OBJ MOUSE_Y);
+    this->sprite->set_animation(thoom::save.geti(FETA_OBJ MOUSE_ANIMATION));
   } else {
     // cheddar will have provided the corresponding coordinates and animation
     this->x = (float)x;
@@ -33,8 +33,8 @@ Feta::Feta(int x, int y, int animation) {
     this->sprite->set_animation(animation);
   }
 
-  this->tile_x = (int)this->x / game->tile_width;
-  this->tile_y = (int)this->y / game->tile_height;
+  this->tile_x = (int)this->x / thoom::game->tile_width;
+  this->tile_y = (int)this->y / thoom::game->tile_height;
   foe_path_find(this);
 
   this->dst_rect.w = 32.0f;
@@ -43,7 +43,8 @@ Feta::Feta(int x, int y, int animation) {
   this->emote_rect.h = 32.0f;
 
   // push hurtbox
-  game->push_object(HURTBOX_OBJ, HurtBox::Options(this->id, -8, -8, 16, 12));
+  thoom::game->push_object(HURTBOX_OBJ,
+                           HurtBox::Options(this->id, -8, -8, 16, 12));
 
   this->is_down = false;
 }
@@ -55,14 +56,14 @@ Feta::~Feta() {
 }
 
 void Feta::step() {
-  if (game->net_state != NetworkAgent::State::CONNECTED) {
+  if (thoom::game->net_state != thoom::NetworkAgent::State::CONNECTED) {
     this->synchronized = false;
 
     this->sprite->set_animation(SLEEPING_ANIMATION);
     this->dst_rect.x = this->x - 16.0f;
     this->dst_rect.y = this->y - 24.0f;
-    game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                      &this->sprite->frame, &this->dst_rect, 22);
+    thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
+                             &this->sprite->frame, &this->dst_rect, 22);
 
     return;
   }
@@ -74,15 +75,15 @@ void Feta::step() {
 
   if (!this->new_objects.empty()) {
     for (int i = 0; i < this->new_objects.size(); i++) {
-      game->push_object(this->new_objects[i].first,
-                        this->new_objects[i].second);
+      thoom::game->push_object(this->new_objects[i].first,
+                               this->new_objects[i].second);
     }
 
     this->new_objects.clear();
   }
 
-  int new_tile_x = (int)this->x / game->tile_width;
-  int new_tile_y = (int)this->y / game->tile_height;
+  int new_tile_x = (int)this->x / thoom::game->tile_width;
+  int new_tile_y = (int)this->y / thoom::game->tile_height;
 
   if (this->tile_x != new_tile_x || this->tile_y != new_tile_y) {
     this->tile_x = new_tile_x;
@@ -94,24 +95,24 @@ void Feta::step() {
   this->sprite->set_animation(this->animation);
   this->dst_rect.x = this->x - 16.0f;
   this->dst_rect.y = this->y - 24.0f;
-  game->push_sprite("", this->sprite->texture, &this->sprite->frame,
-                    &this->dst_rect, 22);
+  thoom::game->push_sprite("", this->sprite->texture, &this->sprite->frame,
+                           &this->dst_rect, 22);
 
   this->emote_rect.x = this->dst_rect.x;
   this->emote_rect.y = this->dst_rect.y - 11.0f;
 
   if (this->which_emote != -1) {
     this->emotes->set_frame(this->which_emote % 8);
-    game->push_sprite("", this->emotes->texture, &this->emotes->frame,
-                      &this->emote_rect, 34);
+    thoom::game->push_sprite("", this->emotes->texture, &this->emotes->frame,
+                             &this->emote_rect, 34);
   }
 }
 
 void Feta::save_data() {
-  save.putf(FETA_OBJ MOUSE_X, this->x);
-  save.putf(FETA_OBJ MOUSE_Y, this->y);
-  save.puti(FETA_OBJ MOUSE_ANIMATION, this->sprite->animation);
-  save.data[FETA_OBJ MOUSE_ITEMS] = Mouse::encode_items(this->items);
+  thoom::save.putf(FETA_OBJ MOUSE_X, this->x);
+  thoom::save.putf(FETA_OBJ MOUSE_Y, this->y);
+  thoom::save.puti(FETA_OBJ MOUSE_ANIMATION, this->sprite->animation);
+  thoom::save.data[FETA_OBJ MOUSE_ITEMS] = Mouse::encode_items(this->items);
 }
 
 void Feta::attack(int damage) {
@@ -123,7 +124,7 @@ void Feta::push_item(const std::string& item_id) {
 
   if (item_info.find(item_id) == item_info.end()) FATAL_ERROR
 
-  Game::HudItem new_item;
+  thoom::Game::HudItem new_item;
   new_item.item_id = item_id;
   new_item.count = 1;
 
@@ -148,7 +149,7 @@ void Feta::push_item(const std::string& item_id) {
 void Feta::push_cheese(int amount) {
   NetSender::send_message(MSG_PUSH_CHEESE, std::to_string(amount));
 
-  Game::HudItem new_item;
+  thoom::Game::HudItem new_item;
   new_item.item_id = ITEM_CHEESE;
   new_item.count = amount;
 
@@ -195,8 +196,8 @@ void Feta::synchronize() {
   char x_str[256], y_str[256];
   std::string items_s;
 
-  float_to_str(this->x, x_str, sizeof(x_str));
-  float_to_str(this->y, y_str, sizeof(y_str));
+  thoom::float_to_str(this->x, x_str, sizeof(x_str));
+  thoom::float_to_str(this->y, y_str, sizeof(y_str));
   items_s = Mouse::encode_items(this->items);
 
   snprintf(buff, sizeof(buff), "%s,%s,%d %s", x_str, y_str, this->animation,

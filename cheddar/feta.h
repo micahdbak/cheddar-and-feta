@@ -1,5 +1,4 @@
-#ifndef FETA_OBJ
-#define FETA_OBJ "feta"
+#pragma once
 
 #include <vector>
 
@@ -7,6 +6,8 @@
 #include "mouse.h"
 #include "object.h"
 #include "save_data.h"
+
+#define FETA_OBJ "feta"
 
 class Feta : public Mouse, public HitSource {
  public:
@@ -43,15 +44,15 @@ class Feta : public Mouse, public HitSource {
  private:
   int tile_x, tile_y;
 
-  Sprite *sprite, *emotes;
+  thoom::Sprite *sprite, *emotes;
   SDL_FRect dst_rect, emote_rect;
 
-  std::vector<Game::HudItem> items;
+  std::vector<thoom::Game::HudItem> items;
 };
 
-class FetaFactory : public ObjectFactory {
+class FetaFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     int x, y, animation;
     if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &animation))
       FATAL_ERROR
@@ -59,5 +60,3 @@ class FetaFactory : public ObjectFactory {
     return new Feta(x, y, animation);
   }
 };
-
-#endif

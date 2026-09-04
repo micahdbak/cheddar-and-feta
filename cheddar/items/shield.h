@@ -1,8 +1,9 @@
-#ifndef ITEM_SHIELD
-#define ITEM_SHIELD "item_shield"
+#pragma once
 
 #include "item.h"
 #include "object.h"
+
+#define ITEM_SHIELD "item_shield"
 
 class DroppedShield : public DroppedItem {
  public:
@@ -16,14 +17,12 @@ class DroppedShield : public DroppedItem {
   void take(Mouse* mouse) override { mouse->push_item(ITEM_SHIELD); }
 };
 
-class DroppedShieldFactory : public ObjectFactory {
+class DroppedShieldFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) override {
+  thoom::Object* create(const std::string& options) override {
     int x, y;
     if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
 
     return new DroppedShield(float(x), float(y));
   }
 };
-
-#endif

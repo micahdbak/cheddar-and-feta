@@ -1,11 +1,12 @@
-#ifndef FOE_SPITTER_OBJ
-#define FOE_SPITTER_OBJ "foe_spitter"
+#pragma once
 
 #include <iostream>
 
 #include "../../hitbox.h"
 #include "../foe.h"
 #include "sprite.h"
+
+#define FOE_SPITTER_OBJ "foe_spitter"
 
 #define NUM_SEGMENTS 8
 #define SEGMENT_DISTANCE 11
@@ -34,7 +35,7 @@ class Spitter : public Foe {
   Foe::State prev_state = Foe::State::IDLE;
 
  private:
-  Sprite* sprite;
+  thoom::Sprite* sprite;
   SDL_FRect dst_rect;
 
   Uint64 timer, hurt_timer, direction_timer = 0, start_timer;
@@ -74,9 +75,9 @@ class Spitter : public Foe {
   }
 };
 
-class SpitterFactory : public ObjectFactory {
+class SpitterFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int x, y, spawner_id;
     if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id))
       FATAL_ERROR
@@ -84,5 +85,3 @@ class SpitterFactory : public ObjectFactory {
     return new Spitter(x, y, spawner_id);
   }
 };
-
-#endif

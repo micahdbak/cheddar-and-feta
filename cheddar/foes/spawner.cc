@@ -14,7 +14,7 @@ FoeSpawner::FoeSpawner(float x, float y, int spawner_id, int animation,
     : x(x), y(y), spawner_id(spawner_id), waves(waves) {
   char key[256];
   snprintf(key, sizeof(key), "spawner_%d", this->spawner_id);
-  if (save.geti(key) == 1) {
+  if (thoom::save.geti(key) == 1) {
     this->empty = true;
     this->wave = this->waves.size();
   }
@@ -25,8 +25,9 @@ FoeSpawner::FoeSpawner(float x, float y, int spawner_id, int animation,
 FoeSpawner::~FoeSpawner() { spawners[this->spawner_id] = nullptr; }
 
 void FoeSpawner::step() {
-  if (!this->to_spawn.empty() && game->ticks - this->spawned_ticks > 500) {
-    this->spawned_ticks = game->ticks;
+  if (!this->to_spawn.empty() &&
+      thoom::game->ticks - this->spawned_ticks > 500) {
+    this->spawned_ticks = thoom::game->ticks;
 
     std::string obj = this->to_spawn.back();
     this->to_spawn.pop_back();
@@ -34,7 +35,7 @@ void FoeSpawner::step() {
     char buff[256];
     snprintf(buff, sizeof(buff), "%d,%d,%d", (int)this->x, (int)this->y,
              this->spawner_id);
-    game->push_object(obj, buff);
+    thoom::game->push_object(obj, buff);
   }
 }
 
@@ -45,7 +46,7 @@ void FoeSpawner::trigger() {
     this->empty = true;
     char key[256];
     snprintf(key, sizeof(key), "spawner_%d", this->spawner_id);
-    save.puti(key, 1);
+    thoom::save.puti(key, 1);
     return;
   }
 

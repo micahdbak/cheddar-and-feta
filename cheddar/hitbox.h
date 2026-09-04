@@ -1,8 +1,10 @@
-#ifndef HITBOX_OBJ
-#define HITBOX_OBJ "hitbox"
+#pragma once
 
 #include "game.h"
 #include "object.h"
+#include "utils.h"
+
+#define HITBOX_OBJ "hitbox"
 
 // hitbox shared IDs
 #define HB_SHARED_UNKNOWN -1
@@ -19,7 +21,7 @@ class HitSource {
   virtual void hitsource_notify() {};
 };
 
-class HitBox : public Object {
+class HitBox : public thoom::Object {
  public:
   struct Properties {
     int damage;
@@ -34,7 +36,7 @@ class HitBox : public Object {
                          float distance) {
     bool is_diagonal = x_dir != 0 && y_dir != 0;
     int hitbox_distance =
-        (int)(is_diagonal ? DIAG_MULTIPLIER * distance : distance);
+        (int)(is_diagonal ? THOOM_DIAG_MULTIPLIER * distance : distance);
     *x_off = x_dir * hitbox_distance;
     *y_off = y_dir * hitbox_distance;
   }
@@ -75,9 +77,9 @@ class HitBox : public Object {
   SDL_FRect src_rect, dst_rect;
 };
 
-class HitBoxFactory : public ObjectFactory {
+class HitBoxFactory : public thoom::ObjectFactory {
  public:
-  Object* create(const std::string& options) {
+  thoom::Object* create(const std::string& options) {
     int hitsource_owner_id, hurtbox_owner_id, x_off, y_off, w, h, damage,
         cooldown_ms, delete_after_ms, shared_cooldowns, shared_id, single_use;
     if (12 != sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
@@ -86,7 +88,7 @@ class HitBoxFactory : public ObjectFactory {
                      &shared_cooldowns, &shared_id, &single_use))
       FATAL_ERROR
 
-    Object* source_obj = game->get_object(hitsource_owner_id);
+    thoom::Object* source_obj = thoom::game->get_object(hitsource_owner_id);
     if (source_obj == nullptr) return nullptr;
 
     std::shared_ptr<bool> source_deleted = source_obj->get_deleted_ptr();
@@ -106,5 +108,3 @@ class HitBoxFactory : public ObjectFactory {
                       h, props);
   }
 };
-
-#endif

@@ -6,13 +6,14 @@
 #include "foe.h"
 #include "game.h"
 #include "mouse.h"
+#include "utils.h"
 
 #define FREE_IF(a) \
   if ((a)) {       \
     free(a);       \
   }
 #define COORD(x, y) (((y) * cols) + (x))
-#define COLLISION(x, y) (game->collision[COORD((x), (y))] >= 0)
+#define COLLISION(x, y) (thoom::game->collision[COORD((x), (y))] >= 0)
 #define DIST_ADJACENT 10000
 #define DIST_DIAGONAL 14142
 #define MAX_DISTANCE DIST_ADJACENT * 24  // tiles radius
@@ -41,8 +42,8 @@ static void _init_matrices() {
   FREE_IF(_cheddar_prev);
   FREE_IF(_feta_prev);
 
-  rows = game->rows;
-  cols = game->cols;
+  rows = thoom::game->rows;
+  cols = thoom::game->cols;
 
   _cheddar_dist = (int*)malloc((rows * cols) * sizeof(int));
   _feta_dist = (int*)malloc((rows * cols) * sizeof(int));
@@ -70,13 +71,13 @@ static void _neighbours(int x, int y, std::vector<_Neighbour>& neighbours) {
 }
 
 void foe_path_find(Mouse* mouse) {
-  if (game->collision == nullptr) {
+  if (thoom::game->collision == nullptr) {
     std::cerr << "foe_path_find error: called without game->collision"
               << std::endl;
     std::exit(1);
   }
 
-  if (game->rows != rows) {
+  if (thoom::game->rows != rows) {
     _init_matrices();
   }
 
@@ -87,8 +88,8 @@ void foe_path_find(Mouse* mouse) {
   std::vector<_Neighbour> neighbours;
 
   // starting coordinates
-  int mouse_tile_x = (int)mouse->x / game->tile_width;
-  int mouse_tile_y = (int)mouse->y / game->tile_height;
+  int mouse_tile_x = (int)mouse->x / thoom::game->tile_width;
+  int mouse_tile_y = (int)mouse->y / thoom::game->tile_height;
   std::pair<int, int> start(mouse_tile_x, mouse_tile_y);
   queue.push(_QItem{start, 0});
 
@@ -135,8 +136,8 @@ bool foe_move_towards(Mouse* mouse, int* x, int* y, FoeStrafe strafe) {
     return false;
   }
 
-  int _x = cnf_clamp(*x, 0, cols - 1);
-  int _y = cnf_clamp(*y, 0, rows - 1);
+  int _x = THOOM_CLAMP(*x, 0, cols - 1);
+  int _y = THOOM_CLAMP(*y, 0, rows - 1);
 
   int i = prev[COORD(_x, _y)];
 
@@ -170,7 +171,7 @@ bool foe_move_towards(Mouse* mouse, int* x, int* y, FoeStrafe strafe) {
   if (strafe != FoeStrafe::NO_STRAFE && SDL_rand(2) == 1) {
     int x_dir = *x - _x;
     int y_dir = *y - _y;
-    int direction = direction_from_dirs(x_dir, y_dir);
+    int direction = thoom::direction_from_dirs(x_dir, y_dir);
 
     // alter direction according to strafe
     if (strafe == FoeStrafe::STRAFE_LEFT) direction -= 1;
@@ -181,7 +182,7 @@ bool foe_move_towards(Mouse* mouse, int* x, int* y, FoeStrafe strafe) {
     if (direction > 7) direction = 0;
 
     // get new x/y dir
-    dirs_from_direction(direction, &x_dir, &y_dir);
+    thoom::dirs_from_direction(direction, &x_dir, &y_dir);
 
     int strafe_x = _x + x_dir;
     int strafe_y = _y + y_dir;
@@ -204,8 +205,8 @@ bool foe_move_away(Mouse* mouse, int* x, int* y) {
     return false;
   }
 
-  int source_x = cnf_clamp(*x, 0, cols - 1);
-  int source_y = cnf_clamp(*y, 0, rows - 1);
+  int source_x = THOOM_CLAMP(*x, 0, cols - 1);
+  int source_y = THOOM_CLAMP(*y, 0, rows - 1);
 
   int i = prev[COORD(source_x, source_y)];
 
@@ -242,8 +243,8 @@ bool foe_move_circle(Mouse* mouse, int* x, int* y) {
     return false;
   }
 
-  int source_x = cnf_clamp(*x, 0, cols - 1);
-  int source_y = cnf_clamp(*y, 0, rows - 1);
+  int source_x = THOOM_CLAMP(*x, 0, cols - 1);
+  int source_y = THOOM_CLAMP(*y, 0, rows - 1);
 
   int i = prev[COORD(source_x, source_y)];
 
@@ -295,7 +296,7 @@ void foe_pick_random(int* x, int* y) {
 void foe_move_direction(int* x, int* y, int x_dir, int y_dir) {
   int x_goal = *x + x_dir, y_goal = *y + y_dir;
 
-  if (game->collision[COORD(x_goal, y_goal)] < 0) {
+  if (thoom::game->collision[COORD(x_goal, y_goal)] < 0) {
     *x = x_goal;
     *y = y_goal;
   } else {
@@ -316,15 +317,16 @@ SDL_Texture* debug_tiles_texture = nullptr;
 void foe_debug_tile(int x, int y) {
   if (debug_dst_rect == nullptr) {
     debug_dst_rect = (SDL_FRect*)malloc(sizeof(SDL_FRect) * rows * cols);
-    debug_tiles_texture = load_bmp_texture("sprites/foe_debug.bmp");
+    debug_tiles_texture = thoom::load_bmp_texture("sprites/foe_debug.bmp");
   }
 
   float center_x = CENTER_TILE_X(x);
   float center_y = CENTER_TILE_Y(y);
 
   float dist1 =
-      distance_between_points(center_x, center_y, cheddar->x, cheddar->y);
-  float dist2 = distance_between_points(center_x, center_y, feta->x, feta->y);
+      THOOM_DISTANCE_BETWEEN_POINTS(center_x, center_y, cheddar->x, cheddar->y);
+  float dist2 =
+      THOOM_DISTANCE_BETWEEN_POINTS(center_x, center_y, feta->x, feta->y);
   Mouse* mouse = nullptr;
 
   if (dist1 < dist2) {
@@ -348,7 +350,7 @@ void foe_debug_tile(int x, int y) {
 
     int x_dir = px - x;
     int y_dir = py - y;
-    int direction = direction_from_dirs(x_dir, y_dir);
+    int direction = thoom::direction_from_dirs(x_dir, y_dir);
 
     src_rect = &debug_src_rect[direction];
   } else {
@@ -356,10 +358,10 @@ void foe_debug_tile(int x, int y) {
   }
 
   debug_dst_rect[COORD(x, y)] =
-      SDL_FRect{(float)(x * game->tile_width), (float)(y * game->tile_height),
-                16.0f, 16.0f};
+      SDL_FRect{(float)(x * thoom::game->tile_width),
+                (float)(y * thoom::game->tile_height), 16.0f, 16.0f};
   dst_rect = &debug_dst_rect[COORD(x, y)];
 
-  game->push_sprite("sprites/foe_debug.bmp", debug_tiles_texture, src_rect,
-                    dst_rect, 0);
+  thoom::game->push_sprite("sprites/foe_debug.bmp", debug_tiles_texture,
+                           src_rect, dst_rect, 0);
 }

@@ -12,13 +12,14 @@ NetSender::NetSender() { net_sender = this; }
 NetSender::~NetSender() { net_sender = nullptr; }
 
 void NetSender::step() {
-  if (net_agent->get_state() != NetworkAgent::State::CONNECTED) return;
+  if (thoom::net_agent->get_state() != thoom::NetworkAgent::State::CONNECTED)
+    return;
 
-  std::string frame_msg = MSG_MAP + game->current_map + '\n';
+  std::string frame_msg = MSG_MAP + thoom::game->current_map + '\n';
   char buff[1024];
 
   // sprites
-  for (Game::SpriteRender& sprite : game->sprites) {
+  for (thoom::Game::SpriteRender& sprite : thoom::game->sprites) {
     if (sprite.texture == nullptr || sprite.dst_rect == nullptr ||
         sprite.tex_id.size() == 0)
       continue;
@@ -43,7 +44,7 @@ void NetSender::step() {
   }
 
   // audio
-  for (Game::AudioMsg& msg : game->audio) {
+  for (thoom::Game::AudioMsg& msg : thoom::game->audio) {
     snprintf(buff, sizeof(buff), "%c%s %d,%d,%d\n", MSG_AUDIO,
              msg.wav_path.c_str(), (int)(10.0f * msg.gain), (int)msg.x,
              (int)msg.y);
@@ -56,7 +57,7 @@ void NetSender::step() {
 
   this->messages.clear();
 
-  net_agent->send_message(frame_msg);
+  thoom::net_agent->send_message(frame_msg);
 }
 
 void NetSender::send_message(char func, const std::string& arg) {
@@ -64,7 +65,7 @@ void NetSender::send_message(char func, const std::string& arg) {
     return;
   }
 
-  if (game->net_state != NetworkAgent::State::CONNECTED) {
+  if (thoom::game->net_state != thoom::NetworkAgent::State::CONNECTED) {
     if (!net_sender->messages.empty()) {
       // don't want a clogged up message queue
       net_sender->messages.clear();

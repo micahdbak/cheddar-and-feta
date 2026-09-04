@@ -82,7 +82,7 @@ the solution by going to Project Properties > Configuration Properties > Linker
 
 ## Engine Design
 
-The engine source is located in `src/engine`. This section provides an overview
+The engine source is located in `thoom`. This section provides an overview
 of the major subsystems.
 
 ### Game Loop

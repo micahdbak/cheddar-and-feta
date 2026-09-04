@@ -24,7 +24,7 @@ if(NOT WIN32)
       $<$<CONFIG:Debug>:-fsanitize=address>)
 endif()
 
-add_subdirectory(engine)
+add_subdirectory(thoom)
 
 add_subdirectory(cheddar)
 add_subdirectory(feta)

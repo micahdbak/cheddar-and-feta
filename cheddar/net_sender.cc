@@ -19,7 +19,7 @@ void NetSender::step() {
   char buff[1024];
 
   // sprites
-  for (thoom::Game::SpriteRender& sprite : thoom::game->sprites) {
+  for (thoom::SpriteRender& sprite : thoom::game->sprites) {
     if (sprite.texture == nullptr || sprite.dst_rect == nullptr ||
         sprite.tex_id.size() == 0)
       continue;

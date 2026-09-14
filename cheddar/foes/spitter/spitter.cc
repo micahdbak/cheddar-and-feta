@@ -161,8 +161,7 @@ void Spitter::step() {
         last_direction = this->direction;
 
         int distance =
-            (int)(x_dir != 0 && y_dir != 0 ? 16.0f * THOOM_DIAG_MULTIPLIER
-                                           : 16.0f);
+            (int)(x_dir != 0 && y_dir != 0 ? 16.0f * THOOM_INV_SQRT2_F : 16.0f);
         float fire_x = this->x + (float)(x_dir * distance);
         float fire_y = this->y + (float)(y_dir * distance);
 

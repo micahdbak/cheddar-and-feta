@@ -186,8 +186,7 @@ void Foe::foe_step() {
 
       bool diagonal = this->x_dir != 0 && this->y_dir != 0;
       this->walking_time =
-          diagonal ? (int)((float)this->speed * THOOM_DIAG_MULTIPLIER2)
-                   : this->speed;
+          diagonal ? (int)((float)this->speed * THOOM_SQRT2_F) : this->speed;
 
       float target_center_x = CENTER_TILE_X(this->target_x);
       float target_center_y = CENTER_TILE_X(this->target_y);
@@ -227,8 +226,7 @@ void Foe::foe_step() {
 
       bool diagonal = this->x_dir != 0 && this->y_dir != 0;
       this->walking_time =
-          diagonal ? (int)((float)this->speed * THOOM_DIAG_MULTIPLIER2)
-                   : this->speed;
+          diagonal ? (int)((float)this->speed * THOOM_SQRT2_F) : this->speed;
 
       float target_center_x = CENTER_TILE_X(this->target_x);
       float target_center_y = CENTER_TILE_X(this->target_y);
@@ -268,9 +266,9 @@ void Foe::foe_step() {
       this->start_ticks = thoom::game->ticks;
 
       bool diagonal = this->x_dir != 0 && this->y_dir != 0;
-      this->walking_time =
-          diagonal ? (int)((float)this->throw_speed * THOOM_DIAG_MULTIPLIER2)
-                   : this->throw_speed;
+      this->walking_time = diagonal
+                               ? (int)((float)this->throw_speed * THOOM_SQRT2_F)
+                               : this->throw_speed;
 
       float target_center_x = CENTER_TILE_X(this->target_x);
       float target_center_y = CENTER_TILE_X(this->target_y);

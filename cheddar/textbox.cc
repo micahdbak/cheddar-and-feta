@@ -3,11 +3,14 @@
 #include "audio_playback.h"
 #include "controller.h"
 #include "game.h"
+#include "renderer.h"
 
 Textbox* textbox;
 
 Textbox::Textbox(const std::string& text, const std::string& owner, int font,
                  int interval_ms) {
+  thoom::Renderer* renderer = thoom::Renderer::instance;
+
   this->owner = owner;
   this->text = text;
   this->last_ticks = thoom::game->ticks;
@@ -15,16 +18,20 @@ Textbox::Textbox(const std::string& text, const std::string& owner, int font,
   this->text_rect = {80.0f, 176.0f, 160.0f, 48.0f};
   this->font = font;
   this->interval_ms = interval_ms;
-  thoom::game->draw_ui_box(thoom::game->ui, BOX_CONTAINER, &this->box_rect);
+
+  renderer->draw_ui_box(thoom::game->ui_box, BOX_CONTAINER, thoom::game->ui,
+                        &this->box_rect);
 }
 
 Textbox::~Textbox() {
   // clear all ui
-  thoom::game->draw_rect(thoom::game->ui, NULL, 0, 0, 0, 0, SDL_BLENDMODE_NONE);
+  thoom::Renderer::instance->clear(thoom::game->ui, thoom::kMask);
 }
 
 void Textbox::step() {
   if (this->done) return;
+
+  thoom::Renderer* renderer = thoom::Renderer::instance;
 
   if (this->done_sentence) {
     if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
@@ -41,11 +48,12 @@ void Textbox::step() {
       this->running_text += text[j];
     }
     this->i = j;
-    thoom::game->draw_rect(thoom::game->ui, &this->text_rect, 24, 24, 24, 255,
-                           SDL_BLENDMODE_NONE);
-    thoom::game->draw_text(thoom::game->ui, this->running_text, this->font,
-                           this->text_rect.x, this->text_rect.y,
-                           this->text_rect.w);
+    renderer->draw_rect(thoom::game->ui, &this->text_rect,
+                        thoom::Colour{24, 24, 24}, SDL_BLENDMODE_NONE);
+    renderer->draw_text(thoom::game->ui, thoom::game->fonts[this->font],
+                        this->running_text, this->text_rect.x,
+                        this->text_rect.y, this->text_rect.w,
+                        thoom::Colour(24, 24, 24, 255));
     return;
   }
 
@@ -69,24 +77,22 @@ void Textbox::step() {
     if (c == '\n' || c == '\0') {
       this->done = c == '\0';
       this->done_sentence = c == '\n';
-      SDL_SetRenderTarget(thoom::renderer, thoom::game->ui);
-      SDL_FRect* prompt_src =
-          thoom::game->fonts[this->font]->src_rect + CHAR_TEXTBOX_NEXT - ' ';
+      thoom::Font* font = thoom::game->fonts[this->font];
+      SDL_FRect* prompt_src = font->src_rect + CHAR_TEXTBOX_NEXT - ' ';
       SDL_FRect prompt_dst = {
           this->text_rect.x + this->text_rect.w - prompt_src->w,
           this->text_rect.y + this->text_rect.h - prompt_src->h, prompt_src->w,
           prompt_src->h};
-      SDL_RenderTexture(thoom::renderer,
-                        thoom::game->fonts[this->font]->texture, prompt_src,
-                        &prompt_dst);
-      SDL_SetRenderTarget(thoom::renderer, thoom::game->screen);
+      renderer->draw_texture(thoom::game->ui, font->texture, prompt_src,
+                             &prompt_dst);
       return;
     }
 
-    thoom::game->draw_rect(thoom::game->ui, &this->text_rect, 24, 24, 24, 255,
-                           SDL_BLENDMODE_NONE);
-    thoom::game->draw_text(thoom::game->ui, this->running_text, this->font,
-                           this->text_rect.x, this->text_rect.y,
-                           this->text_rect.w);
+    renderer->draw_rect(thoom::game->ui, &this->text_rect,
+                        thoom::Colour{24, 24, 24}, SDL_BLENDMODE_NONE);
+    renderer->draw_text(thoom::game->ui, thoom::game->fonts[this->font],
+                        this->running_text, this->text_rect.x,
+                        this->text_rect.y, this->text_rect.w,
+                        thoom::Colour(24, 24, 24, 255));
   }
 }

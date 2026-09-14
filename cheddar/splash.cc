@@ -4,15 +4,18 @@
 
 #include "controller.h"
 #include "game.h"
+#include "renderer.h"
 #include "utils.h"
 
 Splash::Splash() {
-  this->overlay = SDL_CreateTexture(thoom::renderer, SDL_PIXELFORMAT_RGBA32,
-                                    SDL_TEXTUREACCESS_TARGET,
-                                    THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT);
-  this->tunnel = SDL_CreateTexture(thoom::renderer, SDL_PIXELFORMAT_RGBA32,
-                                   SDL_TEXTUREACCESS_TARGET, THOOM_SCREEN_WIDTH,
-                                   THOOM_SCREEN_HEIGHT);
+  thoom::Renderer* renderer = thoom::Renderer::instance;
+
+  this->overlay =
+      renderer->create_texture(THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
+                               SDL_PIXELFORMAT_RGBA8888, SDL_SCALEMODE_LINEAR);
+  this->tunnel =
+      renderer->create_texture(THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
+                               SDL_PIXELFORMAT_RGBA8888, SDL_SCALEMODE_LINEAR);
 
   this->overlay_rect.x = this->overlay_rect.y = 0.0f;
   this->overlay_rect.w = THOOM_SCREEN_WIDTH;
@@ -50,6 +53,8 @@ Splash::~Splash() {
 #define DISPLAY_FOR 4500
 
 void Splash::step() {
+  thoom::Renderer* renderer = thoom::Renderer::instance;
+
   this->timer = thoom::game->ticks - this->initial_timer;
 
   // skip splash
@@ -78,27 +83,20 @@ void Splash::step() {
   }
 
   if (alpha > 0) {
-    SDL_SetRenderTarget(thoom::renderer, this->overlay);
-    SDL_SetRenderDrawColor(thoom::renderer, 24, 24, 24, alpha);
-    SDL_SetRenderDrawBlendMode(thoom::renderer, SDL_BLENDMODE_NONE);
-    SDL_RenderFillRect(thoom::renderer, NULL);
-    SDL_SetRenderTarget(thoom::renderer, thoom::game->screen);
+    renderer->draw_rect(this->overlay, NULL, thoom::Colour{24, 24, 24, alpha},
+                        SDL_BLENDMODE_NONE);
   }
 
   if (this->animation == 4) {
     float perc = (float)this->timer / (float)DISPLAY_FOR;
 
-    SDL_SetRenderTarget(thoom::renderer, this->tunnel);
-    SDL_SetRenderDrawColor(thoom::renderer, 0, 0, 0, 0);
-    SDL_SetRenderDrawBlendMode(thoom::renderer, SDL_BLENDMODE_NONE);
-    SDL_RenderFillRect(thoom::renderer, NULL);
+    renderer->clear(this->tunnel, thoom::kMask);
     SDL_FRect tile_spr = {96.0f, 400.0f, 64.0f, 64.0f};
     SDL_FRect tile_dst = {float(THOOM_SCREEN_WIDTH / 2 - 32),
                           0.0f - perc * 128.0f, 64.0f,
                           (float)THOOM_SCREEN_HEIGHT + 128.0f};
-    SDL_RenderTextureTiled(thoom::renderer, this->sprite->texture, &tile_spr,
-                           1.0f, &tile_dst);
-    SDL_SetRenderTarget(thoom::renderer, thoom::game->screen);
+    renderer->draw_texture_tiled(this->tunnel, this->sprite->texture, &tile_spr,
+                                 1.0f, &tile_dst);
 
     // ants
 

@@ -2,6 +2,7 @@
 
 #include "controller.h"
 #include "game.h"
+#include "renderer.h"
 #include "save_data.h"
 #include "textbox.h"
 #include "utils.h"
@@ -68,13 +69,15 @@ void LoadSave::step() {
   }
 
   if (this->render) {
-    thoom::game->draw_rect(thoom::game->ui, NULL, 0, 0, 0, 0,
-                           SDL_BLENDMODE_NONE);
+    thoom::Renderer* renderer = thoom::Renderer::instance;
+
+    renderer->clear(thoom::game->ui, thoom::kMask);
 
     const int x = (THOOM_SCREEN_WIDTH - UI_WIDTH) / 2;
     const int y = (THOOM_SCREEN_HEIGHT - UI_HEIGHT) / 2;
     SDL_FRect ui_rect = {float(x), float(y), UI_WIDTH, UI_HEIGHT};
-    thoom::game->draw_ui_box(thoom::game->ui, BOX_CONTAINER, &ui_rect);
+    renderer->draw_ui_box(thoom::game->ui_box, BOX_CONTAINER, thoom::game->ui,
+                          &ui_rect);
 
     for (int i = save_start; i <= save_end; i++) {
       const int save_y = y + PADDING + (16 * (i - save_start));
@@ -85,25 +88,27 @@ void LoadSave::step() {
       highlight_rect.w = float(4 + UI_WIDTH - (2 * PADDING));
       highlight_rect.h = 14.0f;
 
-      thoom::game->draw_ui_box(thoom::game->ui,
-                               this->sel_save == i ? BOX_OUT_SEL : BOX_OUT,
-                               &highlight_rect);
+      renderer->draw_ui_box(thoom::game->ui_box,
+                            this->sel_save == i ? BOX_OUT_SEL : BOX_OUT,
+                            thoom::game->ui, &highlight_rect);
       std::string save_text =
           i >= this->summaries.size() ? NEW_SAVE_STR : this->summaries[i];
       save_text = std::to_string(i + 1) + ": " + save_text;
-      thoom::game->draw_text(thoom::game->ui, save_text, DEFAULT_FONT,
-                             x + PADDING + 2, save_y + 3, 0);
+      renderer->draw_text(thoom::game->ui, thoom::game->fonts[DEFAULT_FONT],
+                          save_text, x + PADDING + 2, save_y + 3, 0,
+                          thoom::Colour(24, 24, 24, 255));
     }
 
     if (save_start > 0) {
-      thoom::game->draw_text(thoom::game->ui, "^", SMALL_FONT,
-                             (THOOM_SCREEN_WIDTH / 2) - 3, y + 3, 0);
+      renderer->draw_text(thoom::game->ui, thoom::game->fonts[SMALL_FONT], "^",
+                          (THOOM_SCREEN_WIDTH / 2) - 3, y + 3, 0,
+                          thoom::Colour(24, 24, 24, 255));
     }
 
     if (save_end < this->summaries.size()) {
-      thoom::game->draw_text(thoom::game->ui, "}", SMALL_FONT,
-                             (THOOM_SCREEN_WIDTH / 2) - 3, y + UI_HEIGHT - 9,
-                             0);
+      renderer->draw_text(thoom::game->ui, thoom::game->fonts[SMALL_FONT], "}",
+                          (THOOM_SCREEN_WIDTH / 2) - 3, y + UI_HEIGHT - 9, 0,
+                          thoom::Colour(24, 24, 24, 255));
     }
 
     this->render = false;

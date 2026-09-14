@@ -50,10 +50,10 @@ ThrownCannonBall::~ThrownCannonBall() {
 
 void ThrownCannonBall::step() {
   float dx = float(this->x_dir) *
-             (this->y_dir != 0 ? THOOM_DIAG_MULTIPLIER : 1.0f) * 64.0f *
+             (this->y_dir != 0 ? THOOM_INV_SQRT2_F : 1.0f) * 64.0f *
              thoom::game->delta;
   float dy = float(this->y_dir) *
-             (this->x_dir != 0 ? THOOM_DIAG_MULTIPLIER : 1.0f) * 64.0f *
+             (this->x_dir != 0 ? THOOM_INV_SQRT2_F : 1.0f) * 64.0f *
              thoom::game->delta;
   float new_x = this->x + dx;
   float new_y = this->y + dy;

@@ -36,7 +36,7 @@ class HitBox : public thoom::Object {
                          float distance) {
     bool is_diagonal = x_dir != 0 && y_dir != 0;
     int hitbox_distance =
-        (int)(is_diagonal ? THOOM_DIAG_MULTIPLIER * distance : distance);
+        (int)(is_diagonal ? THOOM_INV_SQRT2_F * distance : distance);
     *x_off = x_dir * hitbox_distance;
     *y_off = y_dir * hitbox_distance;
   }

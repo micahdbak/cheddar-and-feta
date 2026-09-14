@@ -17,7 +17,7 @@ char nullbyte = '\0';
 
 NetReceiver::~NetReceiver() {
   if (!this->sprites.empty()) {
-    for (thoom::Game::SpriteRender& sprite : this->sprites) {
+    for (thoom::SpriteRender& sprite : this->sprites) {
       delete sprite.src_rect;
       delete sprite.dst_rect;
     }
@@ -56,7 +56,7 @@ void NetReceiver::step() {
 
   // if empty, reuse last frame
   if (msgs.empty()) {
-    for (thoom::Game::SpriteRender& sprite : this->sprites) {
+    for (thoom::SpriteRender& sprite : this->sprites) {
       thoom::game->push_sprite(sprite.tex_id, sprite.texture, sprite.src_rect,
                                sprite.dst_rect, sprite.y);
     }
@@ -74,7 +74,7 @@ void NetReceiver::step() {
   last_frame_ticks = thoom::game->ticks;
 
   // free stuff
-  for (thoom::Game::SpriteRender& sprite : this->sprites) {
+  for (thoom::SpriteRender& sprite : this->sprites) {
     delete sprite.src_rect;
     delete sprite.dst_rect;
   }
@@ -144,7 +144,7 @@ void NetReceiver::step() {
           FATAL_ERROR
         buff[1023] = '\0';
 
-        thoom::Game::SpriteRender sprite;
+        thoom::SpriteRender sprite;
         sprite.tex_id = buff;  // buff is tex_id and sprite path
 
         // don't double render feta
@@ -320,7 +320,7 @@ void NetReceiver::load_map(const std::string& map, const char* remaining_msgs) {
     this->skipped_messages += remaining_msgs;
   }
 
-  for (thoom::Game::SpriteRender& sprite : this->sprites) {
+  for (thoom::SpriteRender& sprite : this->sprites) {
     delete sprite.src_rect;
     delete sprite.dst_rect;
   }

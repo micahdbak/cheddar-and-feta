@@ -9,6 +9,7 @@
 #include "items/persister.h"
 #include "items/save.h"
 #include "items/tossed.h"
+#include "macros.h"
 #include "net_agent.h"
 #include "save_data.h"
 
@@ -412,9 +413,9 @@ void Cheddar::step() {
   // new coordinates calculated with direction moving, movement speed, and
   // diagonal multiplier (if necessary)
   if (mov_speed > 0.0f && (x_dir != 0 || y_dir != 0)) {
-    float dx = float(x_dir) * (y_dir != 0 ? THOOM_DIAG_MULTIPLIER : 1.0f) *
+    float dx = float(x_dir) * (y_dir != 0 ? THOOM_INV_SQRT2_F : 1.0f) *
                mov_speed * thoom::game->delta;
-    float dy = float(y_dir) * (x_dir != 0 ? THOOM_DIAG_MULTIPLIER : 1.0f) *
+    float dy = float(y_dir) * (x_dir != 0 ? THOOM_INV_SQRT2_F : 1.0f) *
                mov_speed * thoom::game->delta;
 
     // prevents bad delta time movement (imagine a single frame lag spike)

@@ -4,6 +4,7 @@
 #include "../../mouse.h"
 #include "abdomen.h"
 #include "audio_playback.h"
+#include "icon.h"
 #include "save_data.h"
 #include "segment.h"
 #include "utils.h"
@@ -204,8 +205,8 @@ void Spitter::step() {
         return;
       }
 
-      thoom::game->push_icon(SKULL_AND_BONES_ICON, this->x, this->y - 14.0f,
-                             &this->icon_src, &this->icon_dst);
+      push_icon(SKULL_AND_BONES_ICON, this->x, this->y - 14.0f, &this->icon_src,
+                &this->icon_dst);
 
       break;
 
@@ -222,9 +223,8 @@ void Spitter::step() {
 
   if (thoom::game->ticks - this->hurt_timer < 500 &&
       this->state != Foe::State::DEAD) {
-    thoom::game->push_health_bar(this->health, this->max_health, this->x,
-                                 this->y - 16.0f, &this->icon_src,
-                                 &this->icon_dst);
+    push_health_bar(this->health, this->max_health, this->x, this->y - 16.0f,
+                    &this->icon_src, &this->icon_dst);
   }
 
   if (thoom::game->ticks - this->direction_timer > 100 &&

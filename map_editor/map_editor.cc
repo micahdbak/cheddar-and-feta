@@ -3,9 +3,12 @@
 #include <vector>
 
 #include "bmp_texture.h"
+#include "constants.h"
 #include "controller.h"
 #include "font.h"
 #include "game.h"
+#include "hud.h"
+#include "icon.h"
 #include "map.h"
 #include "object.h"
 #include "renderer.h"
@@ -234,11 +237,11 @@ void Editor::step() {
     }
 
     SDL_FRect black_rect = {0.0f, 0.0f, float(THOOM_SCREEN_WIDTH), 11.0f};
-    renderer->draw_rect(thoom::game->ui, &black_rect, thoom::Colour(0, 0, 0),
+    renderer->draw_rect(Hud::instance->ui, &black_rect, thoom::Colour(0, 0, 0),
                         SDL_BLENDMODE_NONE);
-    renderer->draw_text(thoom::game->ui, thoom::game->fonts[MONO_FONT],
+    renderer->draw_text(Hud::instance->ui, thoom::game->fonts[MONO_FONT],
                         " h:write, j:tile, k:sheet, l:layer, x:export  ", 0, 0,
-                        0, thoom::Colour(24, 24, 24, 255));
+                        0, kBackground);
     char status_text[256];
     if (this->layer != COLLISION) {
       // foreground / background status text
@@ -256,11 +259,11 @@ void Editor::step() {
     }
     black_rect = {0.0f, float(THOOM_SCREEN_HEIGHT - 11),
                   float(THOOM_SCREEN_WIDTH), 11.0f};
-    renderer->draw_rect(thoom::game->ui, &black_rect, thoom::Colour(0, 0, 0),
+    renderer->draw_rect(Hud::instance->ui, &black_rect, thoom::Colour(0, 0, 0),
                         SDL_BLENDMODE_NONE);
-    renderer->draw_text(thoom::game->ui, thoom::game->fonts[MONO_FONT],
+    renderer->draw_text(Hud::instance->ui, thoom::game->fonts[MONO_FONT],
                         std::string(status_text), 0, THOOM_SCREEN_HEIGHT - 11,
-                        0, thoom::Colour(24, 24, 24, 255));
+                        0, kBackground);
 
     switch (thoom::local_controller.c) {
       case 'h':
@@ -432,7 +435,7 @@ void Editor::step() {
         break;
       default:
         this->user_inputting = false;
-        renderer->clear(thoom::game->ui, thoom::kMask);
+        renderer->clear(Hud::instance->ui, thoom::kMask);
         break;
     }
   }
@@ -448,7 +451,7 @@ void Editor::input_tile() {
   if (thoom::local_controller.is_hit(thoom::Button::SELECT) ||
       thoom::local_controller.is_hit(thoom::DIGIT)) {
     this->user_inputting = false;
-    renderer->clear(thoom::game->ui, thoom::kMask);
+    renderer->clear(Hud::instance->ui, thoom::kMask);
     return;
   }
 
@@ -538,11 +541,11 @@ void Editor::input_tile() {
   }
 
   SDL_FRect black_rect = {0.0f, 0.0f, float(THOOM_SCREEN_WIDTH), 11.0f};
-  renderer->draw_rect(thoom::game->ui, &black_rect, thoom::Colour(0, 0, 0),
+  renderer->draw_rect(Hud::instance->ui, &black_rect, thoom::Colour(0, 0, 0),
                       SDL_BLENDMODE_NONE);
-  renderer->draw_text(thoom::game->ui, thoom::game->fonts[MONO_FONT],
+  renderer->draw_text(Hud::instance->ui, thoom::game->fonts[MONO_FONT],
                       "<Return> to place, <0-9> to close", 0, 0, 0,
-                      thoom::Colour(24, 24, 24, 255));
+                      kBackground);
 }
 
 void Editor::input_sheet() {
@@ -553,7 +556,7 @@ void Editor::input_sheet() {
     if (text.empty()) {
       // close
       this->user_inputting = false;
-      thoom::Renderer::instance->clear(thoom::game->ui, thoom::kMask);
+      thoom::Renderer::instance->clear(Hud::instance->ui, thoom::kMask);
       return;
     } else if (nfields == 1 && sel_i < this->map.tilesheets.size()) {
       this->sel_tilesheet = sel_i;
@@ -587,11 +590,12 @@ void Editor::input_sheet() {
   }
   SDL_FRect black_rect = {0.0f, 0.0f, float(THOOM_SCREEN_WIDTH),
                           float(THOOM_SCREEN_HEIGHT)};
-  thoom::Renderer::instance->draw_rect(
-      thoom::game->ui, &black_rect, thoom::Colour(0, 0, 0), SDL_BLENDMODE_NONE);
-  thoom::Renderer::instance->draw_text(
-      thoom::game->ui, thoom::game->fonts[MONO_FONT], display_text, 0, 0, 0,
-      thoom::Colour(24, 24, 24, 255));
+  thoom::Renderer::instance->draw_rect(Hud::instance->ui, &black_rect,
+                                       thoom::Colour(0, 0, 0),
+                                       SDL_BLENDMODE_NONE);
+  thoom::Renderer::instance->draw_text(Hud::instance->ui,
+                                       thoom::game->fonts[MONO_FONT],
+                                       display_text, 0, 0, 0, kBackground);
 }
 
 void Editor::render() {
@@ -745,10 +749,9 @@ void Editor::render_objects() {
       if (sscanf(pair.second.c_str(), "%d,%d", &x, &y) == 2) {
         SDL_FRect dst_rect =
             SDL_FRect{float(x) - 8.0f, float(y) - 8.0f, 16.0f, 16.0f};
-        thoom::game->draw_icon(this->objects, EDITOR_OBJECT_ICON, &dst_rect);
+        draw_icon(EDITOR_OBJECT_ICON, this->objects, &dst_rect);
         renderer->draw_text(this->objects, thoom::game->fonts[SMALL_FONT],
-                            pair.first, x + 6, y - 4, 0,
-                            thoom::Colour(24, 24, 24, 255));
+                            pair.first, x + 6, y - 4, 0, kBackground);
       }
     }
   }

@@ -40,8 +40,10 @@ class FoeSpawnerFactory : public thoom::ObjectFactory {
     const char* arr = options.c_str();
 
     int x = 0, y = 0, spawner_id = 0, animation = 0;
-    if (4 != sscanf(arr, "%d,%d,%d,%d", &x, &y, &spawner_id, &animation))
-      FATAL_ERROR
+    if (4 != sscanf(arr, "%d,%d,%d,%d", &x, &y, &spawner_id, &animation)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     // skip until null byte or space
     while (*arr != '\0' && *arr != ' ') arr++;

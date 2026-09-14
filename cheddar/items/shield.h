@@ -21,7 +21,10 @@ class DroppedShieldFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) override {
     int x, y;
-    if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
+    if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     return new DroppedShield(float(x), float(y));
   }

@@ -34,8 +34,10 @@ ItemPersister::ItemPersister() {
 
       char item_id[128];
       int item_x, item_y;
-      if (3 != sscanf(buff, "%127[^,],%d,%d", item_id, &item_x, &item_y))
-        FATAL_ERROR
+      if (3 != sscanf(buff, "%127[^,],%d,%d", item_id, &item_x, &item_y)) {
+        // TODO(micahdbak): error
+        std::exit(1);
+      }
 
       item_id[127] = '\0';
 

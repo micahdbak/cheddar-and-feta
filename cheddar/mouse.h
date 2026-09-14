@@ -7,6 +7,7 @@
 #include "foes/foe.h"
 #include "game.h"
 #include "hitbox.h"
+#include "hud.h"
 #include "object.h"
 #include "sprite.h"
 
@@ -52,10 +53,8 @@ class Mouse : public thoom::Object {
   virtual void signal_down() = 0;
 
   static bool check_collision(float x, float y);
-  static std::string encode_items(
-      const std::vector<thoom::Game::HudItem>& items);
-  static std::vector<thoom::Game::HudItem> read_items(
-      const std::string& items_s);
+  static std::string encode_items(const std::vector<Hud::Item>& items);
+  static std::vector<Hud::Item> read_items(const std::string& items_s);
   static Mouse* closest_mouse(float x, float y, float min_distance,
                               bool forced);
 

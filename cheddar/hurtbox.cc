@@ -2,6 +2,7 @@
 
 #include "foes/foe.h"
 #include "game.h"
+#include "icon.h"
 #include "mouse.h"
 
 std::vector<HurtBox*> hurtboxes;
@@ -154,8 +155,7 @@ void HurtBox::step() {
 #ifdef ONSCREEN_DEBUG
   this->dst_rect = {(float)this->bounding_box.x, (float)this->bounding_box.y,
                     (float)this->bounding_box.w, (float)this->bounding_box.h};
-  thoom::game->push_sprite("sprites/icons.bmp", thoom::game->icons,
-                           &this->src_rect, &this->dst_rect,
-                           THOOM_SCREEN_HEIGHT);
+  thoom::game->push_sprite("sprites/icons.bmp", icons, &this->src_rect,
+                           &this->dst_rect, THOOM_SCREEN_HEIGHT);
 #endif
 }

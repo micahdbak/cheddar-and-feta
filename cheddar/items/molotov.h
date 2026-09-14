@@ -21,7 +21,10 @@ class DroppedMolotovFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) override {
     int x, y;
-    if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
+    if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     return new DroppedMolotov(float(x), float(y));
   }
@@ -55,8 +58,10 @@ class ThrownMolotovFactory : public thoom::ObjectFactory {
   thoom::Object* create(const std::string& options) {
     int x, y, x_dir = 0, y_dir = 0, from_id = -1;
     if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
-                    &from_id))
-      FATAL_ERROR
+                    &from_id)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     return new ThrownMolotov((float)x, (float)y, x_dir, y_dir, from_id);
   }

@@ -85,8 +85,10 @@ class HitBoxFactory : public thoom::ObjectFactory {
     if (12 != sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
                      &hitsource_owner_id, &hurtbox_owner_id, &x_off, &y_off, &w,
                      &h, &damage, &cooldown_ms, &delete_after_ms,
-                     &shared_cooldowns, &shared_id, &single_use))
-      FATAL_ERROR
+                     &shared_cooldowns, &shared_id, &single_use)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     thoom::Object* source_obj = thoom::game->get_object(hitsource_owner_id);
     if (source_obj == nullptr) return nullptr;

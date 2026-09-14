@@ -39,8 +39,10 @@ class CheeseFactory : public thoom::ObjectFactory {
 
     if (fields == 2) {
       amount = 1;
-    } else if (fields != 3)
-      FATAL_ERROR
+    } else if (fields != 3) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     return new Cheese(float(x), float(y), amount);
   }

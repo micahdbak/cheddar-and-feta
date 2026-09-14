@@ -1,15 +1,18 @@
 #include <iostream>
 #include <string>
 
+#include "constants.h"
 #include "controller.h"
 #include "feta.h"
 #include "font.h"
 #include "game.h"
+#include "hud.h"
 #include "item.h"
 #include "net_agent.h"
 #include "net_receiver.h"
 #include "net_sender.h"
 #include "renderer.h"
+#include "ui_box.h"
 #include "utils.h"
 
 #define INIT_OBJ "load_save"
@@ -135,24 +138,20 @@ void Init::step() {
         renderer->clear(this->ui, thoom::kMask);
 
         SDL_FRect code_ui_box = {80.0f, 64.0f, 160.0f, 32.0f};
-        renderer->draw_ui_box(thoom::game->ui_box, BOX_CONTAINER, this->ui,
-                              &code_ui_box);
+        draw_ui_box(UI_BOX_CONTAINER, this->ui, &code_ui_box);
 
         std::string prompt = "Please enter the connection code.";
         int prompt_w = thoom::game->fonts[DEFAULT_FONT]->text_width(prompt);
         renderer->draw_text(this->ui, thoom::game->fonts[DEFAULT_FONT], prompt,
-                            160 - prompt_w / 2, 70, 0,
-                            thoom::Colour(24, 24, 24, 255));
+                            160 - prompt_w / 2, 70, 0, kBackground);
 
         renderer->draw_text(this->ui, thoom::game->fonts[SMALL_FONT],
-                            "Code:", 130, 82, 0,
-                            thoom::Colour(24, 24, 24, 255));
+                            "Code:", 130, 82, 0, kBackground);
         renderer->draw_text(this->ui, thoom::game->fonts[CODE_FONT], this->code,
-                            154, 81, 0, thoom::Colour(24, 24, 24, 255));
+                            154, 81, 0, kBackground);
 
         SDL_FRect ui_box = {80.0f, 104.0f, 160.0f, 64.0f};
-        renderer->draw_ui_box(thoom::game->ui_box, BOX_CHAR_CONT, this->ui,
-                              &ui_box);
+        draw_ui_box(UI_BOX_CHAR_CONT, this->ui, &ui_box);
 
         const int start_x = 100;
         const int start_y = 112;
@@ -162,9 +161,8 @@ void Init::step() {
           int y = start_y + (i / cols) * 12;
 
           SDL_FRect box_rect = {(float)x, (float)y, 12.0f, 12.0f};
-          renderer->draw_ui_box(thoom::game->ui_box,
-                                i == this->sel_c ? BOX_CHAR_SEL : BOX_CHAR_BOX,
-                                this->ui, &box_rect);
+          draw_ui_box(i == this->sel_c ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX,
+                      this->ui, &box_rect);
           char c = code_charset[i];
           SDL_FRect src_rect = thoom::game->fonts[CODE_FONT]->src_rect[c - ' '];
 
@@ -182,14 +180,13 @@ void Init::step() {
 
         if (valid_code) {
           SDL_FRect enter_box = {172.0f, 147.0f, 18.0f, 12.0f};
-          renderer->draw_ui_box(thoom::game->ui_box,
-                                36 == this->sel_c ? BOX_CHAR_SEL : BOX_CHAR_BOX,
-                                this->ui, &enter_box);
+          draw_ui_box(36 == this->sel_c ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX,
+                      this->ui, &enter_box);
           renderer->draw_text(
               this->ui,
               thoom::game
                   ->fonts[36 == this->sel_c ? CODE_FONT : CODE_GRAY_FONT],
-              "OK", 175, 148, 0, thoom::Colour(24, 24, 24, 255));
+              "OK", 175, 148, 0, kBackground);
         }
 
         if (this->sel_c == 36) {
@@ -221,12 +218,10 @@ void Init::step() {
         renderer->clear(this->ui, thoom::kMask);
 
         SDL_FRect waiting_box = {76.0f, 100.0f, 168.0f, 40.0f};
-        renderer->draw_ui_box(thoom::game->ui_box, BOX_CHAR_CONT, this->ui,
-                              &waiting_box);
+        draw_ui_box(UI_BOX_CHAR_CONT, this->ui, &waiting_box);
 
         SDL_FRect waiting_disp_box = {84.0f, 108.0f, 152.0f, 24.0f};
-        renderer->draw_ui_box(thoom::game->ui_box, BOX_CHAR_DISP, this->ui,
-                              &waiting_disp_box);
+        draw_ui_box(UI_BOX_CHAR_DISP, this->ui, &waiting_disp_box);
 
         std::string waiting = "Connecting with code " + this->code + "...";
         if (net_state == thoom::NetworkAgent::State::CONNECTED) {
@@ -235,14 +230,13 @@ void Init::step() {
 
         int waiting_w = thoom::game->fonts[DEFAULT_FONT]->text_width(waiting);
         renderer->draw_text(this->ui, thoom::game->fonts[DEFAULT_FONT], waiting,
-                            160 - waiting_w / 2, 116, 0,
-                            thoom::Colour(24, 24, 24, 255));
+                            160 - waiting_w / 2, 116, 0, kBackground);
       }
 
       // no connection after 15 seconds
       if (thoom::game->ticks - this->waiting_ticks > 15000) {
         thoom::net_agent->try_reset();
-        thoom::game->display_notification("That code didn't work.");
+        Hud::instance->display_notification("That code didn't work.");
         this->waiting_ticks = 0;
       }
 

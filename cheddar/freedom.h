@@ -21,7 +21,10 @@ class FreedomFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) {
     int x = 0, y = 0;
-    if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
+    if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     return new Freedom(x, y);
   }

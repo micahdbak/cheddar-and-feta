@@ -35,8 +35,10 @@ void NetReceiver::step() {
         case MSG_USE_ITEM: {
           int x, y, x_dir, y_dir;
           if (5 != sscanf(arr + 1, "%1023s %d,%d,%d,%d", buff, &x, &y, &x_dir,
-                          &y_dir))
-            FATAL_ERROR
+                          &y_dir)) {
+            // TODO(micahdbak): error
+            std::exit(1);
+          }
 
           std::string options = UseItem::Options(x, y, x_dir, y_dir, feta->id);
           thoom::game->push_object(std::string(buff) + USE_OBJ, options);
@@ -46,8 +48,10 @@ void NetReceiver::step() {
         case MSG_TOSS_ITEM: {
           int x, y, x_dir, y_dir;
           if (5 != sscanf(arr + 1, "%1023s %d,%d,%d,%d", buff, &x, &y, &x_dir,
-                          &y_dir))
-            FATAL_ERROR
+                          &y_dir)) {
+            // TODO(micahdbak): error
+            std::exit(1);
+          }
 
           std::string options =
               TossedItem::Options(x, y, x_dir, y_dir, true, buff);
@@ -57,8 +61,10 @@ void NetReceiver::step() {
 
         case MSG_PUSH_HITBOX: {
           int x_dir, y_dir, x_off, y_off;
-          if (3 != sscanf(arr + 1, "%1023s %d,%d", buff, &x_dir, &y_dir))
-            FATAL_ERROR
+          if (3 != sscanf(arr + 1, "%1023s %d,%d", buff, &x_dir, &y_dir)) {
+            // TODO(micahdbak): error
+            std::exit(1);
+          }
 
           std::string sel_item_id = ITEM_NONE;
           if (item_info.find(std::string(buff)) != item_info.end()) {
@@ -78,8 +84,10 @@ void NetReceiver::step() {
           char x_str[256], y_str[256];
           int animation, frame_i, which_emote;
           if (5 != sscanf(arr + 1, "%[^,],%[^,],%d,%d,%d", x_str, y_str,
-                          &animation, &frame_i, &which_emote))
-            FATAL_ERROR
+                          &animation, &frame_i, &which_emote)) {
+            // TODO(micahdbak): error
+            std::exit(1);
+          }
 
           feta->x = thoom::str_to_float(x_str);
           feta->y = thoom::str_to_float(y_str);
@@ -96,8 +104,10 @@ void NetReceiver::step() {
           int gain_i, x, y;
           float gain;
 
-          if (4 != sscanf(arr + 1, "%1023s %d,%d,%d", buff, &gain_i, &x, &y))
-            FATAL_ERROR
+          if (4 != sscanf(arr + 1, "%1023s %d,%d,%d", buff, &gain_i, &x, &y)) {
+            // TODO(micahdbak): error
+            std::exit(1);
+          }
 
           gain = (float)gain_i / 10.0f;
 

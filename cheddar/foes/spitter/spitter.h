@@ -79,8 +79,10 @@ class SpitterFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) {
     int x, y, spawner_id;
-    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id))
-      FATAL_ERROR
+    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     return new Spitter(x, y, spawner_id);
   }

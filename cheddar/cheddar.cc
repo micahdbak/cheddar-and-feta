@@ -3,6 +3,7 @@
 #include "audio_playback.h"
 #include "feta.h"
 #include "game.h"
+#include "hud.h"
 #include "hurtbox.h"
 #include "items/cheese.h"
 #include "items/item.h"
@@ -15,7 +16,10 @@
 
 Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
                  std::string options) {
-  if (cheddar != nullptr) FATAL_ERROR
+  if (cheddar != nullptr) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
   cheddar = this;
   this->is_feta = false;
 
@@ -26,7 +30,7 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
   if (!items_s.empty()) {
     this->items = Mouse::read_items(items_s);
   } else {
-    this->items.push_back(thoom::Game::HudItem{ITEM_SAVE, 1});
+    this->items.push_back(Hud::Item{ITEM_SAVE, 1});
   }
 
   int feta_x = 0, feta_y = 0, feta_animation = 0;
@@ -44,8 +48,10 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
     thoom::save.puti(MOUSE_SPAWN_AT, 0);  // unset
 
     // validate
-    if (coordinates.empty() || coord < 0 || coord >= coordinates.size())
-      FATAL_ERROR
+    if (coordinates.empty() || coord < 0 || coord >= coordinates.size()) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     this->x = coordinates[coord].x;
     this->y = coordinates[coord].y;
@@ -124,8 +130,8 @@ void Cheddar::step() {
     sel_item_count = this->items[this->sel_item].count;
   }
 
-  thoom::game->draw_hud(thoom::game->ui, this->items, this->sel_item,
-                        this->health, this->max_health);
+  Hud::instance->draw_items(this->items, this->sel_item, this->health,
+                            this->max_health);
 
   // ---- state management ----
 
@@ -567,9 +573,12 @@ void Cheddar::attack(int damage) {
 }
 
 void Cheddar::push_item(const std::string& item_id) {
-  if (item_info.find(item_id) == item_info.end()) FATAL_ERROR
+  if (item_info.find(item_id) == item_info.end()) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
 
-  thoom::Game::HudItem new_item;
+  Hud::Item new_item;
   new_item.item_id = item_id;
   new_item.count = 1;
 
@@ -594,7 +603,7 @@ void Cheddar::push_item(const std::string& item_id) {
 }
 
 void Cheddar::push_cheese(int amount) {
-  thoom::Game::HudItem new_item;
+  Hud::Item new_item;
   new_item.item_id = ITEM_CHEESE;
   new_item.count = amount;
 

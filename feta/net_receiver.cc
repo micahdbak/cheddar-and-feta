@@ -140,8 +140,10 @@ void NetReceiver::step() {
         if (10 != sscanf(arr + 1, "%1023s %d,%d,%d,%d %d,%d,%d,%d %d", buff,
                          &src_rect.x, &src_rect.y, &src_rect.w, &src_rect.h,
                          &dst_rect.x, &dst_rect.y, &dst_rect.w, &dst_rect.h,
-                         &depth_offset))
-          FATAL_ERROR
+                         &depth_offset)) {
+          // TODO(micahdbak): error
+          std::exit(1);
+        }
         buff[1023] = '\0';
 
         thoom::SpriteRender sprite;
@@ -175,8 +177,10 @@ void NetReceiver::step() {
         int gain_i, x, y;
         float gain;
 
-        if (4 != sscanf(arr + 1, "%1023s %d,%d,%d", buff, &gain_i, &x, &y))
-          FATAL_ERROR
+        if (4 != sscanf(arr + 1, "%1023s %d,%d,%d", buff, &gain_i, &x, &y)) {
+          // TODO(micahdbak): error
+          std::exit(1);
+        }
         gain = (float)gain_i / 10.0f;
 
         thoom::play_audio(std::string(buff), gain, (float)x, (float)y, true);
@@ -200,8 +204,10 @@ bool NetReceiver::handle_important_message(const char* arr) {
         int animation;
         char x_str[256], y_str[256];
         if (4 != sscanf(arr + 1, "%255[^,],%255[^,],%d %1023[^\n]\n", x_str,
-                        y_str, &animation, buff))
-          FATAL_ERROR
+                        y_str, &animation, buff)) {
+          // TODO(micahdbak): error
+          std::exit(1);
+        }
         x_str[255] = y_str[255] = buff[1023] = '\0';
 
         feta->x = thoom::str_to_float(x_str);
@@ -276,7 +282,10 @@ bool NetReceiver::handle_important_message(const char* arr) {
     case MSG_THROW:
       if (feta != nullptr) {
         int throw_x, throw_y;
-        if (2 != sscanf(arr + 1, "%d,%d", &throw_x, &throw_y)) FATAL_ERROR
+        if (2 != sscanf(arr + 1, "%d,%d", &throw_x, &throw_y)) {
+          // TODO(micahdbak): error
+          std::exit(1);
+        }
         feta->set_throw(throw_x, throw_y);
       } else if (this->just_pushed_feta) {
         sscanf(arr, "%1023[^\n]\n", buff);
@@ -299,7 +308,10 @@ bool NetReceiver::handle_important_message(const char* arr) {
 
     case MSG_COLLISION:
       int coord, collider;
-      if (2 != sscanf(arr + 1, "%d,%d", &coord, &collider)) FATAL_ERROR
+      if (2 != sscanf(arr + 1, "%d,%d", &coord, &collider)) {
+        // TODO(micahdbak): error
+        std::exit(1);
+      }
 
       if (coord >= 0 && coord < thoom::game->cols * thoom::game->rows &&
           collider >= 0 && collider < thoom::n_MapColliders) {

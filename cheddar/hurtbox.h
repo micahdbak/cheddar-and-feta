@@ -70,8 +70,10 @@ class HurtBoxFactory : public thoom::ObjectFactory {
   thoom::Object* create(const std::string& options) {
     int owner_id, x_off, y_off, w, h;
     if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &owner_id, &x_off,
-                    &y_off, &w, &h))
-      FATAL_ERROR
+                    &y_off, &w, &h)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     return new HurtBox(owner_id, x_off, y_off, w, h);
   }

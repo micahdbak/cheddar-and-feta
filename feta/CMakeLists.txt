@@ -6,4 +6,4 @@ add_executable(feta
   net_sender.cc
 )
 target_include_directories(feta PRIVATE .)
-target_link_libraries(feta PRIVATE thoom sanitizers)
+target_link_libraries(feta PRIVATE shared sanitizers)

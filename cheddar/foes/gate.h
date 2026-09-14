@@ -32,9 +32,11 @@ class FoeGateFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) {
     int x = 0, y = 0, spawner_id = 0, animation = 0;
-    if (4 !=
-        sscanf(options.c_str(), "%d,%d,%d,%d", &x, &y, &spawner_id, &animation))
-      FATAL_ERROR
+    if (4 != sscanf(options.c_str(), "%d,%d,%d,%d", &x, &y, &spawner_id,
+                    &animation)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     return new FoeGate(x, y, spawner_id, animation);
   }

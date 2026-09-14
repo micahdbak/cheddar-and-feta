@@ -25,8 +25,10 @@ class LadderFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) override {
     int x, y, which_coord;
-    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &which_coord))
-      FATAL_ERROR
+    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &which_coord)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     const char* map = options.c_str();
     while (*map != '\0' && *map != ' ') map++;

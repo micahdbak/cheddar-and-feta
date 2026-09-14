@@ -1,9 +1,12 @@
 #include "textbox.h"
 
 #include "audio_playback.h"
+#include "constants.h"
 #include "controller.h"
 #include "game.h"
+#include "hud.h"
 #include "renderer.h"
+#include "ui_box.h"
 
 Textbox* textbox;
 
@@ -19,13 +22,12 @@ Textbox::Textbox(const std::string& text, const std::string& owner, int font,
   this->font = font;
   this->interval_ms = interval_ms;
 
-  renderer->draw_ui_box(thoom::game->ui_box, BOX_CONTAINER, thoom::game->ui,
-                        &this->box_rect);
+  draw_ui_box(UI_BOX_CONTAINER, Hud::instance->ui, &this->box_rect);
 }
 
 Textbox::~Textbox() {
   // clear all ui
-  thoom::Renderer::instance->clear(thoom::game->ui, thoom::kMask);
+  thoom::Renderer::instance->clear(Hud::instance->ui, thoom::kMask);
 }
 
 void Textbox::step() {
@@ -48,12 +50,11 @@ void Textbox::step() {
       this->running_text += text[j];
     }
     this->i = j;
-    renderer->draw_rect(thoom::game->ui, &this->text_rect,
-                        thoom::Colour{24, 24, 24}, SDL_BLENDMODE_NONE);
-    renderer->draw_text(thoom::game->ui, thoom::game->fonts[this->font],
+    renderer->draw_rect(Hud::instance->ui, &this->text_rect, kBackground,
+                        SDL_BLENDMODE_NONE);
+    renderer->draw_text(Hud::instance->ui, thoom::game->fonts[this->font],
                         this->running_text, this->text_rect.x,
-                        this->text_rect.y, this->text_rect.w,
-                        thoom::Colour(24, 24, 24, 255));
+                        this->text_rect.y, this->text_rect.w, kBackground);
     return;
   }
 
@@ -83,16 +84,15 @@ void Textbox::step() {
           this->text_rect.x + this->text_rect.w - prompt_src->w,
           this->text_rect.y + this->text_rect.h - prompt_src->h, prompt_src->w,
           prompt_src->h};
-      renderer->draw_texture(thoom::game->ui, font->texture, prompt_src,
+      renderer->draw_texture(Hud::instance->ui, font->texture, prompt_src,
                              &prompt_dst);
       return;
     }
 
-    renderer->draw_rect(thoom::game->ui, &this->text_rect,
-                        thoom::Colour{24, 24, 24}, SDL_BLENDMODE_NONE);
-    renderer->draw_text(thoom::game->ui, thoom::game->fonts[this->font],
+    renderer->draw_rect(Hud::instance->ui, &this->text_rect, kBackground,
+                        SDL_BLENDMODE_NONE);
+    renderer->draw_text(Hud::instance->ui, thoom::game->fonts[this->font],
                         this->running_text, this->text_rect.x,
-                        this->text_rect.y, this->text_rect.w,
-                        thoom::Colour(24, 24, 24, 255));
+                        this->text_rect.y, this->text_rect.w, kBackground);
   }
 }

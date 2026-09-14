@@ -8,7 +8,10 @@
 #include "save_data.h"
 
 Feta::Feta(int x, int y, int animation) {
-  if (feta != nullptr) FATAL_ERROR
+  if (feta != nullptr) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
   feta = this;
   this->is_feta = true;
 
@@ -122,9 +125,12 @@ void Feta::attack(int damage) {
 void Feta::push_item(const std::string& item_id) {
   NetSender::send_message(MSG_PUSH_ITEM, item_id);
 
-  if (item_info.find(item_id) == item_info.end()) FATAL_ERROR
+  if (item_info.find(item_id) == item_info.end()) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
 
-  thoom::Game::HudItem new_item;
+  Hud::Item new_item;
   new_item.item_id = item_id;
   new_item.count = 1;
 
@@ -149,7 +155,7 @@ void Feta::push_item(const std::string& item_id) {
 void Feta::push_cheese(int amount) {
   NetSender::send_message(MSG_PUSH_CHEESE, std::to_string(amount));
 
-  thoom::Game::HudItem new_item;
+  Hud::Item new_item;
   new_item.item_id = ITEM_CHEESE;
   new_item.count = amount;
 

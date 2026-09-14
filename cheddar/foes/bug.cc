@@ -7,6 +7,7 @@
 #include "audio_playback.h"
 #include "game.h"
 #include "hurtbox.h"
+#include "icon.h"
 #include "mouse.h"
 #include "save_data.h"
 
@@ -129,9 +130,9 @@ void FoeBug::step() {
         return;
       }
 
-      thoom::game->push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
-                             this->y - 14.0f + this->off_y, &this->icon_src,
-                             &this->icon_dst);
+      push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
+                this->y - 14.0f + this->off_y, &this->icon_src,
+                &this->icon_dst);
 
       break;
 
@@ -145,9 +146,9 @@ void FoeBug::step() {
   if (thoom::game->ticks - this->hurt_timer < 333 &&
       this->state != Foe::State::DEAD) {
     this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
-    thoom::game->push_health_bar(
-        this->health, this->max_health, this->x + this->off_x,
-        this->y - 16.0f + this->off_y, &this->icon_src, &this->icon_dst);
+    push_health_bar(this->health, this->max_health, this->x + this->off_x,
+                    this->y - 16.0f + this->off_y, &this->icon_src,
+                    &this->icon_dst);
   }
 
   this->prev_state = this->state;

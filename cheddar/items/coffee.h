@@ -23,7 +23,10 @@ class DroppedCoffeeBeanFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) override {
     int x, y;
-    if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) FATAL_ERROR
+    if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     return new DroppedCoffeeBean(float(x), float(y));
   }
@@ -62,8 +65,10 @@ class UsedCoffeeBeanFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) override {
     int from_id;
-    if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &from_id))
-      FATAL_ERROR
+    if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &from_id)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     bool is_feta = feta != nullptr && feta->id == from_id;
 

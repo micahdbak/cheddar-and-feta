@@ -3,6 +3,7 @@
 #include "audio_playback.h"
 #include "controller.h"
 #include "game.h"
+#include "hud.h"
 #include "item.h"
 #include "net_agent.h"
 #include "net_receiver.h"
@@ -12,9 +13,11 @@
 
 Feta* feta = nullptr;
 
-Feta::Feta(float x, float y, int animation,
-           std::vector<thoom::Game::HudItem> items) {
-  if (feta != nullptr) FATAL_ERROR
+Feta::Feta(float x, float y, int animation, std::vector<Hud::Item> items) {
+  if (feta != nullptr) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
   feta = this;
 
   this->x = x;
@@ -77,8 +80,8 @@ void Feta::step() {
     sel_item_count = this->items[this->sel_item].count;
   }
 
-  thoom::game->draw_hud(thoom::game->ui, this->items, this->sel_item,
-                        this->health, this->max_health);
+  Hud::instance->draw_items(this->items, this->sel_item, this->health,
+                            this->max_health);
 
   // ---- state management ----
 
@@ -505,9 +508,12 @@ void Feta::attack(int damage) {
 }
 
 void Feta::push_item(const std::string& item_id) {
-  if (item_info.find(item_id) == item_info.end()) FATAL_ERROR
+  if (item_info.find(item_id) == item_info.end()) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
 
-  thoom::Game::HudItem new_item;
+  Hud::Item new_item;
   new_item.item_id = item_id;
   new_item.count = 1;
 
@@ -532,7 +538,7 @@ void Feta::push_item(const std::string& item_id) {
 }
 
 void Feta::push_cheese(int amount) {
-  thoom::Game::HudItem new_item;
+  Hud::Item new_item;
   new_item.item_id = ITEM_CHEESE;
   new_item.count = amount;
 

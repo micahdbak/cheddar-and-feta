@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "game.h"
+#include "hud.h"
 #include "object.h"
 #include "save_data.h"
 #include "sprite.h"
@@ -25,15 +26,14 @@
 
 namespace Mouse {
 bool check_collision(float x, float y);
-std::string encode_items(const std::vector<thoom::Game::HudItem>& items);
-std::vector<thoom::Game::HudItem> read_items(const std::string& items_s);
+std::string encode_items(const std::vector<Hud::Item>& items);
+std::vector<Hud::Item> read_items(const std::string& items_s);
 std::string audio_msg(const char* wav_path, float gain, int x, int y);
 };  // namespace Mouse
 
 class Feta : public thoom::Object {
  public:
-  Feta(float x, float y, int animation,
-       std::vector<thoom::Game::HudItem> items);
+  Feta(float x, float y, int animation, std::vector<Hud::Item> items);
   ~Feta();
 
   void step() override;
@@ -61,7 +61,7 @@ class Feta : public thoom::Object {
   SDL_FRect dst_rect, emote_rect;
 
   int health = 10, max_health = 10;
-  std::vector<thoom::Game::HudItem> items;
+  std::vector<Hud::Item> items;
   int sel_item = -1;
 
   int throw_x = 0, throw_y = 0;
@@ -89,8 +89,10 @@ class FetaFactory : public thoom::ObjectFactory {
 
     if (fields == 3) {
       items_s[0] = '\0';
-    } else if (fields != 4)
-      FATAL_ERROR
+    } else if (fields != 4) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     return new Feta(thoom::str_to_float(x_str), thoom::str_to_float(y_str),
                     animation, Mouse::read_items(items_s));

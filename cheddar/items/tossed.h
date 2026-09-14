@@ -37,8 +37,10 @@ class TossedItemFactory : public thoom::ObjectFactory {
   thoom::Object* create(const std::string& options) {
     int x, y, x_dir, y_dir, from_feta;
     if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
-                    &from_feta))
-      FATAL_ERROR
+                    &from_feta)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     const char* arr = options.c_str();
     while (*arr != ' ' && *arr != '\0') arr++;

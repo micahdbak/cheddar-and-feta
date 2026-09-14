@@ -40,8 +40,10 @@ class SpitterSegmentFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) {
     int parent_id, segment_id;
-    if (2 != sscanf(options.c_str(), "%d,%d", &parent_id, &segment_id))
-      FATAL_ERROR
+    if (2 != sscanf(options.c_str(), "%d,%d", &parent_id, &segment_id)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     thoom::Object* obj = thoom::game->get_object(parent_id);
     Spitter* spitter;

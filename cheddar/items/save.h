@@ -1,6 +1,7 @@
 #pragma once
 
 #include "game.h"
+#include "hud.h"
 #include "mouse.h"
 #include "object.h"
 #include "save_data.h"
@@ -22,7 +23,7 @@ class ItemSaveUse : public thoom::Object {
     if (cheddar != nullptr) cheddar->push_item(ITEM_SAVE);
 
     thoom::game->save_objects();
-    thoom::game->display_notification(
+    Hud::instance->display_notification(
         "Saved to file " + std::to_string(thoom::save.geti(SAVE_FILE) + 1) +
         ".");
     thoom::save.write_file(thoom::save.geti(SAVE_FILE));
@@ -39,7 +40,10 @@ class ItemSaveUseFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) {
     int obj_id;
-    if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &obj_id)) FATAL_ERROR
+    if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &obj_id)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     bool is_feta = feta != nullptr && feta->id == obj_id;
 

@@ -37,7 +37,10 @@ class SpitterAbdomenFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) {
     int parent_id;
-    if (1 != sscanf(options.c_str(), "%d", &parent_id)) FATAL_ERROR
+    if (1 != sscanf(options.c_str(), "%d", &parent_id)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     thoom::Object* obj = thoom::game->get_object(parent_id);
     Spitter* spitter;

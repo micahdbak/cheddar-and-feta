@@ -5,6 +5,7 @@
 #include "audio_playback.h"
 #include "game.h"
 #include "hurtbox.h"
+#include "icon.h"
 #include "save_data.h"
 
 FoeFrog::FoeFrog(int x, int y, int spawner_id)
@@ -127,9 +128,9 @@ void FoeFrog::step() {
         return;
       }
 
-      thoom::game->push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
-                             this->y - 24.0f + this->off_y, &this->icon_src,
-                             &this->icon_dst);
+      push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
+                this->y - 24.0f + this->off_y, &this->icon_src,
+                &this->icon_dst);
 
       break;
 
@@ -143,9 +144,9 @@ void FoeFrog::step() {
       this->state != Foe::State::DEAD) {
     this->sprite->set_animation(ACTION_ANIMATION + this->_displayed_direction);
     this->sprite->set_frame(0);
-    thoom::game->push_health_bar(
-        this->health, this->max_health, this->x + this->off_x,
-        this->y - 24.0f + this->off_y, &this->icon_src, &this->icon_dst);
+    push_health_bar(this->health, this->max_health, this->x + this->off_x,
+                    this->y - 24.0f + this->off_y, &this->icon_src,
+                    &this->icon_dst);
   }
 
   this->prev_state = this->state;

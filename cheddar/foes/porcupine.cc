@@ -7,6 +7,7 @@
 #include "audio_playback.h"
 #include "game.h"
 #include "hurtbox.h"
+#include "icon.h"
 #include "mouse.h"
 #include "save_data.h"
 
@@ -106,9 +107,9 @@ void FoePorcupine::step() {
         return;
       }
 
-      thoom::game->push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
-                             this->y - 16.0f + this->off_y, &this->icon_src,
-                             &this->icon_dst);
+      push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
+                this->y - 16.0f + this->off_y, &this->icon_src,
+                &this->icon_dst);
 
       break;
 
@@ -130,9 +131,9 @@ void FoePorcupine::step() {
       this->state != Foe::State::DEAD) {
     this->sprite->set_animation(WALK_ANIMATION);
     this->sprite->set_frame(1);
-    thoom::game->push_health_bar(
-        this->health, this->max_health, this->x + this->off_x,
-        this->y - 12.0f + this->off_y, &this->icon_src, &this->icon_dst);
+    push_health_bar(this->health, this->max_health, this->x + this->off_x,
+                    this->y - 12.0f + this->off_y, &this->icon_src,
+                    &this->icon_dst);
   }
 
   if (this->sprite->update_frame() && this->state == Foe::State::WALKING &&

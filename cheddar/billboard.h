@@ -30,8 +30,10 @@ class BillboardFactory : public thoom::ObjectFactory {
                            std::string& tilesheet) {
     char buff[1024];
     if (8 != sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%1023[^\n]", x, y,
-                    ts_x, ts_y, w, h, depth, buff))
-      FATAL_ERROR
+                    ts_x, ts_y, w, h, depth, buff)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     tilesheet = buff;
   }

@@ -7,8 +7,7 @@ bool Mouse::check_collision(float x, float y) {
          thoom::game->point_in_collider(x, y - 2.0f);
 }
 
-std::string Mouse::encode_items(
-    const std::vector<thoom::Game::HudItem>& items) {
+std::string Mouse::encode_items(const std::vector<Hud::Item>& items) {
   std::string items_s = "";
   for (int i = 0; i < items.size(); i++) {
     if (items[i].count <= 0) continue;
@@ -25,9 +24,8 @@ std::string Mouse::encode_items(
   return items_s;
 }
 
-std::vector<thoom::Game::HudItem> Mouse::read_items(
-    const std::string& items_s) {
-  std::vector<thoom::Game::HudItem> ret;
+std::vector<Hud::Item> Mouse::read_items(const std::string& items_s) {
+  std::vector<Hud::Item> ret;
 
   if (!items_s.empty()) {
     const char* arr = items_s.c_str();
@@ -35,12 +33,15 @@ std::vector<thoom::Game::HudItem> Mouse::read_items(
     do {
       char item_id[256];
       int count = 1;
-      if (2 != sscanf(arr, "%255[^*] * %d", item_id, &count)) FATAL_ERROR
+      if (2 != sscanf(arr, "%255[^*] * %d", item_id, &count)) {
+        // TODO(micahdbak): error
+        std::exit(1);
+      }
 
       // validate item
       if (item_info.find(item_id) == item_info.end() || count <= 0) continue;
 
-      thoom::Game::HudItem item{item_id, count};
+      Hud::Item item{item_id, count};
       ret.push_back(item);
 
       while (*arr != '\0' && *arr != ',') arr++;

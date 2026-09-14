@@ -35,8 +35,10 @@ class FoeBatFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) override {
     int x = 0, y = 0, spawner_id = 0;
-    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id))
-      FATAL_ERROR
+    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     return new FoeBat(x, y, spawner_id);
   }

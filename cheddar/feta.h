@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "hitbox.h"
+#include "hud.h"
 #include "mouse.h"
 #include "object.h"
 #include "save_data.h"
@@ -47,15 +48,17 @@ class Feta : public Mouse, public HitSource {
   thoom::Sprite *sprite, *emotes;
   SDL_FRect dst_rect, emote_rect;
 
-  std::vector<thoom::Game::HudItem> items;
+  std::vector<Hud::Item> items;
 };
 
 class FetaFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) override {
     int x, y, animation;
-    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &animation))
-      FATAL_ERROR
+    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &animation)) {
+      // TODO(micahdbak): error
+      std::exit(1);
+    }
 
     return new Feta(x, y, animation);
   }

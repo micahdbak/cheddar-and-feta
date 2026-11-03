@@ -5,6 +5,7 @@
 #include "abdomen.h"
 #include "audio_playback.h"
 #include "icon.h"
+#include "renderer.h"
 #include "save_data.h"
 #include "segment.h"
 #include "utils.h"
@@ -263,6 +264,7 @@ void Spitter::step() {
   this->sprite->set_animation(this->displayed_direction);
   this->dst_rect.x = this->x - 16.0f;
   this->dst_rect.y = this->y - 16.0f;
-  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                           &this->sprite->frame, &this->dst_rect, 16);
+  thoom::Renderer::instance->push_sprite(
+      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, 16);
 }

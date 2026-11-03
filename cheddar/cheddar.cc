@@ -12,6 +12,7 @@
 #include "items/tossed.h"
 #include "macros.h"
 #include "net_agent.h"
+#include "renderer.h"
 #include "save_data.h"
 
 Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
@@ -66,7 +67,7 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
   this->tile_y = (int)this->y / thoom::game->map->tile_height;
   foe_path_find(this);
 
-  thoom::game->set_view(this->x, this->y);
+  thoom::Renderer::instance->set_view(this->x, this->y);
 
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
@@ -95,8 +96,9 @@ Cheddar::~Cheddar() {
 
 void Cheddar::step() {
   if (mice_locked) {
-    thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                             &this->sprite->frame, &this->dst_rect, 22);
+    thoom::Renderer::instance->push_sprite(
+        this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+        &this->dst_rect, 22);
     return;
   }
 
@@ -494,13 +496,12 @@ void Cheddar::step() {
   }
 #endif
 
-  thoom::game->set_view(this->x, this->y);
-  this->dst_rect.x =
-      (float)(thoom::game->corner_x + THOOM_SCREEN_WIDTH / 2) - 16.0f;
-  this->dst_rect.y =
-      (float)(thoom::game->corner_y + THOOM_SCREEN_HEIGHT / 2) - 24.0f;
-  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                           &this->sprite->frame, &this->dst_rect, 22);
+  thoom::Renderer::instance->set_view(this->x, this->y);
+  this->dst_rect.x = float(int(this->x)) - 16.0f;
+  this->dst_rect.y = float(int(this->y)) - 24.0f;
+  thoom::Renderer::instance->push_sprite(
+      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, 22);
 
   this->which_emote = thoom::local_controller.cheat_last(9, 8, 7);
   this->emote_rect.x = this->dst_rect.x;
@@ -508,8 +509,9 @@ void Cheddar::step() {
 
   if (this->which_emote != -1) {
     this->emotes->set_frame(this->which_emote % 8);
-    thoom::game->push_sprite(this->emotes->tex_id, this->emotes->texture,
-                             &this->emotes->frame, &this->emote_rect, 34);
+    thoom::Renderer::instance->push_sprite(
+        this->emotes->tex_id, this->emotes->texture, &this->emotes->frame,
+        &this->emote_rect, 34);
   }
 }
 

@@ -14,6 +14,7 @@
 #include "renderer.h"
 #include "sprite.h"
 #include "utils.h"
+#include "window.h"
 
 enum EditorSelectedLayer { BACKGROUND, FOREGROUND, COLLISION };
 
@@ -65,17 +66,16 @@ class EditorFactory : public thoom::ObjectFactory {
 
 void thoom::Game::init() {
   if (this->argc < 2) {
-    thoom::_running = false;
     std::cerr << "Please provide a map to edit via the command line."
               << std::endl;
-    return;
+    std::exit(1);
   }
 
   this->factories["editor"] = new EditorFactory();
   this->create_object("editor", std::string(this->argv[1]));
 
-  this->title = "Map Editor - ";
-  this->title += this->argv[1];
+  std::string title = "Map Editor - " + std::string(this->argv[1]);
+  thoom::Window::instance->set_title(title.c_str());
 
   thoom::net_agent = new thoom::NetworkAgent(false);
 }
@@ -88,8 +88,7 @@ Editor::Editor(const char* map_path) {
       std::cerr << "To create a new map please provide: <map name> <tw> <th> "
                    "<cols> <rows> <fill(0/1)> <fillts(opt)>."
                 << std::endl;
-      thoom::_running = false;
-      return;
+      std::exit(1);
     }
 
     int tile_width = atoi(thoom::game->argv[2]);
@@ -106,8 +105,7 @@ Editor::Editor(const char* map_path) {
       if (tilesheet->texture == nullptr) {
         std::cerr << thoom::game->argv[6] << " is not a valid tilesheet."
                   << std::endl;
-        thoom::_running = false;
-        return;
+        std::exit(1);
       }
       this->map->tilesheets.push_back(tilesheet);
 
@@ -130,7 +128,7 @@ Editor::Editor(const char* map_path) {
     this->map->write(backup_path.c_str());
   }
 
-  this->texture = thoom::Renderer::instance->create_texture(
+  this->texture = thoom::Window::instance->create_texture(
       THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
       SDL_SCALEMODE_LINEAR);
   this->src_rect = this->dst_rect =
@@ -140,14 +138,14 @@ Editor::Editor(const char* map_path) {
 
   if (!this->map->tilesheets.empty()) this->sel_tilesheet = 0;
 
-  this->collision_texture = thoom::Renderer::instance->create_texture(
+  this->collision_texture = thoom::Window::instance->create_texture(
       this->map->layers[thoom::Map::kBackgroundLayer]->texture->w,
       this->map->layers[thoom::Map::kBackgroundLayer]->texture->h,
       SDL_PIXELFORMAT_RGBA8888, SDL_SCALEMODE_LINEAR);
 
   int collision_sheet_w = this->map->tile_width * 14;
   int collision_sheet_h = this->map->tile_height * 3;
-  this->collision_sheet = thoom::Renderer::instance->create_texture(
+  this->collision_sheet = thoom::Window::instance->create_texture(
       collision_sheet_w, collision_sheet_h, SDL_PIXELFORMAT_RGBA8888,
       SDL_SCALEMODE_LINEAR);
 
@@ -177,7 +175,7 @@ Editor::Editor(const char* map_path) {
     this->render_collision_tile(this->collision_sheet, x, y, i);
   }
 
-  this->objects = thoom::Renderer::instance->create_texture(
+  this->objects = thoom::Window::instance->create_texture(
       this->map->layers[thoom::Map::kBackgroundLayer]->texture->w,
       this->map->layers[thoom::Map::kBackgroundLayer]->texture->h,
       SDL_PIXELFORMAT_RGBA8888, SDL_SCALEMODE_LINEAR);
@@ -204,8 +202,6 @@ Editor::~Editor() {
 }
 
 void Editor::step() {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
   if (!this->user_inputting) {
     // move the selected tile on input
     this->sel_x += int(thoom::local_controller.is_hit(thoom::Button::RIGHT)) -
@@ -229,11 +225,12 @@ void Editor::step() {
     }
 
     SDL_FRect black_rect = {0.0f, 0.0f, float(THOOM_SCREEN_WIDTH), 11.0f};
-    renderer->draw_rect(Hud::instance->ui, &black_rect, thoom::Colour(0, 0, 0),
-                        SDL_BLENDMODE_NONE);
-    renderer->draw_text(Hud::instance->ui, thoom::game->fonts[MONO_FONT],
-                        " h:write, j:tile, k:sheet, l:layer, x:export  ", 0, 0,
-                        0, kBackground);
+    thoom::Renderer::instance->draw_rect(Hud::instance->ui, &black_rect,
+                                         thoom::Colour(0, 0, 0),
+                                         SDL_BLENDMODE_NONE);
+    thoom::Renderer::instance->draw_text(
+        Hud::instance->ui, MONO_FONT,
+        " h:write, j:tile, k:sheet, l:layer, x:export  ", 0, 0, 0, kBackground);
     char status_text[256];
     if (this->layer != COLLISION) {
       // foreground / background status text
@@ -251,11 +248,12 @@ void Editor::step() {
     }
     black_rect = {0.0f, float(THOOM_SCREEN_HEIGHT - 11),
                   float(THOOM_SCREEN_WIDTH), 11.0f};
-    renderer->draw_rect(Hud::instance->ui, &black_rect, thoom::Colour(0, 0, 0),
-                        SDL_BLENDMODE_NONE);
-    renderer->draw_text(Hud::instance->ui, thoom::game->fonts[MONO_FONT],
-                        std::string(status_text), 0, THOOM_SCREEN_HEIGHT - 11,
-                        0, kBackground);
+    thoom::Renderer::instance->draw_rect(Hud::instance->ui, &black_rect,
+                                         thoom::Colour(0, 0, 0),
+                                         SDL_BLENDMODE_NONE);
+    thoom::Renderer::instance->draw_text(
+        Hud::instance->ui, MONO_FONT, std::string(status_text), 0,
+        THOOM_SCREEN_HEIGHT - 11, 0, kBackground);
 
     switch (thoom::local_controller.c) {
       case 'h':
@@ -291,7 +289,7 @@ void Editor::step() {
       case 'x': {
         std::cout << "exporting map to mapdump.bmp" << std::endl;
         thoom::local_controller.c = NO_CHAR;
-        SDL_Surface* _bg = renderer->read_pixels(
+        SDL_Surface* _bg = thoom::Window::instance->read_pixels(
             this->map->layers[thoom::Map::kBackgroundLayer]->texture);
         SDL_SaveBMP(_bg, "mapdump.bmp");
         SDL_DestroySurface(_bg);
@@ -434,23 +432,21 @@ void Editor::step() {
         break;
       default:
         this->user_inputting = false;
-        renderer->clear(Hud::instance->ui, thoom::kMask);
+        thoom::Renderer::instance->clear(Hud::instance->ui, thoom::kMask);
         break;
     }
   }
 
-  thoom::game->push_sprite("EDITOR", this->texture, &this->src_rect,
-                           &this->dst_rect, 0);
+  thoom::Renderer::instance->push_sprite("EDITOR", this->texture,
+                                         &this->src_rect, &this->dst_rect, 0);
 }
 
 void Editor::input_tile() {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
   // end inputting
   if (thoom::local_controller.is_hit(thoom::Button::SELECT) ||
       thoom::local_controller.is_hit(thoom::DIGIT)) {
     this->user_inputting = false;
-    renderer->clear(Hud::instance->ui, thoom::kMask);
+    thoom::Renderer::instance->clear(Hud::instance->ui, thoom::kMask);
     return;
   }
 
@@ -498,16 +494,17 @@ void Editor::input_tile() {
     tilesheet_rect.h = this->map->tilesheets[this->sel_tilesheet]->texture->h;
   }
 
-  renderer->draw_rect(this->texture, &tilesheet_rect,
-                      thoom::Colour(128, 128, 128), SDL_BLENDMODE_NONE);
+  thoom::Renderer::instance->draw_rect(this->texture, &tilesheet_rect,
+                                       thoom::Colour(128, 128, 128),
+                                       SDL_BLENDMODE_NONE);
 
   if (this->layer == COLLISION) {
-    renderer->draw_texture(this->texture, this->collision_sheet, NULL,
-                           &tilesheet_rect);
+    thoom::Renderer::instance->draw_texture(
+        this->texture, this->collision_sheet, NULL, &tilesheet_rect);
   } else {
-    renderer->draw_texture(this->texture,
-                           this->map->tilesheets[this->sel_tilesheet]->texture,
-                           NULL, &tilesheet_rect);
+    thoom::Renderer::instance->draw_texture(
+        this->texture, this->map->tilesheets[this->sel_tilesheet]->texture,
+        NULL, &tilesheet_rect);
   }
 
   SDL_FRect sel_tile_rect;
@@ -525,9 +522,9 @@ void Editor::input_tile() {
         tilesheet_rect.y + this->map->tile_height * this->sel_ts_y;
   }
 
-  renderer->draw_outline(this->texture, &sel_tile_rect,
-                         thoom::Colour{255, 128, 255, 240},
-                         SDL_BLENDMODE_BLEND);
+  thoom::Renderer::instance->draw_outline(this->texture, &sel_tile_rect,
+                                          thoom::Colour{255, 128, 255, 240},
+                                          SDL_BLENDMODE_BLEND);
 
   if (this->sel_ts2_x >= 0) {
     SDL_FRect sel_tile2_rect;
@@ -537,17 +534,18 @@ void Editor::input_tile() {
     sel_tile2_rect.y =
         tilesheet_rect.y + this->map->tile_height * this->sel_ts2_y;
 
-    renderer->draw_outline(this->texture, &sel_tile2_rect,
-                           thoom::Colour{255, 255, 128, 240},
-                           SDL_BLENDMODE_BLEND);
+    thoom::Renderer::instance->draw_outline(this->texture, &sel_tile2_rect,
+                                            thoom::Colour{255, 255, 128, 240},
+                                            SDL_BLENDMODE_BLEND);
   }
 
   SDL_FRect black_rect = {0.0f, 0.0f, float(THOOM_SCREEN_WIDTH), 11.0f};
-  renderer->draw_rect(Hud::instance->ui, &black_rect, thoom::Colour(0, 0, 0),
-                      SDL_BLENDMODE_NONE);
-  renderer->draw_text(Hud::instance->ui, thoom::game->fonts[MONO_FONT],
-                      "<Return> to place, <0-9> to close", 0, 0, 0,
-                      kBackground);
+  thoom::Renderer::instance->draw_rect(Hud::instance->ui, &black_rect,
+                                       thoom::Colour(0, 0, 0),
+                                       SDL_BLENDMODE_NONE);
+  thoom::Renderer::instance->draw_text(Hud::instance->ui, MONO_FONT,
+                                       "<Return> to place, <0-9> to close", 0,
+                                       0, 0, kBackground);
 }
 
 void Editor::input_sheet() {
@@ -595,8 +593,7 @@ void Editor::input_sheet() {
   thoom::Renderer::instance->draw_rect(Hud::instance->ui, &black_rect,
                                        thoom::Colour(0, 0, 0),
                                        SDL_BLENDMODE_NONE);
-  thoom::Renderer::instance->draw_text(Hud::instance->ui,
-                                       thoom::game->fonts[MONO_FONT],
+  thoom::Renderer::instance->draw_text(Hud::instance->ui, MONO_FONT,
                                        display_text, 0, 0, 0, kBackground);
 }
 
@@ -619,23 +616,21 @@ void Editor::render() {
   selected_tile_rect.w = float(this->map->tile_width);
   selected_tile_rect.h = float(this->map->tile_height);
 
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
-  renderer->clear(this->texture, thoom::Colour(128, 128, 128));
-  renderer->draw_texture(
+  thoom::Renderer::instance->clear(this->texture, thoom::Colour(128, 128, 128));
+  thoom::Renderer::instance->draw_texture(
       this->texture, this->map->layers[thoom::Map::kBackgroundLayer]->texture,
       &src, &dst);
 
   // only render the foreground if not only background
   if (this->layer != BACKGROUND)
-    renderer->draw_texture(
+    thoom::Renderer::instance->draw_texture(
         this->texture, this->map->layers[thoom::Map::kForegroundLayer]->texture,
         &src, &dst);
   else {
     // render foreground at half opacity if viewing background
     SDL_SetTextureAlphaMod(
         this->map->layers[thoom::Map::kForegroundLayer]->texture, 0x80);
-    renderer->draw_texture(
+    thoom::Renderer::instance->draw_texture(
         this->texture, this->map->layers[thoom::Map::kForegroundLayer]->texture,
         &src, &dst);
     SDL_SetTextureAlphaMod(
@@ -644,20 +639,22 @@ void Editor::render() {
 
   // render collision layer if that mode is selected
   if (this->layer == COLLISION) {
-    renderer->draw_texture(this->texture, objects, &src, &dst);
-    renderer->draw_texture(this->texture, this->collision_texture, &src, &dst);
+    thoom::Renderer::instance->draw_texture(this->texture, objects, &src, &dst);
+    thoom::Renderer::instance->draw_texture(
+        this->texture, this->collision_texture, &src, &dst);
   }
 
-  renderer->draw_outline(this->texture, &selected_tile_rect,
-                         thoom::Colour{255, 128, 255, 240},
-                         SDL_BLENDMODE_BLEND);
+  thoom::Renderer::instance->draw_outline(this->texture, &selected_tile_rect,
+                                          thoom::Colour{255, 128, 255, 240},
+                                          SDL_BLENDMODE_BLEND);
 
   if (this->sel_tilesheet >= 0) {
     selected_tile_rect.x = 0.0f;
     selected_tile_rect.y =
         float(THOOM_SCREEN_HEIGHT - 11 - this->map->tile_height);
-    renderer->draw_rect(this->texture, &selected_tile_rect,
-                        thoom::Colour(128, 128, 128), SDL_BLENDMODE_NONE);
+    thoom::Renderer::instance->draw_rect(this->texture, &selected_tile_rect,
+                                         thoom::Colour(128, 128, 128),
+                                         SDL_BLENDMODE_NONE);
     SDL_FRect selected_tile_src_rect;
     selected_tile_src_rect.w = float(this->map->tile_width);
     selected_tile_src_rect.h = float(this->map->tile_height);
@@ -667,12 +664,13 @@ void Editor::render() {
       int _y = (this->sel_collider + 1) / 14;
       selected_tile_src_rect.x = float(_x * this->map->tile_width);
       selected_tile_src_rect.y = float(_y * this->map->tile_height);
-      renderer->draw_texture(this->texture, this->collision_sheet,
-                             &selected_tile_src_rect, &selected_tile_rect);
+      thoom::Renderer::instance->draw_texture(
+          this->texture, this->collision_sheet, &selected_tile_src_rect,
+          &selected_tile_rect);
     } else {
       selected_tile_src_rect.x = float(this->sel_ts_x * this->map->tile_width);
       selected_tile_src_rect.y = float(this->sel_ts_y * this->map->tile_height);
-      renderer->draw_texture(
+      thoom::Renderer::instance->draw_texture(
           this->texture, this->map->tilesheets[this->sel_tilesheet]->texture,
           &selected_tile_src_rect, &selected_tile_rect);
     }
@@ -728,9 +726,7 @@ static void _ParseBillboardOptions(const std::string& options, int* x, int* y,
 }
 
 void Editor::render_objects() {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
-  renderer->clear(this->objects, thoom::kMask);
+  thoom::Renderer::instance->clear(this->objects, thoom::kMask);
 
   for (const std::pair<std::string, std::string>& pair : this->map->objects) {
     if (pair.first == "billboard") {
@@ -750,19 +746,22 @@ void Editor::render_objects() {
       SDL_FRect dst_rect = SDL_FRect{float(x), float(y), float(w), float(h)};
 
       SDL_SetTextureAlphaMod(tex, 0x40);
-      renderer->draw_texture(this->objects, tex, &src_rect, &dst_rect);
+      thoom::Renderer::instance->draw_texture(this->objects, tex, &src_rect,
+                                              &dst_rect);
       SDL_SetTextureAlphaMod(tex, 0xff);
 
-      renderer->draw_outline(this->objects, &dst_rect,
-                             thoom::Colour(255, 128, 0), SDL_BLENDMODE_NONE);
+      thoom::Renderer::instance->draw_outline(this->objects, &dst_rect,
+                                              thoom::Colour(255, 128, 0),
+                                              SDL_BLENDMODE_NONE);
     } else {
       int x, y;
       if (sscanf(pair.second.c_str(), "%d,%d", &x, &y) == 2) {
         SDL_FRect dst_rect =
             SDL_FRect{float(x) - 8.0f, float(y) - 8.0f, 16.0f, 16.0f};
         draw_icon(EDITOR_OBJECT_ICON, this->objects, &dst_rect);
-        renderer->draw_text(this->objects, thoom::game->fonts[SMALL_FONT],
-                            pair.first, x + 6, y - 4, 0, kBackground);
+        thoom::Renderer::instance->draw_text(this->objects, SMALL_FONT,
+                                             pair.first, x + 6, y - 4, 0,
+                                             kBackground);
       }
     }
   }

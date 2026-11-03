@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "item.h"
+#include "renderer.h"
 #include "utils.h"
 
 ThrownCannonBall::ThrownCannonBall(float x, float y, int x_dir, int y_dir,
@@ -76,8 +77,9 @@ void ThrownCannonBall::step() {
   this->dst_rect.x = float(this->x - 8);
   this->dst_rect.y = float(this->y - 8);
 
-  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                           &this->sprite->frame, &this->dst_rect, 16);
+  thoom::Renderer::instance->push_sprite(
+      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, 16);
 }
 
 void ThrownCannonBall::hitsource_notify() {

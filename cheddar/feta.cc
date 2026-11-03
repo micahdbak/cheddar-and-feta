@@ -5,6 +5,7 @@
 #include "items/item.h"
 #include "net_agent.h"
 #include "net_sender.h"
+#include "renderer.h"
 #include "save_data.h"
 
 Feta::Feta(int x, int y, int animation) {
@@ -65,8 +66,9 @@ void Feta::step() {
     this->sprite->set_animation(SLEEPING_ANIMATION);
     this->dst_rect.x = this->x - 16.0f;
     this->dst_rect.y = this->y - 24.0f;
-    thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                             &this->sprite->frame, &this->dst_rect, 22);
+    thoom::Renderer::instance->push_sprite(
+        this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+        &this->dst_rect, 22);
 
     return;
   }
@@ -98,16 +100,16 @@ void Feta::step() {
   this->sprite->set_animation(this->animation);
   this->dst_rect.x = this->x - 16.0f;
   this->dst_rect.y = this->y - 24.0f;
-  thoom::game->push_sprite("", this->sprite->texture, &this->sprite->frame,
-                           &this->dst_rect, 22);
+  thoom::Renderer::instance->push_sprite(
+      "", this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
 
   this->emote_rect.x = this->dst_rect.x;
   this->emote_rect.y = this->dst_rect.y - 11.0f;
 
   if (this->which_emote != -1) {
     this->emotes->set_frame(this->which_emote % 8);
-    thoom::game->push_sprite("", this->emotes->texture, &this->emotes->frame,
-                             &this->emote_rect, 34);
+    thoom::Renderer::instance->push_sprite(
+        "", this->emotes->texture, &this->emotes->frame, &this->emote_rect, 34);
   }
 }
 

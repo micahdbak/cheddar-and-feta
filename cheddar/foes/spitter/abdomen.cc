@@ -1,5 +1,6 @@
 #include "abdomen.h"
 
+#include "renderer.h"
 #include "utils.h"
 
 SpitterAbdomen::SpitterAbdomen(Spitter* parent,
@@ -72,6 +73,7 @@ void SpitterAbdomen::step() {
 
   this->sprite->set_animation(this->cur_dir);
   this->sprite->update_frame();
-  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                           &this->sprite->frame, &this->dst_rect, 16);
+  thoom::Renderer::instance->push_sprite(
+      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, 16);
 }

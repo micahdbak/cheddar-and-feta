@@ -14,6 +14,7 @@
 #include "renderer.h"
 #include "ui_box.h"
 #include "utils.h"
+#include "window.h"
 
 #define INIT_OBJ "load_save"
 
@@ -22,13 +23,11 @@ std::unordered_map<std::string, Item> item_info;
 class Init : public thoom::Object {
  public:
   Init() {
-    thoom::Renderer* renderer = thoom::Renderer::instance;
-
-    this->ui = renderer->create_texture(THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
-                                        SDL_PIXELFORMAT_RGBA8888,
-                                        SDL_SCALEMODE_LINEAR);
+    this->ui = thoom::Window::instance->create_texture(
+        THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
+        SDL_SCALEMODE_LINEAR);
     SDL_SetTextureBlendMode(this->ui, SDL_BLENDMODE_BLEND);
-    thoom::game->set_view(160, 120);
+    thoom::Renderer::instance->reset_view();
   }
 
   ~Init() { SDL_DestroyTexture(this->ui); }
@@ -81,7 +80,7 @@ void thoom::Game::init() {
   item_info[ITEM_SHIELD].armour = 1;
   item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Porcu' Pine"};
 
-  this->title = "Playing as Feta";
+  thoom::Window::instance->set_title("Playing as Feta");
 
   this->load_map("maps/init");
   this->create_objects = false;
@@ -133,22 +132,22 @@ void Init::step() {
       if (this->render) {
         this->render = false;
 
-        thoom::Renderer* renderer = thoom::Renderer::instance;
-
-        renderer->clear(this->ui, thoom::kMask);
+        thoom::Renderer::instance->clear(this->ui, thoom::kMask);
 
         SDL_FRect code_ui_box = {80.0f, 64.0f, 160.0f, 32.0f};
         draw_ui_box(UI_BOX_CONTAINER, this->ui, &code_ui_box);
 
         std::string prompt = "Please enter the connection code.";
-        int prompt_w = thoom::game->fonts[DEFAULT_FONT]->text_width(prompt);
-        renderer->draw_text(this->ui, thoom::game->fonts[DEFAULT_FONT], prompt,
-                            160 - prompt_w / 2, 70, 0, kBackground);
+        int prompt_w =
+            thoom::Renderer::instance->fonts[DEFAULT_FONT]->text_width(prompt);
+        thoom::Renderer::instance->draw_text(this->ui, DEFAULT_FONT, prompt,
+                                             160 - prompt_w / 2, 70, 0,
+                                             kBackground);
 
-        renderer->draw_text(this->ui, thoom::game->fonts[SMALL_FONT],
-                            "Code:", 130, 82, 0, kBackground);
-        renderer->draw_text(this->ui, thoom::game->fonts[CODE_FONT], this->code,
-                            154, 81, 0, kBackground);
+        thoom::Renderer::instance->draw_text(this->ui, SMALL_FONT, "Code:", 130,
+                                             82, 0, kBackground);
+        thoom::Renderer::instance->draw_text(this->ui, CODE_FONT, this->code,
+                                             154, 81, 0, kBackground);
 
         SDL_FRect ui_box = {80.0f, 104.0f, 160.0f, 64.0f};
         draw_ui_box(UI_BOX_CHAR_CONT, this->ui, &ui_box);
@@ -164,16 +163,18 @@ void Init::step() {
           draw_ui_box(i == this->sel_c ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX,
                       this->ui, &box_rect);
           char c = code_charset[i];
-          SDL_FRect src_rect = thoom::game->fonts[CODE_FONT]->src_rect[c - ' '];
+          SDL_FRect src_rect =
+              thoom::Renderer::instance->fonts[CODE_FONT]->src_rect[c - ' '];
 
           box_rect.x = (float)(int)(x + 6 - (int)src_rect.w / 2);
           box_rect.y = (float)(int)(y + 6 - (int)src_rect.h / 2);
           box_rect.w = src_rect.w;
           box_rect.h = src_rect.h;
 
-          renderer->draw_texture(
+          thoom::Renderer::instance->draw_texture(
               this->ui,
-              thoom::game->fonts[i == this->sel_c ? CODE_FONT : CODE_GRAY_FONT]
+              thoom::Renderer::instance
+                  ->fonts[i == this->sel_c ? CODE_FONT : CODE_GRAY_FONT]
                   ->texture,
               &src_rect, &box_rect);
         }
@@ -182,11 +183,9 @@ void Init::step() {
           SDL_FRect enter_box = {172.0f, 147.0f, 18.0f, 12.0f};
           draw_ui_box(36 == this->sel_c ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX,
                       this->ui, &enter_box);
-          renderer->draw_text(
-              this->ui,
-              thoom::game
-                  ->fonts[36 == this->sel_c ? CODE_FONT : CODE_GRAY_FONT],
-              "OK", 175, 148, 0, kBackground);
+          thoom::Renderer::instance->draw_text(
+              this->ui, 36 == this->sel_c ? CODE_FONT : CODE_GRAY_FONT, "OK",
+              175, 148, 0, kBackground);
         }
 
         if (this->sel_c == 36) {
@@ -213,9 +212,7 @@ void Init::step() {
       if (this->render) {
         this->render = false;
 
-        thoom::Renderer* renderer = thoom::Renderer::instance;
-
-        renderer->clear(this->ui, thoom::kMask);
+        thoom::Renderer::instance->clear(this->ui, thoom::kMask);
 
         SDL_FRect waiting_box = {76.0f, 100.0f, 168.0f, 40.0f};
         draw_ui_box(UI_BOX_CHAR_CONT, this->ui, &waiting_box);
@@ -228,9 +225,11 @@ void Init::step() {
           waiting = "Waiting for Cheddar...";
         }
 
-        int waiting_w = thoom::game->fonts[DEFAULT_FONT]->text_width(waiting);
-        renderer->draw_text(this->ui, thoom::game->fonts[DEFAULT_FONT], waiting,
-                            160 - waiting_w / 2, 116, 0, kBackground);
+        int waiting_w =
+            thoom::Renderer::instance->fonts[DEFAULT_FONT]->text_width(waiting);
+        thoom::Renderer::instance->draw_text(this->ui, DEFAULT_FONT, waiting,
+                                             160 - waiting_w / 2, 116, 0,
+                                             kBackground);
       }
 
       // no connection after 15 seconds
@@ -243,5 +242,6 @@ void Init::step() {
       break;
   }
 
-  thoom::game->push_sprite("", this->ui, nullptr, &this->dst_rect, 0);
+  thoom::Renderer::instance->push_sprite("", this->ui, nullptr, &this->dst_rect,
+                                         0);
 }

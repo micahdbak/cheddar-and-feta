@@ -1,6 +1,7 @@
 #include "billboard.h"
 
 #include "game.h"
+#include "renderer.h"
 
 Billboard::Billboard(int x, int y, int ts_x, int ts_y, int w, int h, int depth,
                      std::string tilesheet) {
@@ -24,6 +25,7 @@ Billboard::~Billboard() { delete this->sprite; }
 void Billboard::step() {
   this->dst_rect.x = (float)this->x;
   this->dst_rect.y = (float)this->y;
-  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                           &this->sprite->frame, &this->dst_rect, this->depth);
+  thoom::Renderer::instance->push_sprite(
+      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, this->depth);
 }

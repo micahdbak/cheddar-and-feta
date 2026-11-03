@@ -2,6 +2,7 @@
 
 #include "game.h"
 #include "object.h"
+#include "sprite.h"
 
 class NetReceiver : public thoom::Object {
  public:

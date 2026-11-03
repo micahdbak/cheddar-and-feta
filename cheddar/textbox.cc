@@ -7,13 +7,12 @@
 #include "hud.h"
 #include "renderer.h"
 #include "ui_box.h"
+#include "window.h"
 
 Textbox* textbox;
 
 Textbox::Textbox(const std::string& text, const std::string& owner, int font,
                  int interval_ms) {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
   this->owner = owner;
   this->text = text;
   this->last_ticks = thoom::game->ticks;
@@ -33,8 +32,6 @@ Textbox::~Textbox() {
 void Textbox::step() {
   if (this->done) return;
 
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
   if (this->done_sentence) {
     if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
       this->done_sentence = false;
@@ -50,11 +47,11 @@ void Textbox::step() {
       this->running_text += text[j];
     }
     this->i = j;
-    renderer->draw_rect(Hud::instance->ui, &this->text_rect, kBackground,
-                        SDL_BLENDMODE_NONE);
-    renderer->draw_text(Hud::instance->ui, thoom::game->fonts[this->font],
-                        this->running_text, this->text_rect.x,
-                        this->text_rect.y, this->text_rect.w, kBackground);
+    thoom::Renderer::instance->draw_rect(Hud::instance->ui, &this->text_rect,
+                                         kBackground, SDL_BLENDMODE_NONE);
+    thoom::Renderer::instance->draw_text(
+        Hud::instance->ui, this->font, this->running_text, this->text_rect.x,
+        this->text_rect.y, this->text_rect.w, kBackground);
     return;
   }
 
@@ -78,21 +75,21 @@ void Textbox::step() {
     if (c == '\n' || c == '\0') {
       this->done = c == '\0';
       this->done_sentence = c == '\n';
-      thoom::Font* font = thoom::game->fonts[this->font];
+      thoom::Font* font = thoom::Renderer::instance->fonts[this->font];
       SDL_FRect* prompt_src = font->src_rect + CHAR_TEXTBOX_NEXT - ' ';
       SDL_FRect prompt_dst = {
           this->text_rect.x + this->text_rect.w - prompt_src->w,
           this->text_rect.y + this->text_rect.h - prompt_src->h, prompt_src->w,
           prompt_src->h};
-      renderer->draw_texture(Hud::instance->ui, font->texture, prompt_src,
-                             &prompt_dst);
+      thoom::Renderer::instance->draw_texture(Hud::instance->ui, font->texture,
+                                              prompt_src, &prompt_dst);
       return;
     }
 
-    renderer->draw_rect(Hud::instance->ui, &this->text_rect, kBackground,
-                        SDL_BLENDMODE_NONE);
-    renderer->draw_text(Hud::instance->ui, thoom::game->fonts[this->font],
-                        this->running_text, this->text_rect.x,
-                        this->text_rect.y, this->text_rect.w, kBackground);
+    thoom::Renderer::instance->draw_rect(Hud::instance->ui, &this->text_rect,
+                                         kBackground, SDL_BLENDMODE_NONE);
+    thoom::Renderer::instance->draw_text(
+        Hud::instance->ui, this->font, this->running_text, this->text_rect.x,
+        this->text_rect.y, this->text_rect.w, kBackground);
   }
 }

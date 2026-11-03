@@ -7,6 +7,7 @@
 #include "controller.h"
 #include "game.h"
 #include "items/persister.h"
+#include "renderer.h"
 #include "save_data.h"
 #include "textbox.h"
 
@@ -77,7 +78,7 @@ void DroppedItem::dropped_step() {
 
   this->dst_rect.x = this->x - (float)(this->sprite->frame_w / 2);
   this->dst_rect.y = this->y - (float)(this->sprite->frame_h / 2);
-  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                           &this->sprite->frame, &this->dst_rect,
-                           this->sprite->frame_h / 2);
+  thoom::Renderer::instance->push_sprite(
+      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, this->sprite->frame_h / 2);
 }

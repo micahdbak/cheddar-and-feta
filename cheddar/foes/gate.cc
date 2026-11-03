@@ -6,6 +6,7 @@
 #include "game.h"
 #include "net_agent.h"
 #include "net_sender.h"
+#include "renderer.h"
 #include "save_data.h"
 #include "spawner.h"
 
@@ -86,6 +87,7 @@ void FoeGate::step() {
 
   this->dst_rect.x = this->x;
   this->dst_rect.y = this->y;
-  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                           &this->sprite->frame, &this->dst_rect, 24);
+  thoom::Renderer::instance->push_sprite(
+      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, 24);
 }

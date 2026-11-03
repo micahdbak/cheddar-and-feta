@@ -9,6 +9,7 @@
 #include "textbox.h"
 #include "ui_box.h"
 #include "utils.h"
+#include "window.h"
 
 #define PADDING 8
 #define UI_WIDTH (128 + (2 * PADDING))
@@ -72,9 +73,7 @@ void LoadSave::step() {
   }
 
   if (this->render) {
-    thoom::Renderer* renderer = thoom::Renderer::instance;
-
-    renderer->clear(Hud::instance->ui, thoom::kMask);
+    thoom::Renderer::instance->clear(Hud::instance->ui, thoom::kMask);
 
     const int x = (THOOM_SCREEN_WIDTH - UI_WIDTH) / 2;
     const int y = (THOOM_SCREEN_HEIGHT - UI_HEIGHT) / 2;
@@ -95,21 +94,21 @@ void LoadSave::step() {
       std::string save_text =
           i >= this->summaries.size() ? NEW_SAVE_STR : this->summaries[i];
       save_text = std::to_string(i + 1) + ": " + save_text;
-      renderer->draw_text(Hud::instance->ui, thoom::game->fonts[DEFAULT_FONT],
-                          save_text, x + PADDING + 2, save_y + 3, 0,
-                          kBackground);
+      thoom::Renderer::instance->draw_text(Hud::instance->ui, DEFAULT_FONT,
+                                           save_text, x + PADDING + 2,
+                                           save_y + 3, 0, kBackground);
     }
 
     if (save_start > 0) {
-      renderer->draw_text(Hud::instance->ui, thoom::game->fonts[SMALL_FONT],
-                          "^", (THOOM_SCREEN_WIDTH / 2) - 3, y + 3, 0,
-                          kBackground);
+      thoom::Renderer::instance->draw_text(Hud::instance->ui, SMALL_FONT, "^",
+                                           (THOOM_SCREEN_WIDTH / 2) - 3, y + 3,
+                                           0, kBackground);
     }
 
     if (save_end < this->summaries.size()) {
-      renderer->draw_text(Hud::instance->ui, thoom::game->fonts[SMALL_FONT],
-                          "}", (THOOM_SCREEN_WIDTH / 2) - 3, y + UI_HEIGHT - 9,
-                          0, kBackground);
+      thoom::Renderer::instance->draw_text(Hud::instance->ui, SMALL_FONT, "}",
+                                           (THOOM_SCREEN_WIDTH / 2) - 3,
+                                           y + UI_HEIGHT - 9, 0, kBackground);
     }
 
     this->render = false;

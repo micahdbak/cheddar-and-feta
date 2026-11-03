@@ -8,6 +8,7 @@
 #include "foes/porcupine.h"
 #include "foes/spitter/spitter.h"
 #include "game.h"
+#include "renderer.h"
 #include "save_data.h"
 
 Credits::Credits() {
@@ -25,13 +26,12 @@ Credits::Credits() {
   this->src_rect = this->dst_rect =
       SDL_FRect{0, 0, THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT};
 
-  thoom::game->corner_x = 0;
-  thoom::game->corner_y = 0;
+  thoom::Renderer::instance->reset_view();
 }
 
 void Credits::step() {
-  thoom::game->push_sprite(this->tex_id, this->texture, &this->src_rect,
-                           &this->dst_rect, 0);
+  thoom::Renderer::instance->push_sprite(this->tex_id, this->texture,
+                                         &this->src_rect, &this->dst_rect, 0);
 
   if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
     thoom::game->next_map = "maps/init";

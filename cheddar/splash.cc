@@ -6,16 +6,15 @@
 #include "game.h"
 #include "renderer.h"
 #include "utils.h"
+#include "window.h"
 
 Splash::Splash() {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
-  this->overlay =
-      renderer->create_texture(THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
-                               SDL_PIXELFORMAT_RGBA8888, SDL_SCALEMODE_LINEAR);
-  this->tunnel =
-      renderer->create_texture(THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
-                               SDL_PIXELFORMAT_RGBA8888, SDL_SCALEMODE_LINEAR);
+  this->overlay = thoom::Window::instance->create_texture(
+      THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
+      SDL_SCALEMODE_LINEAR);
+  this->tunnel = thoom::Window::instance->create_texture(
+      THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
+      SDL_SCALEMODE_LINEAR);
 
   this->overlay_rect.x = this->overlay_rect.y = 0.0f;
   this->overlay_rect.w = THOOM_SCREEN_WIDTH;
@@ -39,8 +38,7 @@ Splash::Splash() {
 
   this->animations = 7;
 
-  thoom::game->corner_x = 0;
-  thoom::game->corner_y = 0;
+  thoom::Renderer::instance->reset_view();
 }
 
 Splash::~Splash() {
@@ -53,8 +51,6 @@ Splash::~Splash() {
 #define DISPLAY_FOR 4500
 
 void Splash::step() {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
   this->timer = thoom::game->ticks - this->initial_timer;
 
   // skip splash
@@ -83,20 +79,21 @@ void Splash::step() {
   }
 
   if (alpha > 0) {
-    renderer->draw_rect(this->overlay, NULL, thoom::Colour{24, 24, 24, alpha},
-                        SDL_BLENDMODE_NONE);
+    thoom::Renderer::instance->draw_rect(this->overlay, NULL,
+                                         thoom::Colour{24, 24, 24, alpha},
+                                         SDL_BLENDMODE_NONE);
   }
 
   if (this->animation == 4) {
     float perc = (float)this->timer / (float)DISPLAY_FOR;
 
-    renderer->clear(this->tunnel, thoom::kMask);
+    thoom::Renderer::instance->clear(this->tunnel, thoom::kMask);
     SDL_FRect tile_spr = {96.0f, 400.0f, 64.0f, 64.0f};
     SDL_FRect tile_dst = {float(THOOM_SCREEN_WIDTH / 2 - 32),
                           0.0f - perc * 128.0f, 64.0f,
                           (float)THOOM_SCREEN_HEIGHT + 128.0f};
-    renderer->draw_texture_tiled(this->tunnel, this->sprite->texture, &tile_spr,
-                                 1.0f, &tile_dst);
+    thoom::Renderer::instance->draw_texture_tiled(
+        this->tunnel, this->sprite->texture, &tile_spr, 1.0f, &tile_dst);
 
     // ants
 
@@ -123,9 +120,9 @@ void Splash::step() {
         this->ant_dst[which_ant].h = this->ant_src[which_ant].h = 32.0f + neg;
       }
 
-      thoom::game->push_sprite(this->ant->tex_id, this->ant->texture,
-                               this->ant_src + which_ant,
-                               this->ant_dst + which_ant, 8);
+      thoom::Renderer::instance->push_sprite(
+          this->ant->tex_id, this->ant->texture, this->ant_src + which_ant,
+          this->ant_dst + which_ant, 8);
     }
 
     // mice
@@ -143,12 +140,14 @@ void Splash::step() {
     this->ched_src.x = sin_res < 0.0f ? 48.0f : 16.0f;
     this->feta_src.x = sin_res > 0.0f ? 48.0f : 16.0f;
 
-    thoom::game->push_sprite("", this->tunnel, &this->overlay_rect,
-                             &this->overlay_rect, 0);
-    thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                             &this->ched_src, &this->ched_dst, 32);
-    thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                             &this->feta_src, &this->feta_dst, 32);
+    thoom::Renderer::instance->push_sprite(
+        "", this->tunnel, &this->overlay_rect, &this->overlay_rect, 0);
+    thoom::Renderer::instance->push_sprite(
+        this->sprite->tex_id, this->sprite->texture, &this->ched_src,
+        &this->ched_dst, 32);
+    thoom::Renderer::instance->push_sprite(
+        this->sprite->tex_id, this->sprite->texture, &this->feta_src,
+        &this->feta_dst, 32);
   } else {
     this->sprite->interval_ms = this->sprite->animation > 2 ? 100 : 250;
     this->sprite->update_frame();
@@ -178,19 +177,23 @@ void Splash::step() {
         this->ched_src.x = sin_res < 0.0f ? 48.0f : 16.0f;
         this->feta_src.x = sin_res > 0.0f ? 48.0f : 16.0f;
 
-        thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                                 &this->ched_src, &this->ched_dst, 32);
-        thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                                 &this->feta_src, &this->feta_dst, 32);
+        thoom::Renderer::instance->push_sprite(
+            this->sprite->tex_id, this->sprite->texture, &this->ched_src,
+            &this->ched_dst, 32);
+        thoom::Renderer::instance->push_sprite(
+            this->sprite->tex_id, this->sprite->texture, &this->feta_src,
+            &this->feta_dst, 32);
       } break;
     }
 
     this->dst_rect.x = (float)(THOOM_SCREEN_WIDTH / 2) - 64.0f + shake_x;
     this->dst_rect.y = (float)(THOOM_SCREEN_HEIGHT / 2) - 64.0f + shake_y;
 
-    thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                             &this->sprite->frame, &this->dst_rect, 0);
+    thoom::Renderer::instance->push_sprite(
+        this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+        &this->dst_rect, 0);
   }
-  thoom::game->push_sprite("", this->overlay, &this->overlay_rect,
-                           &this->overlay_rect, 2 * THOOM_SCREEN_HEIGHT);
+  thoom::Renderer::instance->push_sprite("", this->overlay, &this->overlay_rect,
+                                         &this->overlay_rect,
+                                         2 * THOOM_SCREEN_HEIGHT);
 }

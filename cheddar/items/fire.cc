@@ -1,6 +1,7 @@
 #include "fire.h"
 
 #include "audio_playback.h"
+#include "renderer.h"
 #include "utils.h"
 
 static int fire_counter = 0;
@@ -77,6 +78,7 @@ void Fire::step() {
   this->dst_rect.x = this->x - (float)(this->sprite->frame_w / 2);
   this->dst_rect.y = this->y - (float)(this->sprite->frame_h / 2);
 
-  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                           &this->sprite->frame, &this->dst_rect, 12);
+  thoom::Renderer::instance->push_sprite(
+      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, 12);
 }

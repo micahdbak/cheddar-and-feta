@@ -3,6 +3,7 @@
 #include "audio_playback.h"
 #include "controller.h"
 #include "mouse.h"
+#include "renderer.h"
 #include "spawner.h"
 
 Bell::Bell(int x, int y, int spawner_id) {
@@ -45,6 +46,7 @@ void Bell::step() {
 
   this->dst_rect.x = this->x - 16.0f;
   this->dst_rect.y = this->y - 16.0f;
-  thoom::game->push_sprite("sprites/bell.bmp", this->sprite->texture,
-                           &this->sprite->frame, &this->dst_rect, 16);
+  thoom::Renderer::instance->push_sprite(
+      "sprites/bell.bmp", this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, 16);
 }

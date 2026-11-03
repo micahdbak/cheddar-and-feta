@@ -15,6 +15,7 @@
 #include "renderer.h"
 #include "save_data.h"
 #include "ui_box.h"
+#include "window.h"
 
 #define ITEM_NONE "item_none"
 
@@ -37,22 +38,20 @@ void Hud::shutdown() {
 }
 
 Hud::Hud() {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
-  this->ui =
-      renderer->create_texture(THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
-                               SDL_PIXELFORMAT_RGBA32, SDL_SCALEMODE_LINEAR);
-  this->overlay =
-      renderer->create_texture(THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
-                               SDL_PIXELFORMAT_RGBA32, SDL_SCALEMODE_LINEAR);
+  this->ui = thoom::Window::instance->create_texture(
+      THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA32,
+      SDL_SCALEMODE_LINEAR);
+  this->overlay = thoom::Window::instance->create_texture(
+      THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA32,
+      SDL_SCALEMODE_LINEAR);
 
   if (this->ui == nullptr || this->overlay == nullptr) {
     std::cerr << "Hud::Hud error: " << SDL_GetError() << std::endl;
     exit(1);
   }
 
-  renderer->clear(this->ui, thoom::kMask);
-  renderer->clear(this->overlay, thoom::kMask);
+  thoom::Renderer::instance->clear(this->ui, thoom::kMask);
+  thoom::Renderer::instance->clear(this->overlay, thoom::kMask);
 }
 
 Hud::~Hud() {
@@ -64,8 +63,6 @@ Hud::~Hud() {
 }
 
 void Hud::render() {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
   thoom::Controller* controller = thoom::capture_controls
                                       ? &thoom::captured_controller
                                       : &thoom::local_controller;
@@ -80,7 +77,7 @@ void Hud::render() {
 
   if (current_map != this->current_map) {
     this->current_map = current_map;
-    renderer->clear(this->ui, thoom::kMask);
+    thoom::Renderer::instance->clear(this->ui, thoom::kMask);
     if (thoom::game->map != nullptr) {
       this->display_notification(thoom::game->map->title + ", " +
                                  thoom::game->map->description);
@@ -93,7 +90,7 @@ void Hud::render() {
     this->draw_controls_menu();
     return;
   } else if (this->displaying_controls_menu) {
-    renderer->clear(this->overlay, thoom::kMask);
+    thoom::Renderer::instance->clear(this->overlay, thoom::kMask);
     this->displaying_controls_menu = false;
     force_render = true;
   }
@@ -102,7 +99,7 @@ void Hud::render() {
       current_map == "maps/dead" || current_map == "maps/credits") {
     if (!force_render) {
       force_render = true;
-      renderer->clear(this->overlay, thoom::kMask);
+      thoom::Renderer::instance->clear(this->overlay, thoom::kMask);
     }
 
     return;
@@ -120,12 +117,11 @@ void Hud::display_notification(std::string text) {
 
 void Hud::draw_items(std::vector<Item> items, int sel_item, int health,
                      int max_health) {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
   SDL_FRect hud_rect = {HUD_MAIN_X, HUD_MAIN_Y, 18.0f, 48.0f};
   draw_ui_box(UI_BOX_MENU_CONT, this->ui, &hud_rect);
-  renderer->draw_text(this->ui, thoom::game->fonts[SMALL_FONT],
-                      "HP:", HUD_MAIN_X + 5, HUD_MAIN_Y + 4, 0, kBackground);
+  thoom::Renderer::instance->draw_text(this->ui, SMALL_FONT,
+                                       "HP:", HUD_MAIN_X + 5, HUD_MAIN_Y + 4, 0,
+                                       kBackground);
 
   SDL_FRect health_rect = {(float)(HUD_MAIN_X + 5), (float)(HUD_MAIN_Y + 11),
                            8.0f, 32.0f};
@@ -133,10 +129,12 @@ void Hud::draw_items(std::vector<Item> items, int sel_item, int health,
   SDL_FRect fill_rect = {(float)(HUD_MAIN_X + 6),
                          (float)(HUD_MAIN_Y + 12 + 30 - fill_px), 6.0f,
                          (float)fill_px};
-  renderer->draw_rect(this->ui, &health_rect, thoom::Colour{52, 48, 48, 255},
-                      SDL_BLENDMODE_NONE);
-  renderer->draw_rect(this->ui, &fill_rect, thoom::Colour{240, 80, 64, 255},
-                      SDL_BLENDMODE_NONE);
+  thoom::Renderer::instance->draw_rect(this->ui, &health_rect,
+                                       thoom::Colour{52, 48, 48, 255},
+                                       SDL_BLENDMODE_NONE);
+  thoom::Renderer::instance->draw_rect(this->ui, &fill_rect,
+                                       thoom::Colour{240, 80, 64, 255},
+                                       SDL_BLENDMODE_NONE);
 
   std::string current_item = ITEM_NONE;
   int item_count = 1;
@@ -152,7 +150,8 @@ void Hud::draw_items(std::vector<Item> items, int sel_item, int health,
   SDL_FRect clear_rect = this->item_list_rect;
   clear_rect.y -= 4.0f;
   clear_rect.h += 10.0f;
-  renderer->draw_rect(this->ui, &clear_rect, thoom::kMask, SDL_BLENDMODE_NONE);
+  thoom::Renderer::instance->draw_rect(this->ui, &clear_rect, thoom::kMask,
+                                       SDL_BLENDMODE_NONE);
 
   this->item_list_rect.x = HUD_ITEMS_X;
   this->item_list_rect.y = HUD_ITEMS_Y;
@@ -173,12 +172,13 @@ void Hud::draw_items(std::vector<Item> items, int sel_item, int health,
 
     std::string item_id = i < 0 ? ITEM_NONE : items[i].item_id;
     item_texture = thoom::load_bmp_texture("sprites/" + item_id + ".bmp");
-    renderer->draw_texture(this->ui, item_texture, &item_src_rect, &item_rect);
+    thoom::Renderer::instance->draw_texture(this->ui, item_texture,
+                                            &item_src_rect, &item_rect);
 
     SDL_FRect hint_rect = {float(x_offset), HUD_ITEMS_Y + 15, 5.0f, 7.0f};
-    renderer->draw_text(this->ui, thoom::game->fonts[SMALL_FONT],
-                        std::to_string(i + 2), x_offset, HUD_ITEMS_Y + 15, 0,
-                        kBackground);
+    thoom::Renderer::instance->draw_text(this->ui, SMALL_FONT,
+                                         std::to_string(i + 2), x_offset,
+                                         HUD_ITEMS_Y + 15, 0, kBackground);
 
     int this_item_count = i >= 0 ? items[i].count : 1;
     if (this_item_count > 1) {
@@ -186,16 +186,15 @@ void Hud::draw_items(std::vector<Item> items, int sel_item, int health,
                                    (float)(HUD_ITEMS_Y - 4), 16.0f, 16.0f};
       draw_icon(i == sel_item ? ITEM_COUNT_ICON : ITEM_COUNT_ICON_SHD, this->ui,
                 &item_count_icon);
-      renderer->draw_text(this->ui, thoom::game->fonts[SMALL_FONT],
-                          std::to_string(this_item_count),
-                          this_item_count > 9 ? x_offset + 11 : x_offset + 13,
-                          HUD_ITEMS_Y - 1, 0, kBackground);
+      thoom::Renderer::instance->draw_text(
+          this->ui, SMALL_FONT, std::to_string(this_item_count),
+          this_item_count > 9 ? x_offset + 11 : x_offset + 13, HUD_ITEMS_Y - 1,
+          0, kBackground);
     }
   }
 }
 
 void Hud::draw_controls_menu() {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
   bool should_render = !this->displaying_controls_menu;
   this->displaying_controls_menu = true;
 
@@ -270,63 +269,70 @@ void Hud::draw_controls_menu() {
                          uint8_t(thoom::game->map->bg_b));
     }
     bg.a = 128;
-    renderer->clear(this->overlay, bg);
+    thoom::Renderer::instance->clear(this->overlay, bg);
 
     SDL_FRect config_rect = {8.0f, 8.0f, 112.0f, 168.0f};
     draw_ui_box(UI_BOX_CONTAINER, this->overlay, &config_rect);
 
-    renderer->draw_text(this->overlay, thoom::game->fonts[SMALL_FONT], "Game",
-                        16, 16, 0, kBackground);
+    thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT, "Game", 16,
+                                         16, 0, kBackground);
 
-    renderer->draw_text(this->overlay, thoom::game->fonts[SMALL_FONT],
-                        "Exit to Main Menu", 20, 28, 0, kBackground);
+    thoom::Renderer::instance->draw_text(
+        this->overlay, SMALL_FONT, "Exit to Main Menu", 20, 28, 0, kBackground);
     if (this->sel_control != -3) {
       SDL_FRect option_rect = {20.0f, 28.0f, 96.0f, 8.0f};
-      renderer->draw_rect(this->overlay, &option_rect,
-                          thoom::Colour{24, 24, 24, 96}, SDL_BLENDMODE_BLEND);
+      thoom::Renderer::instance->draw_rect(this->overlay, &option_rect,
+                                           thoom::Colour{24, 24, 24, 96},
+                                           SDL_BLENDMODE_BLEND);
     }
 
-    renderer->draw_text(this->overlay, thoom::game->fonts[SMALL_FONT],
-                        "Volume Settings", 16, 40, 0, kBackground);
+    thoom::Renderer::instance->draw_text(
+        this->overlay, SMALL_FONT, "Volume Settings", 16, 40, 0, kBackground);
 
-    renderer->draw_text(this->overlay, thoom::game->fonts[SMALL_FONT], "Sounds",
-                        20, 52, 0, kBackground);
-    renderer->draw_text(this->overlay, thoom::game->fonts[SMALL_FONT],
-                        std::to_string(thoom::game->volume), 52, 52, 0,
-                        kBackground);
+    thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT, "Sounds",
+                                         20, 52, 0, kBackground);
+    thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT,
+                                         std::to_string(thoom::game->volume),
+                                         52, 52, 0, kBackground);
     if (this->sel_control != -2) {
       SDL_FRect sound_rect = {20.0f, 52.0f, 96.0f, 8.0f};
-      renderer->draw_rect(this->overlay, &sound_rect,
-                          thoom::Colour{24, 24, 24, 96}, SDL_BLENDMODE_BLEND);
+      thoom::Renderer::instance->draw_rect(this->overlay, &sound_rect,
+                                           thoom::Colour{24, 24, 24, 96},
+                                           SDL_BLENDMODE_BLEND);
       SDL_FRect volume_rect = {52.0f, 52.0f, 64.0f, 8.0f};
-      renderer->draw_rect(this->overlay, &volume_rect,
-                          thoom::Colour{24, 24, 24, 128}, SDL_BLENDMODE_BLEND);
+      thoom::Renderer::instance->draw_rect(this->overlay, &volume_rect,
+                                           thoom::Colour{24, 24, 24, 128},
+                                           SDL_BLENDMODE_BLEND);
     } else {
       SDL_FRect volume_rect = {52.0f, 52.0f, 64.0f, 8.0f};
-      renderer->draw_rect(this->overlay, &volume_rect,
-                          thoom::Colour{24, 24, 24, 96}, SDL_BLENDMODE_BLEND);
+      thoom::Renderer::instance->draw_rect(this->overlay, &volume_rect,
+                                           thoom::Colour{24, 24, 24, 96},
+                                           SDL_BLENDMODE_BLEND);
     }
 
-    renderer->draw_text(this->overlay, thoom::game->fonts[SMALL_FONT], "Music",
-                        20, 60, 0, kBackground);
-    renderer->draw_text(this->overlay, thoom::game->fonts[SMALL_FONT],
-                        std::to_string(thoom::game->music_volume), 52, 60, 0,
-                        kBackground);
+    thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT, "Music", 20,
+                                         60, 0, kBackground);
+    thoom::Renderer::instance->draw_text(
+        this->overlay, SMALL_FONT, std::to_string(thoom::game->music_volume),
+        52, 60, 0, kBackground);
     if (this->sel_control != -1) {
       SDL_FRect music_rect = {20.0f, 60.0f, 96.0f, 8.0f};
-      renderer->draw_rect(this->overlay, &music_rect,
-                          thoom::Colour{24, 24, 24, 96}, SDL_BLENDMODE_BLEND);
+      thoom::Renderer::instance->draw_rect(this->overlay, &music_rect,
+                                           thoom::Colour{24, 24, 24, 96},
+                                           SDL_BLENDMODE_BLEND);
       SDL_FRect volume_rect = {52.0f, 60.0f, 64.0f, 8.0f};
-      renderer->draw_rect(this->overlay, &volume_rect,
-                          thoom::Colour{24, 24, 24, 128}, SDL_BLENDMODE_BLEND);
+      thoom::Renderer::instance->draw_rect(this->overlay, &volume_rect,
+                                           thoom::Colour{24, 24, 24, 128},
+                                           SDL_BLENDMODE_BLEND);
     } else {
       SDL_FRect volume_rect = {52.0f, 60.0f, 64.0f, 8.0f};
-      renderer->draw_rect(this->overlay, &volume_rect,
-                          thoom::Colour{24, 24, 24, 96}, SDL_BLENDMODE_BLEND);
+      thoom::Renderer::instance->draw_rect(this->overlay, &volume_rect,
+                                           thoom::Colour{24, 24, 24, 96},
+                                           SDL_BLENDMODE_BLEND);
     }
 
-    renderer->draw_text(this->overlay, thoom::game->fonts[SMALL_FONT],
-                        "Controls", 16, 72, 0, kBackground);
+    thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT, "Controls",
+                                         16, 72, 0, kBackground);
 
     int start_y = 84;
 
@@ -338,10 +344,10 @@ void Hud::draw_controls_menu() {
               : SDL_GetKeyName(thoom::btokeycode_map[(thoom::Button)i]);
 
       int y = start_y + (i * 8);
-      renderer->draw_text(this->overlay, thoom::game->fonts[SMALL_FONT],
-                          control_name, 20, y, 0, kBackground);
-      renderer->draw_text(this->overlay, thoom::game->fonts[SMALL_FONT],
-                          input_name, 52, y, 0, kBackground);
+      thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT,
+                                           control_name, 20, y, 0, kBackground);
+      thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT,
+                                           input_name, 52, y, 0, kBackground);
 
       int control_opacity = 128;
       int input_opacity = 192;
@@ -357,19 +363,19 @@ void Hud::draw_controls_menu() {
 
       SDL_FRect control_rect = {20.0f, (float)y, 28.0f, 8.0f};
       SDL_FRect input_rect = {52.0f, (float)y, 64.0f, 8.0f};
-      renderer->draw_rect(this->overlay, &control_rect,
-                          thoom::Colour{24, 24, 24, uint8_t(control_opacity)},
-                          SDL_BLENDMODE_BLEND);
-      renderer->draw_rect(this->overlay, &input_rect,
-                          thoom::Colour{24, 24, 24, uint8_t(input_opacity)},
-                          SDL_BLENDMODE_BLEND);
+      thoom::Renderer::instance->draw_rect(
+          this->overlay, &control_rect,
+          thoom::Colour{24, 24, 24, uint8_t(control_opacity)},
+          SDL_BLENDMODE_BLEND);
+      thoom::Renderer::instance->draw_rect(
+          this->overlay, &input_rect,
+          thoom::Colour{24, 24, 24, uint8_t(input_opacity)},
+          SDL_BLENDMODE_BLEND);
     }
   }
 }
 
 void Hud::draw_net_agent(bool force_render) {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
   if (!(thoom::game->create_objects && thoom::net_agent != nullptr)) return;
 
   std::string code = thoom::net_agent->get_connection_code();
@@ -378,8 +384,8 @@ void Hud::draw_net_agent(bool force_render) {
       code != this->last_code ||
       thoom::game->ticks - this->last_drawn_ticks > 1000) {
     if (this->netagent_rect.w > 0.0f) {
-      renderer->draw_rect(this->overlay, &this->netagent_rect, thoom::kMask,
-                          SDL_BLENDMODE_NONE);
+      thoom::Renderer::instance->draw_rect(this->overlay, &this->netagent_rect,
+                                           thoom::kMask, SDL_BLENDMODE_NONE);
     }
 
     switch (thoom::game->net_state) {
@@ -387,22 +393,23 @@ void Hud::draw_net_agent(bool force_render) {
         this->netagent_rect = SDL_FRect{8.0f, 8.0f, 88.0f, 16.0f};
         draw_ui_box(UI_BOX_MENU_CONT, this->overlay, &this->netagent_rect);
         draw_icon(NOT_CONNECTED_ICON, this->overlay, &this->neticon_rect);
-        renderer->draw_text(this->overlay, thoom::game->fonts[DEFAULT_FONT],
-                            "Not Connected", 28, 12, 0, kBackground);
+        thoom::Renderer::instance->draw_text(this->overlay, DEFAULT_FONT,
+                                             "Not Connected", 28, 12, 0,
+                                             kBackground);
         this->displaying_netagent = true;
         break;
       case thoom::NetworkAgent::State::WAITING_FOR_PEER:
         this->netagent_rect = SDL_FRect{8.0f, 8.0f, 80.0f, 16.0f};
         draw_ui_box(UI_BOX_MENU_CONT, this->overlay, &this->netagent_rect);
         draw_icon(WAITING_FOR_PEER_ICON, this->overlay, &this->neticon_rect);
-        renderer->draw_text(this->overlay, thoom::game->fonts[SMALL_FONT],
-                            "Code:", 28, 13, 0, kBackground);
-        renderer->draw_text(this->overlay, thoom::game->fonts[CODE_FONT], code,
-                            48, 12, 0, kBackground);
+        thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT,
+                                             "Code:", 28, 13, 0, kBackground);
+        thoom::Renderer::instance->draw_text(this->overlay, CODE_FONT, code, 48,
+                                             12, 0, kBackground);
         this->displaying_netagent = true;
         break;
       default:
-        renderer->clear(this->overlay, thoom::kMask);
+        thoom::Renderer::instance->clear(this->overlay, thoom::kMask);
         this->netagent_rect = SDL_FRect{0.0f, 0.0f, 0.0f, 0.0f};
         this->displaying_netagent = false;
         this->displaying_notification = false;
@@ -416,12 +423,10 @@ void Hud::draw_net_agent(bool force_render) {
 }
 
 void Hud::draw_notification(bool force_render) {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
   if (this->notification.empty()) return;
 
   if (force_render || this->force_notif_rerender) {
-    renderer->clear(this->overlay, thoom::kMask);
+    thoom::Renderer::instance->clear(this->overlay, thoom::kMask);
     this->displaying_notification = false;
     this->force_notif_rerender = false;
 
@@ -434,8 +439,8 @@ void Hud::draw_notification(bool force_render) {
   }
 
   if (!this->displaying_notification) {
-    int text_w =
-        thoom::game->fonts[DEFAULT_FONT]->text_width(this->notification);
+    int text_w = thoom::Renderer::instance->fonts[DEFAULT_FONT]->text_width(
+        this->notification);
     SDL_FRect notif_rect = SDL_FRect{8.0f, 8.0f, (float)(text_w + 12), 16.0f};
     int text_y = 12;
 
@@ -445,12 +450,13 @@ void Hud::draw_notification(bool force_render) {
     }
 
     draw_ui_box(UI_BOX_MENU_CONT, this->overlay, &notif_rect);
-    renderer->draw_text(this->overlay, thoom::game->fonts[DEFAULT_FONT],
-                        this->notification, 14, text_y, 0, kBackground);
+    thoom::Renderer::instance->draw_text(this->overlay, DEFAULT_FONT,
+                                         this->notification, 14, text_y, 0,
+                                         kBackground);
 
     this->displaying_notification = true;
   } else if (thoom::game->ticks - this->notif_ticks > 3000) {
-    renderer->clear(this->overlay, thoom::kMask);
+    thoom::Renderer::instance->clear(this->overlay, thoom::kMask);
     this->notification.clear();
     this->displaying_notification = false;
 

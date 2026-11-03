@@ -9,6 +9,7 @@
 #include "hurtbox.h"
 #include "icon.h"
 #include "mouse.h"
+#include "renderer.h"
 #include "save_data.h"
 
 FoePorcupine::FoePorcupine(int x, int y, int spawner_id)
@@ -143,6 +144,7 @@ void FoePorcupine::step() {
 
   this->dst_rect.x = this->x - 16.0f + this->off_x;
   this->dst_rect.y = this->y - 16.0f + this->off_y;
-  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                           &this->sprite->frame, &this->dst_rect, 22);
+  thoom::Renderer::instance->push_sprite(
+      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, 22);
 }

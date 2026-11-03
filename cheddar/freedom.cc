@@ -19,7 +19,7 @@ void Freedom::step() {
 
   if (this->timer_start > 0) {
     if (thoom::game->ticks - this->timer_start > 2000) {
-      thoom::game->map = "maps/credits";
+      thoom::game->next_map = "maps/credits";
     }
 
     return;

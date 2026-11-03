@@ -34,7 +34,7 @@ void Credits::step() {
                            &this->dst_rect, 0);
 
   if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
-    thoom::game->map = "maps/init";
+    thoom::game->next_map = "maps/init";
     thoom::save.clear();
   }
 }

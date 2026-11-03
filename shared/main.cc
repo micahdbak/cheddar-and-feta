@@ -75,8 +75,13 @@ int main(int argc, char** argv) {
 
     controller->clear_hits();
 
-    renderer->present(thoom::Colour{thoom::game->bg_r, thoom::game->bg_g,
-                                    thoom::game->bg_b, 255});
+    thoom::Colour bg = thoom::kBlack;
+    if (thoom::game->map != nullptr) {
+      bg = thoom::Colour(uint8_t(thoom::game->map->bg_r),
+                         uint8_t(thoom::game->map->bg_g),
+                         uint8_t(thoom::game->map->bg_b));
+    }
+    renderer->present(bg);
   }
 
   Hud::shutdown();

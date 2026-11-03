@@ -28,7 +28,7 @@ void GameOver::step() {
   thoom::game->push_sprite("", this->ui, &this->src, &this->dst, 0);
 
   if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
-    thoom::game->map = "maps/init";
+    thoom::game->next_map = "maps/init";
     thoom::save.clear();
   }
 }

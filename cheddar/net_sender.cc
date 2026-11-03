@@ -15,7 +15,7 @@ void NetSender::step() {
   if (thoom::net_agent->get_state() != thoom::NetworkAgent::State::CONNECTED)
     return;
 
-  std::string frame_msg = MSG_MAP + thoom::game->current_map + '\n';
+  std::string frame_msg = MSG_MAP + thoom::game->map->path + '\n';
   char buff[1024];
 
   // sprites

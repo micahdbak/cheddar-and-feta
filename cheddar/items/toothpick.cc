@@ -47,7 +47,7 @@ void ThrownToothpick::step() {
   float new_x = this->x + dx;
   float new_y = this->y + dy;
 
-  if (thoom::game->point_in_collider(new_x, new_y) ||
+  if (thoom::game->map->collider->point_in_collider(new_x, new_y) ||
       thoom::game->ticks - this->spawned_ticks > 1000) {
     thoom::game->delete_object = true;
 

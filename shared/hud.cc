@@ -75,11 +75,16 @@ void Hud::render() {
     thoom::capture_controls = this->display_controls_menu;
   }
 
-  if (thoom::game->current_map != this->current_map) {
-    this->current_map = thoom::game->current_map;
+  std::string current_map =
+      thoom::game->map != nullptr ? thoom::game->map->path : "";
+
+  if (current_map != this->current_map) {
+    this->current_map = current_map;
     renderer->clear(this->ui, thoom::kMask);
-    this->display_notification(thoom::game->map_title + ", " +
-                               thoom::game->map_description);
+    if (thoom::game->map != nullptr) {
+      this->display_notification(thoom::game->map->title + ", " +
+                                 thoom::game->map->description);
+    }
   }
 
   bool force_render = false;
@@ -93,10 +98,8 @@ void Hud::render() {
     force_render = true;
   }
 
-  if (thoom::game->current_map == "maps/splash" ||
-      thoom::game->current_map == "maps/init" ||
-      thoom::game->current_map == "maps/dead" ||
-      thoom::game->current_map == "maps/credits") {
+  if (current_map == "maps/splash" || current_map == "maps/init" ||
+      current_map == "maps/dead" || current_map == "maps/credits") {
     if (!force_render) {
       force_render = true;
       renderer->clear(this->overlay, thoom::kMask);
@@ -226,7 +229,7 @@ void Hud::draw_controls_menu() {
 
     if (this->sel_control == -3 &&
         thoom::captured_controller.is_hit(thoom::Button::SELECT)) {
-      thoom::game->map = "maps/init";
+      thoom::game->next_map = "maps/init";
       thoom::save.clear();
 
       thoom::capture_controls = false;
@@ -260,9 +263,14 @@ void Hud::draw_controls_menu() {
   }
 
   if (should_render) {
-    renderer->clear(this->overlay,
-                    thoom::Colour{thoom::game->bg_r, thoom::game->bg_g,
-                                  thoom::game->bg_b, 128});
+    thoom::Colour bg = thoom::kBlack;
+    if (thoom::game->map != nullptr) {
+      bg = thoom::Colour(uint8_t(thoom::game->map->bg_r),
+                         uint8_t(thoom::game->map->bg_g),
+                         uint8_t(thoom::game->map->bg_b));
+    }
+    bg.a = 128;
+    renderer->clear(this->overlay, bg);
 
     SDL_FRect config_rect = {8.0f, 8.0f, 112.0f, 168.0f};
     draw_ui_box(UI_BOX_CONTAINER, this->overlay, &config_rect);

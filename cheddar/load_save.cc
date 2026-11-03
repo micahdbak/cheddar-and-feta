@@ -50,7 +50,7 @@ void LoadSave::step() {
 
     if (!thoom::save.has(LOAD_MAP)) thoom::save.data[LOAD_MAP] = "maps/demo00";
 
-    thoom::game->map = thoom::save.data[LOAD_MAP];
+    thoom::game->next_map = thoom::save.data[LOAD_MAP];
     return;
   }
 

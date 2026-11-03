@@ -33,7 +33,7 @@ void ThrownMolotov::step() {
   float new_y = this->y + dy;
 
   if (this->did_hit || thoom::game->ticks - this->timer > 1000 ||
-      thoom::game->point_in_collider(new_x, new_y)) {
+      thoom::game->map->collider->point_in_collider(new_x, new_y)) {
     for (int i = 0; i < 8; i++) {
       int fire_x_dir, fire_y_dir;
       thoom::dirs_from_direction(i, &fire_x_dir, &fire_y_dir);

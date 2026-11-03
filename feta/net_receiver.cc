@@ -30,9 +30,9 @@ void NetReceiver::step() {
   if (thoom::game->net_state != thoom::NetworkAgent::State::CONNECTED) {
     // if currently in a map other than the init map, reset the network agent
     // and go to that
-    if (thoom::game->current_map != "maps/init") {
+    if (thoom::game->map->path != "maps/init") {
       thoom::net_agent->try_reset();
-      thoom::game->map = "maps/init";
+      thoom::game->next_map = "maps/init";
       last_frame_ticks = 0;
     }
 
@@ -95,7 +95,7 @@ void NetReceiver::step() {
         sscanf(arr + 1, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
 
-        if (thoom::game->current_map != buff) {
+        if (thoom::game->map->path != buff) {
           this->load_map(std::string(buff), thoom::next_line(arr));
           return;  // don't read rest of messages
         }
@@ -120,8 +120,8 @@ void NetReceiver::step() {
         sscanf(arr + 1, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
 
-        if (thoom::game->current_map != buff) {
-          if (thoom::game->current_map != buff) {
+        if (thoom::game->map->path != buff) {
+          if (thoom::game->map->path != buff) {
             this->load_map(std::string(buff), thoom::next_line(arr));
             return;  // don't read rest of messages
           }
@@ -313,9 +313,10 @@ bool NetReceiver::handle_important_message(const char* arr) {
         std::exit(1);
       }
 
-      if (coord >= 0 && coord < thoom::game->cols * thoom::game->rows &&
+      if (coord >= 0 &&
+          coord < thoom::game->map->cols * thoom::game->map->rows &&
           collider >= 0 && collider < thoom::n_MapColliders) {
-        thoom::game->collision[coord] = collider;
+        thoom::game->map->collider->collision[coord] = collider;
       }
 
       break;
@@ -338,7 +339,7 @@ void NetReceiver::load_map(const std::string& map, const char* remaining_msgs) {
   }
   this->sprites.clear();
 
-  thoom::game->map = map;
+  thoom::game->next_map = map;
 
   this->just_loaded_map = true;
 }

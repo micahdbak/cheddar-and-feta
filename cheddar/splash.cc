@@ -70,7 +70,7 @@ void Splash::step() {
     this->initial_timer = thoom::game->ticks;
 
     if (++this->animation >= this->animations) {
-      thoom::game->map = "maps/init";  // leave the splash screen
+      thoom::game->next_map = "maps/init";  // leave the splash screen
       return;
     }
 

@@ -62,8 +62,8 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
     feta_animation = coordinates[coord].animation;
   }
 
-  this->tile_x = (int)this->x / thoom::game->tile_width;
-  this->tile_y = (int)this->y / thoom::game->tile_height;
+  this->tile_x = (int)this->x / thoom::game->map->tile_width;
+  this->tile_y = (int)this->y / thoom::game->map->tile_height;
   foe_path_find(this);
 
   thoom::game->set_view(this->x, this->y);
@@ -475,8 +475,8 @@ void Cheddar::step() {
     }
 
     // if moved onto a new tile, update the path finding
-    int new_tile_x = (int)this->x / thoom::game->tile_width;
-    int new_tile_y = (int)this->y / thoom::game->tile_height;
+    int new_tile_x = (int)this->x / thoom::game->map->tile_width;
+    int new_tile_y = (int)this->y / thoom::game->map->tile_height;
     if (new_tile_x != this->tile_x || new_tile_y != this->tile_y) {
       foe_path_find(this);
       this->tile_x = new_tile_x;
@@ -567,7 +567,7 @@ void Cheddar::attack(int damage) {
         thoom::game->net_state == thoom::NetworkAgent::State::NO_CONNECTION ||
         thoom::game->net_state ==
             thoom::NetworkAgent::State::WAITING_FOR_PEER) {
-      thoom::game->map = "maps/dead";
+      thoom::game->next_map = "maps/dead";
     }
   }
 }
@@ -656,6 +656,6 @@ void Cheddar::signal_down() {
   // signal implies that feta is down; check if we are down too
   if (this->is_down && this->is_busy == DOWNED && feta != nullptr &&
       feta->is_down) {
-    thoom::game->map = "maps/dead";
+    thoom::game->next_map = "maps/dead";
   }
 }

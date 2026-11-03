@@ -13,7 +13,8 @@
     free(a);       \
   }
 #define COORD(x, y) (((y) * cols) + (x))
-#define COLLISION(x, y) (thoom::game->collision[COORD((x), (y))] >= 0)
+#define COLLISION(x, y) \
+  (thoom::game->map->collider->collision[COORD((x), (y))] >= 0)
 #define DIST_ADJACENT 10000
 #define DIST_DIAGONAL 14142
 #define MAX_DISTANCE DIST_ADJACENT * 24  // tiles radius
@@ -42,8 +43,8 @@ static void _init_matrices() {
   FREE_IF(_cheddar_prev);
   FREE_IF(_feta_prev);
 
-  rows = thoom::game->rows;
-  cols = thoom::game->cols;
+  rows = thoom::game->map->rows;
+  cols = thoom::game->map->cols;
 
   _cheddar_dist = (int*)malloc((rows * cols) * sizeof(int));
   _feta_dist = (int*)malloc((rows * cols) * sizeof(int));
@@ -71,13 +72,13 @@ static void _neighbours(int x, int y, std::vector<_Neighbour>& neighbours) {
 }
 
 void foe_path_find(Mouse* mouse) {
-  if (thoom::game->collision == nullptr) {
-    std::cerr << "foe_path_find error: called without game->collision"
+  if (thoom::game->map->collider->collision == nullptr) {
+    std::cerr << "foe_path_find error: called without game->map->collider->collision"
               << std::endl;
     std::exit(1);
   }
 
-  if (thoom::game->rows != rows) {
+  if (thoom::game->map->rows != rows) {
     _init_matrices();
   }
 
@@ -88,8 +89,8 @@ void foe_path_find(Mouse* mouse) {
   std::vector<_Neighbour> neighbours;
 
   // starting coordinates
-  int mouse_tile_x = (int)mouse->x / thoom::game->tile_width;
-  int mouse_tile_y = (int)mouse->y / thoom::game->tile_height;
+  int mouse_tile_x = (int)mouse->x / thoom::game->map->tile_width;
+  int mouse_tile_y = (int)mouse->y / thoom::game->map->tile_height;
   std::pair<int, int> start(mouse_tile_x, mouse_tile_y);
   queue.push(_QItem{start, 0});
 
@@ -296,7 +297,7 @@ void foe_pick_random(int* x, int* y) {
 void foe_move_direction(int* x, int* y, int x_dir, int y_dir) {
   int x_goal = *x + x_dir, y_goal = *y + y_dir;
 
-  if (thoom::game->collision[COORD(x_goal, y_goal)] < 0) {
+  if (thoom::game->map->collider->collision[COORD(x_goal, y_goal)] < 0) {
     *x = x_goal;
     *y = y_goal;
   } else {
@@ -358,8 +359,8 @@ void foe_debug_tile(int x, int y) {
   }
 
   debug_dst_rect[COORD(x, y)] =
-      SDL_FRect{(float)(x * thoom::game->tile_width),
-                (float)(y * thoom::game->tile_height), 16.0f, 16.0f};
+      SDL_FRect{(float)(x * thoom::game->map->tile_width),
+                (float)(y * thoom::game->map->tile_height), 16.0f, 16.0f};
   dst_rect = &debug_dst_rect[COORD(x, y)];
 
   thoom::game->push_sprite("sprites/foe_debug.bmp", debug_tiles_texture,

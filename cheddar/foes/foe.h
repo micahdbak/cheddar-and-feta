@@ -4,13 +4,13 @@
 
 #include "object.h"
 
-#define CENTER_TILE_X(_x)                        \
-  ((float)(int)((_x * thoom::game->tile_width) + \
-                (thoom::game->tile_width / 2)) + \
+#define CENTER_TILE_X(_x)                             \
+  ((float)(int)((_x * thoom::game->map->tile_width) + \
+                (thoom::game->map->tile_width / 2)) + \
    0.5f)
-#define CENTER_TILE_Y(_y)                         \
-  ((float)(int)((_y * thoom::game->tile_height) + \
-                (thoom::game->tile_height / 2)) + \
+#define CENTER_TILE_Y(_y)                              \
+  ((float)(int)((_y * thoom::game->map->tile_height) + \
+                (thoom::game->map->tile_height / 2)) + \
    0.5f)
 
 class Mouse;  // forward declaration

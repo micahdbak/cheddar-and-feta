@@ -42,8 +42,8 @@ void TossedItem::step() {
         THOOM_DISTANCE_BETWEEN_POINTS(new_x, new_y, feta->x, feta->y);
   }
 
-  if (thoom::game->point_in_collider(new_x, new_y) || mouse_distance < 8.0f ||
-      thoom::game->ticks - this->spawned_ticks > 500) {
+  if (thoom::game->map->collider->point_in_collider(new_x, new_y) ||
+      mouse_distance < 8.0f || thoom::game->ticks - this->spawned_ticks > 500) {
     thoom::game->delete_object = true;
 
     std::string dropped_obj_id = this->item_id + DROPPED_OBJ;

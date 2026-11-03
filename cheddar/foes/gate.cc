@@ -16,14 +16,14 @@ FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
   this->dst_rect.h = 48.0f;
   this->sprite->set_animation(animation);
 
-  x = x - (x % thoom::game->tile_width);
-  y = y - (y % thoom::game->tile_height);
+  x = x - (x % thoom::game->map->tile_width);
+  y = y - (y % thoom::game->map->tile_height);
   this->x = float(x);
   this->y = float(y);
 
   this->colliders_offset =
-      ((y / thoom::game->tile_height) + 1) * thoom::game->cols;
-  this->colliders_x = x / thoom::game->tile_width;
+      ((y / thoom::game->map->tile_height) + 1) * thoom::game->map->cols;
+  this->colliders_x = x / thoom::game->map->tile_width;
 
   char key[256];
   snprintf(key, sizeof(key), "spawner_%d", this->spawner_id);
@@ -44,8 +44,8 @@ FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
 
   for (int i = 0; i < 3; i++) {
     int coord = this->colliders_offset + this->colliders_x + i;
-    this->colliders.push_back(thoom::game->collision[coord]);
-    thoom::game->collision[coord] = 0;  // solid collider
+    this->colliders.push_back(thoom::game->map->collider->collision[coord]);
+    thoom::game->map->collider->collision[coord] = 0;  // solid collider
   }
 }
 
@@ -58,8 +58,9 @@ void FoeGate::step() {
     for (int i = 0; i < 3; i++) {
       int coord = this->colliders_offset + this->colliders_x + i;
       NetSender::send_message(
-          MSG_COLLISION, std::to_string(coord) + ',' +
-                             std::to_string(thoom::game->collision[coord]));
+          MSG_COLLISION,
+          std::to_string(coord) + ',' +
+              std::to_string(thoom::game->map->collider->collision[coord]));
     }
 
     this->synchronized = true;
@@ -70,7 +71,7 @@ void FoeGate::step() {
     // remove colliders
     for (int i = 0; i < 3; i++) {
       int coord = this->colliders_offset + this->colliders_x + i;
-      thoom::game->collision[coord] = this->colliders[i];
+      thoom::game->map->collider->collision[coord] = this->colliders[i];
     }
 
     this->colliders.clear();

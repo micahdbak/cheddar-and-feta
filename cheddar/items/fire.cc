@@ -49,11 +49,11 @@ void Fire::step() {
     float new_x = this->x + dx;
     float new_y = this->y + dy;
 
-    if (!thoom::game->point_in_collider(new_x, this->y)) {
+    if (!thoom::game->map->collider->point_in_collider(new_x, this->y)) {
       this->x = new_x;
     }
 
-    if (!thoom::game->point_in_collider(this->x, new_y)) {
+    if (!thoom::game->map->collider->point_in_collider(this->x, new_y)) {
       this->y = new_y;
     }
 

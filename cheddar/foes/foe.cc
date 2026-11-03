@@ -20,8 +20,8 @@ Foe::Foe(float x, float y, int spawner_id, int speed, int throw_speed,
       throw_speed(throw_speed),
       stalking_distance(stalking_distance),
       action_distance(action_distance) {
-  this->target_x = (int)x / thoom::game->tile_width;
-  this->target_y = (int)y / thoom::game->tile_height;
+  this->target_x = (int)x / thoom::game->map->tile_width;
+  this->target_y = (int)y / thoom::game->map->tile_height;
 
   // ensure starting x/y is in the center of the corresponding tile
   this->x = CENTER_TILE_X(this->target_x);
@@ -124,12 +124,13 @@ void Foe::foe_step() {
       // will be walking if not action'ing
       this->state = Foe::State::WALKING;
 
-      int current_x = (int)this->x / thoom::game->tile_width;
-      int current_y = (int)this->y / thoom::game->tile_height;
-      int coord = (current_y * thoom::game->cols) + current_x;
+      int current_x = (int)this->x / thoom::game->map->tile_width;
+      int current_y = (int)this->y / thoom::game->map->tile_height;
+      int coord = (current_y * thoom::game->map->cols) + current_x;
 
-      if (coord >= 0 && coord < thoom::game->cols * thoom::game->rows &&
-          thoom::game->collision[coord] < 0) {
+      if (coord >= 0 &&
+          coord < thoom::game->map->cols * thoom::game->map->rows &&
+          thoom::game->map->collider->collision[coord] < 0) {
         this->target_x = current_x;
         this->target_y = current_y;
       } else {
@@ -197,12 +198,13 @@ void Foe::foe_step() {
     case Foe::State::FORCE_RANDOM_TILE: {
       this->state = Foe::State::WALKING;
 
-      int current_x = (int)this->x / thoom::game->tile_width;
-      int current_y = (int)this->y / thoom::game->tile_height;
-      int coord = (current_y * thoom::game->cols) + current_x;
+      int current_x = (int)this->x / thoom::game->map->tile_width;
+      int current_y = (int)this->y / thoom::game->map->tile_height;
+      int coord = (current_y * thoom::game->map->cols) + current_x;
 
-      if (coord >= 0 && coord < thoom::game->cols * thoom::game->rows &&
-          thoom::game->collision[coord] < 0) {
+      if (coord >= 0 &&
+          coord < thoom::game->map->cols * thoom::game->map->rows &&
+          thoom::game->map->collider->collision[coord] < 0) {
         this->target_x = current_x;
         this->target_y = current_y;
       } else {
@@ -237,12 +239,13 @@ void Foe::foe_step() {
     case Foe::State::THROW_AWAY_FROM: {
       this->state = Foe::State::THROWN;
 
-      int current_x = (int)this->x / thoom::game->tile_width;
-      int current_y = (int)this->y / thoom::game->tile_height;
-      int coord = (current_y * thoom::game->cols) + current_x;
+      int current_x = (int)this->x / thoom::game->map->tile_width;
+      int current_y = (int)this->y / thoom::game->map->tile_height;
+      int coord = (current_y * thoom::game->map->cols) + current_x;
 
-      if (coord >= 0 && coord < thoom::game->cols * thoom::game->rows &&
-          thoom::game->collision[coord] < 0) {
+      if (coord >= 0 &&
+          coord < thoom::game->map->cols * thoom::game->map->rows &&
+          thoom::game->map->collider->collision[coord] < 0) {
         this->target_x = current_x;
         this->target_y = current_y;
       } else {

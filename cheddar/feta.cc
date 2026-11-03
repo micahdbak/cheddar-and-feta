@@ -36,8 +36,8 @@ Feta::Feta(int x, int y, int animation) {
     this->sprite->set_animation(animation);
   }
 
-  this->tile_x = (int)this->x / thoom::game->tile_width;
-  this->tile_y = (int)this->y / thoom::game->tile_height;
+  this->tile_x = (int)this->x / thoom::game->map->tile_width;
+  this->tile_y = (int)this->y / thoom::game->map->tile_height;
   foe_path_find(this);
 
   this->dst_rect.w = 32.0f;
@@ -85,8 +85,8 @@ void Feta::step() {
     this->new_objects.clear();
   }
 
-  int new_tile_x = (int)this->x / thoom::game->tile_width;
-  int new_tile_y = (int)this->y / thoom::game->tile_height;
+  int new_tile_x = (int)this->x / thoom::game->map->tile_width;
+  int new_tile_y = (int)this->y / thoom::game->map->tile_height;
 
   if (this->tile_x != new_tile_x || this->tile_y != new_tile_y) {
     this->tile_x = new_tile_x;

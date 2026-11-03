@@ -17,7 +17,7 @@ ItemPersister::ItemPersister() {
 
   item_persister = this;
 
-  std::string key = thoom::game->current_map + "_items";
+  std::string key = thoom::game->map->path + "_items";
 
   if (thoom::save.has(key)) {
     std::string items = thoom::save.data[key];
@@ -70,7 +70,7 @@ void ItemPersister::step() {
 }
 
 void ItemPersister::save_items() {
-  std::string key = thoom::game->current_map + "_items";
+  std::string key = thoom::game->map->path + "_items";
   std::string data;
 
   auto it = this->items_to_save.begin();

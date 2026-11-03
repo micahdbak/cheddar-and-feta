@@ -29,7 +29,7 @@ DroppedItem::DroppedItem(std::string item_id, float x, float y,
     char buff[256];
     snprintf(buff, sizeof(buff), "%s_%d_%d", this->item_id.c_str(),
              (int)this->x, (int)this->y);
-    std::string key = thoom::game->current_map + "_" + buff;
+    std::string key = thoom::game->map->path + "_" + buff;
 
     // cancel creation if this save entry exists
     if (thoom::save.geti(key)) {
@@ -66,7 +66,7 @@ void DroppedItem::dropped_step() {
       char buff[256];
       snprintf(buff, sizeof(buff), "%s_%d_%d", this->item_id.c_str(),
                (int)this->x, (int)this->y);
-      std::string key = thoom::game->current_map + "_" + buff;
+      std::string key = thoom::game->map->path + "_" + buff;
       thoom::save.puti(key, 1);
     }
 

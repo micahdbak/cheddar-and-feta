@@ -5,6 +5,7 @@
 #include "bmp_texture.h"
 #include "game.h"
 #include "mouse.h"
+#include "renderer.h"
 
 Cheese::Cheese(float x, float y, int amount) {
   this->x = x;
@@ -36,8 +37,8 @@ void Cheese::step() {
 
   this->dst_rect.x = float(this->x - 9);
   this->dst_rect.y = float(this->y - this->depth_offset);
-  thoom::game->push_sprite(this->tex_id, this->texture, NULL, &this->dst_rect,
-                           this->depth_offset);
+  thoom::Renderer::instance->push_sprite(this->tex_id, this->texture, NULL,
+                                         &this->dst_rect, this->depth_offset);
 }
 
 void Cheese::drop_cheese(int x, int y, int min_amount, int max_amount) {

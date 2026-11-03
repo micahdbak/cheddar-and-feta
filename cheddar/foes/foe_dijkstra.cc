@@ -6,6 +6,7 @@
 #include "foe.h"
 #include "game.h"
 #include "mouse.h"
+#include "renderer.h"
 #include "utils.h"
 
 #define FREE_IF(a) \
@@ -73,8 +74,9 @@ static void _neighbours(int x, int y, std::vector<_Neighbour>& neighbours) {
 
 void foe_path_find(Mouse* mouse) {
   if (thoom::game->map->collider->collision == nullptr) {
-    std::cerr << "foe_path_find error: called without game->map->collider->collision"
-              << std::endl;
+    std::cerr
+        << "foe_path_find error: called without game->map->collider->collision"
+        << std::endl;
     std::exit(1);
   }
 
@@ -363,6 +365,6 @@ void foe_debug_tile(int x, int y) {
                 (float)(y * thoom::game->map->tile_height), 16.0f, 16.0f};
   dst_rect = &debug_dst_rect[COORD(x, y)];
 
-  thoom::game->push_sprite("sprites/foe_debug.bmp", debug_tiles_texture,
-                           src_rect, dst_rect, 0);
+  thoom::Renderer::instance->push_sprite(
+      "sprites/foe_debug.bmp", debug_tiles_texture, src_rect, dst_rect, 0);
 }

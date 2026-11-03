@@ -9,6 +9,7 @@
 #include "feta.h"
 #include "game.h"
 #include "net_agent.h"
+#include "renderer.h"
 #include "utils.h"
 
 #define BUFF_SIZE 1024
@@ -57,8 +58,9 @@ void NetReceiver::step() {
   // if empty, reuse last frame
   if (msgs.empty()) {
     for (thoom::SpriteRender& sprite : this->sprites) {
-      thoom::game->push_sprite(sprite.tex_id, sprite.texture, sprite.src_rect,
-                               sprite.dst_rect, sprite.y);
+      thoom::Renderer::instance->push_sprite(sprite.tex_id, sprite.texture,
+                                             sprite.src_rect, sprite.dst_rect,
+                                             sprite.y);
     }
 
     // 5 seconds of no frames; disconnect
@@ -168,8 +170,9 @@ void NetReceiver::step() {
                                     (float)dst_rect.w, (float)dst_rect.h});
         sprite.y = depth_offset;
 
-        thoom::game->push_sprite(sprite.tex_id, sprite.texture, sprite.src_rect,
-                                 sprite.dst_rect, sprite.y);
+        thoom::Renderer::instance->push_sprite(sprite.tex_id, sprite.texture,
+                                               sprite.src_rect, sprite.dst_rect,
+                                               sprite.y);
         this->sprites.push_back(sprite);
       } break;
 

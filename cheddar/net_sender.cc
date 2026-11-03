@@ -4,6 +4,7 @@
 #include "items/item.h"
 #include "mouse.h"
 #include "net_agent.h"
+#include "renderer.h"
 
 NetSender* net_sender = nullptr;
 
@@ -19,7 +20,7 @@ void NetSender::step() {
   char buff[1024];
 
   // sprites
-  for (thoom::SpriteRender& sprite : thoom::game->sprites) {
+  for (thoom::SpriteRender& sprite : thoom::Renderer::instance->sprites) {
     if (sprite.texture == nullptr || sprite.dst_rect == nullptr ||
         sprite.tex_id.size() == 0)
       continue;

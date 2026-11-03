@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "item.h"
+#include "renderer.h"
 #include "utils.h"
 
 ThrownToothpick::ThrownToothpick(float x, float y, int x_dir, int y_dir,
@@ -65,8 +66,9 @@ void ThrownToothpick::step() {
   this->dst_rect.x = this->x - 8.0f;
   this->dst_rect.y = this->y - 8.0f;
 
-  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                           &this->sprite->frame, &this->dst_rect, 16);
+  thoom::Renderer::instance->push_sprite(
+      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, 16);
 }
 
 void ThrownToothpick::hitsource_notify() {

@@ -8,31 +8,29 @@
 #include "renderer.h"
 #include "save_data.h"
 #include "ui_box.h"
+#include "window.h"
 
-bool thoom::_running, thoom::capture_controls = false;
+bool thoom::capture_controls = false;
 thoom::Controller thoom::local_controller, thoom::remote_controller,
     thoom::captured_controller;
 thoom::Game* thoom::game;
 int thoom::_object_id_counter = 0;
 
 int main(int argc, char** argv) {
-  thoom::Renderer::init("Thoom Engine", THOOM_SCREEN_WIDTH,
-                        THOOM_SCREEN_HEIGHT);
-  thoom::Renderer* renderer = thoom::Renderer::instance;
+  thoom::Window::init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT);
+  thoom::Renderer::init();
 
-  thoom::_running = true;
+  bool running = true;
   thoom::game = new thoom::Game();
   thoom::game->argc = argc;
   thoom::game->argv = argv;
   thoom::game->init();
-  renderer->set_window_title(thoom::game->title.c_str());
 
   load_ui_box();
   load_icons();
   Hud::init();
-  Hud* hud = Hud::instance;
 
-  while (thoom::_running) {
+  while (running) {
     SDL_Event event;
 
     thoom::Controller* controller = thoom::capture_controls
@@ -42,7 +40,7 @@ int main(int argc, char** argv) {
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
         case SDL_EVENT_WINDOW_RESIZED:
-          renderer->update_screen_scale();
+          thoom::Window::instance->update_screen_scale();
           break;
 
         case SDL_EVENT_KEY_DOWN:
@@ -57,7 +55,7 @@ int main(int argc, char** argv) {
           break;
 
         case SDL_EVENT_QUIT:
-          thoom::_running = false;
+          running = false;
           break;
 
         default:
@@ -68,10 +66,12 @@ int main(int argc, char** argv) {
 
     thoom::game->step();
 
-    hud->render();
+    Hud::instance->render();
 
-    renderer->draw_texture(renderer->screen, hud->ui, NULL, NULL);
-    renderer->draw_texture(renderer->screen, hud->overlay, NULL, NULL);
+    thoom::Renderer::instance->draw_texture(thoom::Window::instance->screen,
+                                            Hud::instance->ui, NULL, NULL);
+    thoom::Renderer::instance->draw_texture(thoom::Window::instance->screen,
+                                            Hud::instance->overlay, NULL, NULL);
 
     controller->clear_hits();
 
@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
                          uint8_t(thoom::game->map->bg_g),
                          uint8_t(thoom::game->map->bg_b));
     }
-    renderer->present(bg);
+    thoom::Window::instance->present(bg);
   }
 
   Hud::shutdown();
@@ -96,6 +96,7 @@ int main(int argc, char** argv) {
   icons = nullptr;
 
   thoom::Renderer::shutdown();
+  thoom::Window::shutdown();
 
   exit(0);
 }

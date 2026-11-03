@@ -7,6 +7,7 @@
 
 #include "game.h"
 #include "renderer.h"
+#include "window.h"
 
 SDL_Texture* icons = nullptr;
 
@@ -15,26 +16,13 @@ static const unsigned char icons_bmp[] = {
 };
 
 void load_icons() {
-  thoom::Renderer* renderer = thoom::Renderer::instance;
-
-  SDL_IOStream* io = SDL_IOFromConstMem(icons_bmp, sizeof(icons_bmp));
-  SDL_Surface* surface = SDL_LoadBMP_IO(io, true);
-
-  if (surface == nullptr) {
-    std::cerr << "load_icons error: " << SDL_GetError() << std::endl;
-    exit(1);
-  }
-
-  icons = renderer->create_texture_from_surface(surface, SDL_SCALEMODE_NEAREST);
-  SDL_DestroySurface(surface);
+  icons = thoom::Window::instance->create_texture_from_bmp_memory(
+      icons_bmp, sizeof(icons_bmp), SDL_SCALEMODE_NEAREST);
+  if (icons == nullptr) std::exit(1);
 }
 
 void draw_icon(SDL_FRect icon, SDL_Texture* dst, SDL_FRect* dst_rect) {
-  SDL_Renderer* sdl_renderer = thoom::Renderer::instance->sdl_renderer;
-
-  SDL_SetRenderTarget(sdl_renderer, dst);
-  SDL_RenderTexture(sdl_renderer, icons, &icon, dst_rect);
-  SDL_SetRenderTarget(sdl_renderer, thoom::Renderer::instance->screen);
+  thoom::Renderer::instance->draw_texture(dst, icons, &icon, dst_rect);
 }
 
 void push_icon(SDL_FRect icon_rect, float x, float y, SDL_FRect* src_rect,
@@ -46,8 +34,8 @@ void push_icon(SDL_FRect icon_rect, float x, float y, SDL_FRect* src_rect,
   dst_rect->w = src_rect->w;
   dst_rect->h = src_rect->h;
 
-  thoom::game->push_sprite("sprites/icons.bmp", icons, src_rect, dst_rect,
-                           THOOM_SCREEN_HEIGHT);
+  thoom::Renderer::instance->push_sprite("sprites/icons.bmp", icons, src_rect,
+                                         dst_rect, THOOM_SCREEN_HEIGHT);
 }
 
 void push_health_bar(int health, int max_health, float x, float y,
@@ -69,6 +57,6 @@ void push_health_bar(int health, int max_health, float x, float y,
   dst_rect->w = src_rect->w;
   dst_rect->h = src_rect->h;
 
-  thoom::game->push_sprite("sprites/icons.bmp", icons, src_rect, dst_rect,
-                           THOOM_SCREEN_HEIGHT);
+  thoom::Renderer::instance->push_sprite("sprites/icons.bmp", icons, src_rect,
+                                         dst_rect, THOOM_SCREEN_HEIGHT);
 }

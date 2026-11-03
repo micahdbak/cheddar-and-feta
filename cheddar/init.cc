@@ -5,6 +5,7 @@
 #include "object.h"
 #include "save_data.h"
 #include "textbox.h"
+#include "window.h"
 
 // objects
 #include "billboard.h"
@@ -108,7 +109,7 @@ void thoom::Game::init() {
   this->factories[FIRST_OBJ] = new NetReceiverFactory();
   this->factories[LAST_OBJ] = new NetSenderFactory();
 
-  this->title = "Playing as Cheddar";
+  thoom::Window::instance->set_title("Playing as Cheddar");
 
   thoom::net_agent = new thoom::NetworkAgent(false);
 

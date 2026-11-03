@@ -6,6 +6,7 @@
 #include "game.h"
 #include "hurtbox.h"
 #include "icon.h"
+#include "renderer.h"
 #include "save_data.h"
 
 FoeFrog::FoeFrog(int x, int y, int spawner_id)
@@ -154,6 +155,7 @@ void FoeFrog::step() {
   this->sprite->update_frame();
   this->dst_rect.x = this->x - 24.0f + this->off_x;
   this->dst_rect.y = this->y - 24.0f + this->off_y;
-  thoom::game->push_sprite(this->sprite->tex_id, this->sprite->texture,
-                           &this->sprite->frame, &this->dst_rect, 32);
+  thoom::Renderer::instance->push_sprite(
+      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, 32);
 }

@@ -1,6 +1,6 @@
 #include "net_receiver.h"
 
-#include "audio_playback.h"
+#include "audio.h"
 #include "controller.h"
 #include "feta.h"
 #include "game.h"
@@ -111,7 +111,8 @@ void NetReceiver::step() {
 
           gain = (float)gain_i / 10.0f;
 
-          thoom::play_audio(std::string(buff), gain, (float)x, (float)y, true);
+          thoom::Audio::instance->play(std::string(buff), gain, (float)x,
+                                       (float)y, true);
         } break;
 
         case MSG_IS_DOWN:

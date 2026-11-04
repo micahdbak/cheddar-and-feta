@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "audio_playback.h"
+#include "audio.h"
 #include "game.h"
 #include "net_agent.h"
 #include "net_sender.h"
@@ -82,7 +82,7 @@ void FoeGate::step() {
 
     this->synchronized = false;
 
-    thoom::play_audio("sfx/door.wav", 1.0f, this->x, this->y, false);
+    thoom::Audio::instance->play("sfx/door.wav", 1.0f, this->x, this->y, false);
   }
 
   this->dst_rect.x = this->x;

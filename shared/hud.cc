@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "audio.h"
 #include "bmp_texture.h"
 #include "constants.h"
 #include "controller.h"
@@ -241,12 +242,12 @@ void Hud::draw_controls_menu() {
     int x_dir = thoom::captured_controller.is_hit(thoom::Button::RIGHT) -
                 thoom::captured_controller.is_hit(thoom::Button::LEFT);
     if (this->sel_control == -2 && x_dir != 0) {
-      thoom::game->volume =
-          THOOM_CLAMP(thoom::game->volume + (10 * x_dir), 0, 200);
+      thoom::Audio::instance->volume =
+          THOOM_CLAMP(thoom::Audio::instance->volume + (10 * x_dir), 0, 200);
       should_render = true;
     } else if (this->sel_control == -1 && x_dir != 0) {
-      thoom::game->music_volume =
-          THOOM_CLAMP(thoom::game->music_volume + (10 * x_dir), 0, 200);
+      thoom::Audio::instance->music_volume = THOOM_CLAMP(
+          thoom::Audio::instance->music_volume + (10 * x_dir), 0, 200);
       should_render = true;
     }
 
@@ -291,9 +292,9 @@ void Hud::draw_controls_menu() {
 
     thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT, "Sounds",
                                          20, 52, 0, kBackground);
-    thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT,
-                                         std::to_string(thoom::game->volume),
-                                         52, 52, 0, kBackground);
+    thoom::Renderer::instance->draw_text(
+        this->overlay, SMALL_FONT,
+        std::to_string(thoom::Audio::instance->volume), 52, 52, 0, kBackground);
     if (this->sel_control != -2) {
       SDL_FRect sound_rect = {20.0f, 52.0f, 96.0f, 8.0f};
       thoom::Renderer::instance->draw_rect(this->overlay, &sound_rect,
@@ -313,8 +314,9 @@ void Hud::draw_controls_menu() {
     thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT, "Music", 20,
                                          60, 0, kBackground);
     thoom::Renderer::instance->draw_text(
-        this->overlay, SMALL_FONT, std::to_string(thoom::game->music_volume),
-        52, 60, 0, kBackground);
+        this->overlay, SMALL_FONT,
+        std::to_string(thoom::Audio::instance->music_volume), 52, 60, 0,
+        kBackground);
     if (this->sel_control != -1) {
       SDL_FRect music_rect = {20.0f, 60.0f, 96.0f, 8.0f};
       thoom::Renderer::instance->draw_rect(this->overlay, &music_rect,

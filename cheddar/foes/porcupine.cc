@@ -4,7 +4,7 @@
 
 #include "../items/cheese.h"
 #include "../items/toothpick.h"
-#include "audio_playback.h"
+#include "audio.h"
 #include "game.h"
 #include "hurtbox.h"
 #include "icon.h"
@@ -82,21 +82,24 @@ void FoePorcupine::step() {
                  this->spine_x_dir, this->spine_y_dir, this->id);
         thoom::game->push_object(ITEM_TOOTHPICK USE_OBJ, std::string(buff));
         this->spine_x_dir = this->spine_y_dir = 0;
-        thoom::play_audio("sfx/throw.wav", 1.0f, this->x, this->y, false);
+        thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x, this->y,
+                                     false);
       }
 
       break;
 
     case Foe::State::THROWN:
       if (this->prev_state != this->state) {
-        thoom::play_audio("sfx/ant_hurt.wav", 1.0f, this->x, this->y, false);
+        thoom::Audio::instance->play("sfx/ant_hurt.wav", 1.0f, this->x, this->y,
+                                     false);
       }
 
       break;
 
     case Foe::State::DEAD:
       if (this->prev_state != this->state) {
-        thoom::play_audio("sfx/ant_die.wav", 1.0f, this->x, this->y, false);
+        thoom::Audio::instance->play("sfx/ant_die.wav", 1.0f, this->x, this->y,
+                                     false);
       }
 
       this->sprite->set_animation(DEAD_ANIMATION + this->direction);
@@ -139,7 +142,7 @@ void FoePorcupine::step() {
 
   if (this->sprite->update_frame() && this->state == Foe::State::WALKING &&
       (this->sprite->frame_i % 2) == 1) {
-    thoom::play_audio("sfx/step.wav", 1.0f, this->x, this->y, false);
+    thoom::Audio::instance->play("sfx/step.wav", 1.0f, this->x, this->y, false);
   }
 
   this->dst_rect.x = this->x - 16.0f + this->off_x;

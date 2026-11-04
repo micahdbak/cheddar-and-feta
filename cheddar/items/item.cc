@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "../foes/foe.h"
-#include "audio_playback.h"
+#include "audio.h"
 #include "controller.h"
 #include "game.h"
 #include "items/persister.h"
@@ -40,7 +40,8 @@ DroppedItem::DroppedItem(std::string item_id, float x, float y,
     item_persister->remember_item(item_id, x, y, this->id);
 
     if (!item_persister->creating_items) {
-      thoom::play_audio("sfx/settle.wav", 0.5f, this->x, this->y, false);
+      thoom::Audio::instance->play("sfx/settle.wav", 0.5f, this->x, this->y,
+                                   false);
     }
   }
 }
@@ -49,7 +50,8 @@ DroppedItem::~DroppedItem() {
   if (!thoom::game->deleting_objects && item_persister != nullptr) {
     // item picked up by player, most likely
     item_persister->forget_item(this->id);
-    thoom::play_audio("sfx/pickup.wav", 0.5f, this->x, this->y, false);
+    thoom::Audio::instance->play("sfx/pickup.wav", 0.5f, this->x, this->y,
+                                 false);
   }
 
   delete this->sprite;

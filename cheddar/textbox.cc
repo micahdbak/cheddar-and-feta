@@ -1,6 +1,6 @@
 #include "textbox.h"
 
-#include "audio_playback.h"
+#include "audio.h"
 #include "constants.h"
 #include "controller.h"
 #include "game.h"
@@ -68,7 +68,7 @@ void Textbox::step() {
 
     // don't blip if there was a space
     if (!space) {
-      thoom::play_audio("sfx/blip.wav", 0.5f, 0.0f, 0.0f, true);
+      thoom::Audio::instance->play("sfx/blip.wav", 0.5f, 0.0f, 0.0f, true);
     }
 
     // display prompt arrow

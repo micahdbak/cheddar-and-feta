@@ -2,7 +2,7 @@
 
 #include "../items/cannon_ball.h"
 #include "../items/cheese.h"
-#include "audio_playback.h"
+#include "audio.h"
 #include "game.h"
 #include "hurtbox.h"
 #include "icon.h"
@@ -37,7 +37,7 @@ void FoeFrog::action(Mouse* mouse) {
   this->state = Foe::State::ACTION;
   this->timer = thoom::game->ticks;
 
-  thoom::play_audio("sfx/cannon.wav", 1.0, this->x, this->y, false);
+  thoom::Audio::instance->play("sfx/cannon.wav", 1.0, this->x, this->y, false);
 
   char options[256];
   snprintf(options, sizeof(options), "%d,%d,%d,%d,%d",
@@ -79,12 +79,12 @@ void FoeFrog::step() {
       if (this->prev_state != this->state) {
         switch (SDL_rand(2)) {
           case 0:
-            thoom::play_audio("sfx/tank_roll1.wav", 0.5, this->x, this->y,
-                              false);
+            thoom::Audio::instance->play("sfx/tank_roll1.wav", 0.5, this->x,
+                                         this->y, false);
             break;
           case 1:
-            thoom::play_audio("sfx/tank_roll2.wav", 0.5, this->x, this->y,
-                              false);
+            thoom::Audio::instance->play("sfx/tank_roll2.wav", 0.5, this->x,
+                                         this->y, false);
             break;
         }
       }
@@ -102,14 +102,16 @@ void FoeFrog::step() {
 
     case Foe::State::THROWN:
       if (this->prev_state != this->state) {
-        thoom::play_audio("sfx/tank_hurt.wav", 1.0, this->x, this->y, false);
+        thoom::Audio::instance->play("sfx/tank_hurt.wav", 1.0, this->x, this->y,
+                                     false);
       }
 
       break;
 
     case Foe::State::DEAD:
       if (this->prev_state != this->state) {
-        thoom::play_audio("sfx/tank_die.wav", 1.0, this->x, this->y, false);
+        thoom::Audio::instance->play("sfx/tank_die.wav", 1.0, this->x, this->y,
+                                     false);
       }
 
       this->sprite->set_animation(ACTION_ANIMATION +

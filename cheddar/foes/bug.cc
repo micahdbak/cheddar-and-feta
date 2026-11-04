@@ -4,7 +4,7 @@
 
 #include "../items/cheese.h"
 #include "../items/toothpick.h"
-#include "audio_playback.h"
+#include "audio.h"
 #include "game.h"
 #include "hurtbox.h"
 #include "icon.h"
@@ -76,16 +76,16 @@ void FoeBug::step() {
       if (this->prev_state != this->state) {
         switch (SDL_rand(4)) {
           case 0:
-            thoom::play_audio("sfx/ant_walk1.wav", 0.5, this->x, this->y,
-                              false);
+            thoom::Audio::instance->play("sfx/ant_walk1.wav", 0.5, this->x,
+                                         this->y, false);
             break;
           case 1:
-            thoom::play_audio("sfx/ant_walk2.wav", 0.5, this->x, this->y,
-                              false);
+            thoom::Audio::instance->play("sfx/ant_walk2.wav", 0.5, this->x,
+                                         this->y, false);
             break;
           case 2:
-            thoom::play_audio("sfx/ant_walk3.wav", 0.5, this->x, this->y,
-                              false);
+            thoom::Audio::instance->play("sfx/ant_walk3.wav", 0.5, this->x,
+                                         this->y, false);
             break;
           default:
             break;  // no sound
@@ -96,7 +96,8 @@ void FoeBug::step() {
 
     case Foe::State::ACTION:
       if (this->prev_state != this->state) {
-        thoom::play_audio("sfx/ant_attack.wav", 1.0, this->x, this->y, false);
+        thoom::Audio::instance->play("sfx/ant_attack.wav", 1.0, this->x,
+                                     this->y, false);
       }
 
       this->sprite->set_animation(ATTACK_ANIMATION +
@@ -110,7 +111,8 @@ void FoeBug::step() {
 
     case Foe::State::THROWN:
       if (this->prev_state != this->state) {
-        thoom::play_audio("sfx/ant_hurt.wav", 1.0, this->x, this->y, false);
+        thoom::Audio::instance->play("sfx/ant_hurt.wav", 1.0, this->x, this->y,
+                                     false);
       }
 
       // foe internally exits the thrown state
@@ -119,7 +121,8 @@ void FoeBug::step() {
 
     case Foe::State::DEAD:
       if (this->prev_state != this->state) {
-        thoom::play_audio("sfx/ant_die.wav", 1.0, this->x, this->y, false);
+        thoom::Audio::instance->play("sfx/ant_die.wav", 1.0, this->x, this->y,
+                                     false);
       }
 
       this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);

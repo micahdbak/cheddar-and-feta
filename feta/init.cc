@@ -12,6 +12,7 @@
 #include "net_receiver.h"
 #include "net_sender.h"
 #include "renderer.h"
+#include "texture.h"
 #include "ui_box.h"
 #include "utils.h"
 #include "window.h"
@@ -23,7 +24,7 @@ std::unordered_map<std::string, Item> item_info;
 class Init : public thoom::Object {
  public:
   Init() {
-    this->ui = thoom::Window::instance->create_texture(
+    this->ui = thoom::Texture::instance->create_texture(
         THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
         SDL_SCALEMODE_LINEAR);
     SDL_SetTextureBlendMode(this->ui, SDL_BLENDMODE_BLEND);

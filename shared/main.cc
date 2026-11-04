@@ -6,9 +6,11 @@
 #include "game.h"
 #include "hud.h"
 #include "icon.h"
+#include "render_functions.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "sounds.h"
+#include "texture.h"
 #include "ui_box.h"
 #include "window.h"
 
@@ -22,6 +24,8 @@ int main(int argc, char** argv) {
   thoom::Window::init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT);
   thoom::Renderer::init();
   thoom::Audio::init();
+  thoom::Texture::init();
+  register_render_functions();
 
   thoom::game = new thoom::Game();
   thoom::game->argc = argc;
@@ -95,6 +99,7 @@ int main(int argc, char** argv) {
   delete thoom::game;
   thoom::game = nullptr;
 
+  thoom::Texture::shutdown();
   thoom::Audio::shutdown();
 
   SDL_DestroyTexture(ui_box);

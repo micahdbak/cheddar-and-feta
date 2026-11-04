@@ -2,7 +2,6 @@
 #include <iostream>
 #include <vector>
 
-#include "bmp_texture.h"
 #include "constants.h"
 #include "controller.h"
 #include "font.h"
@@ -13,6 +12,7 @@
 #include "object.h"
 #include "renderer.h"
 #include "sprite.h"
+#include "texture.h"
 #include "utils.h"
 #include "window.h"
 
@@ -128,7 +128,7 @@ Editor::Editor(const char* map_path) {
     this->map->write(backup_path.c_str());
   }
 
-  this->texture = thoom::Window::instance->create_texture(
+  this->texture = thoom::Texture::instance->create_texture(
       THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
       SDL_SCALEMODE_LINEAR);
   this->src_rect = this->dst_rect =
@@ -138,14 +138,14 @@ Editor::Editor(const char* map_path) {
 
   if (!this->map->tilesheets.empty()) this->sel_tilesheet = 0;
 
-  this->collision_texture = thoom::Window::instance->create_texture(
+  this->collision_texture = thoom::Texture::instance->create_texture(
       this->map->layers[thoom::Map::kBackgroundLayer]->texture->w,
       this->map->layers[thoom::Map::kBackgroundLayer]->texture->h,
       SDL_PIXELFORMAT_RGBA8888, SDL_SCALEMODE_LINEAR);
 
   int collision_sheet_w = this->map->tile_width * 14;
   int collision_sheet_h = this->map->tile_height * 3;
-  this->collision_sheet = thoom::Window::instance->create_texture(
+  this->collision_sheet = thoom::Texture::instance->create_texture(
       collision_sheet_w, collision_sheet_h, SDL_PIXELFORMAT_RGBA8888,
       SDL_SCALEMODE_LINEAR);
 
@@ -175,7 +175,7 @@ Editor::Editor(const char* map_path) {
     this->render_collision_tile(this->collision_sheet, x, y, i);
   }
 
-  this->objects = thoom::Window::instance->create_texture(
+  this->objects = thoom::Texture::instance->create_texture(
       this->map->layers[thoom::Map::kBackgroundLayer]->texture->w,
       this->map->layers[thoom::Map::kBackgroundLayer]->texture->h,
       SDL_PIXELFORMAT_RGBA8888, SDL_SCALEMODE_LINEAR);
@@ -736,7 +736,7 @@ void Editor::render_objects() {
       _ParseBillboardOptions(pair.second, &x, &y, &ts_x, &ts_y, &w, &h, &depth,
                              tilesheet);
 
-      SDL_Texture* tex = thoom::load_bmp_texture(tilesheet);
+      SDL_Texture* tex = thoom::Texture::instance->load(tilesheet);
 
       SDL_FRect src_rect;
       src_rect.x = ts_x * this->map->tile_width;

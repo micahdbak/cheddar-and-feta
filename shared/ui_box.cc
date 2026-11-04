@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "renderer.h"
-#include "window.h"
+#include "texture.h"
 
 #define UI_BOX_SIZE 4.0f
 
@@ -17,7 +17,7 @@ static const unsigned char ui_box_bmp[] = {
 };
 
 void load_ui_box() {
-  ui_box = thoom::Window::instance->create_texture_from_bmp_memory(
+  ui_box = thoom::Texture::instance->create_texture_from_bmp_memory(
       ui_box_bmp, sizeof(ui_box_bmp), SDL_SCALEMODE_NEAREST);
   if (ui_box == nullptr) std::exit(1);
 }

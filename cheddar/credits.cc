@@ -1,6 +1,5 @@
 #include "credits.h"
 
-#include "bmp_texture.h"
 #include "controller.h"
 #include "foes/bat.h"
 #include "foes/bug.h"
@@ -8,8 +7,10 @@
 #include "foes/porcupine.h"
 #include "foes/spitter/spitter.h"
 #include "game.h"
+#include "render_functions.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "texture.h"
 
 Credits::Credits() {
   int ant_kills = thoom::save.geti(FOE_BUG_OBJ STATS);
@@ -19,9 +20,9 @@ Credits::Credits() {
   int spitter_time = thoom::save.geti(FOE_SPITTER_OBJ STATS) / 1000;
 
   this->tex_id =
-      RENDER_CREDITS + thoom::credits_args(ant_kills, drone_kills, tank_kills,
-                                           agent_kills, spitter_time);
-  this->texture = thoom::load_bmp_texture(tex_id);
+      RENDER_CREDITS + credits_args(ant_kills, drone_kills, tank_kills,
+                                    agent_kills, spitter_time);
+  this->texture = thoom::Texture::instance->load(tex_id);
 
   this->src_rect = this->dst_rect =
       SDL_FRect{0, 0, THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT};

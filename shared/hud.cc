@@ -11,7 +11,7 @@
 #include "font.h"
 #include "game.h"
 #include "icon.h"
-#include "net_agent.h"
+#include "peer.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "texture.h"
@@ -105,7 +105,7 @@ void Hud::render() {
     return;
   }
 
-  this->draw_net_agent(force_render);
+  this->draw_peer(force_render);
   this->draw_notification(force_render);
 }
 
@@ -377,48 +377,50 @@ void Hud::draw_controls_menu() {
   }
 }
 
-void Hud::draw_net_agent(bool force_render) {
-  if (!(thoom::game->create_objects && thoom::net_agent != nullptr)) return;
+void Hud::draw_peer(bool force_render) {
+  if (!(thoom::game->create_objects && thoom::Peer::instance != nullptr))
+    return;
 
-  std::string code = thoom::net_agent->get_connection_code();
+  std::string code = thoom::Peer::instance->get_connection_code();
+  uint64_t peer_state = thoom::Peer::instance->state.load();
 
-  if (force_render || thoom::game->net_state != this->last_state ||
+  if (force_render || peer_state != this->last_peer_state ||
       code != this->last_code ||
       thoom::game->ticks - this->last_drawn_ticks > 1000) {
-    if (this->netagent_rect.w > 0.0f) {
-      thoom::Renderer::instance->draw_rect(this->overlay, &this->netagent_rect,
+    if (this->peer_rect.w > 0.0f) {
+      thoom::Renderer::instance->draw_rect(this->overlay, &this->peer_rect,
                                            thoom::kMask, SDL_BLENDMODE_NONE);
     }
 
-    switch (thoom::game->net_state) {
-      case thoom::NetworkAgent::State::NO_CONNECTION:
-        this->netagent_rect = SDL_FRect{8.0f, 8.0f, 88.0f, 16.0f};
-        draw_ui_box(UI_BOX_MENU_CONT, this->overlay, &this->netagent_rect);
-        draw_icon(NOT_CONNECTED_ICON, this->overlay, &this->neticon_rect);
+    switch (peer_state) {
+      case thoom::Peer::kStateNoConnection:
+        this->peer_rect = SDL_FRect{8.0f, 8.0f, 88.0f, 16.0f};
+        draw_ui_box(UI_BOX_MENU_CONT, this->overlay, &this->peer_rect);
+        draw_icon(NOT_CONNECTED_ICON, this->overlay, &this->peer_icon_rect);
         thoom::Renderer::instance->draw_text(this->overlay, DEFAULT_FONT,
                                              "Not Connected", 28, 12, 0,
                                              kBackground);
-        this->displaying_netagent = true;
+        this->displaying_peer = true;
         break;
-      case thoom::NetworkAgent::State::WAITING_FOR_PEER:
-        this->netagent_rect = SDL_FRect{8.0f, 8.0f, 80.0f, 16.0f};
-        draw_ui_box(UI_BOX_MENU_CONT, this->overlay, &this->netagent_rect);
-        draw_icon(WAITING_FOR_PEER_ICON, this->overlay, &this->neticon_rect);
+      case thoom::Peer::kStateWaitingForPeer:
+        this->peer_rect = SDL_FRect{8.0f, 8.0f, 80.0f, 16.0f};
+        draw_ui_box(UI_BOX_MENU_CONT, this->overlay, &this->peer_rect);
+        draw_icon(WAITING_FOR_PEER_ICON, this->overlay, &this->peer_icon_rect);
         thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT,
                                              "Code:", 28, 13, 0, kBackground);
         thoom::Renderer::instance->draw_text(this->overlay, CODE_FONT, code, 48,
                                              12, 0, kBackground);
-        this->displaying_netagent = true;
+        this->displaying_peer = true;
         break;
       default:
         thoom::Renderer::instance->clear(this->overlay, thoom::kMask);
-        this->netagent_rect = SDL_FRect{0.0f, 0.0f, 0.0f, 0.0f};
-        this->displaying_netagent = false;
+        this->peer_rect = SDL_FRect{0.0f, 0.0f, 0.0f, 0.0f};
+        this->displaying_peer = false;
         this->displaying_notification = false;
         break;
     }
 
-    this->last_state = thoom::game->net_state;
+    this->last_peer_state = peer_state;
     this->last_code = code;
     this->last_drawn_ticks = thoom::game->ticks;
   }
@@ -432,7 +434,7 @@ void Hud::draw_notification(bool force_render) {
     this->displaying_notification = false;
     this->force_notif_rerender = false;
 
-    if (this->displaying_netagent && !this->second_pass) {
+    if (this->displaying_peer && !this->second_pass) {
       this->last_drawn_ticks = 0;
       this->second_pass = true;
       this->render();
@@ -446,7 +448,7 @@ void Hud::draw_notification(bool force_render) {
     SDL_FRect notif_rect = SDL_FRect{8.0f, 8.0f, (float)(text_w + 12), 16.0f};
     int text_y = 12;
 
-    if (this->displaying_netagent) {
+    if (this->displaying_peer) {
       notif_rect.y = 26.0f;
       text_y = 30;
     }
@@ -462,7 +464,7 @@ void Hud::draw_notification(bool force_render) {
     this->notification.clear();
     this->displaying_notification = false;
 
-    if (this->displaying_netagent && !this->second_pass) {
+    if (this->displaying_peer && !this->second_pass) {
       this->last_drawn_ticks = 0;
       this->second_pass = true;
       this->render();

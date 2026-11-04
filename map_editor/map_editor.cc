@@ -10,6 +10,7 @@
 #include "icon.h"
 #include "map.h"
 #include "object.h"
+#include "peer.h"
 #include "renderer.h"
 #include "sprite.h"
 #include "texture.h"
@@ -77,7 +78,7 @@ void thoom::Game::init() {
   std::string title = "Map Editor - " + std::string(this->argv[1]);
   thoom::Window::instance->set_title(title.c_str());
 
-  thoom::net_agent = new thoom::NetworkAgent(false);
+  thoom::Peer::init(false);
 }
 
 Editor::Editor(const char* map_path) {

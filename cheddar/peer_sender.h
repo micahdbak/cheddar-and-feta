@@ -5,10 +5,10 @@
 
 #include "object.h"
 
-class NetSender : public thoom::Object {
+class PeerSender : public thoom::Object {
  public:
-  NetSender();
-  ~NetSender();
+  PeerSender();
+  ~PeerSender();
 
   void step() override;
 
@@ -19,9 +19,9 @@ class NetSender : public thoom::Object {
   bool was_disconnected = true;
 };
 
-class NetSenderFactory : public thoom::ObjectFactory {
+class PeerSenderFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) override {
-    return new NetSender();
+    return new PeerSender();
   }
 };

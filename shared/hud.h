@@ -2,11 +2,12 @@
 
 #include <SDL3/SDL.h>
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
 #include "macros.h"
-#include "net_agent.h"
+#include "peer.h"
 
 #define UI_BOX_CONTAINER 0
 #define UI_BOX_OUT 1
@@ -51,7 +52,7 @@ class Hud {
 
  private:
   void draw_controls_menu();
-  void draw_net_agent(bool force_render);
+  void draw_peer(bool force_render);
   void draw_notification(bool force_render);
 
   std::string current_map;
@@ -61,13 +62,12 @@ class Hud {
   bool waiting_for_key = false;
   int sel_control = -3;
 
-  thoom::NetworkAgent::State last_state =
-      thoom::NetworkAgent::State::NO_CONNECTION;
+  uint64_t last_peer_state = thoom::Peer::kStateNoConnection;
   std::string last_code;
   Uint64 last_drawn_ticks = 0;
-  bool displaying_netagent = false;
-  SDL_FRect netagent_rect = {0.0f, 0.0f, 0.0f, 0.0f};
-  SDL_FRect neticon_rect = {10.0f, 8.0f, 16.0f, 16.0f};
+  bool displaying_peer = false;
+  SDL_FRect peer_rect = {0.0f, 0.0f, 0.0f, 0.0f};
+  SDL_FRect peer_icon_rect = {10.0f, 8.0f, 16.0f, 16.0f};
 
   std::string notification;
   Uint64 notif_ticks = 0;

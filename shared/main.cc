@@ -6,6 +6,7 @@
 #include "game.h"
 #include "hud.h"
 #include "icon.h"
+#include "peer.h"
 #include "render_functions.h"
 #include "renderer.h"
 #include "save_data.h"
@@ -99,6 +100,7 @@ int main(int argc, char** argv) {
   delete thoom::game;
   thoom::game = nullptr;
 
+  thoom::Peer::shutdown();
   thoom::Texture::shutdown();
   thoom::Audio::shutdown();
 

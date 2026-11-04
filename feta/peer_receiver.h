@@ -4,10 +4,10 @@
 #include "object.h"
 #include "sprite.h"
 
-class NetReceiver : public thoom::Object {
+class PeerReceiver : public thoom::Object {
  public:
-  NetReceiver() = default;
-  ~NetReceiver();
+  PeerReceiver() = default;
+  ~PeerReceiver();
 
   void step() override;
 
@@ -21,9 +21,9 @@ class NetReceiver : public thoom::Object {
   bool just_pushed_feta = false, just_loaded_map = false;
 };
 
-class NetReceiverFactory : public thoom::ObjectFactory {
+class PeerReceiverFactory : public thoom::ObjectFactory {
  public:
   thoom::Object* create(const std::string& options) override {
-    return new NetReceiver();
+    return new PeerReceiver();
   }
 };

@@ -36,7 +36,7 @@ class Feta : public Mouse, public HitSource {
 
   void synchronize();
 
-  // directly acted on by net_receiver
+  // directly acted on by peer_receiver
   // Mouse: x, y, is_down
   int frame_i = 0, animation = 0, which_emote = -1;
   std::vector<std::pair<std::string, std::string>> new_objects;

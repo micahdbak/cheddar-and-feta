@@ -3,8 +3,8 @@
 #include "hurtbox.h"
 #include "items/cheese.h"
 #include "items/item.h"
-#include "net_agent.h"
-#include "net_sender.h"
+#include "peer.h"
+#include "peer_sender.h"
 #include "renderer.h"
 #include "save_data.h"
 
@@ -60,7 +60,7 @@ Feta::~Feta() {
 }
 
 void Feta::step() {
-  if (thoom::game->net_state != thoom::NetworkAgent::State::CONNECTED) {
+  if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
     this->synchronized = false;
 
     this->sprite->set_animation(SLEEPING_ANIMATION);
@@ -121,11 +121,11 @@ void Feta::save_data() {
 }
 
 void Feta::attack(int damage) {
-  NetSender::send_message(MSG_ATTACK, std::to_string(damage));
+  PeerSender::send_message(MSG_ATTACK, std::to_string(damage));
 }
 
 void Feta::push_item(const std::string& item_id) {
-  NetSender::send_message(MSG_PUSH_ITEM, item_id);
+  PeerSender::send_message(MSG_PUSH_ITEM, item_id);
 
   if (item_info.find(item_id) == item_info.end()) {
     // TODO(micahdbak): error
@@ -155,7 +155,7 @@ void Feta::push_item(const std::string& item_id) {
 }
 
 void Feta::push_cheese(int amount) {
-  NetSender::send_message(MSG_PUSH_CHEESE, std::to_string(amount));
+  PeerSender::send_message(MSG_PUSH_CHEESE, std::to_string(amount));
 
   Hud::Item new_item;
   new_item.item_id = ITEM_CHEESE;
@@ -192,11 +192,11 @@ void Feta::remove_item(const std::string& item_id) {
 }
 
 void Feta::force_dance(Uint64 timeout_ms) {
-  NetSender::send_message(MSG_FORCE_DANCE, std::to_string(timeout_ms));
+  PeerSender::send_message(MSG_FORCE_DANCE, std::to_string(timeout_ms));
 }
 
 void Feta::hitsource_notify() {
-  NetSender::send_message(MSG_DID_HIT, std::string());
+  PeerSender::send_message(MSG_DID_HIT, std::string());
 }
 
 void Feta::synchronize() {
@@ -211,14 +211,14 @@ void Feta::synchronize() {
   snprintf(buff, sizeof(buff), "%s,%s,%d %s", x_str, y_str, this->animation,
            items_s.c_str());
 
-  NetSender::send_message(MSG_SYNC, std::string(buff));
+  PeerSender::send_message(MSG_SYNC, std::string(buff));
 }
 
 void Feta::set_throw(int throw_x, int throw_y) {
-  NetSender::send_message(
+  PeerSender::send_message(
       MSG_THROW, std::to_string(throw_x) + ',' + std::to_string(throw_y));
 }
 
 void Feta::set_max_mov_speed(float max_mov_speed) {
-  NetSender::send_message(MSG_MAX_SPEED, std::to_string(max_mov_speed));
+  PeerSender::send_message(MSG_MAX_SPEED, std::to_string(max_mov_speed));
 }

@@ -31,8 +31,8 @@ add_executable(cheddar
   ladder.cc
   load_save.cc
   mouse.cc
-  net_receiver.cc
-  net_sender.cc
+  peer_receiver.cc
+  peer_sender.cc
   splash.cc
   textbox.cc
 )

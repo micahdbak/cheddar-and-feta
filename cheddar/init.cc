@@ -1,7 +1,7 @@
 #include "controller.h"
 #include "game.h"
-#include "net_agent.h"
 #include "object.h"
+#include "peer.h"
 #include "save_data.h"
 #include "textbox.h"
 #include "window.h"
@@ -40,8 +40,8 @@
 #include "ladder.h"
 #include "load_save.h"
 #include "mouse.h"
-#include "net_receiver.h"
-#include "net_sender.h"
+#include "peer_receiver.h"
+#include "peer_sender.h"
 #include "splash.h"
 
 void thoom::Game::init() {
@@ -105,12 +105,12 @@ void thoom::Game::init() {
   item_info[ITEM_SHIELD].armour = 1;
   item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Porcu' Pine"};
 
-  this->factories[FIRST_OBJ] = new NetReceiverFactory();
-  this->factories[LAST_OBJ] = new NetSenderFactory();
+  this->factories[FIRST_OBJ] = new PeerReceiverFactory();
+  this->factories[LAST_OBJ] = new PeerSenderFactory();
 
   thoom::Window::instance->set_title("Playing as Cheddar");
 
-  thoom::net_agent = new thoom::NetworkAgent(false);
+  thoom::Peer::init(false);
 
   this->create_object(FIRST_OBJ, "");
   this->create_object(LAST_OBJ, "");

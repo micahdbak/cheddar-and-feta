@@ -1,18 +1,18 @@
-#include "net_sender.h"
+#include "peer_sender.h"
 
 #include "controller.h"
 #include "feta.h"
 #include "game.h"
-#include "net_agent.h"
+#include "peer.h"
 #include "save_data.h"
 
-NetSender* net_sender;
+PeerSender* peer_sender;
 
-NetSender::NetSender() { net_sender = this; }
+PeerSender::PeerSender() { peer_sender = this; }
 
-NetSender::~NetSender() { net_sender = nullptr; }
+PeerSender::~PeerSender() { peer_sender = nullptr; }
 
-void NetSender::step() {
+void PeerSender::step() {
   if (feta == nullptr) {
     return;
   }
@@ -35,21 +35,21 @@ void NetSender::step() {
 
   this->messages.clear();
 
-  thoom::net_agent->send_message(frame_msg);
+  thoom::Peer::instance->send_message(frame_msg);
 }
 
-void NetSender::send_message(char func, const std::string& arg) {
-  if (net_sender == nullptr) {
+void PeerSender::send_message(char func, const std::string& arg) {
+  if (peer_sender == nullptr) {
     return;
   }
 
-  if (thoom::game->net_state != thoom::NetworkAgent::State::CONNECTED) {
-    if (!net_sender->messages.empty()) {
-      net_sender->messages.clear();
+  if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
+    if (!peer_sender->messages.empty()) {
+      peer_sender->messages.clear();
     }
 
     return;
   }
 
-  net_sender->messages.push_back(std::string(func + arg + '\n'));
+  peer_sender->messages.push_back(std::string(func + arg + '\n'));
 }

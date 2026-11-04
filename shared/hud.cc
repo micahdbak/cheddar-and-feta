@@ -6,7 +6,6 @@
 #include <iostream>
 
 #include "audio.h"
-#include "bmp_texture.h"
 #include "constants.h"
 #include "controller.h"
 #include "font.h"
@@ -15,8 +14,8 @@
 #include "net_agent.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "texture.h"
 #include "ui_box.h"
-#include "window.h"
 
 #define ITEM_NONE "item_none"
 
@@ -39,10 +38,10 @@ void Hud::shutdown() {
 }
 
 Hud::Hud() {
-  this->ui = thoom::Window::instance->create_texture(
+  this->ui = thoom::Texture::instance->create_texture(
       THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA32,
       SDL_SCALEMODE_LINEAR);
-  this->overlay = thoom::Window::instance->create_texture(
+  this->overlay = thoom::Texture::instance->create_texture(
       THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA32,
       SDL_SCALEMODE_LINEAR);
 
@@ -172,7 +171,8 @@ void Hud::draw_items(std::vector<Item> items, int sel_item, int health,
                            16.0f};
 
     std::string item_id = i < 0 ? ITEM_NONE : items[i].item_id;
-    item_texture = thoom::load_bmp_texture("sprites/" + item_id + ".bmp");
+    item_texture =
+        thoom::Texture::instance->load("sprites/" + item_id + ".bmp");
     thoom::Renderer::instance->draw_texture(this->ui, item_texture,
                                             &item_src_rect, &item_rect);
 

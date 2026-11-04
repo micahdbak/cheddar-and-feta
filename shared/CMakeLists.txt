@@ -1,5 +1,6 @@
 add_library(shared
   main.cc
+  render_functions.cc
   sounds.cc
   hud.cc
   ui_box.cc

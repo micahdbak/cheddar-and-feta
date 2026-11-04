@@ -2,10 +2,11 @@
 
 #include <iostream>
 
-#include "bmp_texture.h"
 #include "game.h"
 #include "mouse.h"
+#include "render_functions.h"
 #include "renderer.h"
+#include "texture.h"
 
 Cheese::Cheese(float x, float y, int amount) {
   this->x = x;
@@ -20,7 +21,7 @@ void Cheese::render_cheese() {
   char args[256];
   snprintf(args, sizeof(args), "%d", this->amount);
   this->tex_id = RENDER_CHEESE + args;
-  this->texture = thoom::load_bmp_texture(this->tex_id);
+  this->texture = thoom::Texture::instance->load(this->tex_id);
 
   this->depth_offset = this->texture->h - 2;
   this->dst_rect.w = float(this->texture->w);

@@ -4,10 +4,10 @@
 #include "controller.h"
 #include "renderer.h"
 #include "save_data.h"
-#include "window.h"
+#include "texture.h"
 
 GameOver::GameOver() {
-  this->ui = thoom::Window::instance->create_texture(
+  this->ui = thoom::Texture::instance->create_texture(
       THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
       SDL_SCALEMODE_LINEAR);
 

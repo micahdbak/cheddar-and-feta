@@ -7,7 +7,7 @@
 
 #include "game.h"
 #include "renderer.h"
-#include "window.h"
+#include "texture.h"
 
 SDL_Texture* icons = nullptr;
 
@@ -16,7 +16,7 @@ static const unsigned char icons_bmp[] = {
 };
 
 void load_icons() {
-  icons = thoom::Window::instance->create_texture_from_bmp_memory(
+  icons = thoom::Texture::instance->create_texture_from_bmp_memory(
       icons_bmp, sizeof(icons_bmp), SDL_SCALEMODE_NEAREST);
   if (icons == nullptr) std::exit(1);
 }

@@ -5,11 +5,11 @@
 #include <vector>
 
 #include "audio.h"
-#include "bmp_texture.h"
 #include "feta.h"
 #include "game.h"
 #include "net_agent.h"
 #include "renderer.h"
+#include "texture.h"
 #include "utils.h"
 
 #define BUFF_SIZE 1024
@@ -156,7 +156,7 @@ void NetReceiver::step() {
           continue;
         }
 
-        sprite.texture = thoom::load_bmp_texture(sprite.tex_id);
+        sprite.texture = thoom::Texture::instance->load(sprite.tex_id);
 
         if (sprite.texture == nullptr) {
           continue;

@@ -2,11 +2,11 @@
 #include <queue>
 
 #include "SDL3/SDL_stdinc.h"
-#include "bmp_texture.h"
 #include "foe.h"
 #include "game.h"
 #include "mouse.h"
 #include "renderer.h"
+#include "texture.h"
 #include "utils.h"
 
 #define FREE_IF(a) \
@@ -320,7 +320,8 @@ SDL_Texture* debug_tiles_texture = nullptr;
 void foe_debug_tile(int x, int y) {
   if (debug_dst_rect == nullptr) {
     debug_dst_rect = (SDL_FRect*)malloc(sizeof(SDL_FRect) * rows * cols);
-    debug_tiles_texture = thoom::load_bmp_texture("sprites/foe_debug.bmp");
+    debug_tiles_texture =
+        thoom::Texture::instance->load("sprites/foe_debug.bmp");
   }
 
   float center_x = CENTER_TILE_X(x);

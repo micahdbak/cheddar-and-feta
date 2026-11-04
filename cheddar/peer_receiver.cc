@@ -1,4 +1,4 @@
-#include "net_receiver.h"
+#include "peer_receiver.h"
 
 #include "audio.h"
 #include "controller.h"
@@ -7,10 +7,10 @@
 #include "items/cheese.h"
 #include "items/item.h"
 #include "items/tossed.h"
-#include "net_agent.h"
+#include "peer.h"
 
-void NetReceiver::step() {
-  std::queue<std::string> msgs = thoom::net_agent->all_messages();
+void PeerReceiver::step() {
+  std::queue<std::string> msgs = thoom::Peer::instance->all_messages();
   char buff[1024];
 
   // shouldn't be receiving any messages; ignore

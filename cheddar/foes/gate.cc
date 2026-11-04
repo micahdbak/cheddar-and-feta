@@ -4,8 +4,8 @@
 
 #include "audio.h"
 #include "game.h"
-#include "net_agent.h"
-#include "net_sender.h"
+#include "peer.h"
+#include "peer_sender.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "spawner.h"
@@ -53,12 +53,12 @@ FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
 FoeGate::~FoeGate() { delete this->sprite; }
 
 void FoeGate::step() {
-  if (thoom::game->net_state != thoom::NetworkAgent::State::CONNECTED) {
+  if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
     this->synchronized = false;
   } else if (!this->synchronized) {
     for (int i = 0; i < 3; i++) {
       int coord = this->colliders_offset + this->colliders_x + i;
-      NetSender::send_message(
+      PeerSender::send_message(
           MSG_COLLISION,
           std::to_string(coord) + ',' +
               std::to_string(thoom::game->map->collider->collision[coord]));

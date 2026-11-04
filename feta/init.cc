@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <iostream>
 #include <string>
 
@@ -8,9 +9,9 @@
 #include "game.h"
 #include "hud.h"
 #include "item.h"
-#include "net_agent.h"
-#include "net_receiver.h"
-#include "net_sender.h"
+#include "peer.h"
+#include "peer_receiver.h"
+#include "peer_sender.h"
 #include "renderer.h"
 #include "texture.h"
 #include "ui_box.h"
@@ -36,13 +37,12 @@ class Init : public thoom::Object {
   void step();
 
  private:
-  bool render = true, waiting_for_net_agent = false;
+  bool render = true, waiting_for_peer = false;
   int sel_c = 0;
   std::string code;
   SDL_Texture* ui = nullptr;
   SDL_FRect dst_rect = {0.0f, 0.0f, 320.0f, 240.0f};
-  thoom::NetworkAgent::State last_net_state =
-      thoom::NetworkAgent::State::NO_CONNECTION;
+  uint64_t last_peer_state = thoom::Peer::kStateNoConnection;
   Uint64 waiting_ticks = 0;
 };
 
@@ -59,8 +59,8 @@ class InitFactory : public thoom::ObjectFactory {
 void thoom::Game::init() {
   this->factories[INIT_OBJ] = new InitFactory();
 
-  this->factories[FIRST_OBJ] = new NetReceiverFactory();
-  this->factories[LAST_OBJ] = new NetSenderFactory();
+  this->factories[FIRST_OBJ] = new PeerReceiverFactory();
+  this->factories[LAST_OBJ] = new PeerSenderFactory();
 
   this->factories[FETA_OBJ] = new FetaFactory();
 
@@ -86,30 +86,30 @@ void thoom::Game::init() {
   this->load_map("maps/init");
   this->create_objects = false;
 
-  thoom::net_agent = new thoom::NetworkAgent(true);
+  thoom::Peer::init(true);
 
   this->create_object(FIRST_OBJ, "");
   this->create_object(LAST_OBJ, "");
 }
 
 void Init::step() {
-  thoom::NetworkAgent::State net_state = thoom::net_agent->get_state();
+  uint64_t peer_state = thoom::Peer::instance->state.load();
 
-  if (net_state != this->last_net_state) this->render = true;
+  if (peer_state != this->last_peer_state) this->render = true;
 
-  this->last_net_state = net_state;
+  this->last_peer_state = peer_state;
 
-  if (this->waiting_for_net_agent) {
-    if (net_state == thoom::NetworkAgent::State::NO_CONNECTION)
-      net_state = thoom::NetworkAgent::State::WAITING_FOR_PEER;
+  if (this->waiting_for_peer) {
+    if (peer_state == thoom::Peer::kStateNoConnection)
+      peer_state = thoom::Peer::kStateWaitingForPeer;
     else {
-      this->waiting_for_net_agent = false;
+      this->waiting_for_peer = false;
       this->waiting_ticks = thoom::game->ticks;
     }
   }
 
-  switch (net_state) {
-    case thoom::NetworkAgent::State::NO_CONNECTION: {
+  switch (peer_state) {
+    case thoom::Peer::kStateNoConnection: {
       static char code_charset[38] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ*";
       static const int cols = 10;
       static const int rows = 4;
@@ -191,8 +191,8 @@ void Init::step() {
 
         if (this->sel_c == 36) {
           if (select && valid_code) {
-            thoom::net_agent->set_connection_code(this->code);
-            this->waiting_for_net_agent = true;
+            thoom::Peer::instance->set_connection_code(this->code);
+            this->waiting_for_peer = true;
             this->waiting_ticks = thoom::game->ticks;
             this->render = true;
           }
@@ -222,7 +222,7 @@ void Init::step() {
         draw_ui_box(UI_BOX_CHAR_DISP, this->ui, &waiting_disp_box);
 
         std::string waiting = "Connecting with code " + this->code + "...";
-        if (net_state == thoom::NetworkAgent::State::CONNECTED) {
+        if (peer_state == thoom::Peer::kStateConnected) {
           waiting = "Waiting for Cheddar...";
         }
 
@@ -235,7 +235,7 @@ void Init::step() {
 
       // no connection after 15 seconds
       if (thoom::game->ticks - this->waiting_ticks > 15000) {
-        thoom::net_agent->try_reset();
+        thoom::Peer::instance->state.store(thoom::Peer::kStateTryReset);
         Hud::instance->display_notification("That code didn't work.");
         this->waiting_ticks = 0;
       }

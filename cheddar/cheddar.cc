@@ -11,7 +11,7 @@
 #include "items/save.h"
 #include "items/tossed.h"
 #include "macros.h"
-#include "net_agent.h"
+#include "peer.h"
 #include "renderer.h"
 #include "save_data.h"
 
@@ -569,11 +569,12 @@ void Cheddar::attack(int damage) {
 
     this->is_down = true;
 
+    uint64_t peer_state = thoom::Peer::instance->state.load();
+
     // game over if feta is down or disconnected
     if ((feta != nullptr && feta->is_down) ||
-        thoom::game->net_state == thoom::NetworkAgent::State::NO_CONNECTION ||
-        thoom::game->net_state ==
-            thoom::NetworkAgent::State::WAITING_FOR_PEER) {
+        peer_state == thoom::Peer::kStateNoConnection ||
+        peer_state == thoom::Peer::kStateWaitingForPeer) {
       thoom::game->next_map = "maps/dead";
     }
   }

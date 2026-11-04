@@ -5,9 +5,9 @@
 #include "game.h"
 #include "hud.h"
 #include "item.h"
-#include "net_agent.h"
-#include "net_receiver.h"
-#include "net_sender.h"
+#include "peer.h"
+#include "peer_receiver.h"
+#include "peer_sender.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "utils.h"
@@ -123,7 +123,7 @@ void Feta::step() {
         if (this->sprite->update_frame() && (this->sprite->frame_i % 2) == 1) {
           thoom::Audio::instance->play("sfx/step.wav", 0.5, this->x, this->y,
                                        true);
-          NetSender::send_message(
+          PeerSender::send_message(
               MSG_AUDIO,
               Mouse::audio_msg("sfx/step.wav", 0.5, this->x, this->y));
         }
@@ -152,7 +152,7 @@ void Feta::step() {
             char buff[256];
             snprintf(buff, sizeof(buff), "%d,%d,%d,%d", (int)this->x,
                      (int)this->y, x_dir, y_dir);
-            NetSender::send_message(MSG_USE_ITEM, sel_item_id + " " + buff);
+            PeerSender::send_message(MSG_USE_ITEM, sel_item_id + " " + buff);
             this->remove_item(sel_item_id);
 
             if (item_info[sel_item_id].type == THROWABLE) {
@@ -166,7 +166,7 @@ void Feta::step() {
 
               thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x,
                                            this->y, true);
-              NetSender::send_message(
+              PeerSender::send_message(
                   MSG_AUDIO,
                   Mouse::audio_msg("sfx/throw.wav", 1.0, this->x, this->y));
             }
@@ -178,7 +178,7 @@ void Feta::step() {
             if (this->health < this->max_health) {
               this->health++;
               this->remove_item(sel_item_id);
-              NetSender::send_message(MSG_EAT_CHEESE, std::string());
+              PeerSender::send_message(MSG_EAT_CHEESE, std::string());
 
               this->is_busy = EATING;
               this->busy_ticks = thoom::game->ticks;
@@ -189,13 +189,13 @@ void Feta::step() {
 
               thoom::Audio::instance->play("sfx/cheese.wav", 1.0f, this->x,
                                            this->y, true);
-              NetSender::send_message(
+              PeerSender::send_message(
                   MSG_AUDIO,
                   Mouse::audio_msg("sfx/cheese.wav", 1.0, this->x, this->y));
             } else {
               thoom::Audio::instance->play("sfx/full.wav", 1.0f, this->x,
                                            this->y, true);
-              NetSender::send_message(
+              PeerSender::send_message(
                   MSG_AUDIO,
                   Mouse::audio_msg("sfx/full.wav", 1.0, this->x, this->y));
             }
@@ -215,7 +215,7 @@ void Feta::step() {
             char buff[256];
             snprintf(buff, sizeof(buff), "%s %d,%d", sel_item_id.c_str(), x_dir,
                      y_dir);
-            NetSender::send_message(MSG_PUSH_HITBOX, std::string(buff));
+            PeerSender::send_message(MSG_PUSH_HITBOX, std::string(buff));
 
             // set animation to attacking
             this->sprite->set_animation((this->sprite->animation % 8) +
@@ -223,7 +223,7 @@ void Feta::step() {
 
             thoom::Audio::instance->play("sfx/kick.wav", 1.0f, this->x, this->y,
                                          true);
-            NetSender::send_message(
+            PeerSender::send_message(
                 MSG_AUDIO,
                 Mouse::audio_msg("sfx/kick.wav", 1.0, this->x, this->y));
           } break;
@@ -240,7 +240,7 @@ void Feta::step() {
                                      &y_dir);
 
         // toss item
-        NetSender::send_message(
+        PeerSender::send_message(
             MSG_TOSS_ITEM,
             sel_item_id + " " + UseItem::Options(x, y, x_dir, y_dir));
         this->remove_item(sel_item_id);
@@ -256,7 +256,7 @@ void Feta::step() {
 
         thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x, this->y,
                                      true);
-        NetSender::send_message(
+        PeerSender::send_message(
             MSG_AUDIO,
             Mouse::audio_msg("sfx/throw.wav", 1.0, this->x, this->y));
       }
@@ -383,7 +383,7 @@ void Feta::step() {
   // (three seconds of movement)
   if (this->is_down && thoom::game->ticks - this->is_down_ticks > 5000) {
     this->is_down = false;
-    NetSender::send_message(MSG_IS_DOWN, std::to_string(0));
+    PeerSender::send_message(MSG_IS_DOWN, std::to_string(0));
   }
 
   // ---- move cheddar ----
@@ -498,7 +498,7 @@ void Feta::attack(int damage) {
 
   this->health -= damage;
   thoom::Audio::instance->play("sfx/hurt.wav", 1.0f, this->x, this->y, true);
-  NetSender::send_message(
+  PeerSender::send_message(
       MSG_AUDIO, Mouse::audio_msg("sfx/hurt.wav", 1.0, this->x, this->y));
 
   // if dead, go down
@@ -511,7 +511,7 @@ void Feta::attack(int damage) {
     this->sprite->set_animation((this->sprite->animation % 8) + DOWN_ANIMATION);
 
     this->is_down = true;
-    NetSender::send_message(MSG_IS_DOWN, std::to_string(1));
+    PeerSender::send_message(MSG_IS_DOWN, std::to_string(1));
   }
 }
 

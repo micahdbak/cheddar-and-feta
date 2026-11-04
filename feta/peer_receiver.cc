@@ -1,4 +1,4 @@
-#include "net_receiver.h"
+#include "peer_receiver.h"
 
 #include <iostream>
 #include <string>
@@ -7,7 +7,7 @@
 #include "audio.h"
 #include "feta.h"
 #include "game.h"
-#include "net_agent.h"
+#include "peer.h"
 #include "renderer.h"
 #include "texture.h"
 #include "utils.h"
@@ -16,7 +16,7 @@
 
 char nullbyte = '\0';
 
-NetReceiver::~NetReceiver() {
+PeerReceiver::~PeerReceiver() {
   if (!this->sprites.empty()) {
     for (thoom::SpriteRender& sprite : this->sprites) {
       delete sprite.src_rect;
@@ -26,13 +26,13 @@ NetReceiver::~NetReceiver() {
   }
 }
 
-void NetReceiver::step() {
+void PeerReceiver::step() {
   // ensure we are in maps/init if disconnected, and do nothing else
-  if (thoom::game->net_state != thoom::NetworkAgent::State::CONNECTED) {
-    // if currently in a map other than the init map, reset the network agent
+  if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
+    // if currently in a map other than the init map, reset the peer
     // and go to that
     if (thoom::game->map->path != "maps/init") {
-      thoom::net_agent->try_reset();
+      thoom::Peer::instance->state.store(thoom::Peer::kStateTryReset);
       thoom::game->next_map = "maps/init";
       last_frame_ticks = 0;
     }
@@ -53,7 +53,7 @@ void NetReceiver::step() {
   }
 
   // get all unread messages
-  std::queue<std::string> msgs = thoom::net_agent->all_messages();
+  std::queue<std::string> msgs = thoom::Peer::instance->all_messages();
 
   // if empty, reuse last frame
   if (msgs.empty()) {
@@ -65,7 +65,7 @@ void NetReceiver::step() {
 
     // 5 seconds of no frames; disconnect
     if (thoom::game->ticks - last_frame_ticks > 5000 && last_frame_ticks != 0) {
-      thoom::net_agent->try_reset();
+      thoom::Peer::instance->state.store(thoom::Peer::kStateTryReset);
       last_frame_ticks = 0;
     }
 
@@ -195,7 +195,7 @@ void NetReceiver::step() {
   this->just_loaded_map = false;
 }
 
-bool NetReceiver::handle_important_message(const char* arr) {
+bool PeerReceiver::handle_important_message(const char* arr) {
   char buff[1024];
 
   switch (arr[0]) {
@@ -332,7 +332,8 @@ bool NetReceiver::handle_important_message(const char* arr) {
   return true;
 }
 
-void NetReceiver::load_map(const std::string& map, const char* remaining_msgs) {
+void PeerReceiver::load_map(const std::string& map,
+                            const char* remaining_msgs) {
   if (remaining_msgs != NULL && *remaining_msgs != '\0') {
     this->skipped_messages += remaining_msgs;
   }

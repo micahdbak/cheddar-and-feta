@@ -3,7 +3,7 @@
 #include "../../items/fire.h"
 #include "../../mouse.h"
 #include "abdomen.h"
-#include "audio_playback.h"
+#include "audio.h"
 #include "icon.h"
 #include "renderer.h"
 #include "save_data.h"
@@ -66,24 +66,24 @@ void Spitter::step() {
       if (this->prev_state != this->state) {
         switch (SDL_rand(6)) {
           case 0:
-            thoom::play_audio("sfx/spitter_walk1.wav", 1.0f, this->x, this->y,
-                              false);
+            thoom::Audio::instance->play("sfx/spitter_walk1.wav", 1.0f, this->x,
+                                         this->y, false);
             break;
           case 1:
-            thoom::play_audio("sfx/spitter_walk2.wav", 1.0f, this->x, this->y,
-                              false);
+            thoom::Audio::instance->play("sfx/spitter_walk2.wav", 1.0f, this->x,
+                                         this->y, false);
             break;
           case 2:
-            thoom::play_audio("sfx/spitter_walk3.wav", 1.0f, this->x, this->y,
-                              false);
+            thoom::Audio::instance->play("sfx/spitter_walk3.wav", 1.0f, this->x,
+                                         this->y, false);
             break;
           case 3:
-            thoom::play_audio("sfx/spitter_walk4.wav", 1.0f, this->x, this->y,
-                              false);
+            thoom::Audio::instance->play("sfx/spitter_walk4.wav", 1.0f, this->x,
+                                         this->y, false);
             break;
           case 4:
-            thoom::play_audio("sfx/ant_walk3.wav", 1.0f, this->x, this->y,
-                              false);
+            thoom::Audio::instance->play("sfx/ant_walk3.wav", 1.0f, this->x,
+                                         this->y, false);
             break;
           default:
             break;
@@ -174,19 +174,19 @@ void Spitter::step() {
                                                 fire_y_dir * 2, -1));
 
         if (SDL_rand(2)) {
-          thoom::play_audio("sfx/fire_short1.wav", 1.0f, this->x, this->y,
-                            false);
+          thoom::Audio::instance->play("sfx/fire_short1.wav", 1.0f, this->x,
+                                       this->y, false);
         } else {
-          thoom::play_audio("sfx/fire_short2.wav", 1.0f, this->x, this->y,
-                            false);
+          thoom::Audio::instance->play("sfx/fire_short2.wav", 1.0f, this->x,
+                                       this->y, false);
         }
       }
     } break;
 
     case Foe::State::HURT:
       if (this->prev_state != this->state) {
-        thoom::play_audio("sfx/spitter_hurt.wav", 1.0f, this->x, this->y,
-                          false);
+        thoom::Audio::instance->play("sfx/spitter_hurt.wav", 1.0f, this->x,
+                                     this->y, false);
       }
 
       if (thoom::game->ticks - this->hurt_timer > 100) {
@@ -197,7 +197,8 @@ void Spitter::step() {
 
     case Foe::State::DEAD:
       if (this->prev_state != this->state) {
-        thoom::play_audio("sfx/spitter_die.wav", 1.0f, this->x, this->y, false);
+        thoom::Audio::instance->play("sfx/spitter_die.wav", 1.0f, this->x,
+                                     this->y, false);
       }
 
       if (thoom::game->ticks - this->hurt_timer > 2000) {

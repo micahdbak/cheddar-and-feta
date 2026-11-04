@@ -1,12 +1,14 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
+#include "audio.h"
 #include "controller.h"
 #include "game.h"
 #include "hud.h"
 #include "icon.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "sounds.h"
 #include "ui_box.h"
 #include "window.h"
 
@@ -19,8 +21,8 @@ int thoom::_object_id_counter = 0;
 int main(int argc, char** argv) {
   thoom::Window::init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT);
   thoom::Renderer::init();
+  thoom::Audio::init();
 
-  bool running = true;
   thoom::game = new thoom::Game();
   thoom::game->argc = argc;
   thoom::game->argv = argv;
@@ -29,6 +31,10 @@ int main(int argc, char** argv) {
   load_ui_box();
   load_icons();
   Hud::init();
+
+  load_sounds();
+
+  bool running = true;
 
   while (running) {
     SDL_Event event;
@@ -88,6 +94,8 @@ int main(int argc, char** argv) {
 
   delete thoom::game;
   thoom::game = nullptr;
+
+  thoom::Audio::shutdown();
 
   SDL_DestroyTexture(ui_box);
   ui_box = nullptr;

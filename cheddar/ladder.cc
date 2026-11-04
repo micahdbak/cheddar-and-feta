@@ -1,6 +1,6 @@
 #include "ladder.h"
 
-#include "audio_playback.h"
+#include "audio.h"
 #include "game.h"
 #include "mouse.h"
 #include "save_data.h"
@@ -24,6 +24,7 @@ void Ladder::step() {
   if (mouse != nullptr) {
     thoom::game->next_map = this->next_map;
     thoom::save.puti(MOUSE_SPAWN_AT, this->which_coord);
-    thoom::play_audio("sfx/ladder.wav", 1.0f, this->x, this->y, false);
+    thoom::Audio::instance->play("sfx/ladder.wav", 1.0f, this->x, this->y,
+                                 false);
   }
 }

@@ -1,6 +1,6 @@
 #include "bell.h"
 
-#include "audio_playback.h"
+#include "audio.h"
 #include "controller.h"
 #include "mouse.h"
 #include "renderer.h"
@@ -34,7 +34,7 @@ void Bell::attack(int damage) {
 
   this->triggered = true;
   this->timer = thoom::game->ticks;
-  thoom::play_audio("sfx/bell.wav", 1.0f, this->x, this->y, false);
+  thoom::Audio::instance->play("sfx/bell.wav", 1.0f, this->x, this->y, false);
 }
 
 void Bell::step() {

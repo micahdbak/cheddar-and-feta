@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include "audio_playback.h"
+#include "audio.h"
 #include "fire.h"
 #include "game.h"
 #include "renderer.h"
@@ -48,7 +48,7 @@ void ThrownMolotov::step() {
 
     thoom::game->delete_object = true;
 
-    thoom::play_audio("sfx/fire.wav", 1.0f, this->x, this->y, false);
+    thoom::Audio::instance->play("sfx/fire.wav", 1.0f, this->x, this->y, false);
 
     return;
   }

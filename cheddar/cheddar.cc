@@ -1,6 +1,6 @@
 #include "cheddar.h"
 
-#include "audio_playback.h"
+#include "audio.h"
 #include "feta.h"
 #include "game.h"
 #include "hud.h"
@@ -102,7 +102,7 @@ void Cheddar::step() {
     return;
   }
 
-  thoom::set_listener(this->x, this->y);  // for audio
+  thoom::Audio::instance->set_listener(this->x, this->y);  // for audio
 
   // ---- items ----
 
@@ -171,7 +171,8 @@ void Cheddar::step() {
         this->sprite->set_animation(thoom::direction_from_dirs(x_dir, y_dir));
 
         if (this->sprite->update_frame() && (this->sprite->frame_i % 2) == 1) {
-          thoom::play_audio("sfx/step.wav", 0.5, this->x, this->y, false);
+          thoom::Audio::instance->play("sfx/step.wav", 0.5, this->x, this->y,
+                                       false);
         }
 
         mov_speed = this->max_mov_speed;
@@ -211,7 +212,8 @@ void Cheddar::step() {
               this->sprite->set_frame(0);
               this->sprite->interval_ms = 125;
 
-              thoom::play_audio("sfx/throw.wav", 1.0f, this->x, this->y, false);
+              thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x,
+                                           this->y, false);
             }
 
             break;
@@ -230,10 +232,11 @@ void Cheddar::step() {
               this->sprite->set_animation(EATING_ANIMATION);
               this->sprite->interval_ms = 75;
 
-              thoom::play_audio("sfx/cheese.wav", 1.0f, this->x, this->y,
-                                false);
+              thoom::Audio::instance->play("sfx/cheese.wav", 1.0f, this->x,
+                                           this->y, false);
             } else {
-              thoom::play_audio("sfx/full.wav", 1.0f, this->x, this->y, false);
+              thoom::Audio::instance->play("sfx/full.wav", 1.0f, this->x,
+                                           this->y, false);
             }
 
             break;
@@ -260,7 +263,8 @@ void Cheddar::step() {
             this->sprite->set_animation((this->sprite->animation % 8) +
                                         ATTACKING_ANIMATION);
 
-            thoom::play_audio("sfx/kick.wav", 1.0f, this->x, this->y, false);
+            thoom::Audio::instance->play("sfx/kick.wav", 1.0f, this->x, this->y,
+                                         false);
           } break;
 
           default:
@@ -289,7 +293,8 @@ void Cheddar::step() {
         this->sprite->set_frame(0);
         this->sprite->interval_ms = 125;
 
-        thoom::play_audio("sfx/throw.wav", 1.0f, this->x, this->y, false);
+        thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x, this->y,
+                                     false);
       }
 
       break;
@@ -551,7 +556,7 @@ void Cheddar::attack(int damage) {
   }
 
   this->health -= damage;
-  thoom::play_audio("sfx/hurt.wav", 1.0f, this->x, this->y, false);
+  thoom::Audio::instance->play("sfx/hurt.wav", 1.0f, this->x, this->y, false);
 
   // if dead, go down
   if (this->health <= 0) {

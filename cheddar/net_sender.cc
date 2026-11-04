@@ -1,5 +1,6 @@
 #include "net_sender.h"
 
+#include "audio.h"
 #include "game.h"
 #include "items/item.h"
 #include "mouse.h"
@@ -45,7 +46,7 @@ void NetSender::step() {
   }
 
   // audio
-  for (thoom::Game::AudioMsg& msg : thoom::game->audio) {
+  for (thoom::Audio::AudioMsg& msg : thoom::Audio::instance->messages) {
     snprintf(buff, sizeof(buff), "%c%s %d,%d,%d\n", MSG_AUDIO,
              msg.wav_path.c_str(), (int)(10.0f * msg.gain), (int)msg.x,
              (int)msg.y);

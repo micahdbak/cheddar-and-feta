@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hurtbox.h"
+#include "scene.h"
 #include "spitter.h"
 #include "sprite.h"
 
@@ -10,7 +11,7 @@
 
 class SpitterAbdomen : public thoom::Object, public HurtSource {
  public:
-  SpitterAbdomen(Spitter* parent, std::shared_ptr<bool> deleted_ptr);
+  SpitterAbdomen(int parent_id);
   ~SpitterAbdomen();
 
   void step() override;
@@ -18,38 +19,14 @@ class SpitterAbdomen : public thoom::Object, public HurtSource {
   float hurtsource_x() override { return this->x; }
   float hurtsource_y() override { return this->y; }
 
-  void attack(int damage) override {
-    if (!*this->deleted_ptr) {
-      this->parent->attack(damage);
-    }
-  }
+  void attack(int damage) override;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   int cur_dir, dirs[FRAMES_TO_SET_CUR_DIR], dirs_i;
   float x, y;
-  Spitter* parent;
-  std::shared_ptr<bool> deleted_ptr;
+  int parent_id;
   thoom::Sprite* sprite;
   SDL_FRect dst_rect;
-};
-
-class SpitterAbdomenFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
-    int parent_id;
-    if (1 != sscanf(options.c_str(), "%d", &parent_id)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    thoom::Object* obj = thoom::game->get_object(parent_id);
-    Spitter* spitter;
-
-    if (obj != nullptr && (spitter = dynamic_cast<Spitter*>(obj)) != nullptr) {
-      std::shared_ptr<bool> deleted_ptr = spitter->get_deleted_ptr();
-      return new SpitterAbdomen(spitter, deleted_ptr);
-    } else {
-      return nullptr;
-    }
-  }
 };

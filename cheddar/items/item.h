@@ -4,9 +4,9 @@
 #include <unordered_map>
 
 #include "../foes/foe.h"
-#include "game.h"
 #include "mouse.h"
 #include "object.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define ITEM_NONE "item_none"
@@ -27,7 +27,7 @@ extern std::unordered_map<std::string, Item> item_info;
 
 class DroppedItem : public virtual thoom::Object {
  public:
-  static std::string Options(int x, int y) {
+  static std::string options(int x, int y) {
     char buff[256];
     snprintf(buff, sizeof(buff), "%d,%d", x, y);
     return std::string(buff);
@@ -54,7 +54,7 @@ class DroppedItem : public virtual thoom::Object {
 };
 
 namespace UseItem {
-static std::string Options(int x, int y, int x_dir, int y_dir, int from_id) {
+static std::string options(int x, int y, int x_dir, int y_dir, int from_id) {
   char buff[256];
   snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d", x, y, x_dir, y_dir, from_id);
   return std::string(buff);

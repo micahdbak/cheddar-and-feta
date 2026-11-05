@@ -5,10 +5,10 @@
 #include "../foes/foe.h"
 #include "audio.h"
 #include "controller.h"
-#include "game.h"
 #include "items/persister.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 #include "textbox.h"
 
 std::unordered_map<std::string, Item> item_info;
@@ -24,17 +24,17 @@ DroppedItem::DroppedItem(std::string item_id, float x, float y,
   this->dst_rect.w = float(frame_w);
   this->dst_rect.h = float(frame_h);
 
-  if (thoom::game->creating_objects) {
+  if ((thoom::Scene::instance->state == thoom::Scene::kLoading)) {
     this->spawned_item = true;
 
     char buff[256];
     snprintf(buff, sizeof(buff), "%s_%d_%d", this->item_id.c_str(),
              (int)this->x, (int)this->y);
-    std::string key = thoom::game->map->path + "_" + buff;
+    std::string key = thoom::Scene::instance->map->path + "_" + buff;
 
     // cancel creation if this save entry exists
     if (thoom::save.geti(key)) {
-      thoom::game->delete_object = true;
+      this->deleted = true;
     }
   } else if (item_persister != nullptr) {
     item_persister->remember_item(item_id, x, y, this->id);
@@ -47,7 +47,8 @@ DroppedItem::DroppedItem(std::string item_id, float x, float y,
 }
 
 DroppedItem::~DroppedItem() {
-  if (!thoom::game->deleting_objects && item_persister != nullptr) {
+  if (!(thoom::Scene::instance->state == thoom::Scene::kUnloading) &&
+      item_persister != nullptr) {
     // item picked up by player, most likely
     item_persister->forget_item(this->id);
     thoom::Audio::instance->play("sfx/pickup.wav", 0.5f, this->x, this->y,
@@ -62,14 +63,14 @@ void DroppedItem::dropped_step() {
   Mouse* mouse = Mouse::closest_mouse(this->x, this->y, 12.0f, true);
   if (!mice_locked && mouse != nullptr) {
     this->take(mouse);
-    thoom::game->delete_object = true;
+    this->deleted = true;
 
     // spawned item was taken; don't spawn next time
     if (this->spawned_item) {
       char buff[256];
       snprintf(buff, sizeof(buff), "%s_%d_%d", this->item_id.c_str(),
                (int)this->x, (int)this->y);
-      std::string key = thoom::game->map->path + "_" + buff;
+      std::string key = thoom::Scene::instance->map->path + "_" + buff;
       thoom::save.puti(key, 1);
     }
 

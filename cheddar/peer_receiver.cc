@@ -3,11 +3,11 @@
 #include "audio.h"
 #include "controller.h"
 #include "feta.h"
-#include "game.h"
 #include "items/cheese.h"
 #include "items/item.h"
 #include "items/tossed.h"
 #include "peer.h"
+#include "scene.h"
 
 void PeerReceiver::step() {
   std::queue<std::string> msgs = thoom::Peer::instance->all_messages();
@@ -40,8 +40,9 @@ void PeerReceiver::step() {
             std::exit(1);
           }
 
-          std::string options = UseItem::Options(x, y, x_dir, y_dir, feta->id);
-          thoom::game->push_object(std::string(buff) + USE_OBJ, options);
+          std::string options = UseItem::options(x, y, x_dir, y_dir, feta->id);
+          thoom::Scene::instance->create_object(std::string(buff) + USE_OBJ,
+                                                options);
           feta->remove_item(std::string(buff));
         } break;
 
@@ -54,8 +55,8 @@ void PeerReceiver::step() {
           }
 
           std::string options =
-              TossedItem::Options(x, y, x_dir, y_dir, true, buff);
-          thoom::game->push_object(TOSSED_ITEM_OBJ, options);
+              TossedItem::options(x, y, x_dir, y_dir, true, buff);
+          thoom::Scene::instance->create_object(TOSSED_ITEM_OBJ, options);
           feta->remove_item(std::string(buff));
         } break;
 
@@ -71,12 +72,12 @@ void PeerReceiver::step() {
             sel_item_id = buff;
           }
 
-          HitBox::MakeOffset(x_dir, y_dir, &x_off, &y_off, 8.0f);
+          HitBox::make_offset(x_dir, y_dir, &x_off, &y_off, 8.0f);
           HitBox::Properties props = {item_info[sel_item_id].damage, 200, 100};
           props.single_use = true;
 
-          thoom::game->push_object(
-              HITBOX_OBJ, HitBox::Options(feta->id, feta->id, x_off - 16,
+          thoom::Scene::instance->create_object(
+              HITBOX_OBJ, HitBox::options(feta->id, feta->id, x_off - 16,
                                           y_off - 18, 32, 32, props));
         } break;
 
@@ -125,4 +126,9 @@ void PeerReceiver::step() {
       }
     }
   }
+}
+
+thoom::Object* PeerReceiver::create_object(thoom::Scene* scene,
+                                           const std::string& options) {
+  return new PeerReceiver();
 }

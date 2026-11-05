@@ -3,11 +3,11 @@
 #include "../items/cannon_ball.h"
 #include "../items/cheese.h"
 #include "audio.h"
-#include "game.h"
 #include "hurtbox.h"
 #include "icon.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 
 FoeFrog::FoeFrog(int x, int y, int spawner_id)
     : Foe(float(x), float(y), spawner_id, 500, 250, 128.0f, 64.0f) {
@@ -16,8 +16,8 @@ FoeFrog::FoeFrog(int x, int y, int spawner_id)
   this->dst_rect.h = 48.0f;
   this->icon_offset = 16;
 
-  thoom::game->push_object(HURTBOX_OBJ,
-                           HurtBox::Options(this->id, -16, -16, 32, 32));
+  thoom::Scene::instance->create_object(
+      HURTBOX_OBJ, HurtBox::options(this->id, -16, -16, 32, 32));
 }
 
 FoeFrog::~FoeFrog() {
@@ -26,16 +26,16 @@ FoeFrog::~FoeFrog() {
 }
 
 void FoeFrog::action(Mouse* mouse) {
-  if (thoom::game->ticks - this->attack_timer < 2000 ||
-      thoom::game->ticks - this->hurt_timer < 750) {
+  if (thoom::Scene::instance->ticks - this->attack_timer < 2000 ||
+      thoom::Scene::instance->ticks - this->hurt_timer < 750) {
     this->state = Foe::State::FORCE_RANDOM_TILE;
     return;
   }
 
-  this->attack_timer = thoom::game->ticks;
+  this->attack_timer = thoom::Scene::instance->ticks;
 
   this->state = Foe::State::ACTION;
-  this->timer = thoom::game->ticks;
+  this->timer = thoom::Scene::instance->ticks;
 
   thoom::Audio::instance->play("sfx/cannon.wav", 1.0, this->x, this->y, false);
 
@@ -43,8 +43,8 @@ void FoeFrog::action(Mouse* mouse) {
   snprintf(options, sizeof(options), "%d,%d,%d,%d,%d",
            (int)(this->x + this->off_x), (int)(this->y + this->off_y),
            this->x_dir, this->y_dir, this->id);
-  thoom::game->push_object(std::string(ITEM_CANNON_BALL USE_OBJ),
-                           std::string(options));
+  thoom::Scene::instance->create_object(std::string(ITEM_CANNON_BALL USE_OBJ),
+                                        std::string(options));
 
   // for action animation
   this->sprite->set_frame(0);
@@ -62,10 +62,10 @@ void FoeFrog::attack_internal(int damage) {
     thoom::save.puti(FOE_FROG_OBJ STATS, kills);
   } else {
     this->state = Foe::State::THROW_AWAY_FROM;
-    this->hurt_timer = thoom::game->ticks;
+    this->hurt_timer = thoom::Scene::instance->ticks;
   }
 
-  this->timer = thoom::game->ticks;
+  this->timer = thoom::Scene::instance->ticks;
 }
 
 #define WALK_ANIMATION 0
@@ -94,7 +94,7 @@ void FoeFrog::step() {
     case Foe::State::ACTION:
       this->sprite->set_animation(ACTION_ANIMATION +
                                   this->_displayed_direction);
-      if (thoom::game->ticks - this->timer > 500) {
+      if (thoom::Scene::instance->ticks - this->timer > 500) {
         this->state = Foe::State::FORCE_RANDOM_TILE;
       }
 
@@ -117,16 +117,16 @@ void FoeFrog::step() {
       this->sprite->set_animation(ACTION_ANIMATION +
                                   this->_displayed_direction);
       this->sprite->set_frame(0);
-      if (thoom::game->ticks - this->timer > 2000) {
+      if (thoom::Scene::instance->ticks - this->timer > 2000) {
         // delete this object
-        thoom::game->delete_object = true;
+        this->deleted = true;
         Cheese::drop_cheese(this->x, this->y, 3, 5);
 
         char options[256];
         snprintf(options, sizeof(options), "%d,%d", int(this->x + this->off_x),
                  int(this->y + this->off_y));
-        thoom::game->push_object(std::string(ITEM_CANNON_BALL DROPPED_OBJ),
-                                 std::string(options));
+        thoom::Scene::instance->create_object(
+            std::string(ITEM_CANNON_BALL DROPPED_OBJ), std::string(options));
 
         return;
       }
@@ -143,7 +143,7 @@ void FoeFrog::step() {
       break;
   }
 
-  if (thoom::game->ticks - this->hurt_timer < 500 &&
+  if (thoom::Scene::instance->ticks - this->hurt_timer < 500 &&
       this->state != Foe::State::DEAD) {
     this->sprite->set_animation(ACTION_ANIMATION + this->_displayed_direction);
     this->sprite->set_frame(0);
@@ -160,4 +160,15 @@ void FoeFrog::step() {
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 32);
+}
+
+thoom::Object* FoeFrog::create_object(thoom::Scene* scene,
+                                      const std::string& options) {
+  int x = 0, y = 0, spawner_id = 0;
+  if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new FoeFrog(x, y, spawner_id);
 }

@@ -1,7 +1,7 @@
 #include "billboard.h"
 
-#include "game.h"
 #include "renderer.h"
+#include "scene.h"
 
 Billboard::Billboard(int x, int y, int ts_x, int ts_y, int w, int h, int depth,
                      std::string tilesheet) {
@@ -28,4 +28,27 @@ void Billboard::step() {
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, this->depth);
+}
+
+void Billboard::parse_options(const std::string& options, int* x, int* y,
+                              int* ts_x, int* ts_y, int* w, int* h, int* depth,
+                              std::string& tilesheet) {
+  char buff[1024];
+  if (8 != sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%1023[^\n]", x, y,
+                  ts_x, ts_y, w, h, depth, buff)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  tilesheet = buff;
+}
+
+thoom::Object* Billboard::create_object(thoom::Scene* scene,
+                                        const std::string& options) {
+  int x, y, ts_x, ts_y, w, h, depth;
+  std::string tilesheet;
+
+  Billboard::parse_options(options, &x, &y, &ts_x, &ts_y, &w, &h, &depth,
+                           tilesheet);
+  return new Billboard(x, y, ts_x, ts_y, w, h, depth, tilesheet);
 }

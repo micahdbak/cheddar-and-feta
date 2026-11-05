@@ -1,7 +1,7 @@
 #pragma once
 
 #include "foe.h"
-#include "game.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define FOE_PORCUPINE_OBJ "foe_porc"
@@ -17,6 +17,8 @@ class FoePorcupine : public Foe {
   void step() override;
 
   Foe::State prev_state = Foe::State::IDLE;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   thoom::Sprite* sprite;
@@ -25,17 +27,4 @@ class FoePorcupine : public Foe {
 
   int max_health = 12, health = 12;
   int spine_x_dir = 0, spine_y_dir = 0;
-};
-
-class FoePorcupineFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
-    int x = 0, y = 0, spawner_id = 0;
-    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new FoePorcupine(x, y, spawner_id);
-  }
 };

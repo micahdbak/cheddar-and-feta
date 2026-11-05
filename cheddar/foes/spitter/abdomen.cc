@@ -3,15 +3,13 @@
 #include "renderer.h"
 #include "utils.h"
 
-SpitterAbdomen::SpitterAbdomen(Spitter* parent,
-                               std::shared_ptr<bool> deleted_ptr)
-    : parent(parent), deleted_ptr(deleted_ptr) {
+SpitterAbdomen::SpitterAbdomen(int parent_id) : parent_id(parent_id) {
   this->sprite =
       new thoom::Sprite("sprites/foe_spitter_abdomen.bmp", 32, 32, 250);
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
-  thoom::game->push_object(HURTBOX_OBJ,
-                           HurtBox::Options(this->id, -16, -16, 32, 32));
+  thoom::Scene::instance->create_object(
+      HURTBOX_OBJ, HurtBox::options(this->id, -16, -16, 32, 32));
 
   this->cur_dir = 0;
   for (int i = 0; i < FRAMES_TO_SET_CUR_DIR; i++) this->dirs[i] = 0;
@@ -20,9 +18,21 @@ SpitterAbdomen::SpitterAbdomen(Spitter* parent,
 
 SpitterAbdomen::~SpitterAbdomen() { delete this->sprite; }
 
+void SpitterAbdomen::attack(int damage) {
+  thoom::Object* parent_object =
+      thoom::Scene::instance->find_object(this->parent_id);
+  Spitter* parent = dynamic_cast<Spitter*>(parent_object);
+
+  if (parent != nullptr) parent->attack(damage);
+}
+
 void SpitterAbdomen::step() {
-  if (*this->deleted_ptr) {
-    thoom::game->delete_object = true;
+  thoom::Object* parent_object =
+      thoom::Scene::instance->find_object(this->parent_id);
+  Spitter* parent = dynamic_cast<Spitter*>(parent_object);
+
+  if (parent == nullptr) {
+    this->deleted = true;
     return;
   }
 
@@ -30,9 +40,9 @@ void SpitterAbdomen::step() {
   int direction;
 
   // p1, not used
-  p2 = this->parent->get_pos(NUM_SEGMENTS);
-  p3 = this->parent->get_pos(NUM_SEGMENTS - 1);
-  p4 = this->parent->get_pos(NUM_SEGMENTS - 2);
+  p2 = parent->get_pos(NUM_SEGMENTS);
+  p3 = parent->get_pos(NUM_SEGMENTS - 1);
+  p4 = parent->get_pos(NUM_SEGMENTS - 2);
 
   if (p2.x == 0 || p3.x == 0 || p4.x == 0) return;
 
@@ -62,9 +72,9 @@ void SpitterAbdomen::step() {
   Mouse* mouse = Mouse::closest_mouse(this->x, this->y, 64.0f, true);
 
   if (mouse == nullptr) {
-    this->parent->abdomen_distance = 256.0f;
+    parent->abdomen_distance = 256.0f;
   } else {
-    this->parent->abdomen_distance =
+    parent->abdomen_distance =
         THOOM_DISTANCE_BETWEEN_POINTS(mouse->x, mouse->y, this->x, this->y);
   }
 
@@ -76,4 +86,18 @@ void SpitterAbdomen::step() {
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 16);
+}
+
+thoom::Object* SpitterAbdomen::create_object(thoom::Scene* scene,
+                                             const std::string& options) {
+  int parent_id;
+  if (1 != sscanf(options.c_str(), "%d", &parent_id)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  thoom::Object* obj = scene->find_object(parent_id);
+  if (obj == nullptr || dynamic_cast<Spitter*>(obj) == nullptr) return nullptr;
+
+  return new SpitterAbdomen(parent_id);
 }

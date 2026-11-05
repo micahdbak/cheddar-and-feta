@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "game.h"
 #include "object.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define GATE_OBJ "gate"
@@ -14,6 +14,8 @@ class FoeGate : public thoom::Object {
   ~FoeGate();
 
   void step() override;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   float x, y;
@@ -26,18 +28,4 @@ class FoeGate : public thoom::Object {
   std::vector<int> colliders;
 
   bool synchronized = false;
-};
-
-class FoeGateFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
-    int x = 0, y = 0, spawner_id = 0, animation = 0;
-    if (4 != sscanf(options.c_str(), "%d,%d,%d,%d", &x, &y, &spawner_id,
-                    &animation)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new FoeGate(x, y, spawner_id, animation);
-  }
 };

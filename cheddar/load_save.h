@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "object.h"
+#include "scene.h"
 
 #define LOAD_SAVE_OBJ "load_save"
 
@@ -16,14 +17,6 @@ class LoadSave : public thoom::Object {
   std::vector<std::string> summaries;
   int sel_save = 0, save_start = 0, save_end = 0;
   bool render = true;
-};
-
-class LoadSaveFactory : public thoom::ObjectFactory {
- public:
-  LoadSaveFactory() = default;
-  ~LoadSaveFactory() = default;
-
-  thoom::Object* create(const std::string& options) override {
-    return new LoadSave();
-  }
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 };

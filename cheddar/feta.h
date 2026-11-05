@@ -7,6 +7,7 @@
 #include "mouse.h"
 #include "object.h"
 #include "save_data.h"
+#include "scene.h"
 
 #define FETA_OBJ "feta"
 
@@ -41,6 +42,8 @@ class Feta : public Mouse, public HitSource {
   int frame_i = 0, animation = 0, which_emote = -1;
   std::vector<std::pair<std::string, std::string>> new_objects;
   bool synchronized = false;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   int tile_x, tile_y;
@@ -49,17 +52,4 @@ class Feta : public Mouse, public HitSource {
   SDL_FRect dst_rect, emote_rect;
 
   std::vector<Hud::Item> items;
-};
-
-class FetaFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
-    int x, y, animation;
-    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &animation)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new Feta(x, y, animation);
-  }
 };

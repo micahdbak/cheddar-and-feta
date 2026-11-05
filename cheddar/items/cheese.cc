@@ -2,10 +2,10 @@
 
 #include <iostream>
 
-#include "game.h"
 #include "mouse.h"
 #include "render_functions.h"
 #include "renderer.h"
+#include "scene.h"
 #include "texture.h"
 
 Cheese::Cheese(float x, float y, int amount) {
@@ -32,7 +32,7 @@ void Cheese::step() {
   Mouse* mouse = Mouse::closest_mouse(this->x, this->y, 8.0f, true);
   if (mouse != nullptr) {
     mouse->push_cheese(this->amount);
-    thoom::game->delete_object = true;
+    this->deleted = true;
     return;
   }
 
@@ -55,6 +55,21 @@ void Cheese::drop_cheese(int x, int y, int min_amount, int max_amount) {
       min_amount +
       ((max_amount - min_amount) > 0 ? SDL_rand(max_amount - min_amount) : 0);
   char cheese_opt[256];
-  thoom::game->push_object(ITEM_CHEESE DROPPED_OBJ,
-                           Cheese::Options(x, y, amount));
+  thoom::Scene::instance->create_object(ITEM_CHEESE DROPPED_OBJ,
+                                        Cheese::options(x, y, amount));
+}
+
+thoom::Object* Cheese::create_object(thoom::Scene* scene,
+                                     const std::string& options) {
+  int x, y, amount;
+  int fields = sscanf(options.c_str(), "%d,%d,%d", &x, &y, &amount);
+
+  if (fields == 2) {
+    amount = 1;
+  } else if (fields != 3) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new Cheese(float(x), float(y), amount);
 }

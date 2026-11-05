@@ -3,11 +3,11 @@
 #include <iostream>
 
 #include "audio.h"
-#include "game.h"
 #include "peer.h"
 #include "peer_sender.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 #include "spawner.h"
 
 FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
@@ -17,14 +17,15 @@ FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
   this->dst_rect.h = 48.0f;
   this->sprite->set_animation(animation);
 
-  x = x - (x % thoom::game->map->tile_width);
-  y = y - (y % thoom::game->map->tile_height);
+  x = x - (x % thoom::Scene::instance->map->tile_width);
+  y = y - (y % thoom::Scene::instance->map->tile_height);
   this->x = float(x);
   this->y = float(y);
 
   this->colliders_offset =
-      ((y / thoom::game->map->tile_height) + 1) * thoom::game->map->cols;
-  this->colliders_x = x / thoom::game->map->tile_width;
+      ((y / thoom::Scene::instance->map->tile_height) + 1) *
+      thoom::Scene::instance->map->cols;
+  this->colliders_x = x / thoom::Scene::instance->map->tile_width;
 
   char key[256];
   snprintf(key, sizeof(key), "spawner_%d", this->spawner_id);
@@ -45,8 +46,10 @@ FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
 
   for (int i = 0; i < 3; i++) {
     int coord = this->colliders_offset + this->colliders_x + i;
-    this->colliders.push_back(thoom::game->map->collider->collision[coord]);
-    thoom::game->map->collider->collision[coord] = 0;  // solid collider
+    this->colliders.push_back(
+        thoom::Scene::instance->map->collider->collision[coord]);
+    thoom::Scene::instance->map->collider->collision[coord] =
+        0;  // solid collider
   }
 }
 
@@ -61,7 +64,8 @@ void FoeGate::step() {
       PeerSender::send_message(
           MSG_COLLISION,
           std::to_string(coord) + ',' +
-              std::to_string(thoom::game->map->collider->collision[coord]));
+              std::to_string(
+                  thoom::Scene::instance->map->collider->collision[coord]));
     }
 
     this->synchronized = true;
@@ -72,7 +76,8 @@ void FoeGate::step() {
     // remove colliders
     for (int i = 0; i < 3; i++) {
       int coord = this->colliders_offset + this->colliders_x + i;
-      thoom::game->map->collider->collision[coord] = this->colliders[i];
+      thoom::Scene::instance->map->collider->collision[coord] =
+          this->colliders[i];
     }
 
     this->colliders.clear();
@@ -90,4 +95,16 @@ void FoeGate::step() {
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 24);
+}
+
+thoom::Object* FoeGate::create_object(thoom::Scene* scene,
+                                      const std::string& options) {
+  int x = 0, y = 0, spawner_id = 0, animation = 0;
+  if (4 !=
+      sscanf(options.c_str(), "%d,%d,%d,%d", &x, &y, &spawner_id, &animation)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new FoeGate(x, y, spawner_id, animation);
 }

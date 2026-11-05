@@ -4,11 +4,10 @@
 #include <vector>
 
 #include "controller.h"
-#include "foes/foe.h"
-#include "game.h"
 #include "hitbox.h"
 #include "hud.h"
 #include "object.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define MOUSE_OBJ "mouse"

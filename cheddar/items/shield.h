@@ -2,6 +2,7 @@
 
 #include "item.h"
 #include "object.h"
+#include "scene.h"
 
 #define ITEM_SHIELD "item_shield"
 
@@ -15,14 +16,10 @@ class DroppedShield : public DroppedItem {
   void step() override { this->dropped_step(); }
 
   void take(Mouse* mouse) override { mouse->push_item(ITEM_SHIELD); }
-};
-
-class DroppedShieldFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options) {
     int x, y;
     if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
-      // TODO(micahdbak): error
       std::exit(1);
     }
 

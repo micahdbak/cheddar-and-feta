@@ -6,9 +6,9 @@
 
 #include "audio.h"
 #include "feta.h"
-#include "game.h"
 #include "peer.h"
 #include "renderer.h"
+#include "scene.h"
 #include "texture.h"
 #include "utils.h"
 
@@ -31,9 +31,9 @@ void PeerReceiver::step() {
   if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
     // if currently in a map other than the init map, reset the peer
     // and go to that
-    if (thoom::game->map->path != "maps/init") {
+    if (thoom::Scene::instance->map->path != "maps/init") {
       thoom::Peer::instance->state.store(thoom::Peer::kStateTryReset);
-      thoom::game->next_map = "maps/init";
+      thoom::Scene::instance->request_map("maps/init");
       last_frame_ticks = 0;
     }
 
@@ -64,7 +64,8 @@ void PeerReceiver::step() {
     }
 
     // 5 seconds of no frames; disconnect
-    if (thoom::game->ticks - last_frame_ticks > 5000 && last_frame_ticks != 0) {
+    if (thoom::Scene::instance->ticks - last_frame_ticks > 5000 &&
+        last_frame_ticks != 0) {
       thoom::Peer::instance->state.store(thoom::Peer::kStateTryReset);
       last_frame_ticks = 0;
     }
@@ -73,7 +74,7 @@ void PeerReceiver::step() {
   }
 
   // set this as we have new frame(s) to parse
-  last_frame_ticks = thoom::game->ticks;
+  last_frame_ticks = thoom::Scene::instance->ticks;
 
   // free stuff
   for (thoom::SpriteRender& sprite : this->sprites) {
@@ -97,7 +98,7 @@ void PeerReceiver::step() {
         sscanf(arr + 1, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
 
-        if (thoom::game->map->path != buff) {
+        if (thoom::Scene::instance->map->path != buff) {
           this->load_map(std::string(buff), thoom::next_line(arr));
           return;  // don't read rest of messages
         }
@@ -122,8 +123,8 @@ void PeerReceiver::step() {
         sscanf(arr + 1, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
 
-        if (thoom::game->map->path != buff) {
-          if (thoom::game->map->path != buff) {
+        if (thoom::Scene::instance->map->path != buff) {
+          if (thoom::Scene::instance->map->path != buff) {
             this->load_map(std::string(buff), thoom::next_line(arr));
             return;  // don't read rest of messages
           }
@@ -221,7 +222,7 @@ bool PeerReceiver::handle_important_message(const char* arr) {
       } else {
         sscanf(arr + 1, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
-        thoom::game->push_object(FETA_OBJ, std::string(buff));
+        thoom::Scene::instance->create_object(FETA_OBJ, std::string(buff));
         this->just_pushed_feta = true;
       }
     } break;
@@ -318,9 +319,10 @@ bool PeerReceiver::handle_important_message(const char* arr) {
       }
 
       if (coord >= 0 &&
-          coord < thoom::game->map->cols * thoom::game->map->rows &&
+          coord < thoom::Scene::instance->map->cols *
+                      thoom::Scene::instance->map->rows &&
           collider >= 0 && collider < thoom::n_MapColliders) {
-        thoom::game->map->collider->collision[coord] = collider;
+        thoom::Scene::instance->map->collider->collision[coord] = collider;
       }
 
       break;
@@ -344,7 +346,12 @@ void PeerReceiver::load_map(const std::string& map,
   }
   this->sprites.clear();
 
-  thoom::game->next_map = map;
+  thoom::Scene::instance->request_map(map, false);
 
   this->just_loaded_map = true;
+}
+
+thoom::Object* PeerReceiver::create_object(thoom::Scene* scene,
+                                           const std::string& options) {
+  return new PeerReceiver();
 }

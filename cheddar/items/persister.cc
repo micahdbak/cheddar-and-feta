@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-#include "game.h"
 #include "item.h"
 #include "save_data.h"
+#include "scene.h"
 
 ItemPersister* item_persister = nullptr;
 
@@ -17,7 +17,7 @@ ItemPersister::ItemPersister() {
 
   item_persister = this;
 
-  std::string key = thoom::game->map->path + "_items";
+  std::string key = thoom::Scene::instance->map->path + "_items";
 
   if (thoom::save.has(key)) {
     std::string items = thoom::save.data[key];
@@ -64,13 +64,13 @@ void ItemPersister::step() {
 
     std::string dropped_item_id = item.item_id;
     dropped_item_id += DROPPED_OBJ;
-    thoom::game->push_object(
-        dropped_item_id, DroppedItem::Options((float)item.x, (float)item.y));
+    thoom::Scene::instance->create_object(
+        dropped_item_id, DroppedItem::options((float)item.x, (float)item.y));
   }
 }
 
 void ItemPersister::save_items() {
-  std::string key = thoom::game->map->path + "_items";
+  std::string key = thoom::Scene::instance->map->path + "_items";
   std::string data;
 
   auto it = this->items_to_save.begin();
@@ -107,4 +107,9 @@ void ItemPersister::remember_item(const std::string& item_id, float x, float y,
 void ItemPersister::forget_item(int id) {
   this->items_to_save.erase(id);
   this->save_items();
+}
+
+thoom::Object* ItemPersister::create_object(thoom::Scene* scene,
+                                            const std::string& options) {
+  return new ItemPersister();
 }

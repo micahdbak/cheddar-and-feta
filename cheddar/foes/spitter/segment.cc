@@ -3,19 +3,18 @@
 #include "renderer.h"
 #include "utils.h"
 
-SpitterSegment::SpitterSegment(Spitter* parent, int segment_id,
-                               std::shared_ptr<bool> deleted_ptr)
-    : parent(parent), deleted_ptr(deleted_ptr) {
+SpitterSegment::SpitterSegment(int parent_id, int segment_id)
+    : parent_id(parent_id) {
   this->sprite = new thoom::Sprite("sprites/foe_spitter_segment.bmp", 32, 32,
                                    50 + (segment_id * 50));
   this->sprite->set_frame((segment_id * 2) % 4);
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
-  thoom::game->push_object(HURTBOX_OBJ,
-                           HurtBox::Options(this->id, -12, -12, 24, 24));
-  thoom::game->push_object(
+  thoom::Scene::instance->create_object(
+      HURTBOX_OBJ, HurtBox::options(this->id, -12, -12, 24, 24));
+  thoom::Scene::instance->create_object(
       HITBOX_OBJ,
-      HitBox::Options(this->id, -1, -8, -8, 16, 16,
+      HitBox::options(this->id, -1, -8, -8, 16, 16,
                       HitBox::Properties{.damage = 2,
                                          .cooldown_ms = 1000,
                                          .shared_cooldowns = true,
@@ -30,21 +29,22 @@ SpitterSegment::SpitterSegment(Spitter* parent, int segment_id,
 SpitterSegment::~SpitterSegment() { delete this->sprite; }
 
 void SpitterSegment::step() {
-  if (*this->deleted_ptr) {
-    thoom::game->delete_object = true;
+  thoom::Object* parent_object =
+      thoom::Scene::instance->find_object(this->parent_id);
+  Spitter* parent = dynamic_cast<Spitter*>(parent_object);
+
+  if (parent == nullptr) {
+    this->deleted = true;
     return;
   }
 
   struct Spitter::step_t p1, p2, p3, p4;
   int direction;
 
-  p1 =
-      this->parent->get_pos(THOOM_CLAMP(this->segment_id + 1, 0, NUM_SEGMENTS));
-  p2 = this->parent->get_pos(this->segment_id);
-  p3 =
-      this->parent->get_pos(THOOM_CLAMP(this->segment_id - 1, 0, NUM_SEGMENTS));
-  p4 =
-      this->parent->get_pos(THOOM_CLAMP(this->segment_id - 2, 0, NUM_SEGMENTS));
+  p1 = parent->get_pos(THOOM_CLAMP(this->segment_id + 1, 0, NUM_SEGMENTS));
+  p2 = parent->get_pos(this->segment_id);
+  p3 = parent->get_pos(THOOM_CLAMP(this->segment_id - 1, 0, NUM_SEGMENTS));
+  p4 = parent->get_pos(THOOM_CLAMP(this->segment_id - 2, 0, NUM_SEGMENTS));
 
   if (p1.x == 0 || p2.x == 0 || p3.x == 0 || p4.x == 0) return;
 
@@ -79,4 +79,18 @@ void SpitterSegment::step() {
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 16);
+}
+
+thoom::Object* SpitterSegment::create_object(thoom::Scene* scene,
+                                             const std::string& options) {
+  int parent_id, segment_id;
+  if (2 != sscanf(options.c_str(), "%d,%d", &parent_id, &segment_id)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  thoom::Object* obj = scene->find_object(parent_id);
+  if (obj == nullptr || dynamic_cast<Spitter*>(obj) == nullptr) return nullptr;
+
+  return new SpitterSegment(parent_id, segment_id);
 }

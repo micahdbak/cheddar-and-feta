@@ -2,9 +2,9 @@
 
 #include "controller.h"
 #include "feta.h"
-#include "game.h"
 #include "peer.h"
 #include "save_data.h"
+#include "scene.h"
 
 PeerSender* peer_sender;
 
@@ -52,4 +52,9 @@ void PeerSender::send_message(char func, const std::string& arg) {
   }
 
   peer_sender->messages.push_back(std::string(func + arg + '\n'));
+}
+
+thoom::Object* PeerSender::create_object(thoom::Scene* scene,
+                                         const std::string& options) {
+  return new PeerSender();
 }

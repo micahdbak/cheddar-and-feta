@@ -5,9 +5,9 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "game.h"
 #include "renderer.h"
 #include "texture.h"
+#include "window.h"
 
 SDL_Texture* icons = nullptr;
 

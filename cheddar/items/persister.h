@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "object.h"
+#include "scene.h"
 
 #define ITEM_PERSISTER_OBJ "item_persister"
 
@@ -18,6 +19,8 @@ class ItemPersister : public thoom::Object {
   void forget_item(int id);
 
   bool creating_items = false;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   void save_items();
@@ -30,13 +33,6 @@ class ItemPersister : public thoom::Object {
 
   std::unordered_map<int, ItemSave> items_to_save;
   std::queue<ItemSave> items_to_spawn;
-};
-
-class ItemPersisterFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string&) override {
-    return new ItemPersister();
-  }
 };
 
 extern ItemPersister* item_persister;

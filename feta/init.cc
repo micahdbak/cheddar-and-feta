@@ -6,13 +6,13 @@
 #include "controller.h"
 #include "feta.h"
 #include "font.h"
-#include "game.h"
 #include "hud.h"
 #include "item.h"
 #include "peer.h"
 #include "peer_receiver.h"
 #include "peer_sender.h"
 #include "renderer.h"
+#include "scene.h"
 #include "texture.h"
 #include "ui_box.h"
 #include "utils.h"
@@ -36,6 +36,11 @@ class Init : public thoom::Object {
 
   void step();
 
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options) {
+    return new Init();
+  }
+
  private:
   bool render = true, waiting_for_peer = false;
   int sel_c = 0;
@@ -46,23 +51,18 @@ class Init : public thoom::Object {
   Uint64 waiting_ticks = 0;
 };
 
-class InitFactory : public thoom::ObjectFactory {
- public:
-  InitFactory() = default;
-  ~InitFactory() = default;
-
-  thoom::Object* create(const std::string& options) override {
-    return new Init();
-  }
+static const thoom::Scene::ObjectDef kFetaObjects[] = {
+    {INIT_OBJ, Init::create_object},
+    {PEER_RECEIVER_OBJ, PeerReceiver::create_object, thoom::kObjectFirst},
+    {PEER_SENDER_OBJ, PeerSender::create_object, thoom::kObjectLast},
+    {FETA_OBJ, Feta::create_object},
+    {nullptr, nullptr},
 };
 
-void thoom::Game::init() {
-  this->factories[INIT_OBJ] = new InitFactory();
+void game_init(int argc, char** argv) {
+  game_is_cheddar = false;
 
-  this->factories[FIRST_OBJ] = new PeerReceiverFactory();
-  this->factories[LAST_OBJ] = new PeerSenderFactory();
-
-  this->factories[FETA_OBJ] = new FetaFactory();
+  thoom::Scene::instance->register_objects(kFetaObjects);
 
   // items
   item_info[ITEM_NONE] = Item{HELD_EFFECT, "Kick"};
@@ -83,13 +83,12 @@ void thoom::Game::init() {
 
   thoom::Window::instance->set_title("Playing as Feta");
 
-  this->load_map("maps/init");
-  this->create_objects = false;
-
   thoom::Peer::init(true);
 
-  this->create_object(FIRST_OBJ, "");
-  this->create_object(LAST_OBJ, "");
+  thoom::Scene::instance->create_object(PEER_RECEIVER_OBJ, "");
+  thoom::Scene::instance->create_object(PEER_SENDER_OBJ, "");
+
+  thoom::Scene::instance->request_map("maps/init");
 }
 
 void Init::step() {
@@ -104,7 +103,7 @@ void Init::step() {
       peer_state = thoom::Peer::kStateWaitingForPeer;
     else {
       this->waiting_for_peer = false;
-      this->waiting_ticks = thoom::game->ticks;
+      this->waiting_ticks = thoom::Scene::instance->ticks;
     }
   }
 
@@ -193,7 +192,7 @@ void Init::step() {
           if (select && valid_code) {
             thoom::Peer::instance->set_connection_code(this->code);
             this->waiting_for_peer = true;
-            this->waiting_ticks = thoom::game->ticks;
+            this->waiting_ticks = thoom::Scene::instance->ticks;
             this->render = true;
           }
         } else if (select && this->code.size() < 6) {
@@ -234,7 +233,7 @@ void Init::step() {
       }
 
       // no connection after 15 seconds
-      if (thoom::game->ticks - this->waiting_ticks > 15000) {
+      if (thoom::Scene::instance->ticks - this->waiting_ticks > 15000) {
         thoom::Peer::instance->state.store(thoom::Peer::kStateTryReset);
         Hud::instance->display_notification("That code didn't work.");
         this->waiting_ticks = 0;

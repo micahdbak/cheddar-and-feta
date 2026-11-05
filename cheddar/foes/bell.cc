@@ -14,8 +14,8 @@ Bell::Bell(int x, int y, int spawner_id) {
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  thoom::game->push_object(HURTBOX_OBJ,
-                           HurtBox::Options(this->id, -8, -8, 16, 16));
+  thoom::Scene::instance->create_object(
+      HURTBOX_OBJ, HurtBox::options(this->id, -8, -8, 16, 16));
 }
 
 Bell::~Bell() { delete this->sprite; }
@@ -28,17 +28,17 @@ void Bell::attack(int damage) {
   }
 
   // don't ring while ringing
-  if (thoom::game->ticks - this->timer < 2250) {
+  if (thoom::Scene::instance->ticks - this->timer < 2250) {
     return;
   }
 
   this->triggered = true;
-  this->timer = thoom::game->ticks;
+  this->timer = thoom::Scene::instance->ticks;
   thoom::Audio::instance->play("sfx/bell.wav", 1.0f, this->x, this->y, false);
 }
 
 void Bell::step() {
-  if (this->triggered && thoom::game->ticks - this->timer < 2250) {
+  if (this->triggered && thoom::Scene::instance->ticks - this->timer < 2250) {
     this->sprite->update_frame();
   } else {
     this->sprite->set_frame(0);
@@ -49,4 +49,15 @@ void Bell::step() {
   thoom::Renderer::instance->push_sprite(
       "sprites/bell.bmp", this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 16);
+}
+
+thoom::Object* Bell::create_object(thoom::Scene* scene,
+                                   const std::string& options) {
+  int x = 0, y = 0, spawner_id = 0;
+  if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new Bell(x, y, spawner_id);
 }

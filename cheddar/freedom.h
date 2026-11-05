@@ -1,7 +1,7 @@
 #pragma once
 
-#include "game.h"
 #include "object.h"
+#include "scene.h"
 
 #define FREEDOM_OBJ "freedom"
 
@@ -11,21 +11,10 @@ class Freedom : public thoom::Object {
   ~Freedom();
 
   void step() override;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   int x, y;
   Uint64 timer_start = 0;
-};
-
-class FreedomFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
-    int x = 0, y = 0;
-    if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new Freedom(x, y);
-  }
 };

@@ -4,6 +4,7 @@
 #include "hud.h"
 #include "mouse.h"
 #include "object.h"
+#include "scene.h"
 
 #define CHEDDAR_OBJ "cheddar"
 
@@ -30,6 +31,8 @@ class Cheddar : public Mouse, public HitSource {
   float hitsource_x() override { return this->x; }
   float hitsource_y() override { return this->y; }
   void hitsource_notify() override { this->did_hit = true; }
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   int tile_x, tile_y;
@@ -56,34 +59,4 @@ class Cheddar : public Mouse, public HitSource {
   } is_busy = Cheddar::Busy::FALSE;
   Uint64 busy_ticks = 0, is_down_ticks = 0, dance_until = 0;
   bool did_hit = false;
-};
-
-class CheddarFactory : public thoom::ObjectFactory {
- public:
-  // options:
-  // [x1,y1,a1] [x2,y2,a2]
-  // e.g., 32,32,0 1600,640,2
-  thoom::Object* create(const std::string& options) override {
-    const char* arr = options.c_str();
-    std::vector<Mouse::SpawnCoord> coordinates;
-
-    int i = 0;
-    do {
-      int x = 0, y = 0, animation = 0;
-      if (3 != sscanf(arr, "%d,%d,%d", &x, &y, &animation)) break;
-
-      Mouse::SpawnCoord coord;
-      coord.x = (float)x;
-      coord.y = (float)y;
-      coord.animation = animation;
-      coordinates.push_back(coord);
-
-      while (*arr != '\0' && *arr != ' ') arr++;
-      if (*arr == '\0') break;
-      while (*++arr == ' ') arr++;
-      if (*arr == '\0') break;
-    } while (++i < 10);  // max ten coords, incase something really breaks
-
-    return new Cheddar(coordinates, options);
-  }
 };

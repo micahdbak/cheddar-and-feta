@@ -3,10 +3,11 @@
 #include <cmath>
 
 #include "controller.h"
-#include "game.h"
 #include "renderer.h"
+#include "scene.h"
 #include "texture.h"
 #include "utils.h"
+#include "window.h"
 
 Splash::Splash() {
   this->overlay = thoom::Texture::instance->create_texture(
@@ -34,7 +35,7 @@ Splash::Splash() {
 
   this->ant = new thoom::Sprite("sprites/splash_ant.bmp", 32, 32, 100);
 
-  this->initial_timer = thoom::game->ticks;
+  this->initial_timer = thoom::Scene::instance->ticks;
 
   this->animations = 7;
 
@@ -51,7 +52,7 @@ Splash::~Splash() {
 #define DISPLAY_FOR 4500
 
 void Splash::step() {
-  this->timer = thoom::game->ticks - this->initial_timer;
+  this->timer = thoom::Scene::instance->ticks - this->initial_timer;
 
   // skip splash
   if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
@@ -63,10 +64,11 @@ void Splash::step() {
 
   if (this->timer >= DISPLAY_FOR) {
     this->timer = 0;
-    this->initial_timer = thoom::game->ticks;
+    this->initial_timer = thoom::Scene::instance->ticks;
 
     if (++this->animation >= this->animations) {
-      thoom::game->next_map = "maps/init";  // leave the splash screen
+      thoom::Scene::instance->request_map(
+          "maps/init");  // leave the splash screen
       return;
     }
 
@@ -196,4 +198,9 @@ void Splash::step() {
   thoom::Renderer::instance->push_sprite("", this->overlay, &this->overlay_rect,
                                          &this->overlay_rect,
                                          2 * THOOM_SCREEN_HEIGHT);
+}
+
+thoom::Object* Splash::create_object(thoom::Scene* scene,
+                                     const std::string& options) {
+  return new Splash();
 }

@@ -6,12 +6,12 @@
 #include "../items/cheese.h"
 #include "../items/toothpick.h"
 #include "audio.h"
-#include "game.h"
 #include "hurtbox.h"
 #include "icon.h"
 #include "mouse.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 
 #define CIRCLE_TICKS 2000
 
@@ -23,8 +23,8 @@ FoeBat::FoeBat(int x, int y, int spawner_id)
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  thoom::game->push_object(HURTBOX_OBJ,
-                           HurtBox::Options(this->id, -8, -8, 16, 16));
+  thoom::Scene::instance->create_object(
+      HURTBOX_OBJ, HurtBox::options(this->id, -8, -8, 16, 16));
 
   this->base_ticks_offset = SDL_rand(CIRCLE_TICKS + 1);
   this->ticks_offset = base_ticks_offset;
@@ -36,19 +36,19 @@ FoeBat::~FoeBat() {
 }
 
 void FoeBat::action(Mouse* mouse) {
-  if (thoom::game->ticks - this->timer < 500) {
+  if (thoom::Scene::instance->ticks - this->timer < 500) {
     this->state = Foe::State::FORCE_RANDOM_TILE;
     return;
   }
 
-  this->timer = thoom::game->ticks;
+  this->timer = thoom::Scene::instance->ticks;
 
   int x_off, y_off;
-  HitBox::MakeOffset(x_dir, y_dir, &x_off, &y_off, 8.0f);
+  HitBox::make_offset(x_dir, y_dir, &x_off, &y_off, 8.0f);
   HitBox::Properties props = {1, 500, 250};
-  thoom::game->push_object(
+  thoom::Scene::instance->create_object(
       HITBOX_OBJ,
-      HitBox::Options(this->id, this->id, x_off - 8, y_off - 8, 16, 16, props));
+      HitBox::options(this->id, this->id, x_off - 8, y_off - 8, 16, 16, props));
 }
 
 void FoeBat::attack_internal(int damage) {
@@ -63,10 +63,10 @@ void FoeBat::attack_internal(int damage) {
     thoom::save.puti(FOE_BAT_OBJ STATS, kills);
   } else {
     this->state = Foe::State::THROW_AWAY_FROM;
-    this->hurt_timer = thoom::game->ticks;
+    this->hurt_timer = thoom::Scene::instance->ticks;
   }
 
-  this->timer = thoom::game->ticks;
+  this->timer = thoom::Scene::instance->ticks;
 }
 
 #define WALK_ANIMATION 0
@@ -78,8 +78,8 @@ void FoeBat::step() {
   switch (this->state) {
     case Foe::State::IDLE:
       if (this->prev_state != this->state &&
-          thoom::game->ticks - this->audio_timer > 500) {
-        this->audio_timer = thoom::game->ticks;
+          thoom::Scene::instance->ticks - this->audio_timer > 500) {
+        this->audio_timer = thoom::Scene::instance->ticks;
         thoom::Audio::instance->play("sfx/ant_fly.wav", 0.5, this->x, this->y,
                                      false);
       }
@@ -92,7 +92,7 @@ void FoeBat::step() {
                                      this->y, false);
       }
 
-      if (thoom::game->ticks - this->timer > 250) {
+      if (thoom::Scene::instance->ticks - this->timer > 250) {
         this->state = State::FORCE_RANDOM_TILE;
       }
 
@@ -114,9 +114,9 @@ void FoeBat::step() {
 
       this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
 
-      if (thoom::game->ticks - this->timer > 2000) {
+      if (thoom::Scene::instance->ticks - this->timer > 2000) {
         // delete this object
-        thoom::game->delete_object = true;
+        this->deleted = true;
         Cheese::drop_cheese(this->x, this->y, 1, 3);
 
         return;
@@ -142,7 +142,7 @@ void FoeBat::step() {
       break;
   }
 
-  if (thoom::game->ticks - this->hurt_timer < 333 &&
+  if (thoom::Scene::instance->ticks - this->hurt_timer < 333 &&
       this->state != Foe::State::DEAD) {
     this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
     push_health_bar(this->health, this->max_health, this->x + this->off_x,
@@ -151,14 +151,15 @@ void FoeBat::step() {
   }
 
   if (this->state != Foe::State::HURT && this->state != Foe::State::DEAD) {
-    float angle =
-        (float)((thoom::game->ticks - this->ticks_offset) % CIRCLE_TICKS) /
-        1000.0f;
+    float angle = (float)((thoom::Scene::instance->ticks - this->ticks_offset) %
+                          CIRCLE_TICKS) /
+                  1000.0f;
     angle *= M_PI;
     this->off_x = sinf(angle) * 8.0f;
     this->off_y = cosf(angle) * 8.0f;
   } else {
-    this->ticks_offset = thoom::game->ticks - this->timer + base_ticks_offset;
+    this->ticks_offset =
+        thoom::Scene::instance->ticks - this->timer + base_ticks_offset;
   }
 
   this->prev_state = this->state;
@@ -169,4 +170,15 @@ void FoeBat::step() {
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 26);
+}
+
+thoom::Object* FoeBat::create_object(thoom::Scene* scene,
+                                     const std::string& options) {
+  int x = 0, y = 0, spawner_id = 0;
+  if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new FoeBat(x, y, spawner_id);
 }

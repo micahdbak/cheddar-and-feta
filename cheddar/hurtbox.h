@@ -7,6 +7,7 @@
 #include "hitbox.h"
 #include "mouse.h"
 #include "object.h"
+#include "scene.h"
 
 #define HURTBOX_OBJ "hurtbox"
 
@@ -30,7 +31,7 @@ class HurtSource {
  */
 class HurtBox : public thoom::Object {
  public:
-  static std::string Options(int owner_id, int x_off, int y_off, int w, int h) {
+  static std::string options(int owner_id, int x_off, int y_off, int w, int h) {
     char buff[256];
     snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d", owner_id, x_off, y_off, w,
              h);
@@ -48,35 +49,16 @@ class HurtBox : public thoom::Object {
 
   int owner_id;
   enum OwnerClass { MOUSE, FOE, HURTSOURCE } owner_class;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   int x_off, y_off;
-
-  thoom::Object* owner;
-  Mouse* mouse;
-  Foe* foe;
-  HurtSource* source;
-
-  std::shared_ptr<bool> owner_deleted;
 
   // maps a hitbox id to when it last hit (in ticks)
   std::map<int, uint64_t> previous_hits;
 
   SDL_FRect src_rect, dst_rect;
-};
-
-class HurtBoxFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
-    int owner_id, x_off, y_off, w, h;
-    if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &owner_id, &x_off,
-                    &y_off, &w, &h)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new HurtBox(owner_id, x_off, y_off, w, h);
-  }
 };
 
 extern std::vector<HurtBox*> hurtboxes;

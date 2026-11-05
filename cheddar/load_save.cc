@@ -2,10 +2,10 @@
 
 #include "constants.h"
 #include "controller.h"
-#include "game.h"
 #include "hud.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 #include "textbox.h"
 #include "ui_box.h"
 #include "utils.h"
@@ -51,7 +51,7 @@ void LoadSave::step() {
 
     if (!thoom::save.has(LOAD_MAP)) thoom::save.data[LOAD_MAP] = "maps/demo00";
 
-    thoom::game->next_map = thoom::save.data[LOAD_MAP];
+    thoom::Scene::instance->request_map(thoom::save.data[LOAD_MAP]);
     return;
   }
 
@@ -113,4 +113,9 @@ void LoadSave::step() {
 
     this->render = false;
   }
+}
+
+thoom::Object* LoadSave::create_object(thoom::Scene* scene,
+                                       const std::string& options) {
+  return new LoadSave();
 }

@@ -1,41 +1,41 @@
 #include "hurtbox.h"
 
 #include "foes/foe.h"
-#include "game.h"
 #include "icon.h"
 #include "mouse.h"
 #include "renderer.h"
+#include "scene.h"
+#include "window.h"
 
 std::vector<HurtBox*> hurtboxes;
 int hurtbox_hitbox_id;
 
 HurtBox::HurtBox(int owner_id, int x_off, int y_off, int w, int h)
     : owner_id(owner_id), x_off(x_off), y_off(y_off), bounding_box{0, 0, w, h} {
-  this->owner = thoom::game->get_object(owner_id);
-  if (this->owner == nullptr) return;
+  thoom::Object* owner = thoom::Scene::instance->find_object(owner_id);
+  if (owner == nullptr) return;
 
-  if ((this->source = dynamic_cast<HurtSource*>(this->owner)) != nullptr) {
+  HurtSource* source = dynamic_cast<HurtSource*>(owner);
+  Mouse* mouse = dynamic_cast<Mouse*>(owner);
+  Foe* foe = dynamic_cast<Foe*>(owner);
+
+  if (source != nullptr) {
     this->owner_class = HurtBox::OwnerClass::HURTSOURCE;
-    this->bounding_box.x = (int)this->source->hurtsource_y() + x_off;
-    this->bounding_box.y = (int)this->source->hurtsource_x() + y_off;
-  } else if ((this->mouse = dynamic_cast<Mouse*>(this->owner)) != nullptr) {
+    this->bounding_box.x = (int)source->hurtsource_y() + x_off;
+    this->bounding_box.y = (int)source->hurtsource_x() + y_off;
+  } else if (mouse != nullptr) {
     this->owner_class = HurtBox::OwnerClass::MOUSE;
-    this->bounding_box.x = (int)this->mouse->x + x_off;
-    this->bounding_box.y = (int)this->mouse->y + y_off;
-  } else if ((this->foe = dynamic_cast<Foe*>(this->owner)) != nullptr) {
+    this->bounding_box.x = (int)mouse->x + x_off;
+    this->bounding_box.y = (int)mouse->y + y_off;
+  } else if (foe != nullptr) {
     this->owner_class = HurtBox::OwnerClass::FOE;
-    this->bounding_box.x = (int)this->foe->x + x_off;
-    this->bounding_box.y = (int)this->foe->y + y_off;
+    this->bounding_box.x = (int)foe->x + x_off;
+    this->bounding_box.y = (int)foe->y + y_off;
   } else {
-    this->owner = nullptr;  // owner must be a Mouse, Foe, or a HurtSource
+    return;
   }
 
-  // owner is Mouse or Foe
-  if (this->owner != nullptr) {
-    this->owner_deleted = this->owner->get_deleted_ptr();
-    hurtboxes.push_back(this);
-  }
-
+  hurtboxes.push_back(this);
   this->src_rect = DEBUG_HURTBOX_ICON;
 }
 
@@ -49,11 +49,8 @@ HurtBox::~HurtBox() {
 }
 
 void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
-  // don't go through with a hit if the owner of the hurtbox was deleted anyways
-  if (owner_deleted == nullptr || *this->owner_deleted) {
-    this->owner = nullptr;
-    return;
-  }
+  thoom::Object* owner = thoom::Scene::instance->find_object(this->owner_id);
+  if (owner == nullptr) return;
 
   bool should_hit = false;
   int hitbox_id = hitbox->shared_cooldowns ? hitbox->shared_id : hitbox->id;
@@ -62,13 +59,13 @@ void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
   if (it != this->previous_hits.end()) {
     uint64_t when_ticks = it->second;
 
-    if (thoom::game->ticks - when_ticks > cooldown_ms) {
+    if (thoom::Scene::instance->ticks - when_ticks > cooldown_ms) {
       should_hit = true;
-      this->previous_hits[hitbox_id] = thoom::game->ticks;
+      this->previous_hits[hitbox_id] = thoom::Scene::instance->ticks;
     }
   } else {
     // hitbox hasn't attacked this yet
-    this->previous_hits[hitbox_id] = thoom::game->ticks;
+    this->previous_hits[hitbox_id] = thoom::Scene::instance->ticks;
     should_hit = true;
   }
 
@@ -77,7 +74,9 @@ void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
 
     switch (this->owner_class) {
       case HurtBox::OwnerClass::MOUSE: {
-        this->mouse->attack(damage);
+        Mouse* mouse = dynamic_cast<Mouse*>(owner);
+        if (mouse == nullptr) return;
+        mouse->attack(damage);
 
         // throw mouse away from source
         int throw_x, throw_y;
@@ -88,19 +87,21 @@ void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
 
         if (hitbox->throw_away) {
           // throws away from hitbox
-          thoom::dir_to_point(hitbox_x, hitbox_y, this->mouse->x,
-                              this->mouse->y, &throw_x, &throw_y);
+          thoom::dir_to_point(hitbox_x, hitbox_y, mouse->x, mouse->y, &throw_x,
+                              &throw_y);
         } else {
           // pulls toward hitbox
-          thoom::dir_to_point(this->mouse->x, this->mouse->y, hitbox_x,
-                              hitbox_y, &throw_x, &throw_y);
+          thoom::dir_to_point(mouse->x, mouse->y, hitbox_x, hitbox_y, &throw_x,
+                              &throw_y);
         }
 
-        this->mouse->set_throw(throw_x, throw_y);
+        mouse->set_throw(throw_x, throw_y);
       } break;
 
       case HurtBox::OwnerClass::FOE: {
-        this->foe->attack(damage);
+        Foe* foe = dynamic_cast<Foe*>(owner);
+        if (foe == nullptr) return;
+        foe->attack(damage);
 
         // throw mouse away from source
         float hitbox_x =
@@ -110,47 +111,61 @@ void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
 
         if (hitbox->throw_away) {
           // throws away from hitbox
-          thoom::dir_to_point(hitbox_x, hitbox_y, this->foe->x, this->foe->y,
-                              &this->foe->throw_x, &this->foe->throw_y);
+          thoom::dir_to_point(hitbox_x, hitbox_y, foe->x, foe->y, &foe->throw_x,
+                              &foe->throw_y);
         } else {
           // pulls toward hitbox
-          thoom::dir_to_point(this->foe->x, this->foe->y, hitbox_x, hitbox_y,
-                              &this->foe->throw_x, &this->foe->throw_y);
+          thoom::dir_to_point(foe->x, foe->y, hitbox_x, hitbox_y, &foe->throw_x,
+                              &foe->throw_y);
         }
       } break;
 
-      case HurtBox::OwnerClass::HURTSOURCE:
-        this->source->attack(damage);
-        break;
+      case HurtBox::OwnerClass::HURTSOURCE: {
+        HurtSource* source = dynamic_cast<HurtSource*>(owner);
+        if (source == nullptr) return;
+        source->attack(damage);
+      } break;
     }
   }
 }
 
 void HurtBox::step() {
-  if (this->owner == nullptr || this->owner_deleted == nullptr ||
-      *this->owner_deleted ||
-      (this->owner_class == HurtBox::OwnerClass::FOE &&
-       this->foe->state == Foe::State::DEAD)) {
-    thoom::game->delete_object = true;
+  thoom::Object* owner = thoom::Scene::instance->find_object(this->owner_id);
+
+  if (owner == nullptr) {
+    this->deleted = true;
     return;
   }
 
   // update bounding box
   switch (this->owner_class) {
-    case HurtBox::OwnerClass::MOUSE:
-      this->bounding_box.x = (int)this->mouse->x + this->x_off;
-      this->bounding_box.y = (int)this->mouse->y + this->y_off;
-      break;
-    case HurtBox::OwnerClass::FOE:
-      this->bounding_box.x =
-          (int)this->foe->x + (int)this->foe->off_x + this->x_off;
-      this->bounding_box.y =
-          (int)this->foe->y + (int)this->foe->off_y + this->y_off;
-      break;
-    case HurtBox::OwnerClass::HURTSOURCE:
-      this->bounding_box.x = (int)this->source->hurtsource_x() + this->x_off;
-      this->bounding_box.y = (int)this->source->hurtsource_y() + this->y_off;
-      break;
+    case HurtBox::OwnerClass::MOUSE: {
+      Mouse* mouse = dynamic_cast<Mouse*>(owner);
+      if (mouse == nullptr) {
+        this->deleted = true;
+        return;
+      }
+      this->bounding_box.x = (int)mouse->x + this->x_off;
+      this->bounding_box.y = (int)mouse->y + this->y_off;
+    } break;
+    case HurtBox::OwnerClass::FOE: {
+      Foe* foe = dynamic_cast<Foe*>(owner);
+      if (foe == nullptr || foe->state == Foe::State::DEAD) {
+        this->deleted = true;
+        return;
+      }
+      this->bounding_box.x = (int)foe->x + (int)foe->off_x + this->x_off;
+      this->bounding_box.y = (int)foe->y + (int)foe->off_y + this->y_off;
+    } break;
+    case HurtBox::OwnerClass::HURTSOURCE: {
+      HurtSource* source = dynamic_cast<HurtSource*>(owner);
+      if (source == nullptr) {
+        this->deleted = true;
+        return;
+      }
+      this->bounding_box.x = (int)source->hurtsource_x() + this->x_off;
+      this->bounding_box.y = (int)source->hurtsource_y() + this->y_off;
+    } break;
   }
 
 #ifdef ONSCREEN_DEBUG
@@ -160,4 +175,16 @@ void HurtBox::step() {
                                          &this->src_rect, &this->dst_rect,
                                          THOOM_SCREEN_HEIGHT);
 #endif
+}
+
+thoom::Object* HurtBox::create_object(thoom::Scene* scene,
+                                      const std::string& options) {
+  int owner_id, x_off, y_off, w, h;
+  if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &owner_id, &x_off, &y_off,
+                  &w, &h)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new HurtBox(owner_id, x_off, y_off, w, h);
 }

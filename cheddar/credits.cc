@@ -6,11 +6,12 @@
 #include "foes/frog.h"
 #include "foes/porcupine.h"
 #include "foes/spitter/spitter.h"
-#include "game.h"
 #include "render_functions.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 #include "texture.h"
+#include "window.h"
 
 Credits::Credits() {
   int ant_kills = thoom::save.geti(FOE_BUG_OBJ STATS);
@@ -35,7 +36,12 @@ void Credits::step() {
                                          &this->src_rect, &this->dst_rect, 0);
 
   if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
-    thoom::game->next_map = "maps/init";
+    thoom::Scene::instance->request_map("maps/init");
     thoom::save.clear();
   }
+}
+
+thoom::Object* Credits::create_object(thoom::Scene* scene,
+                                      const std::string& options) {
+  return new Credits();
 }

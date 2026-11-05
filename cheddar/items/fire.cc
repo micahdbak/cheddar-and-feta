@@ -10,7 +10,7 @@ Fire::Fire(float x, float y, int x_dir, int y_dir)
   this->sprite = new thoom::Sprite("sprites/fire.bmp", 16, 16, 100);
   this->dst_rect.w = this->sprite->frame_w;
   this->dst_rect.h = this->sprite->frame_h;
-  this->timer = thoom::game->ticks;
+  this->timer = thoom::Scene::instance->ticks;
 
   fire_counter++;
   this->sprite->set_animation(fire_counter % 2);
@@ -26,9 +26,9 @@ Fire::Fire(float x, float y, int x_dir, int y_dir)
   }
 
   // deals 3 damage over 3 seconds
-  thoom::game->push_object(
+  thoom::Scene::instance->create_object(
       HITBOX_OBJ,
-      HitBox::Options(this->id, -1, -8, -8, 16, 16,
+      HitBox::options(this->id, -1, -8, -8, 16, 16,
                       HitBox::Properties{.damage = 1,
                                          .cooldown_ms = 1000,
                                          .delete_after_ms = 4000,
@@ -42,32 +42,34 @@ void Fire::step() {
   if (this->state == Fire::State::MOVING) {
     float dx = float(this->x_dir) *
                (this->y_dir != 0 ? THOOM_INV_SQRT2_F : 1.0f) * mov_speed *
-               thoom::game->delta;
+               thoom::Scene::instance->delta;
     float dy = float(this->y_dir) *
                (this->x_dir != 0 ? THOOM_INV_SQRT2_F : 1.0f) * mov_speed *
-               thoom::game->delta;
+               thoom::Scene::instance->delta;
     float new_x = this->x + dx;
     float new_y = this->y + dy;
 
-    if (!thoom::game->map->collider->point_in_collider(new_x, this->y)) {
+    if (!thoom::Scene::instance->map->collider->point_in_collider(new_x,
+                                                                  this->y)) {
       this->x = new_x;
     }
 
-    if (!thoom::game->map->collider->point_in_collider(this->x, new_y)) {
+    if (!thoom::Scene::instance->map->collider->point_in_collider(this->x,
+                                                                  new_y)) {
       this->y = new_y;
     }
 
-    if (thoom::game->ticks - this->timer > this->throw_time) {
+    if (thoom::Scene::instance->ticks - this->timer > this->throw_time) {
       this->state = Fire::State::STATIONARY;
     }
   }
 
-  if (thoom::game->ticks - this->timer > 3000) {
-    thoom::game->delete_object = true;
+  if (thoom::Scene::instance->ticks - this->timer > 3000) {
+    this->deleted = true;
     return;
-  } else if (thoom::game->ticks - this->timer > 2875) {
+  } else if (thoom::Scene::instance->ticks - this->timer > 2875) {
     this->sprite->set_animation(3);
-  } else if (thoom::game->ticks - this->timer > 2750) {
+  } else if (thoom::Scene::instance->ticks - this->timer > 2750) {
     this->sprite->set_animation(2);
     this->sprite->interval_ms = 1000;
   }
@@ -80,4 +82,16 @@ void Fire::step() {
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 12);
+}
+
+thoom::Object* Fire::create_object(thoom::Scene* scene,
+                                   const std::string& options) {
+  int x, y, x_dir = 0, y_dir = 0, from_id = -1;
+  if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
+                  &from_id)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new Fire((float)x, (float)y, x_dir, y_dir);
 }

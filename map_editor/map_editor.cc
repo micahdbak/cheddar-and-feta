@@ -5,13 +5,13 @@
 #include "constants.h"
 #include "controller.h"
 #include "font.h"
-#include "game.h"
 #include "hud.h"
 #include "icon.h"
 #include "map.h"
 #include "object.h"
 #include "peer.h"
 #include "renderer.h"
+#include "scene.h"
 #include "sprite.h"
 #include "texture.h"
 #include "utils.h"
@@ -23,10 +23,13 @@ enum EditorInputMode { INPUT_TILE, INPUT_SHEET };
 
 class Editor : public thoom::Object {
  public:
-  Editor(const char* map_path);
+  Editor(const std::vector<std::string>& args);
   ~Editor();
 
   void step() override;
+
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   void input_tile();
@@ -55,59 +58,60 @@ class Editor : public thoom::Object {
   SDL_Texture *collision_texture = nullptr, *collision_sheet = nullptr;
 };
 
-class EditorFactory : public thoom::ObjectFactory {
- public:
-  EditorFactory() {}
-  ~EditorFactory() {}
-
-  thoom::Object* create(const std::string& options) override {
-    return new Editor(options.c_str());
-  }
-};
-
-void thoom::Game::init() {
-  if (this->argc < 2) {
+void game_init(int argc, char** argv) {
+  if (argc < 2) {
     std::cerr << "Please provide a map to edit via the command line."
               << std::endl;
     std::exit(1);
   }
 
-  this->factories["editor"] = new EditorFactory();
-  this->create_object("editor", std::string(this->argv[1]));
+  std::string options;
+  for (int i = 1; i < argc; i++) {
+    if (i > 1) options += '\n';
+    options += argv[i];
+  }
 
-  std::string title = "Map Editor - " + std::string(this->argv[1]);
+  thoom::Scene::ObjectDef editor;
+  editor.id = "editor";
+  editor.create_object = Editor::create_object;
+  thoom::Scene::instance->register_object(editor);
+  thoom::Scene::instance->create_object("editor", options);
+
+  std::string title = "Map Editor - " + std::string(argv[1]);
   thoom::Window::instance->set_title(title.c_str());
 
   thoom::Peer::init(false);
 }
 
-Editor::Editor(const char* map_path) {
-  std::string bin_path = std::string(map_path) + ".bin";
+Editor::Editor(const std::vector<std::string>& args) {
+  this->map_path = args[0];
+
+  std::string bin_path = args[0] + ".bin";
   FILE* file = fopen(bin_path.c_str(), "rb");
   if (file == nullptr) {
-    if (thoom::game->argc < 8) {
+    if (args.size() < 7) {
       std::cerr << "To create a new map please provide: <map name> <tw> <th> "
                    "<cols> <rows> <fill(0/1)> <fillts(opt)>."
                 << std::endl;
       std::exit(1);
     }
 
-    int tile_width = atoi(thoom::game->argv[2]);
-    int tile_height = atoi(thoom::game->argv[3]);
-    int cols = atoi(thoom::game->argv[4]);
-    int rows = atoi(thoom::game->argv[5]);
-    bool should_fill = atoi(thoom::game->argv[6]);
+    int tile_width = atoi(args[1].c_str());
+    int tile_height = atoi(args[2].c_str());
+    int cols = atoi(args[3].c_str());
+    int rows = atoi(args[4].c_str());
+    bool should_fill = atoi(args[5].c_str());
 
     this->map = new thoom::Map(tile_width, tile_height, cols, rows);
 
     if (should_fill) {
       thoom::Tilesheet* tilesheet =
-          new thoom::Tilesheet(thoom::game->argv[7], tile_width, tile_height);
+          new thoom::Tilesheet(args[6].c_str(), tile_width, tile_height);
       if (tilesheet->texture == nullptr) {
-        std::cerr << thoom::game->argv[6] << " is not a valid tilesheet."
-                  << std::endl;
+        std::cerr << args[5] << " is not a valid tilesheet." << std::endl;
         std::exit(1);
       }
+
       this->map->tilesheets.push_back(tilesheet);
 
       for (int y = 0; y < rows; y++) {
@@ -123,8 +127,8 @@ Editor::Editor(const char* map_path) {
     }
   } else {
     fclose(file);
-    this->map = new thoom::Map(map_path);
-    std::string backup_path = map_path;
+    this->map = new thoom::Map(args[0].c_str());
+    std::string backup_path = args[0];
     backup_path += ".backup";
     this->map->write(backup_path.c_str());
   }
@@ -134,8 +138,6 @@ Editor::Editor(const char* map_path) {
       SDL_SCALEMODE_LINEAR);
   this->src_rect = this->dst_rect =
       SDL_FRect{0, 0, THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT};
-
-  this->map_path = map_path;
 
   if (!this->map->tilesheets.empty()) this->sel_tilesheet = 0;
 
@@ -359,8 +361,10 @@ void Editor::step() {
                this->sel_x * this->map->tile_width,
                this->sel_y * this->map->tile_height, _x, _y, _w, _h, _h,
                this->map->tilesheets[this->sel_tilesheet]->path.c_str());
-      this->map->objects.push_back(
-          std::pair<std::string, std::string>("billboard", buff));
+      thoom::ObjectRequest object;
+      object.id = "billboard";
+      object.options = buff;
+      this->map->objects.push_back(object);
       this->render_objects();
     } else if (thoom::local_controller.is_down(thoom::Button::SELECT) &&
                this->sel_tilesheet >= 0) {
@@ -729,13 +733,13 @@ static void _ParseBillboardOptions(const std::string& options, int* x, int* y,
 void Editor::render_objects() {
   thoom::Renderer::instance->clear(this->objects, thoom::kMask);
 
-  for (const std::pair<std::string, std::string>& pair : this->map->objects) {
-    if (pair.first == "billboard") {
+  for (const thoom::ObjectRequest& object : this->map->objects) {
+    if (object.id == "billboard") {
       int x, y, ts_x, ts_y, w, h, depth;
       std::string tilesheet;
 
-      _ParseBillboardOptions(pair.second, &x, &y, &ts_x, &ts_y, &w, &h, &depth,
-                             tilesheet);
+      _ParseBillboardOptions(object.options, &x, &y, &ts_x, &ts_y, &w, &h,
+                             &depth, tilesheet);
 
       SDL_Texture* tex = thoom::Texture::instance->load(tilesheet);
 
@@ -756,14 +760,31 @@ void Editor::render_objects() {
                                               SDL_BLENDMODE_NONE);
     } else {
       int x, y;
-      if (sscanf(pair.second.c_str(), "%d,%d", &x, &y) == 2) {
+      if (sscanf(object.options.c_str(), "%d,%d", &x, &y) == 2) {
         SDL_FRect dst_rect =
             SDL_FRect{float(x) - 8.0f, float(y) - 8.0f, 16.0f, 16.0f};
         draw_icon(EDITOR_OBJECT_ICON, this->objects, &dst_rect);
-        thoom::Renderer::instance->draw_text(this->objects, SMALL_FONT,
-                                             pair.first, x + 6, y - 4, 0,
-                                             kBackground);
+        thoom::Renderer::instance->draw_text(
+            this->objects, SMALL_FONT, object.id, x + 6, y - 4, 0, kBackground);
       }
     }
   }
+}
+
+thoom::Object* Editor::create_object(thoom::Scene* scene,
+                                     const std::string& options) {
+  std::vector<std::string> args;
+  std::string arg;
+
+  for (char c : options) {
+    if (c == '\n') {
+      args.push_back(arg);
+      arg.clear();
+    } else {
+      arg += c;
+    }
+  }
+
+  args.push_back(arg);
+  return new Editor(args);
 }

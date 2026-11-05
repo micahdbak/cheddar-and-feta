@@ -1,9 +1,9 @@
 #include "ladder.h"
 
 #include "audio.h"
-#include "game.h"
 #include "mouse.h"
 #include "save_data.h"
+#include "scene.h"
 
 Ladder::Ladder(int x, int y, std::string next_map, int which_coord) {
   this->x = (float)x;
@@ -22,9 +22,31 @@ void Ladder::step() {
   Mouse* mouse = Mouse::closest_mouse(this->x, this->y, 8, true);
 
   if (mouse != nullptr) {
-    thoom::game->next_map = this->next_map;
+    thoom::Scene::instance->request_map(this->next_map);
     thoom::save.puti(MOUSE_SPAWN_AT, this->which_coord);
     thoom::Audio::instance->play("sfx/ladder.wav", 1.0f, this->x, this->y,
                                  false);
   }
+}
+
+thoom::Object* Ladder::create_object(thoom::Scene* scene,
+                                     const std::string& options) {
+  int x, y, which_coord;
+  if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &which_coord)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  const char* map = options.c_str();
+  while (*map != '\0' && *map != ' ') map++;
+
+  if (*map == ' ') map++;  // don't want the last space
+
+  if (*map == '\0') {
+    // empty map
+    std::cerr << "Ladder::create_object: no map provided" << std::endl;
+    std::exit(1);
+  }
+
+  return new Ladder(x, y, std::string(map), which_coord);
 }

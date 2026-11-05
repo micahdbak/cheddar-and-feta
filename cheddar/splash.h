@@ -1,6 +1,7 @@
 #pragma once
 
 #include "object.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define SPLASH_OBJ "splash"
@@ -13,6 +14,8 @@ class Splash : public thoom::Object {
   ~Splash();
 
   void step() override;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   SDL_Texture *overlay, *tunnel;
@@ -21,9 +24,4 @@ class Splash : public thoom::Object {
       tile_src, tile_dst, ant_src[NUM_ANTS], ant_dst[NUM_ANTS];
   Uint64 initial_timer, timer;
   int animation = 0, animations;
-};
-
-class SplashFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& _) { return new Splash(); }
 };

@@ -1,8 +1,9 @@
 #pragma once
 
+#include <string>
+
 #include "object.h"
 #include "scene.h"
-#include "sprite.h"
 
 #define CREDITS_OBJ "credits"
 

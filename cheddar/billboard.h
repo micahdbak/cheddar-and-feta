@@ -1,7 +1,6 @@
 #pragma once
 
-#include <cstdio>
-#include <iostream>
+#include <string>
 
 #include "object.h"
 #include "scene.h"

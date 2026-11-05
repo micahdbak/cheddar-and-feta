@@ -1,10 +1,9 @@
 #pragma once
 
-#include <iostream>
+#include <string>
 
 #include "object.h"
 #include "scene.h"
-#include "sprite.h"
 
 #define LADDER_OBJ "ladder"
 

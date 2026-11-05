@@ -1,13 +1,25 @@
 #include "spitter.h"
 
-#include "../../items/fire.h"
-#include "../../mouse.h"
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
 #include "abdomen.h"
 #include "audio.h"
+#include "foes/foe.h"
+#include "hitbox.h"
+#include "hurtbox.h"
 #include "icon.h"
+#include "items/fire.h"
+#include "items/item.h"
+#include "macros.h"
+#include "mouse.h"
+#include "object.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 #include "segment.h"
+#include "sprite.h"
 #include "utils.h"
 
 Spitter::Spitter(float x, float y, int spawner_id)
@@ -109,8 +121,8 @@ void Spitter::step() {
         this->state = Foe::State::IDLE;
         break;
       } else {
-        float distance =
-            THOOM_DISTANCE_BETWEEN_POINTS(this->x, this->y, mouse->x, mouse->y);
+        float distance = thoom::distance_between_points(this->x, this->y,
+                                                        mouse->x, mouse->y);
         if (distance < 32.0f || this->abdomen_distance < 32.0f) {
           this->tile_choice = Foe::TileChoice::SPAZZ;
           this->state = Foe::State::IDLE;

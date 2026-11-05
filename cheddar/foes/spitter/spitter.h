@@ -1,9 +1,11 @@
 #pragma once
 
-#include <iostream>
+#include <cstddef>
+#include <string>
 
-#include "../../hitbox.h"
-#include "../foe.h"
+#include "foes/foe.h"
+#include "mouse.h"
+#include "object.h"
 #include "scene.h"
 #include "sprite.h"
 

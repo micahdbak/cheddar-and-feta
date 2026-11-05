@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
 #include "hud.h"
 #include "mouse.h"
 #include "object.h"

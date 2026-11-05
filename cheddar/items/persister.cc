@@ -1,8 +1,13 @@
 #include "persister.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
+#include <string>
 
 #include "item.h"
+#include "object.h"
 #include "save_data.h"
 #include "scene.h"
 

@@ -1,11 +1,12 @@
 #pragma once
 
+#include <cstdint>
+#include <cstdio>
 #include <map>
+#include <string>
 #include <vector>
 
-#include "foes/foe.h"
 #include "hitbox.h"
-#include "mouse.h"
 #include "object.h"
 #include "scene.h"
 

@@ -1,9 +1,7 @@
 #include "constants.h"
 #include "object.h"
 #include "peer.h"
-#include "save_data.h"
 #include "scene.h"
-#include "textbox.h"
 #include "window.h"
 
 // objects
@@ -39,7 +37,6 @@
 #include "items/tossed.h"
 #include "ladder.h"
 #include "load_save.h"
-#include "mouse.h"
 #include "peer_receiver.h"
 #include "peer_sender.h"
 #include "splash.h"

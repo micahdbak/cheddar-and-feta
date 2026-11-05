@@ -1,9 +1,15 @@
 #include "bell.h"
 
+#include <cstdio>
+#include <cstdlib>
+
 #include "audio.h"
-#include "mouse.h"
+#include "hurtbox.h"
+#include "object.h"
 #include "renderer.h"
+#include "scene.h"
 #include "spawner.h"
+#include "sprite.h"
 
 Bell::Bell(int x, int y, int spawner_id) {
   this->x = x;

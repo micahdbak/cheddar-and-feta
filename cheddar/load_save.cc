@@ -1,14 +1,20 @@
 #include "load_save.h"
 
+#include <string>
+
+#include "colour.h"
 #include "constants.h"
+#include "controller.h"
+#include "font.h"
 #include "hud.h"
 #include "input.h"
+#include "macros.h"
+#include "object.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "scene.h"
 #include "textbox.h"
 #include "ui_box.h"
-#include "utils.h"
 #include "window.h"
 
 #define PADDING 8

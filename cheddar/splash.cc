@@ -1,12 +1,20 @@
 #include "splash.h"
 
-#include <cmath>
+#include <math.h>
 
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+
+#include "colour.h"
+#include "controller.h"
 #include "input.h"
+#include "macros.h"
+#include "object.h"
 #include "renderer.h"
 #include "scene.h"
+#include "sprite.h"
 #include "texture.h"
-#include "utils.h"
 #include "window.h"
 
 Splash::Splash() {

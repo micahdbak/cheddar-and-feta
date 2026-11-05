@@ -3,7 +3,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <string>
 
+#include "colour.h"
+#include "font.h"
 #include "macros.h"
 #include "renderer.h"
 #include "scene.h"

@@ -2,7 +2,10 @@
 
 #include "hitbox.h"
 #include "item.h"
+#include "mouse.h"
+#include "object.h"
 #include "scene.h"
+#include "sprite.h"
 
 #define ITEM_MOLOTOV "item_molotov"
 

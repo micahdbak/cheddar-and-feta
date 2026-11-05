@@ -1,10 +1,14 @@
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "hitbox.h"
 #include "hud.h"
 #include "mouse.h"
 #include "object.h"
 #include "scene.h"
+#include "sprite.h"
 
 #define CHEDDAR_OBJ "cheddar"
 

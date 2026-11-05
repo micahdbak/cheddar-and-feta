@@ -1,7 +1,8 @@
 #include "foe.h"
 
-#include <iostream>
+#include <vector>
 
+#include "macros.h"
 #include "mouse.h"
 #include "scene.h"
 #include "spawner.h"
@@ -23,8 +24,8 @@ Foe::Foe(float x, float y, int spawner_id, int speed, int throw_speed,
   this->target_y = (int)y / thoom::Scene::instance->map->tile_height;
 
   // ensure starting x/y is in the center of the corresponding tile
-  this->x = CENTER_TILE_X(this->target_x);
-  this->y = CENTER_TILE_Y(this->target_y);
+  this->x = center_tile_x(this->target_x);
+  this->y = center_tile_y(this->target_y);
 
   this->state = Foe::State::IDLE;
 
@@ -95,10 +96,10 @@ void Foe::foe_step() {
         this->target_ticks =
             thoom::Scene::instance->ticks - target_ticks_offset;
         this->target_mouse = new_mouse;
-        this->current_distance = THOOM_DISTANCE_BETWEEN_POINTS(
+        this->current_distance = thoom::distance_between_points(
             this->x, this->y, new_mouse->x, new_mouse->y);
       } else {
-        this->current_distance = THOOM_DISTANCE_BETWEEN_POINTS(
+        this->current_distance = thoom::distance_between_points(
             this->x, this->y, this->target_mouse->x, this->target_mouse->y);
 
         if (new_mouse != this->target_mouse &&
@@ -107,7 +108,7 @@ void Foe::foe_step() {
              thoom::Scene::instance->ticks - this->target_ticks > 5000)) {
           this->target_ticks = thoom::Scene::instance->ticks;
           this->target_mouse = new_mouse;
-          this->current_distance = THOOM_DISTANCE_BETWEEN_POINTS(
+          this->current_distance = thoom::distance_between_points(
               this->x, this->y, new_mouse->x, new_mouse->y);
         }
       }
@@ -190,8 +191,8 @@ void Foe::foe_step() {
       this->walking_time =
           diagonal ? (int)((float)this->speed * THOOM_SQRT2_F) : this->speed;
 
-      float target_center_x = CENTER_TILE_X(this->target_x);
-      float target_center_y = CENTER_TILE_X(this->target_y);
+      float target_center_x = center_tile_x(this->target_x);
+      float target_center_y = center_tile_x(this->target_y);
       this->travel_w = target_center_x - this->start_x;
       this->travel_h = target_center_y - this->start_y;
     } break;
@@ -232,8 +233,8 @@ void Foe::foe_step() {
       this->walking_time =
           diagonal ? (int)((float)this->speed * THOOM_SQRT2_F) : this->speed;
 
-      float target_center_x = CENTER_TILE_X(this->target_x);
-      float target_center_y = CENTER_TILE_X(this->target_y);
+      float target_center_x = center_tile_x(this->target_x);
+      float target_center_y = center_tile_x(this->target_y);
       this->travel_w = target_center_x - this->start_x;
       this->travel_h = target_center_y - this->start_y;
     } break;
@@ -276,8 +277,8 @@ void Foe::foe_step() {
                                ? (int)((float)this->throw_speed * THOOM_SQRT2_F)
                                : this->throw_speed;
 
-      float target_center_x = CENTER_TILE_X(this->target_x);
-      float target_center_y = CENTER_TILE_X(this->target_y);
+      float target_center_x = center_tile_x(this->target_x);
+      float target_center_y = center_tile_x(this->target_y);
       this->travel_w = target_center_x - this->x;
       this->travel_h = target_center_y - this->y;
     }; break;
@@ -291,8 +292,8 @@ void Foe::foe_step() {
       this->y = this->start_y + (perc * this->travel_h);
 
       if (elapsed > this->walking_time) {
-        this->x = CENTER_TILE_X(this->target_x);
-        this->y = CENTER_TILE_Y(this->target_y);
+        this->x = center_tile_x(this->target_x);
+        this->y = center_tile_y(this->target_y);
         this->state = Foe::State::IDLE;  // next step will select a new tile
       }
 

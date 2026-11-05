@@ -1,6 +1,10 @@
 #include "peer_sender.h"
 
+#include <cstdio>
+#include <string>
+
 #include "feta.h"
+#include "object.h"
 #include "peer.h"
 #include "save_data.h"
 #include "scene.h"

@@ -1,13 +1,10 @@
 #pragma once
 
-#include <iostream>
+#include <string>
 #include <vector>
 
-#include "hitbox.h"
 #include "hud.h"
 #include "object.h"
-#include "scene.h"
-#include "sprite.h"
 
 #define MOUSE_OBJ "mouse"
 

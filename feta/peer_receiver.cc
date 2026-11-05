@@ -1,14 +1,21 @@
 #include "peer_receiver.h"
 
-#include <iostream>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <queue>
 #include <string>
 #include <vector>
 
 #include "audio.h"
+#include "collider.h"
 #include "feta.h"
+#include "object.h"
 #include "peer.h"
 #include "renderer.h"
+#include "save_data.h"
 #include "scene.h"
+#include "sprite.h"
 #include "texture.h"
 #include "utils.h"
 

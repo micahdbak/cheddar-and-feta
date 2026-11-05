@@ -1,8 +1,16 @@
 #include "tossed.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
 #include "item.h"
+#include "macros.h"
+#include "mouse.h"
+#include "object.h"
 #include "renderer.h"
 #include "scene.h"
+#include "sprite.h"
 #include "utils.h"
 
 TossedItem::TossedItem(float x, float y, int x_dir, int y_dir, bool from_feta,
@@ -37,10 +45,10 @@ void TossedItem::step() {
   float mouse_distance = 32.0f;
   if (from_feta) {
     mouse_distance =
-        THOOM_DISTANCE_BETWEEN_POINTS(new_x, new_y, cheddar->x, cheddar->y);
+        thoom::distance_between_points(new_x, new_y, cheddar->x, cheddar->y);
   } else {
     mouse_distance =
-        THOOM_DISTANCE_BETWEEN_POINTS(new_x, new_y, feta->x, feta->y);
+        thoom::distance_between_points(new_x, new_y, feta->x, feta->y);
   }
 
   if (thoom::Scene::instance->map->collider->point_in_collider(new_x, new_y) ||

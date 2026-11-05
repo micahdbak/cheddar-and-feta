@@ -1,9 +1,17 @@
 #include "toothpick.h"
 
-#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
 
+#include "hitbox.h"
 #include "item.h"
+#include "macros.h"
+#include "mouse.h"
+#include "object.h"
 #include "renderer.h"
+#include "scene.h"
+#include "sprite.h"
 #include "utils.h"
 
 ThrownToothpick::ThrownToothpick(float x, float y, int x_dir, int y_dir,

@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../hurtbox.h"
+#include <string>
+
+#include "hurtbox.h"
 #include "object.h"
 #include "scene.h"
 #include "sprite.h"

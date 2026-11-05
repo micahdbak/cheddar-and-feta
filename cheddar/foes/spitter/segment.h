@@ -1,9 +1,11 @@
 #pragma once
 
+#include <string>
+
 #include "hitbox.h"
 #include "hurtbox.h"
+#include "object.h"
 #include "scene.h"
-#include "spitter.h"
 #include "sprite.h"
 
 #define FOE_SPITTER_SEGMENT_OBJ "foe_spitter_segment"

@@ -1,6 +1,16 @@
 #include "abdomen.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
+#include "foes/spitter/spitter.h"
+#include "hurtbox.h"
+#include "mouse.h"
+#include "object.h"
 #include "renderer.h"
+#include "scene.h"
+#include "sprite.h"
 #include "utils.h"
 
 SpitterAbdomen::SpitterAbdomen(int parent_id) : parent_id(parent_id) {
@@ -75,7 +85,7 @@ void SpitterAbdomen::step() {
     parent->abdomen_distance = 256.0f;
   } else {
     parent->abdomen_distance =
-        THOOM_DISTANCE_BETWEEN_POINTS(mouse->x, mouse->y, this->x, this->y);
+        thoom::distance_between_points(mouse->x, mouse->y, this->x, this->y);
   }
 
   this->dst_rect.x = this->x - 16.0f;

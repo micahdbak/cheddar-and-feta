@@ -1,0 +1,36 @@
+name: clang-format
+
+on:
+  pull_request:
+    paths:
+      - "cheddar/**"
+      - "feta/**"
+      - "map_editor/**"
+      - "shared/**"
+
+permissions:
+  contents: read
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang-format-18
+
+      - name: Format sources
+        env:
+          CLANG_FORMAT: clang-format-18
+        run: scripts/format.sh
+
+      - name: Check for changes
+        run: |
+          if ! git diff --exit-code; then
+            echo "::error::clang-format changed the files above." \
+              "Run scripts/format.sh locally and commit the result."
+            exit 1
+          fi

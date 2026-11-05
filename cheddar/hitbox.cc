@@ -1,9 +1,14 @@
 #include "hitbox.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
+#include "foes/foe.h"
 #include "hurtbox.h"
 #include "icon.h"
-#include "renderer.h"
-#include "window.h"
+#include "object.h"
+#include "scene.h"
 
 HitBox::HitBox(int source_id, int hurtbox_owner_id, int x_off, int y_off, int w,
                int h, HitBox::Properties props)

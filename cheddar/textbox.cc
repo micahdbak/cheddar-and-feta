@@ -1,13 +1,17 @@
 #include "textbox.h"
 
+#include <string>
+
 #include "audio.h"
+#include "colour.h"
 #include "constants.h"
+#include "controller.h"
+#include "font.h"
 #include "hud.h"
 #include "input.h"
 #include "renderer.h"
 #include "scene.h"
 #include "ui_box.h"
-#include "window.h"
 
 Textbox* textbox;
 

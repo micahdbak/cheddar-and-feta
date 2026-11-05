@@ -1,10 +1,11 @@
 #pragma once
 
-#include <iostream>
-
 #include "hitbox.h"
 #include "items/item.h"
+#include "mouse.h"
+#include "object.h"
 #include "scene.h"
+#include "sprite.h"
 
 #define ITEM_CANNON_BALL "item_cannon_ball"
 

@@ -1,8 +1,12 @@
+#include <cstdlib>
 #include <iostream>
 #include <queue>
+#include <utility>
+#include <vector>
 
 #include "SDL3/SDL_stdinc.h"
 #include "foe.h"
+#include "macros.h"
 #include "mouse.h"
 #include "renderer.h"
 #include "scene.h"
@@ -325,13 +329,13 @@ void foe_debug_tile(int x, int y) {
         thoom::Texture::instance->load("sprites/foe_debug.bmp");
   }
 
-  float center_x = CENTER_TILE_X(x);
-  float center_y = CENTER_TILE_Y(y);
+  float center_x = center_tile_x(x);
+  float center_y = center_tile_y(y);
 
-  float dist1 =
-      THOOM_DISTANCE_BETWEEN_POINTS(center_x, center_y, cheddar->x, cheddar->y);
+  float dist1 = thoom::distance_between_points(center_x, center_y, cheddar->x,
+                                               cheddar->y);
   float dist2 =
-      THOOM_DISTANCE_BETWEEN_POINTS(center_x, center_y, feta->x, feta->y);
+      thoom::distance_between_points(center_x, center_y, feta->x, feta->y);
   Mouse* mouse = nullptr;
 
   if (dist1 < dist2) {

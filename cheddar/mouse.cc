@@ -1,8 +1,14 @@
 #include "mouse.h"
 
 #include <cfloat>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <vector>
 
+#include "hud.h"
 #include "items/item.h"
+#include "scene.h"
 #include "utils.h"
 
 Mouse* cheddar = nullptr;
@@ -73,11 +79,11 @@ Mouse* Mouse::closest_mouse(float x, float y, float min_distance, bool forced) {
   float distance_cheddar =
       (cheddar->is_down && !forced)
           ? FLT_MAX
-          : THOOM_DISTANCE_BETWEEN_POINTS(x, y, cheddar->x, cheddar->y);
+          : thoom::distance_between_points(x, y, cheddar->x, cheddar->y);
   float distance_feta =
       (feta->is_down && !forced)
           ? FLT_MAX
-          : THOOM_DISTANCE_BETWEEN_POINTS(x, y, feta->x, feta->y);
+          : thoom::distance_between_points(x, y, feta->x, feta->y);
 
   if (distance_cheddar < distance_feta) {
     if (min_distance < 0.1f || distance_cheddar < min_distance) {

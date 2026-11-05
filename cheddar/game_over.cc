@@ -1,9 +1,13 @@
 #include "game_over.h"
 
 #include "constants.h"
+#include "controller.h"
+#include "font.h"
 #include "input.h"
+#include "object.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 #include "texture.h"
 #include "window.h"
 

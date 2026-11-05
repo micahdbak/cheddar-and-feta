@@ -1,9 +1,9 @@
 #pragma once
 
-#include <iostream>
-
 #include "hitbox.h"
 #include "items/item.h"
+#include "mouse.h"
+#include "object.h"
 #include "scene.h"
 
 #define ITEM_TOOTHPICK "item_toothpick"

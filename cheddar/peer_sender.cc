@@ -1,11 +1,14 @@
 #include "peer_sender.h"
 
+#include <cstdio>
+#include <string>
+
 #include "audio.h"
-#include "items/item.h"
-#include "mouse.h"
+#include "object.h"
 #include "peer.h"
 #include "renderer.h"
 #include "scene.h"
+#include "sprite.h"
 
 PeerSender* peer_sender = nullptr;
 

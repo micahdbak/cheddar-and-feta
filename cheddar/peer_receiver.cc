@@ -1,12 +1,22 @@
 #include "peer_receiver.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <queue>
+#include <string>
+
 #include "audio.h"
 #include "feta.h"
+#include "hitbox.h"
 #include "items/cheese.h"
 #include "items/item.h"
 #include "items/tossed.h"
+#include "mouse.h"
+#include "object.h"
 #include "peer.h"
+#include "save_data.h"
 #include "scene.h"
+#include "utils.h"
 
 void PeerReceiver::step() {
   std::queue<std::string> msgs = thoom::Peer::instance->all_messages();

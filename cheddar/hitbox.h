@@ -1,8 +1,12 @@
 #pragma once
 
+#include <cstdint>
+#include <cstdio>
+#include <string>
+
+#include "macros.h"
 #include "object.h"
 #include "scene.h"
-#include "utils.h"
 
 #define HITBOX_OBJ "hitbox"
 

@@ -1,11 +1,11 @@
 #include "credits.h"
 
-#include "controller.h"
 #include "foes/bat.h"
 #include "foes/bug.h"
 #include "foes/frog.h"
 #include "foes/porcupine.h"
 #include "foes/spitter/spitter.h"
+#include "input.h"
 #include "render_functions.h"
 #include "renderer.h"
 #include "save_data.h"
@@ -35,7 +35,7 @@ void Credits::step() {
   thoom::Renderer::instance->push_sprite(this->tex_id, this->texture,
                                          &this->src_rect, &this->dst_rect, 0);
 
-  if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
+  if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
     thoom::Scene::instance->request_map("maps/init");
     thoom::save.clear();
   }

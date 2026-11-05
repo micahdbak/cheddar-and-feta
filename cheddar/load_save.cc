@@ -1,8 +1,8 @@
 #include "load_save.h"
 
 #include "constants.h"
-#include "controller.h"
 #include "hud.h"
+#include "input.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "scene.h"
@@ -25,13 +25,13 @@ void LoadSave::step() {
     textbox->step();
 
     if (textbox->done &&
-        thoom::local_controller.is_hit(thoom::Button::SELECT)) {
+        thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
       delete textbox;
       textbox = nullptr;
       this->render = true;
     } else
       return;
-  } else if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
+  } else if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
     int ret = thoom::save.load_file(this->sel_save);
 
     if (ret != LOAD_SUCCESS && ret != LOAD_NEW) {
@@ -55,8 +55,7 @@ void LoadSave::step() {
     return;
   }
 
-  int diff = thoom::local_controller.is_hit(thoom::Button::DOWN) -
-             thoom::local_controller.is_hit(thoom::Button::UP);
+  int diff = thoom::Input::instance->world.consume_hit_dy();
   if (diff != 0) {
     this->sel_save += diff;
     this->sel_save = THOOM_CLAMP(this->sel_save, 0, this->summaries.size());

@@ -8,9 +8,9 @@
 
 #include "audio.h"
 #include "constants.h"
-#include "controller.h"
 #include "font.h"
 #include "icon.h"
+#include "input.h"
 #include "peer.h"
 #include "renderer.h"
 #include "save_data.h"
@@ -65,13 +65,12 @@ Hud::~Hud() {
 }
 
 void Hud::render() {
-  thoom::Controller* controller = thoom::capture_controls
-                                      ? &thoom::captured_controller
-                                      : &thoom::local_controller;
-  if (controller->is_hit(thoom::Button::MENU)) {
-    controller->clear_all();
+  thoom::Input* input = thoom::Input::instance;
+
+  if (input->active->consume_hit(thoom::Button::MENU)) {
     this->display_controls_menu = !this->display_controls_menu;
-    thoom::capture_controls = this->display_controls_menu;
+    this->waiting_for_key = false;
+    input->set_capture(this->display_controls_menu);
   }
 
   std::string current_map = thoom::Scene::instance->map != nullptr
@@ -199,51 +198,37 @@ void Hud::draw_items(std::vector<Item> items, int sel_item, int health,
 }
 
 void Hud::draw_controls_menu() {
+  thoom::Input* input = thoom::Input::instance;
   bool should_render = !this->displaying_controls_menu;
   this->displaying_controls_menu = true;
 
+  SDL_Keycode keycode = input->captured.last_keycode;
+
   if (this->waiting_for_key) {
-    if (thoom::captured_controller.last_input != SDLK_UNKNOWN) {
-      SDL_Keycode new_key = thoom::captured_controller.last_input;
-      thoom::Button sel_button = (thoom::Button)this->sel_control;
-
-      if (thoom::ktobutton_map.find(new_key) != thoom::ktobutton_map.end()) {
-        SDL_Keycode old_key = thoom::btokeycode_map[sel_button];
-        thoom::Button existing_button = thoom::ktobutton_map[new_key];
-
-        thoom::btokeycode_map[existing_button] = old_key;
-        thoom::ktobutton_map[old_key] = existing_button;
-      } else {
-        SDL_Keycode old_key = thoom::btokeycode_map[sel_button];
-        thoom::ktobutton_map.erase(old_key);
-      }
-
-      thoom::btokeycode_map[sel_button] = new_key;
-      thoom::ktobutton_map[new_key] = sel_button;
+    if (keycode != SDLK_UNKNOWN) {
+      input->bind_key((thoom::Button)this->sel_control, keycode);
 
       should_render = true;
       this->waiting_for_key = false;
     }
   } else {
-    int y_dir = thoom::captured_controller.is_hit(thoom::Button::DOWN) -
-                thoom::captured_controller.is_hit(thoom::Button::UP);
+    int y_dir = input->captured.consume_hit_dy();
     int new_sel_control = THOOM_CLAMP(this->sel_control + y_dir, -3,
                                       (int)thoom::Button::DIGIT - 1);
 
     if (this->sel_control == -3 &&
-        thoom::captured_controller.is_hit(thoom::Button::SELECT)) {
+        input->captured.consume_hit(thoom::Button::SELECT)) {
       thoom::Scene::instance->request_map("maps/init");
       thoom::save.clear();
 
-      thoom::capture_controls = false;
       this->display_controls_menu = false;
-      thoom::captured_controller.clear_all();
+      this->waiting_for_key = false;
+      input->set_capture(false);
 
       return;
     }
 
-    int x_dir = thoom::captured_controller.is_hit(thoom::Button::RIGHT) -
-                thoom::captured_controller.is_hit(thoom::Button::LEFT);
+    int x_dir = input->captured.consume_hit_dx();
     if (this->sel_control == -2 && x_dir != 0) {
       thoom::Audio::instance->volume =
           THOOM_CLAMP(thoom::Audio::instance->volume + (10 * x_dir), 0, 200);
@@ -257,9 +242,8 @@ void Hud::draw_controls_menu() {
     if (this->sel_control != new_sel_control) {
       this->sel_control = new_sel_control;
       should_render = true;
-    } else if (thoom::captured_controller.is_hit(thoom::Button::SELECT) &&
+    } else if (input->captured.consume_hit(thoom::Button::SELECT) &&
                this->sel_control >= 0) {
-      thoom::captured_controller.last_input = SDLK_UNKNOWN;
       this->waiting_for_key = true;
       should_render = true;
     }
@@ -345,11 +329,10 @@ void Hud::draw_controls_menu() {
     int start_y = 84;
 
     for (int i = 0; i < (int)thoom::Button::DIGIT; i++) {
-      std::string control_name = thoom::btostring_map[(thoom::Button)i];
-      std::string input_name =
-          this->waiting_for_key && i == this->sel_control
-              ? "<Press a Key>"
-              : SDL_GetKeyName(thoom::btokeycode_map[(thoom::Button)i]);
+      std::string control_name = input->bindings[i].name;
+      std::string input_name = this->waiting_for_key && i == this->sel_control
+                                   ? "<Press a Key>"
+                                   : SDL_GetKeyName(input->bindings[i].keycode);
 
       int y = start_y + (i * 8);
       thoom::Renderer::instance->draw_text(this->overlay, SMALL_FONT,

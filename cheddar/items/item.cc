@@ -4,7 +4,6 @@
 
 #include "../foes/foe.h"
 #include "audio.h"
-#include "controller.h"
 #include "items/persister.h"
 #include "renderer.h"
 #include "save_data.h"

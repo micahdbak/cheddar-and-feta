@@ -3,7 +3,6 @@
 #include <iostream>
 #include <vector>
 
-#include "controller.h"
 #include "hitbox.h"
 #include "hud.h"
 #include "object.h"

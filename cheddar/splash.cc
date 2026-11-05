@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "controller.h"
+#include "input.h"
 #include "renderer.h"
 #include "scene.h"
 #include "texture.h"
@@ -55,7 +55,7 @@ void Splash::step() {
   this->timer = thoom::Scene::instance->ticks - this->initial_timer;
 
   // skip splash
-  if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
+  if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
     this->timer = DISPLAY_FOR;
     this->animation = this->animations;
   }

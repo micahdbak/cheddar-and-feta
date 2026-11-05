@@ -1,6 +1,5 @@
 #include "peer_sender.h"
 
-#include "controller.h"
 #include "feta.h"
 #include "peer.h"
 #include "save_data.h"

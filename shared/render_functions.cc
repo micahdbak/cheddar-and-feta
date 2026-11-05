@@ -4,10 +4,11 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "game.h"
 #include "macros.h"
 #include "renderer.h"
+#include "scene.h"
 #include "texture.h"
+#include "window.h"
 
 static SDL_Texture* render_cheese(const std::string& args) {
   int amount = 0;
@@ -82,7 +83,7 @@ static SDL_Texture* render_credits(const std::string& args) {
       std::to_string(tanks) + "\tAgent Kills:\t" + std::to_string(agents) +
       "\n\n" + "Time to Kill the Queen:\t\t" + std::to_string(queen_time) +
       " (s)\n" + "Total Time:\t\t\t" +
-      std::to_string(thoom::game->ticks / 1000) + " (s)\n\n" +
+      std::to_string(thoom::Scene::instance->ticks / 1000) + " (s)\n\n" +
       "}} Credits }}\n\n" + "Made with { by Micah Baker\n\n" +
       "Thanks for playing!\n(Press [Enter] to return to Main Menu.)";
   thoom::Renderer::instance->draw_text(texture, DEFAULT_FONT, results, 64, 40,

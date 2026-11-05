@@ -2,6 +2,7 @@
 
 #include "foe.h"
 #include "hitbox.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define FOE_BUG_OBJ "foe_bug"
@@ -20,6 +21,8 @@ class FoeBug : public Foe, public HitSource {
   float hitsource_y() override { return this->y + this->off_y; }
 
   Foe::State prev_state = Foe::State::IDLE;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   thoom::Sprite* sprite;
@@ -27,17 +30,4 @@ class FoeBug : public Foe, public HitSource {
   Uint64 timer = 0, hurt_timer = 0;
 
   int max_health = 4, health = 4;
-};
-
-class FoeBugFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
-    int x = 0, y = 0, spawner_id = 0;
-    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new FoeBug(x, y, spawner_id);
-  }
 };

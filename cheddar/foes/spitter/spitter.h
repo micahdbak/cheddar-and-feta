@@ -4,6 +4,7 @@
 
 #include "../../hitbox.h"
 #include "../foe.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define FOE_SPITTER_OBJ "foe_spitter"
@@ -33,6 +34,8 @@ class Spitter : public Foe {
   float abdomen_distance = 256.0f;
 
   Foe::State prev_state = Foe::State::IDLE;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   thoom::Sprite* sprite;
@@ -72,18 +75,5 @@ class Spitter : public Foe {
     }
 
     return this->steps[(this->steps_front + idx) % Spitter::steps_size];
-  }
-};
-
-class SpitterFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
-    int x, y, spawner_id;
-    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new Spitter(x, y, spawner_id);
   }
 };

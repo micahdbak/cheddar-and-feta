@@ -5,12 +5,12 @@
 #include "../items/cheese.h"
 #include "../items/toothpick.h"
 #include "audio.h"
-#include "game.h"
 #include "hurtbox.h"
 #include "icon.h"
 #include "mouse.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 
 FoeBug::FoeBug(int x, int y, int spawner_id)
     : Foe(float(x), float(y), spawner_id, spawner_id == -2 ? 1000 : 500, 100,
@@ -20,8 +20,8 @@ FoeBug::FoeBug(int x, int y, int spawner_id)
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  thoom::game->push_object(HURTBOX_OBJ,
-                           HurtBox::Options(this->id, -8, -8, 16, 16));
+  thoom::Scene::instance->create_object(
+      HURTBOX_OBJ, HurtBox::options(this->id, -8, -8, 16, 16));
 }
 
 FoeBug::~FoeBug() {
@@ -30,20 +30,20 @@ FoeBug::~FoeBug() {
 }
 
 void FoeBug::action(Mouse* mouse) {
-  if (thoom::game->ticks - this->hurt_timer < 500) {
+  if (thoom::Scene::instance->ticks - this->hurt_timer < 500) {
     this->state = Foe::State::FORCE_RANDOM_TILE;
     return;
   }
 
   this->state = Foe::State::ACTION;
-  this->timer = thoom::game->ticks;
+  this->timer = thoom::Scene::instance->ticks;
 
   int x_off, y_off;
-  HitBox::MakeOffset(x_dir, y_dir, &x_off, &y_off, 8.0f);
+  HitBox::make_offset(x_dir, y_dir, &x_off, &y_off, 8.0f);
   HitBox::Properties props = {1, 500, 250};
-  thoom::game->push_object(
+  thoom::Scene::instance->create_object(
       HITBOX_OBJ,
-      HitBox::Options(this->id, this->id, x_off - 8, y_off - 8, 16, 16, props));
+      HitBox::options(this->id, this->id, x_off - 8, y_off - 8, 16, 16, props));
 }
 
 void FoeBug::attack_internal(int damage) {
@@ -58,10 +58,10 @@ void FoeBug::attack_internal(int damage) {
     thoom::save.puti(FOE_BUG_OBJ STATS, kills);
   } else {
     this->state = Foe::State::THROW_AWAY_FROM;
-    this->hurt_timer = thoom::game->ticks;
+    this->hurt_timer = thoom::Scene::instance->ticks;
   }
 
-  this->timer = thoom::game->ticks;
+  this->timer = thoom::Scene::instance->ticks;
 }
 
 #define WALK_ANIMATION 0
@@ -103,7 +103,7 @@ void FoeBug::step() {
       this->sprite->set_animation(ATTACK_ANIMATION +
                                   this->_displayed_direction);
       this->sprite->interval_ms = 50;
-      if (thoom::game->ticks - this->timer > 1000) {
+      if (thoom::Scene::instance->ticks - this->timer > 1000) {
         this->state = Foe::State::FORCE_RANDOM_TILE;
       }
 
@@ -126,9 +126,9 @@ void FoeBug::step() {
       }
 
       this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
-      if (thoom::game->ticks - this->timer > 2000) {
+      if (thoom::Scene::instance->ticks - this->timer > 2000) {
         // delete this object
-        thoom::game->delete_object = true;
+        this->deleted = true;
         Cheese::drop_cheese(this->x, this->y, 1, 1);
 
         return;
@@ -147,7 +147,7 @@ void FoeBug::step() {
       break;
   }
 
-  if (thoom::game->ticks - this->hurt_timer < 333 &&
+  if (thoom::Scene::instance->ticks - this->hurt_timer < 333 &&
       this->state != Foe::State::DEAD) {
     this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
     push_health_bar(this->health, this->max_health, this->x + this->off_x,
@@ -163,4 +163,15 @@ void FoeBug::step() {
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 18);
+}
+
+thoom::Object* FoeBug::create_object(thoom::Scene* scene,
+                                     const std::string& options) {
+  int x = 0, y = 0, spawner_id = 0;
+  if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new FoeBug(x, y, spawner_id);
 }

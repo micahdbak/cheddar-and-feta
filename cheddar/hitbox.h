@@ -1,7 +1,7 @@
 #pragma once
 
-#include "game.h"
 #include "object.h"
+#include "scene.h"
 #include "utils.h"
 
 #define HITBOX_OBJ "hitbox"
@@ -32,8 +32,8 @@ class HitBox : public thoom::Object {
     bool single_use = false;
   };
 
-  static void MakeOffset(int x_dir, int y_dir, int* x_off, int* y_off,
-                         float distance) {
+  static void make_offset(int x_dir, int y_dir, int* x_off, int* y_off,
+                          float distance) {
     bool is_diagonal = x_dir != 0 && y_dir != 0;
     int hitbox_distance =
         (int)(is_diagonal ? THOOM_INV_SQRT2_F * distance : distance);
@@ -41,7 +41,7 @@ class HitBox : public thoom::Object {
     *y_off = y_dir * hitbox_distance;
   }
 
-  static std::string Options(int hitsource_owner_id, int hurtbox_owner_id,
+  static std::string options(int hitsource_owner_id, int hurtbox_owner_id,
                              int x_off, int y_off, int w, int h,
                              Properties props) {
     char buff[256];
@@ -53,8 +53,7 @@ class HitBox : public thoom::Object {
     return std::string(buff);
   }
 
-  HitBox(int hurtbox_owner_id, HitSource* source,
-         std::shared_ptr<bool> source_deleted, int x_off, int y_off, int w,
+  HitBox(int source_id, int hurtbox_owner_id, int x_off, int y_off, int w,
          int h, Properties props);
   ~HitBox();
 
@@ -66,47 +65,14 @@ class HitBox : public thoom::Object {
 
   bool shared_cooldowns = false, single_use = false;
   int shared_id = HB_SHARED_UNKNOWN;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   bool from_foe;
-  HitSource* source;
-  std::shared_ptr<bool> source_deleted;
-  int hurtbox_owner_id, x_off, y_off, damage, cooldown_ms, delete_after_ms;
+  int source_id, hurtbox_owner_id;
+  int x_off, y_off, damage, cooldown_ms, delete_after_ms;
   uint64_t created_ticks;
 
   SDL_FRect src_rect, dst_rect;
-};
-
-class HitBoxFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
-    int hitsource_owner_id, hurtbox_owner_id, x_off, y_off, w, h, damage,
-        cooldown_ms, delete_after_ms, shared_cooldowns, shared_id, single_use;
-    if (12 != sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
-                     &hitsource_owner_id, &hurtbox_owner_id, &x_off, &y_off, &w,
-                     &h, &damage, &cooldown_ms, &delete_after_ms,
-                     &shared_cooldowns, &shared_id, &single_use)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    thoom::Object* source_obj = thoom::game->get_object(hitsource_owner_id);
-    if (source_obj == nullptr) return nullptr;
-
-    std::shared_ptr<bool> source_deleted = source_obj->get_deleted_ptr();
-
-    HitSource* source = dynamic_cast<HitSource*>(source_obj);
-    if (source == nullptr) return nullptr;
-
-    HitBox::Properties props;
-    props.damage = damage;
-    props.cooldown_ms = cooldown_ms;
-    props.delete_after_ms = delete_after_ms;
-    props.shared_cooldowns = shared_cooldowns == 1;
-    props.shared_id = shared_id;
-    props.single_use = single_use == 1;
-
-    return new HitBox(hurtbox_owner_id, source, source_deleted, x_off, y_off, w,
-                      h, props);
-  }
 };

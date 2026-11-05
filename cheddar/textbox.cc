@@ -3,9 +3,9 @@
 #include "audio.h"
 #include "constants.h"
 #include "controller.h"
-#include "game.h"
 #include "hud.h"
 #include "renderer.h"
+#include "scene.h"
 #include "ui_box.h"
 #include "window.h"
 
@@ -15,7 +15,7 @@ Textbox::Textbox(const std::string& text, const std::string& owner, int font,
                  int interval_ms) {
   this->owner = owner;
   this->text = text;
-  this->last_ticks = thoom::game->ticks;
+  this->last_ticks = thoom::Scene::instance->ticks;
   this->box_rect = {72.0f, 168.0f, 176.0f, 64.0f};
   this->text_rect = {80.0f, 176.0f, 160.0f, 48.0f};
   this->font = font;
@@ -55,8 +55,8 @@ void Textbox::step() {
     return;
   }
 
-  if (thoom::game->ticks - this->last_ticks > this->interval_ms) {
-    this->last_ticks = thoom::game->ticks;
+  if (thoom::Scene::instance->ticks - this->last_ticks > this->interval_ms) {
+    this->last_ticks = thoom::Scene::instance->ticks;
 
     char c;
     bool space = false;

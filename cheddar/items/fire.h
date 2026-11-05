@@ -2,6 +2,7 @@
 
 #include "hitbox.h"
 #include "item.h"
+#include "scene.h"
 
 #define ITEM_FIRE "item_fire"
 
@@ -14,6 +15,8 @@ class Fire : public thoom::Object, public HitSource {
 
   float hitsource_x() override { return this->x; }
   float hitsource_y() override { return this->y; }
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   float x, y;
@@ -23,18 +26,4 @@ class Fire : public thoom::Object, public HitSource {
   Uint64 timer, attack_timer = 0;
   SDL_FRect dst_rect;
   float mov_speed;
-};
-
-class FireFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
-    int x, y, x_dir = 0, y_dir = 0, from_id = -1;
-    if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
-                    &from_id)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new Fire((float)x, (float)y, x_dir, y_dir);
-  }
 };

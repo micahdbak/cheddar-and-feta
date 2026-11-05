@@ -4,6 +4,7 @@
 
 #include "hitbox.h"
 #include "items/item.h"
+#include "scene.h"
 
 #define ITEM_TOOTHPICK "item_toothpick"
 
@@ -21,19 +22,8 @@ class DroppedToothpick : public DroppedItem {
   void step() override { this->dropped_step(); }
 
   void take(Mouse* mouse) override { mouse->push_item(ITEM_TOOTHPICK); }
-};
-
-class DroppedToothpickFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
-    int x, y;
-    if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new DroppedToothpick(float(x), float(y));
-  }
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 };
 
 // ---- thrown toothpick ----
@@ -49,6 +39,8 @@ class ThrownToothpick : public thoom::Object, public HitSource {
   float hitsource_y() override { return this->y; }
 
   void hitsource_notify() override;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   Uint64 spawned_ticks;
@@ -57,18 +49,4 @@ class ThrownToothpick : public thoom::Object, public HitSource {
   int x_dir, y_dir;
   thoom::Sprite* sprite;
   SDL_FRect dst_rect;
-};
-
-class ThrownToothpickFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
-    int x, y, x_dir, y_dir, from_id;
-    if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
-                    &from_id)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new ThrownToothpick((float)x, (float)y, x_dir, y_dir, from_id);
-  }
 };

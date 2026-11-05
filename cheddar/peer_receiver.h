@@ -1,6 +1,9 @@
 #pragma once
 
 #include "object.h"
+#include "scene.h"
+
+#define PEER_RECEIVER_OBJ "peer_receiver"
 
 class PeerReceiver : public thoom::Object {
  public:
@@ -8,11 +11,6 @@ class PeerReceiver : public thoom::Object {
   ~PeerReceiver() = default;
 
   void step() override;
-};
-
-class PeerReceiverFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
-    return new PeerReceiver();
-  }
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 };

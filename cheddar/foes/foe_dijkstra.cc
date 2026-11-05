@@ -3,9 +3,9 @@
 
 #include "SDL3/SDL_stdinc.h"
 #include "foe.h"
-#include "game.h"
 #include "mouse.h"
 #include "renderer.h"
+#include "scene.h"
 #include "texture.h"
 #include "utils.h"
 
@@ -15,7 +15,7 @@
   }
 #define COORD(x, y) (((y) * cols) + (x))
 #define COLLISION(x, y) \
-  (thoom::game->map->collider->collision[COORD((x), (y))] >= 0)
+  (thoom::Scene::instance->map->collider->collision[COORD((x), (y))] >= 0)
 #define DIST_ADJACENT 10000
 #define DIST_DIAGONAL 14142
 #define MAX_DISTANCE DIST_ADJACENT * 24  // tiles radius
@@ -44,8 +44,8 @@ static void _init_matrices() {
   FREE_IF(_cheddar_prev);
   FREE_IF(_feta_prev);
 
-  rows = thoom::game->map->rows;
-  cols = thoom::game->map->cols;
+  rows = thoom::Scene::instance->map->rows;
+  cols = thoom::Scene::instance->map->cols;
 
   _cheddar_dist = (int*)malloc((rows * cols) * sizeof(int));
   _feta_dist = (int*)malloc((rows * cols) * sizeof(int));
@@ -73,14 +73,14 @@ static void _neighbours(int x, int y, std::vector<_Neighbour>& neighbours) {
 }
 
 void foe_path_find(Mouse* mouse) {
-  if (thoom::game->map->collider->collision == nullptr) {
-    std::cerr
-        << "foe_path_find error: called without game->map->collider->collision"
-        << std::endl;
+  if (thoom::Scene::instance->map->collider->collision == nullptr) {
+    std::cerr << "foe_path_find error: called without "
+                 "Scene::instance->map->collider->collision"
+              << std::endl;
     std::exit(1);
   }
 
-  if (thoom::game->map->rows != rows) {
+  if (thoom::Scene::instance->map->rows != rows) {
     _init_matrices();
   }
 
@@ -91,8 +91,8 @@ void foe_path_find(Mouse* mouse) {
   std::vector<_Neighbour> neighbours;
 
   // starting coordinates
-  int mouse_tile_x = (int)mouse->x / thoom::game->map->tile_width;
-  int mouse_tile_y = (int)mouse->y / thoom::game->map->tile_height;
+  int mouse_tile_x = (int)mouse->x / thoom::Scene::instance->map->tile_width;
+  int mouse_tile_y = (int)mouse->y / thoom::Scene::instance->map->tile_height;
   std::pair<int, int> start(mouse_tile_x, mouse_tile_y);
   queue.push(_QItem{start, 0});
 
@@ -299,7 +299,8 @@ void foe_pick_random(int* x, int* y) {
 void foe_move_direction(int* x, int* y, int x_dir, int y_dir) {
   int x_goal = *x + x_dir, y_goal = *y + y_dir;
 
-  if (thoom::game->map->collider->collision[COORD(x_goal, y_goal)] < 0) {
+  if (thoom::Scene::instance->map->collider->collision[COORD(x_goal, y_goal)] <
+      0) {
     *x = x_goal;
     *y = y_goal;
   } else {
@@ -361,9 +362,9 @@ void foe_debug_tile(int x, int y) {
     src_rect = &debug_src_rect[8];
   }
 
-  debug_dst_rect[COORD(x, y)] =
-      SDL_FRect{(float)(x * thoom::game->map->tile_width),
-                (float)(y * thoom::game->map->tile_height), 16.0f, 16.0f};
+  debug_dst_rect[COORD(x, y)] = SDL_FRect{
+      (float)(x * thoom::Scene::instance->map->tile_width),
+      (float)(y * thoom::Scene::instance->map->tile_height), 16.0f, 16.0f};
   dst_rect = &debug_dst_rect[COORD(x, y)];
 
   thoom::Renderer::instance->push_sprite(

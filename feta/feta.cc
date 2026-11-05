@@ -1,8 +1,9 @@
 #include "feta.h"
 
+#include <cmath>
+
 #include "audio.h"
 #include "controller.h"
-#include "game.h"
 #include "hud.h"
 #include "item.h"
 #include "peer.h"
@@ -10,6 +11,7 @@
 #include "peer_sender.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 #include "utils.h"
 
 Feta* feta = nullptr;
@@ -142,7 +144,7 @@ void Feta::step() {
       }
 
       if (thoom::local_controller.is_hit(thoom::Button::ATTACK)) {
-        this->busy_ticks = thoom::game->ticks;
+        this->busy_ticks = thoom::Scene::instance->ticks;
 
         switch (item_info[sel_item_id].type) {
             // ---- attack / use item ----
@@ -181,7 +183,7 @@ void Feta::step() {
               PeerSender::send_message(MSG_EAT_CHEESE, std::string());
 
               this->is_busy = EATING;
-              this->busy_ticks = thoom::game->ticks;
+              this->busy_ticks = thoom::Scene::instance->ticks;
 
               // set animation to eating cheese
               this->sprite->set_animation(EATING_ANIMATION);
@@ -233,7 +235,7 @@ void Feta::step() {
         }
       } else if (thoom::local_controller.is_hit(thoom::Button::TOSS) &&
                  sel_item_id != ITEM_NONE) {
-        this->busy_ticks = thoom::game->ticks;
+        this->busy_ticks = thoom::Scene::instance->ticks;
 
         if (x_dir == 0 && y_dir == 0)
           thoom::dirs_from_direction(this->sprite->animation % 8, &x_dir,
@@ -242,11 +244,11 @@ void Feta::step() {
         // toss item
         PeerSender::send_message(
             MSG_TOSS_ITEM,
-            sel_item_id + " " + UseItem::Options(x, y, x_dir, y_dir));
+            sel_item_id + " " + UseItem::options(x, y, x_dir, y_dir));
         this->remove_item(sel_item_id);
 
         this->is_busy = THROWING;
-        this->busy_ticks = thoom::game->ticks;
+        this->busy_ticks = thoom::Scene::instance->ticks;
 
         // set animation to throwing
         this->sprite->set_animation((this->sprite->animation % 8) +
@@ -277,7 +279,7 @@ void Feta::step() {
       int cooldown = this->did_hit ? 500 : 250;
 
       // will return to normal after << 250 or 500 ms >>
-      if (thoom::game->ticks - this->busy_ticks > cooldown) {
+      if (thoom::Scene::instance->ticks - this->busy_ticks > cooldown) {
         this->is_busy = FALSE;
         this->did_hit = false;
 
@@ -295,7 +297,7 @@ void Feta::step() {
       mov_speed = MOUSE_DEFAULT_SPEED;
 
       // will return to normal after << 250 ms >>
-      if (thoom::game->ticks - this->busy_ticks > 250) {
+      if (thoom::Scene::instance->ticks - this->busy_ticks > 250) {
         this->is_busy = FALSE;
 
         // set animation to walking/running
@@ -318,7 +320,7 @@ void Feta::step() {
       this->sprite->update_frame();
 
       // will return to normal after << 500 ms >>
-      if (thoom::game->ticks - this->busy_ticks > 500) {
+      if (thoom::Scene::instance->ticks - this->busy_ticks > 500) {
         this->is_busy = FALSE;
 
         // set animation to walking/running
@@ -334,7 +336,7 @@ void Feta::step() {
       this->sprite->update_frame();
 
       // will return to normal after << 750 ms >>
-      if (thoom::game->ticks - this->busy_ticks > 750) {
+      if (thoom::Scene::instance->ticks - this->busy_ticks > 750) {
         this->is_busy = FALSE;
 
         // set animation to walking/running
@@ -350,7 +352,7 @@ void Feta::step() {
       this->sprite->update_frame();
 
       // will return to normal after << 2000 ms >>
-      if (thoom::game->ticks - this->busy_ticks > 2000) {
+      if (thoom::Scene::instance->ticks - this->busy_ticks > 2000) {
         this->is_busy = FALSE;
         this->health = 5;
 
@@ -371,7 +373,8 @@ void Feta::step() {
       this->sprite->update_frame();
 
       // will return to normal after << [this->dance_until] ms >>
-      if (thoom::game->ticks - this->busy_ticks > this->dance_until) {
+      if (thoom::Scene::instance->ticks - this->busy_ticks >
+          this->dance_until) {
         this->is_busy = FALSE;
         this->sprite->set_animation(0);
       }
@@ -381,7 +384,8 @@ void Feta::step() {
 
   // you get 5 seconds after being "downed" before enemies will attack you again
   // (three seconds of movement)
-  if (this->is_down && thoom::game->ticks - this->is_down_ticks > 5000) {
+  if (this->is_down &&
+      thoom::Scene::instance->ticks - this->is_down_ticks > 5000) {
     this->is_down = false;
     PeerSender::send_message(MSG_IS_DOWN, std::to_string(0));
   }
@@ -392,9 +396,9 @@ void Feta::step() {
   // diagonal multiplier (if necessary)
   if (mov_speed > 0.0f && (x_dir != 0 || y_dir != 0)) {
     float dx = float(x_dir) * (y_dir != 0 ? THOOM_INV_SQRT2_F : 1.0f) *
-               mov_speed * thoom::game->delta;
+               mov_speed * thoom::Scene::instance->delta;
     float dy = float(y_dir) * (x_dir != 0 ? THOOM_INV_SQRT2_F : 1.0f) *
-               mov_speed * thoom::game->delta;
+               mov_speed * thoom::Scene::instance->delta;
 
     // prevents bad delta time movement (imagine a single frame lag spike)
     dx = THOOM_CLAMP(dx, -4.0f, 4.0f);
@@ -475,7 +479,7 @@ void Feta::attack(int damage) {
     return;
 
   this->is_busy = ATTACKED;
-  this->busy_ticks = thoom::game->ticks;
+  this->busy_ticks = thoom::Scene::instance->ticks;
   this->sprite->set_animation((this->sprite->animation % 8) +
                               ATTACKED_ANIMATION);
 
@@ -506,8 +510,8 @@ void Feta::attack(int damage) {
     this->health = 0;
 
     this->is_busy = DOWNED;
-    this->busy_ticks = thoom::game->ticks;
-    this->is_down_ticks = thoom::game->ticks;
+    this->busy_ticks = thoom::Scene::instance->ticks;
+    this->is_down_ticks = thoom::Scene::instance->ticks;
     this->sprite->set_animation((this->sprite->animation % 8) + DOWN_ANIMATION);
 
     this->is_down = true;
@@ -605,4 +609,22 @@ void Feta::set_throw(int throw_x, int throw_y) {
 
 void Feta::set_max_mov_speed(float max_mov_speed) {
   this->max_mov_speed = max_mov_speed;
+}
+
+thoom::Object* Feta::create_object(thoom::Scene* scene,
+                                   const std::string& options) {
+  int animation;
+  char x_str[256], y_str[256], items_s[1024];
+  int fields = sscanf(options.c_str(), "%255[^,],%255[^,],%d %1023s", x_str,
+                      y_str, &animation, items_s);
+
+  if (fields == 3) {
+    items_s[0] = '\0';
+  } else if (fields != 4) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new Feta(thoom::str_to_float(x_str), thoom::str_to_float(y_str),
+                  animation, Mouse::read_items(items_s));
 }

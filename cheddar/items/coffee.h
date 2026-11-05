@@ -4,6 +4,7 @@
 
 #include "item.h"
 #include "mouse.h"
+#include "scene.h"
 
 #define ITEM_COFFEE_BEAN "item_coffee_bean"
 
@@ -17,14 +18,10 @@ class DroppedCoffeeBean : public DroppedItem {
   void step() override { this->dropped_step(); }
 
   void take(Mouse* mouse) override { mouse->push_item(ITEM_COFFEE_BEAN); }
-};
-
-class DroppedCoffeeBeanFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options) {
     int x, y;
     if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
-      // TODO(micahdbak): error
       std::exit(1);
     }
 
@@ -35,7 +32,7 @@ class DroppedCoffeeBeanFactory : public thoom::ObjectFactory {
 class UsedCoffeeBean : public thoom::Object {
  public:
   UsedCoffeeBean(bool is_feta) : is_feta(is_feta) {
-    this->timer = thoom::game->ticks + 5000;
+    this->timer = thoom::Scene::instance->ticks + 5000;
 
     Mouse* mouse = is_feta ? feta : cheddar;
     if (mouse != nullptr) mouse->set_max_mov_speed(MOUSE_DEFAULT_SPEED * 2.0f);
@@ -46,27 +43,19 @@ class UsedCoffeeBean : public thoom::Object {
     Mouse* mouse = is_feta ? feta : cheddar;
 
     if (mouse == nullptr) {
-      thoom::game->delete_object = true;
+      this->deleted = true;
       return;
     }
 
-    if (thoom::game->ticks > this->timer) {
+    if (thoom::Scene::instance->ticks > this->timer) {
       mouse->set_max_mov_speed(MOUSE_DEFAULT_SPEED);
-      thoom::game->delete_object = true;
+      this->deleted = true;
     }
   }
-
- private:
-  bool is_feta;
-  Uint64 timer = 0;
-};
-
-class UsedCoffeeBeanFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options) {
     int from_id;
     if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &from_id)) {
-      // TODO(micahdbak): error
       std::exit(1);
     }
 
@@ -74,4 +63,8 @@ class UsedCoffeeBeanFactory : public thoom::ObjectFactory {
 
     return new UsedCoffeeBean(is_feta);
   }
+
+ private:
+  bool is_feta;
+  Uint64 timer = 0;
 };

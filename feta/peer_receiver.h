@@ -1,8 +1,10 @@
 #pragma once
 
-#include "game.h"
 #include "object.h"
+#include "scene.h"
 #include "sprite.h"
+
+#define PEER_RECEIVER_OBJ "peer_receiver"
 
 class PeerReceiver : public thoom::Object {
  public:
@@ -10,6 +12,8 @@ class PeerReceiver : public thoom::Object {
   ~PeerReceiver();
 
   void step() override;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   bool handle_important_message(const char* arr);
@@ -19,11 +23,4 @@ class PeerReceiver : public thoom::Object {
   std::string skipped_messages;
   Uint64 last_frame_ticks = 0;
   bool just_pushed_feta = false, just_loaded_map = false;
-};
-
-class PeerReceiverFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
-    return new PeerReceiver();
-  }
 };

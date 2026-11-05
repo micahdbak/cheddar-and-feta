@@ -1,14 +1,14 @@
 #pragma once
 
-#include "game.h"
 #include "object.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define TOSSED_ITEM_OBJ "tossed_item"
 
 class TossedItem : public thoom::Object {
  public:
-  static std::string Options(int x, int y, int x_dir, int y_dir, bool from_feta,
+  static std::string options(int x, int y, int x_dir, int y_dir, bool from_feta,
                              std::string item_id) {
     char buff[256];
     snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d %s", x, y, x_dir, y_dir,
@@ -21,6 +21,8 @@ class TossedItem : public thoom::Object {
   ~TossedItem();
 
   void step() override;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   float x, y;
@@ -30,25 +32,4 @@ class TossedItem : public thoom::Object {
   thoom::Sprite* sprite;
   SDL_FRect dst_rect;
   Uint64 spawned_ticks;
-};
-
-class TossedItemFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
-    int x, y, x_dir, y_dir, from_feta;
-    if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
-                    &from_feta)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    const char* arr = options.c_str();
-    while (*arr != ' ' && *arr != '\0') arr++;
-
-    if (*arr == ' ') arr++;
-
-    if (*arr == '\0') return nullptr;
-
-    return new TossedItem(x, y, x_dir, y_dir, from_feta == 1, std::string(arr));
-  }
 };

@@ -2,14 +2,15 @@
 #include <SDL3/SDL_main.h>
 
 #include "audio.h"
+#include "constants.h"
 #include "controller.h"
-#include "game.h"
 #include "hud.h"
 #include "icon.h"
 #include "peer.h"
 #include "render_functions.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 #include "sounds.h"
 #include "texture.h"
 #include "ui_box.h"
@@ -18,8 +19,9 @@
 bool thoom::capture_controls = false;
 thoom::Controller thoom::local_controller, thoom::remote_controller,
     thoom::captured_controller;
-thoom::Game* thoom::game;
-int thoom::_object_id_counter = 0;
+bool game_is_cheddar = false;
+
+void game_init(int argc, char** argv);
 
 int main(int argc, char** argv) {
   thoom::Window::init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT);
@@ -28,10 +30,8 @@ int main(int argc, char** argv) {
   thoom::Texture::init();
   register_render_functions();
 
-  thoom::game = new thoom::Game();
-  thoom::game->argc = argc;
-  thoom::game->argv = argv;
-  thoom::game->init();
+  thoom::Scene::init();
+  game_init(argc, argv);
 
   load_ui_box();
   load_icons();
@@ -75,7 +75,21 @@ int main(int argc, char** argv) {
       }
     }
 
-    thoom::game->step();
+    thoom::Audio::instance->step();
+    thoom::Scene::instance->step();
+
+    thoom::Map* map = thoom::Scene::instance->map;
+    thoom::Colour bg = map != nullptr ? map->background : thoom::kBlack;
+    thoom::Window::instance->clear_screen(bg);
+    thoom::Renderer::instance->draw_map_background(map);
+    thoom::Renderer::instance->draw_sprites();
+    thoom::Renderer::instance->draw_map_foreground(map);
+
+    if (thoom::local_controller.c == 'p' ||
+        thoom::captured_controller.c == 'p') {
+      thoom::local_controller.c = NO_CHAR;
+      thoom::Window::instance->save_screenshot("screenshot.bmp");
+    }
 
     Hud::instance->render();
 
@@ -86,19 +100,12 @@ int main(int argc, char** argv) {
 
     controller->clear_hits();
 
-    thoom::Colour bg = thoom::kBlack;
-    if (thoom::game->map != nullptr) {
-      bg = thoom::Colour(uint8_t(thoom::game->map->bg_r),
-                         uint8_t(thoom::game->map->bg_g),
-                         uint8_t(thoom::game->map->bg_b));
-    }
     thoom::Window::instance->present(bg);
   }
 
   Hud::shutdown();
 
-  delete thoom::game;
-  thoom::game = nullptr;
+  thoom::Scene::shutdown();
 
   thoom::Peer::shutdown();
   thoom::Texture::shutdown();

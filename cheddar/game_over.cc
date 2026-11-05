@@ -5,6 +5,7 @@
 #include "renderer.h"
 #include "save_data.h"
 #include "texture.h"
+#include "window.h"
 
 GameOver::GameOver() {
   this->ui = thoom::Texture::instance->create_texture(
@@ -28,7 +29,12 @@ void GameOver::step() {
                                          0);
 
   if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
-    thoom::game->next_map = "maps/init";
+    thoom::Scene::instance->request_map("maps/init");
     thoom::save.clear();
   }
+}
+
+thoom::Object* GameOver::create_object(thoom::Scene* scene,
+                                       const std::string& options) {
+  return new GameOver();
 }

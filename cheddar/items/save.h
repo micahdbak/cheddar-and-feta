@@ -1,10 +1,10 @@
 #pragma once
 
-#include "game.h"
 #include "hud.h"
 #include "mouse.h"
 #include "object.h"
 #include "save_data.h"
+#include "scene.h"
 
 #define ITEM_SAVE "item_save"
 
@@ -16,32 +16,25 @@ class ItemSaveUse : public thoom::Object {
   void step() {
     // feta shouldnt trigger saves - theyre a remote player, seems insecure
     if (this->is_feta) {
-      thoom::game->delete_object = true;
+      this->deleted = true;
       return;
     }
 
     if (cheddar != nullptr) cheddar->push_item(ITEM_SAVE);
 
-    thoom::game->save_objects();
+    thoom::Scene::instance->save_objects();
     Hud::instance->display_notification(
         "Saved to file " + std::to_string(thoom::save.geti(SAVE_FILE) + 1) +
         ".");
     thoom::save.write_file(thoom::save.geti(SAVE_FILE));
 
     // all done
-    thoom::game->delete_object = true;
+    this->deleted = true;
   }
-
- private:
-  bool is_feta;
-};
-
-class ItemSaveUseFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options) {
     int obj_id;
     if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &obj_id)) {
-      // TODO(micahdbak): error
       std::exit(1);
     }
 
@@ -49,4 +42,7 @@ class ItemSaveUseFactory : public thoom::ObjectFactory {
 
     return new ItemSaveUse(is_feta);
   }
+
+ private:
+  bool is_feta;
 };

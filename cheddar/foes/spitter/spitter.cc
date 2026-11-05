@@ -14,12 +14,13 @@ Spitter::Spitter(float x, float y, int spawner_id)
     : Foe(x, y, spawner_id, 200, 250, 256.0f, 80.0f) {
   // make NUM_SEGMENTS-1 segments (the NUM_SEGMENTS'th segment is the abdomen)
   for (int i = 1; i < NUM_SEGMENTS; i++) {
-    thoom::game->push_object(
+    thoom::Scene::instance->create_object(
         FOE_SPITTER_SEGMENT_OBJ,
         std::to_string(this->id) + "," + std::to_string(i));
   }
 
-  thoom::game->push_object(FOE_SPITTER_ABDOMEN_OBJ, std::to_string(this->id));
+  thoom::Scene::instance->create_object(FOE_SPITTER_ABDOMEN_OBJ,
+                                        std::to_string(this->id));
 
   this->off_x = 0.0f;
   this->off_y = 0.0f;
@@ -29,12 +30,14 @@ Spitter::Spitter(float x, float y, int spawner_id)
   this->sprite = new thoom::Sprite("sprites/foe_spitter_head.bmp", 32, 32, 0);
   this->dst_rect.w = this->dst_rect.h = 32.0f;
 
-  this->start_timer = thoom::game->ticks;
+  this->start_timer = thoom::Scene::instance->ticks;
 }
 
 Spitter::~Spitter() { delete this->sprite; }
 
-void Spitter::action(Mouse* mouse) { this->timer = thoom::game->ticks; }
+void Spitter::action(Mouse* mouse) {
+  this->timer = thoom::Scene::instance->ticks;
+}
 
 void Spitter::attack_internal(int damage) {
   if (hurtbox_hitbox_id == HB_SHARED_FIRE ||
@@ -50,12 +53,12 @@ void Spitter::attack_internal(int damage) {
     this->remove_from_foes();
 
     thoom::save.puti(FOE_SPITTER_OBJ STATS,
-                     thoom::game->ticks - this->start_timer);
+                     thoom::Scene::instance->ticks - this->start_timer);
   } else {
     this->state = Foe::State::HURT;
   }
 
-  this->hurt_timer = thoom::game->ticks;
+  this->hurt_timer = thoom::Scene::instance->ticks;
 }
 
 void Spitter::step() {
@@ -93,7 +96,7 @@ void Spitter::step() {
       break;
 
     case Foe::State::ACTION: {
-      Uint64 action_offset = thoom::game->ticks - this->timer;
+      Uint64 action_offset = thoom::Scene::instance->ticks - this->timer;
       if (action_offset > 2000) {
         this->tile_choice = Foe::TileChoice::SPAZZ;
         this->state = Foe::State::WALKING;
@@ -169,8 +172,8 @@ void Spitter::step() {
 
         int fire_x_dir, fire_y_dir;
         thoom::dirs_from_direction(this->direction, &fire_x_dir, &fire_y_dir);
-        thoom::game->push_object(
-            ITEM_FIRE USE_OBJ, UseItem::Options(fire_x, fire_y, fire_x_dir * 2,
+        thoom::Scene::instance->create_object(
+            ITEM_FIRE USE_OBJ, UseItem::options(fire_x, fire_y, fire_x_dir * 2,
                                                 fire_y_dir * 2, -1));
 
         if (SDL_rand(2)) {
@@ -189,7 +192,7 @@ void Spitter::step() {
                                      this->y, false);
       }
 
-      if (thoom::game->ticks - this->hurt_timer > 100) {
+      if (thoom::Scene::instance->ticks - this->hurt_timer > 100) {
         this->state = Foe::State::WALKING;
       }
 
@@ -201,9 +204,9 @@ void Spitter::step() {
                                      this->y, false);
       }
 
-      if (thoom::game->ticks - this->hurt_timer > 2000) {
+      if (thoom::Scene::instance->ticks - this->hurt_timer > 2000) {
         // delete this object
-        thoom::game->delete_object = true;
+        this->deleted = true;
         return;
       }
 
@@ -223,15 +226,15 @@ void Spitter::step() {
 
   this->prev_state = this->state;
 
-  if (thoom::game->ticks - this->hurt_timer < 500 &&
+  if (thoom::Scene::instance->ticks - this->hurt_timer < 500 &&
       this->state != Foe::State::DEAD) {
     push_health_bar(this->health, this->max_health, this->x, this->y - 16.0f,
                     &this->icon_src, &this->icon_dst);
   }
 
-  if (thoom::game->ticks - this->direction_timer > 100 &&
+  if (thoom::Scene::instance->ticks - this->direction_timer > 100 &&
       this->displayed_direction != this->direction) {
-    this->direction_timer = thoom::game->ticks;
+    this->direction_timer = thoom::Scene::instance->ticks;
 
     int diff_up =
         (this->direction < this->displayed_direction ? this->direction + 8
@@ -268,4 +271,15 @@ void Spitter::step() {
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 16);
+}
+
+thoom::Object* Spitter::create_object(thoom::Scene* scene,
+                                      const std::string& options) {
+  int x, y, spawner_id;
+  if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new Spitter(x, y, spawner_id);
 }

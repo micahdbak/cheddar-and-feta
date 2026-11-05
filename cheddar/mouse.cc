@@ -1,5 +1,7 @@
 #include "mouse.h"
 
+#include <cfloat>
+
 #include "items/item.h"
 #include "utils.h"
 
@@ -8,9 +10,11 @@ Mouse* feta = nullptr;
 bool mice_locked = false;
 
 bool Mouse::check_collision(float x, float y) {
-  return thoom::game->map->collider->point_in_collider(x + 2.0f, y) ||
-         thoom::game->map->collider->point_in_collider(x - 2.0f, y) ||
-         thoom::game->map->collider->point_in_collider(x, y - 2.0f);
+  return thoom::Scene::instance->map->collider->point_in_collider(x + 2.0f,
+                                                                  y) ||
+         thoom::Scene::instance->map->collider->point_in_collider(x - 2.0f,
+                                                                  y) ||
+         thoom::Scene::instance->map->collider->point_in_collider(x, y - 2.0f);
 }
 
 std::string Mouse::encode_items(const std::vector<Hud::Item>& items) {

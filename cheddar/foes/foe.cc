@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "game.h"
 #include "mouse.h"
+#include "scene.h"
 #include "spawner.h"
 #include "utils.h"
 
@@ -19,8 +19,8 @@ Foe::Foe(float x, float y, int spawner_id, int speed, int throw_speed,
       throw_speed(throw_speed),
       stalking_distance(stalking_distance),
       action_distance(action_distance) {
-  this->target_x = (int)x / thoom::game->map->tile_width;
-  this->target_y = (int)y / thoom::game->map->tile_height;
+  this->target_x = (int)x / thoom::Scene::instance->map->tile_width;
+  this->target_y = (int)y / thoom::Scene::instance->map->tile_height;
 
   // ensure starting x/y is in the center of the corresponding tile
   this->x = CENTER_TILE_X(this->target_x);
@@ -76,7 +76,7 @@ void Foe::attack(int damage) {
   }
 
   this->attack_internal(damage);
-  this->walk_offset = thoom::game->ticks - this->start_ticks;
+  this->walk_offset = thoom::Scene::instance->ticks - this->start_ticks;
 }
 
 void Foe::foe_step() {
@@ -92,7 +92,8 @@ void Foe::foe_step() {
       } else if (this->target_mouse == nullptr) {
         // no target mouse presently; target the new mouse
         Uint64 target_ticks_offset = SDL_rand(10) * 1000;
-        this->target_ticks = thoom::game->ticks - target_ticks_offset;
+        this->target_ticks =
+            thoom::Scene::instance->ticks - target_ticks_offset;
         this->target_mouse = new_mouse;
         this->current_distance = THOOM_DISTANCE_BETWEEN_POINTS(
             this->x, this->y, new_mouse->x, new_mouse->y);
@@ -103,8 +104,8 @@ void Foe::foe_step() {
         if (new_mouse != this->target_mouse &&
             (this->target_mouse->is_down ||
              this->current_distance > this->stalking_distance ||
-             thoom::game->ticks - this->target_ticks > 5000)) {
-          this->target_ticks = thoom::game->ticks;
+             thoom::Scene::instance->ticks - this->target_ticks > 5000)) {
+          this->target_ticks = thoom::Scene::instance->ticks;
           this->target_mouse = new_mouse;
           this->current_distance = THOOM_DISTANCE_BETWEEN_POINTS(
               this->x, this->y, new_mouse->x, new_mouse->y);
@@ -123,13 +124,14 @@ void Foe::foe_step() {
       // will be walking if not action'ing
       this->state = Foe::State::WALKING;
 
-      int current_x = (int)this->x / thoom::game->map->tile_width;
-      int current_y = (int)this->y / thoom::game->map->tile_height;
-      int coord = (current_y * thoom::game->map->cols) + current_x;
+      int current_x = (int)this->x / thoom::Scene::instance->map->tile_width;
+      int current_y = (int)this->y / thoom::Scene::instance->map->tile_height;
+      int coord = (current_y * thoom::Scene::instance->map->cols) + current_x;
 
       if (coord >= 0 &&
-          coord < thoom::game->map->cols * thoom::game->map->rows &&
-          thoom::game->map->collider->collision[coord] < 0) {
+          coord < thoom::Scene::instance->map->cols *
+                      thoom::Scene::instance->map->rows &&
+          thoom::Scene::instance->map->collider->collision[coord] < 0) {
         this->target_x = current_x;
         this->target_y = current_y;
       } else {
@@ -182,7 +184,7 @@ void Foe::foe_step() {
 
       this->start_x = this->x;
       this->start_y = this->y;
-      this->start_ticks = thoom::game->ticks;
+      this->start_ticks = thoom::Scene::instance->ticks;
 
       bool diagonal = this->x_dir != 0 && this->y_dir != 0;
       this->walking_time =
@@ -197,13 +199,14 @@ void Foe::foe_step() {
     case Foe::State::FORCE_RANDOM_TILE: {
       this->state = Foe::State::WALKING;
 
-      int current_x = (int)this->x / thoom::game->map->tile_width;
-      int current_y = (int)this->y / thoom::game->map->tile_height;
-      int coord = (current_y * thoom::game->map->cols) + current_x;
+      int current_x = (int)this->x / thoom::Scene::instance->map->tile_width;
+      int current_y = (int)this->y / thoom::Scene::instance->map->tile_height;
+      int coord = (current_y * thoom::Scene::instance->map->cols) + current_x;
 
       if (coord >= 0 &&
-          coord < thoom::game->map->cols * thoom::game->map->rows &&
-          thoom::game->map->collider->collision[coord] < 0) {
+          coord < thoom::Scene::instance->map->cols *
+                      thoom::Scene::instance->map->rows &&
+          thoom::Scene::instance->map->collider->collision[coord] < 0) {
         this->target_x = current_x;
         this->target_y = current_y;
       } else {
@@ -223,7 +226,7 @@ void Foe::foe_step() {
 
       this->start_x = this->x;
       this->start_y = this->y;
-      this->start_ticks = thoom::game->ticks;
+      this->start_ticks = thoom::Scene::instance->ticks;
 
       bool diagonal = this->x_dir != 0 && this->y_dir != 0;
       this->walking_time =
@@ -238,13 +241,14 @@ void Foe::foe_step() {
     case Foe::State::THROW_AWAY_FROM: {
       this->state = Foe::State::THROWN;
 
-      int current_x = (int)this->x / thoom::game->map->tile_width;
-      int current_y = (int)this->y / thoom::game->map->tile_height;
-      int coord = (current_y * thoom::game->map->cols) + current_x;
+      int current_x = (int)this->x / thoom::Scene::instance->map->tile_width;
+      int current_y = (int)this->y / thoom::Scene::instance->map->tile_height;
+      int coord = (current_y * thoom::Scene::instance->map->cols) + current_x;
 
       if (coord >= 0 &&
-          coord < thoom::game->map->cols * thoom::game->map->rows &&
-          thoom::game->map->collider->collision[coord] < 0) {
+          coord < thoom::Scene::instance->map->cols *
+                      thoom::Scene::instance->map->rows &&
+          thoom::Scene::instance->map->collider->collision[coord] < 0) {
         this->target_x = current_x;
         this->target_y = current_y;
       } else {
@@ -265,7 +269,7 @@ void Foe::foe_step() {
 
       this->start_x = this->x;
       this->start_y = this->y;
-      this->start_ticks = thoom::game->ticks;
+      this->start_ticks = thoom::Scene::instance->ticks;
 
       bool diagonal = this->x_dir != 0 && this->y_dir != 0;
       this->walking_time = diagonal
@@ -280,7 +284,7 @@ void Foe::foe_step() {
 
     case Foe::State::WALKING:
     case Foe::State::THROWN: {
-      int elapsed = thoom::game->ticks - this->start_ticks;
+      int elapsed = thoom::Scene::instance->ticks - this->start_ticks;
       float perc = (float)elapsed / (float)this->walking_time;
 
       this->x = this->start_x + (perc * this->travel_w);
@@ -295,8 +299,8 @@ void Foe::foe_step() {
       // exclusive to WALKING: update this->_displayed_direction
       if (this->state == Foe::State::WALKING &&
           this->_displayed_direction != this->direction &&
-          thoom::game->ticks - this->direction_timer > 100) {
-        this->direction_timer = thoom::game->ticks;
+          thoom::Scene::instance->ticks - this->direction_timer > 100) {
+        this->direction_timer = thoom::Scene::instance->ticks;
 
         int diff_up =
             (this->direction < this->_displayed_direction ? this->direction + 8
@@ -323,7 +327,7 @@ void Foe::foe_step() {
 
     case HURT: {
       // for when out of the hurt
-      this->start_ticks = thoom::game->ticks - this->walk_offset;
+      this->start_ticks = thoom::Scene::instance->ticks - this->walk_offset;
     } break;
 
     default:

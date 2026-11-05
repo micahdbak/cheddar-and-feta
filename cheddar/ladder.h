@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "game.h"
 #include "object.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define LADDER_OBJ "ladder"
@@ -14,33 +14,11 @@ class Ladder : public thoom::Object {
   ~Ladder();
 
   void step() override;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   float x, y;
   int which_coord;
   std::string next_map;
-};
-
-class LadderFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
-    int x, y, which_coord;
-    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &which_coord)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    const char* map = options.c_str();
-    while (*map != '\0' && *map != ' ') map++;
-
-    if (*map == ' ') map++;  // don't want the last space
-
-    if (*map == '\0') {
-      // empty map
-      std::cerr << "LadderFactory::create: no map provided" << std::endl;
-      std::exit(1);
-    }
-
-    return new Ladder(x, y, std::string(map), which_coord);
-  }
 };

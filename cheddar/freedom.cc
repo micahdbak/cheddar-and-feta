@@ -1,8 +1,8 @@
 #include "freedom.h"
 
-#include "game.h"
 #include "mouse.h"
 #include "save_data.h"
+#include "scene.h"
 #include "utils.h"
 
 Freedom::Freedom(int x, int y) {
@@ -18,8 +18,8 @@ void Freedom::step() {
   }
 
   if (this->timer_start > 0) {
-    if (thoom::game->ticks - this->timer_start > 2000) {
-      thoom::game->next_map = "maps/credits";
+    if (thoom::Scene::instance->ticks - this->timer_start > 2000) {
+      thoom::Scene::instance->request_map("maps/credits");
     }
 
     return;
@@ -35,9 +35,20 @@ void Freedom::step() {
     // eternally dance
     cheddar->force_dance(UINT64_MAX);
     feta->force_dance(UINT64_MAX);
-    this->timer_start = thoom::game->ticks;
+    this->timer_start = thoom::Scene::instance->ticks;
 
     thoom::save.puti(GAME_DONE, 1);
     thoom::save.write_file(thoom::save.geti(SAVE_FILE));
   }
+}
+
+thoom::Object* Freedom::create_object(thoom::Scene* scene,
+                                      const std::string& options) {
+  int x = 0, y = 0;
+  if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new Freedom(x, y);
 }

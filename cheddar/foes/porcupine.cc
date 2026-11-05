@@ -5,12 +5,12 @@
 #include "../items/cheese.h"
 #include "../items/toothpick.h"
 #include "audio.h"
-#include "game.h"
 #include "hurtbox.h"
 #include "icon.h"
 #include "mouse.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 
 FoePorcupine::FoePorcupine(int x, int y, int spawner_id)
     : Foe(float(x), float(y), spawner_id, 250, 100, 256.0f, 64.0f) {
@@ -19,8 +19,8 @@ FoePorcupine::FoePorcupine(int x, int y, int spawner_id)
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  thoom::game->push_object(HURTBOX_OBJ,
-                           HurtBox::Options(this->id, -6, -8, 12, 16));
+  thoom::Scene::instance->create_object(
+      HURTBOX_OBJ, HurtBox::options(this->id, -6, -8, 12, 16));
 }
 
 FoePorcupine::~FoePorcupine() {
@@ -33,7 +33,7 @@ FoePorcupine::~FoePorcupine() {
 #define DEAD_ANIMATION 16
 
 void FoePorcupine::action(Mouse* mouse) {
-  if (thoom::game->ticks - this->hurt_timer < 500) {
+  if (thoom::Scene::instance->ticks - this->hurt_timer < 500) {
     this->state = Foe::State::FORCE_RANDOM_TILE;
     return;
   }
@@ -44,7 +44,7 @@ void FoePorcupine::action(Mouse* mouse) {
       ATTACK_ANIMATION +
       thoom::direction_from_dirs(this->spine_x_dir, this->spine_y_dir));
   this->sprite->set_frame(0);
-  this->timer = thoom::game->ticks;
+  this->timer = thoom::Scene::instance->ticks;
 }
 
 void FoePorcupine::attack_internal(int damage) {
@@ -59,10 +59,10 @@ void FoePorcupine::attack_internal(int damage) {
     thoom::save.puti(FOE_PORCUPINE_OBJ STATS, kills);
   } else {
     this->state = Foe::State::THROW_AWAY_FROM;
-    this->hurt_timer = thoom::game->ticks;
+    this->hurt_timer = thoom::Scene::instance->ticks;
   }
 
-  this->timer = thoom::game->ticks;
+  this->timer = thoom::Scene::instance->ticks;
 }
 
 void FoePorcupine::step() {
@@ -71,16 +71,17 @@ void FoePorcupine::step() {
   switch (this->state) {
     case Foe::State::ACTION:
       this->sprite->interval_ms = 200;
-      if (thoom::game->ticks - this->timer > 600) {
+      if (thoom::Scene::instance->ticks - this->timer > 600) {
         this->state = Foe::State::IDLE;
         this->tile_choice = Foe::TileChoice::AWAY;
-      } else if (thoom::game->ticks - this->timer > 400 &&
+      } else if (thoom::Scene::instance->ticks - this->timer > 400 &&
                  (this->spine_x_dir != 0 || this->spine_y_dir != 0)) {
         char buff[256];
         snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d",
                  (int)(this->x + this->off_x), (int)(this->y + this->off_y),
                  this->spine_x_dir, this->spine_y_dir, this->id);
-        thoom::game->push_object(ITEM_TOOTHPICK USE_OBJ, std::string(buff));
+        thoom::Scene::instance->create_object(ITEM_TOOTHPICK USE_OBJ,
+                                              std::string(buff));
         this->spine_x_dir = this->spine_y_dir = 0;
         thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x, this->y,
                                      false);
@@ -103,9 +104,9 @@ void FoePorcupine::step() {
       }
 
       this->sprite->set_animation(DEAD_ANIMATION + this->direction);
-      if (thoom::game->ticks - this->timer > 2000) {
+      if (thoom::Scene::instance->ticks - this->timer > 2000) {
         // delete this object
-        thoom::game->delete_object = true;
+        this->deleted = true;
         Cheese::drop_cheese(this->x, this->y, 3, 5);
 
         return;
@@ -131,7 +132,7 @@ void FoePorcupine::step() {
 
   this->prev_state = this->state;
 
-  if (thoom::game->ticks - this->hurt_timer < 250 &&
+  if (thoom::Scene::instance->ticks - this->hurt_timer < 250 &&
       this->state != Foe::State::DEAD) {
     this->sprite->set_animation(WALK_ANIMATION);
     this->sprite->set_frame(1);
@@ -150,4 +151,15 @@ void FoePorcupine::step() {
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 22);
+}
+
+thoom::Object* FoePorcupine::create_object(thoom::Scene* scene,
+                                           const std::string& options) {
+  int x = 0, y = 0, spawner_id = 0;
+  if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new FoePorcupine(x, y, spawner_id);
 }

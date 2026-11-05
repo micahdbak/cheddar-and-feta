@@ -3,10 +3,10 @@
 #include <string>
 #include <vector>
 
-#include "game.h"
 #include "hud.h"
 #include "object.h"
 #include "save_data.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define FETA_OBJ "feta"
@@ -54,6 +54,8 @@ class Feta : public thoom::Object {
   bool mice_locked = false;
   thoom::Sprite *sprite, *emotes;
   int which_emote = -1;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   int tile_x, tile_y;
@@ -77,26 +79,6 @@ class Feta : public thoom::Object {
     FORCED_DANCE
   } is_busy = Feta::Busy::FALSE;
   Uint64 busy_ticks = 0, is_down_ticks = 0, dance_until = 0;
-};
-
-class FetaFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
-    int animation;
-    char x_str[256], y_str[256], items_s[1024];
-    int fields = sscanf(options.c_str(), "%255[^,],%255[^,],%d %1023s", x_str,
-                        y_str, &animation, items_s);
-
-    if (fields == 3) {
-      items_s[0] = '\0';
-    } else if (fields != 4) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new Feta(thoom::str_to_float(x_str), thoom::str_to_float(y_str),
-                    animation, Mouse::read_items(items_s));
-  }
 };
 
 extern Feta* feta;

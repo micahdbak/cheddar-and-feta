@@ -2,6 +2,7 @@
 
 #include "../hurtbox.h"
 #include "object.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define BELL_OBJ "bell"
@@ -17,6 +18,8 @@ class Bell : public thoom::Object, public HurtSource {
   float hurtsource_y() override { return this->y; }
 
   void attack(int damage) override;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   thoom::Sprite* sprite;
@@ -25,17 +28,4 @@ class Bell : public thoom::Object, public HurtSource {
   int spawner_id;
   bool triggered = false;
   Uint64 timer = 0;
-};
-
-class BellFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
-    int x = 0, y = 0, spawner_id = 0;
-    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new Bell(x, y, spawner_id);
-  }
 };

@@ -2,18 +2,18 @@
 
 #include <vector>
 
+#include "mouse.h"
 #include "object.h"
+#include "scene.h"
 
-#define CENTER_TILE_X(_x)                             \
-  ((float)(int)((_x * thoom::game->map->tile_width) + \
-                (thoom::game->map->tile_width / 2)) + \
+#define CENTER_TILE_X(_x)                                        \
+  ((float)(int)((_x * thoom::Scene::instance->map->tile_width) + \
+                (thoom::Scene::instance->map->tile_width / 2)) + \
    0.5f)
-#define CENTER_TILE_Y(_y)                              \
-  ((float)(int)((_y * thoom::game->map->tile_height) + \
-                (thoom::game->map->tile_height / 2)) + \
+#define CENTER_TILE_Y(_y)                                         \
+  ((float)(int)((_y * thoom::Scene::instance->map->tile_height) + \
+                (thoom::Scene::instance->map->tile_height / 2)) + \
    0.5f)
-
-class Mouse;  // forward declaration
 
 enum FoeStrafe { STRAFE_LEFT, NO_STRAFE, STRAFE_RIGHT };
 

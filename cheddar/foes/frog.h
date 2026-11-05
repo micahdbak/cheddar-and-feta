@@ -1,7 +1,7 @@
 #pragma once
 
 #include "foe.h"
-#include "game.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define FOE_FROG_OBJ "foe_frog"
@@ -17,6 +17,8 @@ class FoeFrog : public Foe {
   void step() override;
 
   Foe::State prev_state = Foe::State::IDLE;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   thoom::Sprite* sprite;
@@ -24,17 +26,4 @@ class FoeFrog : public Foe {
   Uint64 timer = 0, attack_timer = 0, hurt_timer = 0;
 
   int max_health = 10, health = 10;
-};
-
-class FoeFrogFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
-    int x = 0, y = 0, spawner_id = 0;
-    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new FoeFrog(x, y, spawner_id);
-  }
 };

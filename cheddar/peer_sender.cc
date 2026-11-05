@@ -1,11 +1,11 @@
 #include "peer_sender.h"
 
 #include "audio.h"
-#include "game.h"
 #include "items/item.h"
 #include "mouse.h"
 #include "peer.h"
 #include "renderer.h"
+#include "scene.h"
 
 PeerSender* peer_sender = nullptr;
 
@@ -17,7 +17,7 @@ void PeerSender::step() {
   if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected)
     return;
 
-  std::string frame_msg = MSG_MAP + thoom::game->map->path + '\n';
+  std::string frame_msg = MSG_MAP + thoom::Scene::instance->map->path + '\n';
   char buff[1024];
 
   // sprites
@@ -77,4 +77,9 @@ void PeerSender::send_message(char func, const std::string& arg) {
   }
 
   peer_sender->messages.push_back(std::string(func + arg + '\n'));
+}
+
+thoom::Object* PeerSender::create_object(thoom::Scene* scene,
+                                         const std::string& options) {
+  return new PeerSender();
 }

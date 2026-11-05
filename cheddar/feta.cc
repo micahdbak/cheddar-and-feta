@@ -37,8 +37,8 @@ Feta::Feta(int x, int y, int animation) {
     this->sprite->set_animation(animation);
   }
 
-  this->tile_x = (int)this->x / thoom::game->map->tile_width;
-  this->tile_y = (int)this->y / thoom::game->map->tile_height;
+  this->tile_x = (int)this->x / thoom::Scene::instance->map->tile_width;
+  this->tile_y = (int)this->y / thoom::Scene::instance->map->tile_height;
   foe_path_find(this);
 
   this->dst_rect.w = 32.0f;
@@ -47,8 +47,8 @@ Feta::Feta(int x, int y, int animation) {
   this->emote_rect.h = 32.0f;
 
   // push hurtbox
-  thoom::game->push_object(HURTBOX_OBJ,
-                           HurtBox::Options(this->id, -8, -8, 16, 12));
+  thoom::Scene::instance->create_object(
+      HURTBOX_OBJ, HurtBox::options(this->id, -8, -8, 16, 12));
 
   this->is_down = false;
 }
@@ -80,15 +80,15 @@ void Feta::step() {
 
   if (!this->new_objects.empty()) {
     for (int i = 0; i < this->new_objects.size(); i++) {
-      thoom::game->push_object(this->new_objects[i].first,
-                               this->new_objects[i].second);
+      thoom::Scene::instance->create_object(this->new_objects[i].first,
+                                            this->new_objects[i].second);
     }
 
     this->new_objects.clear();
   }
 
-  int new_tile_x = (int)this->x / thoom::game->map->tile_width;
-  int new_tile_y = (int)this->y / thoom::game->map->tile_height;
+  int new_tile_x = (int)this->x / thoom::Scene::instance->map->tile_width;
+  int new_tile_y = (int)this->y / thoom::Scene::instance->map->tile_height;
 
   if (this->tile_x != new_tile_x || this->tile_y != new_tile_y) {
     this->tile_x = new_tile_x;
@@ -221,4 +221,15 @@ void Feta::set_throw(int throw_x, int throw_y) {
 
 void Feta::set_max_mov_speed(float max_mov_speed) {
   PeerSender::send_message(MSG_MAX_SPEED, std::to_string(max_mov_speed));
+}
+
+thoom::Object* Feta::create_object(thoom::Scene* scene,
+                                   const std::string& options) {
+  int x, y, animation;
+  if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &animation)) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return new Feta(x, y, animation);
 }

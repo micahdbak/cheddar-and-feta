@@ -2,6 +2,7 @@
 
 #include "hitbox.h"
 #include "item.h"
+#include "scene.h"
 
 #define ITEM_MOLOTOV "item_molotov"
 
@@ -15,19 +16,8 @@ class DroppedMolotov : public DroppedItem {
   void step() override { this->dropped_step(); }
 
   void take(Mouse* mouse) override { mouse->push_item(ITEM_MOLOTOV); }
-};
-
-class DroppedMolotovFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
-    int x, y;
-    if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new DroppedMolotov(float(x), float(y));
-  }
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 };
 
 // ----
@@ -43,6 +33,8 @@ class ThrownMolotov : public thoom::Object, public HitSource {
   float hitsource_y() override { return this->y; }
 
   void hitsource_notify() override { this->did_hit = true; }
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   float x, y;
@@ -51,18 +43,4 @@ class ThrownMolotov : public thoom::Object, public HitSource {
   SDL_FRect dst_rect;
   int x_dir, y_dir;
   Uint64 timer;
-};
-
-class ThrownMolotovFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
-    int x, y, x_dir = 0, y_dir = 0, from_id = -1;
-    if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
-                    &from_id)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new ThrownMolotov((float)x, (float)y, x_dir, y_dir, from_id);
-  }
 };

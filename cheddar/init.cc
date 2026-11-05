@@ -1,8 +1,9 @@
+#include "constants.h"
 #include "controller.h"
-#include "game.h"
 #include "object.h"
 #include "peer.h"
 #include "save_data.h"
+#include "scene.h"
 #include "textbox.h"
 #include "window.h"
 
@@ -44,50 +45,53 @@
 #include "peer_sender.h"
 #include "splash.h"
 
-void thoom::Game::init() {
-  this->factories[LOAD_SAVE_OBJ] = new LoadSaveFactory();
+static const thoom::Scene::ObjectDef kCheddarObjects[] = {
+    {LOAD_SAVE_OBJ, LoadSave::create_object},
+    {BELL_OBJ, Bell::create_object},
+    {BILLBOARD_OBJ, Billboard::create_object},
+    {CHEDDAR_OBJ, Cheddar::create_object},
+    {CREDITS_OBJ, Credits::create_object},
+    {FETA_OBJ, Feta::create_object},
+    {FREEDOM_OBJ, Freedom::create_object},
+    {FOE_BAT_OBJ, FoeBat::create_object},
+    {FOE_BUG_OBJ, FoeBug::create_object},
+    {FOE_FROG_OBJ, FoeFrog::create_object},
+    {FOE_PORCUPINE_OBJ, FoePorcupine::create_object},
+    {FOE_SPITTER_ABDOMEN_OBJ, SpitterAbdomen::create_object},
+    {FOE_SPITTER_SEGMENT_OBJ, SpitterSegment::create_object},
+    {FOE_SPITTER_OBJ, Spitter::create_object},
+    {GAME_OVER_OBJ, GameOver::create_object},
+    {GATE_OBJ, FoeGate::create_object},
+    {HITBOX_OBJ, HitBox::create_object},
+    {HURTBOX_OBJ, HurtBox::create_object},
+    {ITEM_CANNON_BALL DROPPED_OBJ, DroppedCannonBall::create_object},
+    {ITEM_CANNON_BALL USE_OBJ, ThrownCannonBall::create_object},
+    {ITEM_CHEESE DROPPED_OBJ, Cheese::create_object},
+    {ITEM_COFFEE_BEAN DROPPED_OBJ, DroppedCoffeeBean::create_object},
+    {ITEM_COFFEE_BEAN USE_OBJ, UsedCoffeeBean::create_object},
+    {ITEM_FIRE USE_OBJ, Fire::create_object},
+    {ITEM_HERMES_BOOT DROPPED_OBJ, DroppedHermesBoot::create_object},
+    {ITEM_MOLOTOV DROPPED_OBJ, DroppedMolotov::create_object},
+    {ITEM_MOLOTOV USE_OBJ, ThrownMolotov::create_object},
+    {ITEM_PERSISTER_OBJ, ItemPersister::create_object},
+    {ITEM_SAVE USE_OBJ, ItemSaveUse::create_object},
+    {ITEM_SHIELD DROPPED_OBJ, DroppedShield::create_object},
+    {ITEM_TOOTHPICK DROPPED_OBJ, DroppedToothpick::create_object},
+    {ITEM_TOOTHPICK USE_OBJ, ThrownToothpick::create_object},
+    {LADDER_OBJ, Ladder::create_object},
+    {SPAWNER_OBJ, FoeSpawner::create_object},
+    {SPLASH_OBJ, Splash::create_object},
+    {TOSSED_ITEM_OBJ, TossedItem::create_object},
+    {PEER_RECEIVER_OBJ, PeerReceiver::create_object, thoom::kObjectFirst},
+    {PEER_SENDER_OBJ, PeerSender::create_object, thoom::kObjectLast},
+    {nullptr, nullptr},
+};
 
-  // objects
-  this->factories[BELL_OBJ] = new BellFactory();
-  this->factories[BILLBOARD_OBJ] = new BillboardFactory();
-  this->factories[CHEDDAR_OBJ] = new CheddarFactory();
-  this->factories[CREDITS_OBJ] = new CreditsFactory();
-  this->factories[FETA_OBJ] = new FetaFactory();
-  this->factories[FREEDOM_OBJ] = new FreedomFactory();
-  this->factories[FOE_BAT_OBJ] = new FoeBatFactory();
-  this->factories[FOE_BUG_OBJ] = new FoeBugFactory();
-  this->factories[FOE_FROG_OBJ] = new FoeFrogFactory();
-  this->factories[FOE_PORCUPINE_OBJ] = new FoePorcupineFactory();
-  this->factories[FOE_SPITTER_ABDOMEN_OBJ] = new SpitterAbdomenFactory();
-  this->factories[FOE_SPITTER_SEGMENT_OBJ] = new SpitterSegmentFactory();
-  this->factories[FOE_SPITTER_OBJ] = new SpitterFactory();
-  this->factories[GAME_OVER_OBJ] = new GameOverFactory();
-  this->factories[GATE_OBJ] = new FoeGateFactory();
-  this->factories[HITBOX_OBJ] = new HitBoxFactory();
-  this->factories[HURTBOX_OBJ] = new HurtBoxFactory();
-  this->factories[ITEM_CANNON_BALL DROPPED_OBJ] =
-      new DroppedCannonBallFactory();
-  this->factories[ITEM_CANNON_BALL USE_OBJ] = new ThrownCannonBallFactory();
-  this->factories[ITEM_CHEESE DROPPED_OBJ] = new CheeseFactory();
-  this->factories[ITEM_COFFEE_BEAN DROPPED_OBJ] =
-      new DroppedCoffeeBeanFactory();
-  this->factories[ITEM_COFFEE_BEAN USE_OBJ] = new UsedCoffeeBeanFactory();
-  this->factories[ITEM_FIRE USE_OBJ] = new FireFactory();
-  this->factories[ITEM_HERMES_BOOT DROPPED_OBJ] =
-      new DroppedHermesBootFactory();
-  this->factories[ITEM_MOLOTOV DROPPED_OBJ] = new DroppedMolotovFactory();
-  this->factories[ITEM_MOLOTOV USE_OBJ] = new ThrownMolotovFactory();
-  this->factories[ITEM_PERSISTER_OBJ] = new ItemPersisterFactory();
-  this->factories[ITEM_SAVE USE_OBJ] = new ItemSaveUseFactory();
-  this->factories[ITEM_SHIELD DROPPED_OBJ] = new DroppedShieldFactory();
-  this->factories[ITEM_TOOTHPICK DROPPED_OBJ] = new DroppedToothpickFactory();
-  this->factories[ITEM_TOOTHPICK USE_OBJ] = new ThrownToothpickFactory();
-  this->factories[LADDER_OBJ] = new LadderFactory();
-  this->factories[SPAWNER_OBJ] = new FoeSpawnerFactory();
-  this->factories[SPLASH_OBJ] = new SplashFactory();
-  this->factories[TOSSED_ITEM_OBJ] = new TossedItemFactory();
+void game_init(int argc, char** argv) {
+  game_is_cheddar = true;
 
-  // items
+  thoom::Scene::instance->register_objects(kCheddarObjects);
+
   item_info[ITEM_NONE] = Item{HELD_EFFECT, "Kick"};
   item_info[ITEM_NONE].damage = 1;
   item_info[ITEM_NONE].armour = 0;
@@ -105,15 +109,12 @@ void thoom::Game::init() {
   item_info[ITEM_SHIELD].armour = 1;
   item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Porcu' Pine"};
 
-  this->factories[FIRST_OBJ] = new PeerReceiverFactory();
-  this->factories[LAST_OBJ] = new PeerSenderFactory();
-
   thoom::Window::instance->set_title("Playing as Cheddar");
 
   thoom::Peer::init(false);
 
-  this->create_object(FIRST_OBJ, "");
-  this->create_object(LAST_OBJ, "");
+  thoom::Scene::instance->create_object(PEER_RECEIVER_OBJ, "");
+  thoom::Scene::instance->create_object(PEER_SENDER_OBJ, "");
 
-  this->load_map("maps/splash");
+  thoom::Scene::instance->request_map("maps/splash");
 }

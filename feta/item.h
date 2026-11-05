@@ -27,7 +27,7 @@ struct Item {
 };
 
 namespace UseItem {
-static std::string Options(int x, int y, int x_dir, int y_dir) {
+static std::string options(int x, int y, int x_dir, int y_dir) {
   char buff[256];
   snprintf(buff, sizeof(buff), "%d,%d,%d,%d", x, y, x_dir, y_dir);
   return std::string(buff);

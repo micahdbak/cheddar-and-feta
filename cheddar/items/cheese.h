@@ -2,13 +2,14 @@
 
 #include "item.h"
 #include "object.h"
+#include "scene.h"
 
 #define ITEM_CHEESE "item_cheese"
 
 // dropped cheese
 class Cheese : public thoom::Object {
  public:
-  static std::string Options(int x, int y, int amount) {
+  static std::string options(int x, int y, int amount) {
     char buff[256];
     snprintf(buff, sizeof(buff), "%d,%d,%d", x, y, amount);
     return std::string(buff);
@@ -20,6 +21,8 @@ class Cheese : public thoom::Object {
   void step() override;
 
   static void drop_cheese(int x, int y, int min_amount, int max_amount);
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   void render_cheese();
@@ -29,21 +32,4 @@ class Cheese : public thoom::Object {
   SDL_FRect dst_rect;
   float x, y;
   int amount, depth_offset;
-};
-
-class CheeseFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) {
-    int x, y, amount;
-    int fields = sscanf(options.c_str(), "%d,%d,%d", &x, &y, &amount);
-
-    if (fields == 2) {
-      amount = 1;
-    } else if (fields != 3) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new Cheese(float(x), float(y), amount);
-  }
 };

@@ -3,6 +3,7 @@
 #include "foe.h"
 #include "hitbox.h"
 #include "hurtbox.h"
+#include "scene.h"
 #include "sprite.h"
 
 #define FOE_BAT_OBJ "foe_bat"
@@ -21,6 +22,8 @@ class FoeBat : public Foe, public HitSource {
   float hitsource_y() override { return this->y + this->off_y; }
 
   Foe::State prev_state = Foe::State::IDLE;
+  static thoom::Object* create_object(thoom::Scene* scene,
+                                      const std::string& options);
 
  private:
   thoom::Sprite* sprite;
@@ -29,17 +32,4 @@ class FoeBat : public Foe, public HitSource {
   int ticks_offset = 0, base_ticks_offset = 0;
 
   int max_health = 4, health = 4;
-};
-
-class FoeBatFactory : public thoom::ObjectFactory {
- public:
-  thoom::Object* create(const std::string& options) override {
-    int x = 0, y = 0, spawner_id = 0;
-    if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    return new FoeBat(x, y, spawner_id);
-  }
 };

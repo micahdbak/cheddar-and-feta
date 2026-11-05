@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL.h>
 
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 
@@ -9,13 +10,14 @@
 #include "constants.h"
 #include "controller.h"
 #include "font.h"
-#include "game.h"
 #include "icon.h"
 #include "peer.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 #include "texture.h"
 #include "ui_box.h"
+#include "window.h"
 
 #define ITEM_NONE "item_none"
 
@@ -72,15 +74,16 @@ void Hud::render() {
     thoom::capture_controls = this->display_controls_menu;
   }
 
-  std::string current_map =
-      thoom::game->map != nullptr ? thoom::game->map->path : "";
+  std::string current_map = thoom::Scene::instance->map != nullptr
+                                ? thoom::Scene::instance->map->path
+                                : "";
 
   if (current_map != this->current_map) {
     this->current_map = current_map;
     thoom::Renderer::instance->clear(this->ui, thoom::kMask);
-    if (thoom::game->map != nullptr) {
-      this->display_notification(thoom::game->map->title + ", " +
-                                 thoom::game->map->description);
+    if (thoom::Scene::instance->map != nullptr) {
+      this->display_notification(thoom::Scene::instance->map->title + ", " +
+                                 thoom::Scene::instance->map->description);
     }
   }
 
@@ -111,7 +114,7 @@ void Hud::render() {
 
 void Hud::display_notification(std::string text) {
   this->notification = text;
-  this->notif_ticks = thoom::game->ticks;
+  this->notif_ticks = thoom::Scene::instance->ticks;
   this->force_notif_rerender = true;
 }
 
@@ -229,7 +232,7 @@ void Hud::draw_controls_menu() {
 
     if (this->sel_control == -3 &&
         thoom::captured_controller.is_hit(thoom::Button::SELECT)) {
-      thoom::game->next_map = "maps/init";
+      thoom::Scene::instance->request_map("maps/init");
       thoom::save.clear();
 
       thoom::capture_controls = false;
@@ -264,11 +267,11 @@ void Hud::draw_controls_menu() {
 
   if (should_render) {
     thoom::Colour bg = thoom::kBlack;
-    if (thoom::game->map != nullptr) {
-      bg = thoom::Colour(uint8_t(thoom::game->map->bg_r),
-                         uint8_t(thoom::game->map->bg_g),
-                         uint8_t(thoom::game->map->bg_b));
+
+    if (thoom::Scene::instance->map != nullptr) {
+      bg = thoom::Scene::instance->map->background;
     }
+
     bg.a = 128;
     thoom::Renderer::instance->clear(this->overlay, bg);
 
@@ -280,6 +283,7 @@ void Hud::draw_controls_menu() {
 
     thoom::Renderer::instance->draw_text(
         this->overlay, SMALL_FONT, "Exit to Main Menu", 20, 28, 0, kBackground);
+
     if (this->sel_control != -3) {
       SDL_FRect option_rect = {20.0f, 28.0f, 96.0f, 8.0f};
       thoom::Renderer::instance->draw_rect(this->overlay, &option_rect,
@@ -295,6 +299,7 @@ void Hud::draw_controls_menu() {
     thoom::Renderer::instance->draw_text(
         this->overlay, SMALL_FONT,
         std::to_string(thoom::Audio::instance->volume), 52, 52, 0, kBackground);
+
     if (this->sel_control != -2) {
       SDL_FRect sound_rect = {20.0f, 52.0f, 96.0f, 8.0f};
       thoom::Renderer::instance->draw_rect(this->overlay, &sound_rect,
@@ -317,6 +322,7 @@ void Hud::draw_controls_menu() {
         this->overlay, SMALL_FONT,
         std::to_string(thoom::Audio::instance->music_volume), 52, 60, 0,
         kBackground);
+
     if (this->sel_control != -1) {
       SDL_FRect music_rect = {20.0f, 60.0f, 96.0f, 8.0f};
       thoom::Renderer::instance->draw_rect(this->overlay, &music_rect,
@@ -353,6 +359,7 @@ void Hud::draw_controls_menu() {
 
       int control_opacity = 128;
       int input_opacity = 192;
+
       if (i == this->sel_control) {
         if (this->waiting_for_key) {
           control_opacity = 96;
@@ -378,15 +385,14 @@ void Hud::draw_controls_menu() {
 }
 
 void Hud::draw_peer(bool force_render) {
-  if (!(thoom::game->create_objects && thoom::Peer::instance != nullptr))
-    return;
+  if (!(game_is_cheddar && thoom::Peer::instance != nullptr)) return;
 
   std::string code = thoom::Peer::instance->get_connection_code();
   uint64_t peer_state = thoom::Peer::instance->state.load();
 
   if (force_render || peer_state != this->last_peer_state ||
       code != this->last_code ||
-      thoom::game->ticks - this->last_drawn_ticks > 1000) {
+      thoom::Scene::instance->ticks - this->last_drawn_ticks > 1000) {
     if (this->peer_rect.w > 0.0f) {
       thoom::Renderer::instance->draw_rect(this->overlay, &this->peer_rect,
                                            thoom::kMask, SDL_BLENDMODE_NONE);
@@ -422,7 +428,7 @@ void Hud::draw_peer(bool force_render) {
 
     this->last_peer_state = peer_state;
     this->last_code = code;
-    this->last_drawn_ticks = thoom::game->ticks;
+    this->last_drawn_ticks = thoom::Scene::instance->ticks;
   }
 }
 
@@ -459,7 +465,7 @@ void Hud::draw_notification(bool force_render) {
                                          kBackground);
 
     this->displaying_notification = true;
-  } else if (thoom::game->ticks - this->notif_ticks > 3000) {
+  } else if (thoom::Scene::instance->ticks - this->notif_ticks > 3000) {
     thoom::Renderer::instance->clear(this->overlay, thoom::kMask);
     this->notification.clear();
     this->displaying_notification = false;

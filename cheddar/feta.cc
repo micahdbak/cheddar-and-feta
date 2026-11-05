@@ -1,12 +1,21 @@
 #include "feta.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
+#include "foes/foe.h"
+#include "hud.h"
 #include "hurtbox.h"
 #include "items/cheese.h"
 #include "items/item.h"
+#include "mouse.h"
+#include "object.h"
 #include "peer.h"
 #include "peer_sender.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "sprite.h"
 
 Feta::Feta(int x, int y, int animation) {
   if (feta != nullptr) {

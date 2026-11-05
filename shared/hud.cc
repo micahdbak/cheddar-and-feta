@@ -3,14 +3,20 @@
 #include <SDL3/SDL.h>
 
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <iostream>
+#include <string>
+#include <vector>
 
 #include "audio.h"
+#include "colour.h"
 #include "constants.h"
+#include "controller.h"
 #include "font.h"
 #include "icon.h"
 #include "input.h"
+#include "macros.h"
 #include "peer.h"
 #include "renderer.h"
 #include "save_data.h"

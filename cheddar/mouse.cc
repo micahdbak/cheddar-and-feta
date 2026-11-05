@@ -1,7 +1,12 @@
 #include "mouse.h"
 
 #include <cfloat>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <vector>
 
+#include "hud.h"
 #include "items/item.h"
 #include "utils.h"
 

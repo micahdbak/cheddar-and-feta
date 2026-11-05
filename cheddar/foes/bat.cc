@@ -1,17 +1,23 @@
 #include "bat.h"
 
+#include <math.h>
+
 #include <cmath>
-#include <iostream>
+#include <cstdio>
+#include <cstdlib>
 
 #include "../items/cheese.h"
-#include "../items/toothpick.h"
 #include "audio.h"
+#include "foes/foe.h"
+#include "hitbox.h"
 #include "hurtbox.h"
 #include "icon.h"
 #include "mouse.h"
+#include "object.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "scene.h"
+#include "sprite.h"
 
 #define CIRCLE_TICKS 2000
 

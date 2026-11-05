@@ -1,7 +1,8 @@
 #include "foe.h"
 
-#include <iostream>
+#include <vector>
 
+#include "macros.h"
 #include "mouse.h"
 #include "scene.h"
 #include "spawner.h"

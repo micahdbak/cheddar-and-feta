@@ -1,13 +1,24 @@
 #include "spitter.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
 #include "../../items/fire.h"
 #include "../../mouse.h"
 #include "abdomen.h"
 #include "audio.h"
+#include "foes/foe.h"
+#include "hitbox.h"
+#include "hurtbox.h"
 #include "icon.h"
+#include "items/item.h"
+#include "macros.h"
+#include "object.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "segment.h"
+#include "sprite.h"
 #include "utils.h"
 
 Spitter::Spitter(float x, float y, int spawner_id)

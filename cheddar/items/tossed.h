@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdio>
+#include <string>
+
 #include "object.h"
 #include "scene.h"
 #include "sprite.h"

@@ -1,13 +1,21 @@
 #include "frog.h"
 
+#include <cstdio>
+#include <cstdlib>
+
 #include "../items/cannon_ball.h"
 #include "../items/cheese.h"
 #include "audio.h"
+#include "foes/foe.h"
 #include "hurtbox.h"
 #include "icon.h"
+#include "items/item.h"
+#include "mouse.h"
+#include "object.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "scene.h"
+#include "sprite.h"
 
 FoeFrog::FoeFrog(int x, int y, int spawner_id)
     : Foe(float(x), float(y), spawner_id, 500, 250, 128.0f, 64.0f) {

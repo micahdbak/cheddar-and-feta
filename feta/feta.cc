@@ -1,17 +1,24 @@
 #include "feta.h"
 
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <vector>
 
 #include "audio.h"
+#include "controller.h"
 #include "hud.h"
 #include "input.h"
 #include "item.h"
+#include "macros.h"
+#include "object.h"
 #include "peer.h"
-#include "peer_receiver.h"
 #include "peer_sender.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "scene.h"
+#include "sprite.h"
 #include "utils.h"
 
 Feta* feta = nullptr;

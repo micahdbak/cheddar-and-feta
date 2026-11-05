@@ -1,0 +1,4 @@
+---
+Checks: '-*,misc-include-cleaner'
+CheckOptions:
+  misc-include-cleaner.IgnoreHeaders: 'SDL3/.*'

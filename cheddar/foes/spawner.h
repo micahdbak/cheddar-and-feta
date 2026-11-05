@@ -1,10 +1,10 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include "object.h"
 #include "scene.h"
-#include "sprite.h"
 
 #define SPAWNER_OBJ "spawner"
 

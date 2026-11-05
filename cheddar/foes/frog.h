@@ -1,6 +1,10 @@
 #pragma once
 
+#include <string>
+
 #include "foe.h"
+#include "mouse.h"
+#include "object.h"
 #include "scene.h"
 #include "sprite.h"
 

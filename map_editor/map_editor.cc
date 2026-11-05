@@ -1,20 +1,26 @@
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <string>
 #include <vector>
 
+#include "collider.h"
+#include "colour.h"
 #include "constants.h"
+#include "controller.h"
 #include "font.h"
 #include "hud.h"
 #include "icon.h"
 #include "input.h"
+#include "macros.h"
 #include "map.h"
+#include "map_layer.h"
 #include "object.h"
 #include "peer.h"
 #include "renderer.h"
 #include "scene.h"
-#include "sprite.h"
 #include "texture.h"
-#include "utils.h"
+#include "tilesheet.h"
 #include "window.h"
 
 enum EditorSelectedLayer { BACKGROUND, FOREGROUND, COLLISION };

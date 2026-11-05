@@ -1,15 +1,19 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
+#include <cstddef>
+#include <cstdlib>
+
 #include "audio.h"
+#include "colour.h"
 #include "constants.h"
 #include "hud.h"
 #include "icon.h"
 #include "input.h"
+#include "map.h"
 #include "peer.h"
 #include "render_functions.h"
 #include "renderer.h"
-#include "save_data.h"
 #include "scene.h"
 #include "sounds.h"
 #include "texture.h"

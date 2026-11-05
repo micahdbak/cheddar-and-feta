@@ -1,11 +1,18 @@
 #include "hurtbox.h"
 
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <vector>
+
 #include "foes/foe.h"
+#include "hitbox.h"
 #include "icon.h"
 #include "mouse.h"
-#include "renderer.h"
+#include "object.h"
 #include "scene.h"
-#include "window.h"
+#include "utils.h"
 
 std::vector<HurtBox*> hurtboxes;
 int hurtbox_hitbox_id;

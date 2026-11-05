@@ -1,8 +1,10 @@
 #pragma once
 
+#include <string>
+
 #include "hurtbox.h"
+#include "object.h"
 #include "scene.h"
-#include "spitter.h"
 #include "sprite.h"
 
 #define FOE_SPITTER_ABDOMEN_OBJ "foe_spitter_abdomen"

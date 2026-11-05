@@ -1,12 +1,11 @@
 #pragma once
 
+#include <cstdio>
 #include <string>
 #include <unordered_map>
 
-#include "../foes/foe.h"
 #include "mouse.h"
 #include "object.h"
-#include "scene.h"
 #include "sprite.h"
 
 #define ITEM_NONE "item_none"

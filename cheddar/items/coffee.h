@@ -1,9 +1,11 @@
 #pragma once
 
-#include <iostream>
+#include <cstdio>
+#include <cstdlib>
 
 #include "item.h"
 #include "mouse.h"
+#include "object.h"
 #include "scene.h"
 
 #define ITEM_COFFEE_BEAN "item_coffee_bean"

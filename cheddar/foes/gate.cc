@@ -1,14 +1,18 @@
 #include "gate.h"
 
-#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
 
 #include "audio.h"
+#include "object.h"
 #include "peer.h"
 #include "peer_sender.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "scene.h"
 #include "spawner.h"
+#include "sprite.h"
 
 FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
     : spawner_id(spawner_id) {

@@ -1,7 +1,11 @@
 #pragma once
 
+#include <string>
+
 #include "foe.h"
 #include "hitbox.h"
+#include "mouse.h"
+#include "object.h"
 #include "scene.h"
 #include "sprite.h"
 

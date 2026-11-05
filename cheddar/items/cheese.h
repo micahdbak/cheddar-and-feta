@@ -1,6 +1,8 @@
 #pragma once
 
-#include "item.h"
+#include <cstdio>
+#include <string>
+
 #include "object.h"
 #include "scene.h"
 

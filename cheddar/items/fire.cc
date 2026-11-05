@@ -1,7 +1,14 @@
 #include "fire.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
+#include "hitbox.h"
+#include "macros.h"
+#include "object.h"
 #include "renderer.h"
-#include "utils.h"
+#include "sprite.h"
 
 static int fire_counter = 0;
 

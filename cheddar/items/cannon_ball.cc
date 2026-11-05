@@ -1,10 +1,16 @@
 #include "cannon_ball.h"
 
-#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
 
+#include "hitbox.h"
 #include "item.h"
+#include "macros.h"
+#include "mouse.h"
+#include "object.h"
 #include "renderer.h"
-#include "utils.h"
+#include "sprite.h"
 
 ThrownCannonBall::ThrownCannonBall(float x, float y, int x_dir, int y_dir,
                                    int from_id)

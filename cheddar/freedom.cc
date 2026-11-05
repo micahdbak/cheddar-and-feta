@@ -1,6 +1,11 @@
 #include "freedom.h"
 
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+
 #include "mouse.h"
+#include "object.h"
 #include "save_data.h"
 #include "scene.h"
 #include "utils.h"

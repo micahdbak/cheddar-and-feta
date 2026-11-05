@@ -1,6 +1,10 @@
 #pragma once
 
+#include <cstdio>
+#include <cstdlib>
+
 #include "item.h"
+#include "mouse.h"
 #include "object.h"
 #include "scene.h"
 

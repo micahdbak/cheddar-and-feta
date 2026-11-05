@@ -1,16 +1,23 @@
 #include "porcupine.h"
 
-#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
 
 #include "../items/cheese.h"
 #include "../items/toothpick.h"
 #include "audio.h"
+#include "foes/foe.h"
 #include "hurtbox.h"
 #include "icon.h"
+#include "items/item.h"
 #include "mouse.h"
+#include "object.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "scene.h"
+#include "sprite.h"
+#include "utils.h"
 
 FoePorcupine::FoePorcupine(int x, int y, int spawner_id)
     : Foe(float(x), float(y), spawner_id, 250, 100, 256.0f, 64.0f) {

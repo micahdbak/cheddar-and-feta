@@ -1,13 +1,15 @@
 #pragma once
 
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "hitbox.h"
 #include "hud.h"
 #include "mouse.h"
 #include "object.h"
-#include "save_data.h"
 #include "scene.h"
+#include "sprite.h"
 
 #define FETA_OBJ "feta"
 

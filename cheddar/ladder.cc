@@ -1,7 +1,14 @@
 #include "ladder.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <ostream>
+#include <string>
+
 #include "audio.h"
 #include "mouse.h"
+#include "object.h"
 #include "save_data.h"
 #include "scene.h"
 

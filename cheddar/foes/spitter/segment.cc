@@ -1,6 +1,16 @@
 #include "segment.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
+#include "foes/spitter/spitter.h"
+#include "hitbox.h"
+#include "hurtbox.h"
+#include "macros.h"
+#include "object.h"
 #include "renderer.h"
+#include "sprite.h"
 #include "utils.h"
 
 SpitterSegment::SpitterSegment(int parent_id, int segment_id)

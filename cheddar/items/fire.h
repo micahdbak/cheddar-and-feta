@@ -1,8 +1,11 @@
 #pragma once
 
+#include <string>
+
 #include "hitbox.h"
-#include "item.h"
+#include "object.h"
 #include "scene.h"
+#include "sprite.h"
 
 #define ITEM_FIRE "item_fire"
 

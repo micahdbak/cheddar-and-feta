@@ -1,14 +1,16 @@
 #include "items/item.h"
 
-#include <iostream>
+#include <cstdio>
+#include <string>
+#include <unordered_map>
 
-#include "../foes/foe.h"
 #include "audio.h"
 #include "items/persister.h"
+#include "mouse.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "scene.h"
-#include "textbox.h"
+#include "sprite.h"
 
 std::unordered_map<std::string, Item> item_info;
 

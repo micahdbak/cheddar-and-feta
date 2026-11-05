@@ -1,7 +1,11 @@
 #include "spawner.h"
 
-#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <vector>
 
+#include "object.h"
 #include "save_data.h"
 #include "scene.h"
 

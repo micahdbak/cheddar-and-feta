@@ -1,8 +1,12 @@
+#include <cstdlib>
 #include <iostream>
 #include <queue>
+#include <utility>
+#include <vector>
 
 #include "SDL3/SDL_stdinc.h"
 #include "foe.h"
+#include "macros.h"
 #include "mouse.h"
 #include "renderer.h"
 #include "scene.h"

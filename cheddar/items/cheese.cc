@@ -1,8 +1,12 @@
 #include "cheese.h"
 
-#include <iostream>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
 
+#include "items/item.h"
 #include "mouse.h"
+#include "object.h"
 #include "render_functions.h"
 #include "renderer.h"
 #include "scene.h"

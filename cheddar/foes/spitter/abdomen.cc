@@ -1,6 +1,15 @@
 #include "abdomen.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
+#include "foes/spitter/spitter.h"
+#include "hurtbox.h"
+#include "mouse.h"
+#include "object.h"
 #include "renderer.h"
+#include "sprite.h"
 #include "utils.h"
 
 SpitterAbdomen::SpitterAbdomen(int parent_id) : parent_id(parent_id) {

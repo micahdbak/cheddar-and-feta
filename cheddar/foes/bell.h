@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "../hurtbox.h"
 #include "object.h"
 #include "scene.h"

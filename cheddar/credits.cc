@@ -1,11 +1,13 @@
 #include "credits.h"
 
+#include "controller.h"
 #include "foes/bat.h"
 #include "foes/bug.h"
 #include "foes/frog.h"
 #include "foes/porcupine.h"
 #include "foes/spitter/spitter.h"
 #include "input.h"
+#include "object.h"
 #include "render_functions.h"
 #include "renderer.h"
 #include "save_data.h"

@@ -1,4 +1,10 @@
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <vector>
+
 #include "feta.h"
+#include "hud.h"
 #include "item.h"
 
 bool Mouse::check_collision(float x, float y) {

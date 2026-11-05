@@ -3,12 +3,12 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "../items/cheese.h"
 #include "audio.h"
 #include "foes/foe.h"
 #include "hitbox.h"
 #include "hurtbox.h"
 #include "icon.h"
+#include "items/cheese.h"
 #include "mouse.h"
 #include "object.h"
 #include "renderer.h"

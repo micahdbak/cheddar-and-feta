@@ -10,6 +10,7 @@
 #include "macros.h"
 #include "object.h"
 #include "renderer.h"
+#include "scene.h"
 #include "sprite.h"
 #include "utils.h"
 

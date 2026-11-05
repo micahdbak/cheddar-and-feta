@@ -329,8 +329,8 @@ void foe_debug_tile(int x, int y) {
         thoom::Texture::instance->load("sprites/foe_debug.bmp");
   }
 
-  float center_x = CENTER_TILE_X(x);
-  float center_y = CENTER_TILE_Y(y);
+  float center_x = center_tile_x(x);
+  float center_y = center_tile_y(y);
 
   float dist1 = thoom::distance_between_points(center_x, center_y, cheddar->x,
                                                cheddar->y);

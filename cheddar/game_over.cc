@@ -7,6 +7,7 @@
 #include "object.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 #include "texture.h"
 #include "window.h"
 

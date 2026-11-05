@@ -8,6 +8,7 @@
 #include "macros.h"
 #include "object.h"
 #include "renderer.h"
+#include "scene.h"
 #include "sprite.h"
 
 static int fire_counter = 0;

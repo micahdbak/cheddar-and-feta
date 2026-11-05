@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <string>
 
-#include "../foe.h"
+#include "foes/foe.h"
 #include "mouse.h"
 #include "object.h"
 #include "scene.h"

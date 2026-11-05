@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "../hurtbox.h"
+#include "hurtbox.h"
 #include "object.h"
 #include "scene.h"
 #include "sprite.h"

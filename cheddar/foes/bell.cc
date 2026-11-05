@@ -7,6 +7,7 @@
 #include "hurtbox.h"
 #include "object.h"
 #include "renderer.h"
+#include "scene.h"
 #include "spawner.h"
 #include "sprite.h"
 

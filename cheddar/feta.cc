@@ -15,6 +15,7 @@
 #include "peer_sender.h"
 #include "renderer.h"
 #include "save_data.h"
+#include "scene.h"
 #include "sprite.h"
 
 Feta::Feta(int x, int y, int animation) {

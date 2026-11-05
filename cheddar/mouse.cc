@@ -8,6 +8,7 @@
 
 #include "hud.h"
 #include "items/item.h"
+#include "scene.h"
 #include "utils.h"
 
 Mouse* cheddar = nullptr;

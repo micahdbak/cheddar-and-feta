@@ -10,6 +10,7 @@
 #include "mouse.h"
 #include "object.h"
 #include "renderer.h"
+#include "scene.h"
 #include "sprite.h"
 
 ThrownCannonBall::ThrownCannonBall(float x, float y, int x_dir, int y_dir,

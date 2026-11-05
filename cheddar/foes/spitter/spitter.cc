@@ -109,8 +109,8 @@ void Spitter::step() {
         this->state = Foe::State::IDLE;
         break;
       } else {
-        float distance =
-            THOOM_DISTANCE_BETWEEN_POINTS(this->x, this->y, mouse->x, mouse->y);
+        float distance = thoom::distance_between_points(this->x, this->y,
+                                                        mouse->x, mouse->y);
         if (distance < 32.0f || this->abdomen_distance < 32.0f) {
           this->tile_choice = Foe::TileChoice::SPAZZ;
           this->state = Foe::State::IDLE;

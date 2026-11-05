@@ -26,9 +26,9 @@ void Freedom::step() {
   }
 
   float cdist =
-      THOOM_DISTANCE_BETWEEN_POINTS(this->x, this->y, cheddar->x, cheddar->y);
+      thoom::distance_between_points(this->x, this->y, cheddar->x, cheddar->y);
   float fdist =
-      THOOM_DISTANCE_BETWEEN_POINTS(this->x, this->y, feta->x, feta->y);
+      thoom::distance_between_points(this->x, this->y, feta->x, feta->y);
 
   // when either mouse goes 64px away from the ladder
   if (cdist > 64.0f || fdist > 64.0f) {

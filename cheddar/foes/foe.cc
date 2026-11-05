@@ -95,10 +95,10 @@ void Foe::foe_step() {
         this->target_ticks =
             thoom::Scene::instance->ticks - target_ticks_offset;
         this->target_mouse = new_mouse;
-        this->current_distance = THOOM_DISTANCE_BETWEEN_POINTS(
+        this->current_distance = thoom::distance_between_points(
             this->x, this->y, new_mouse->x, new_mouse->y);
       } else {
-        this->current_distance = THOOM_DISTANCE_BETWEEN_POINTS(
+        this->current_distance = thoom::distance_between_points(
             this->x, this->y, this->target_mouse->x, this->target_mouse->y);
 
         if (new_mouse != this->target_mouse &&
@@ -107,7 +107,7 @@ void Foe::foe_step() {
              thoom::Scene::instance->ticks - this->target_ticks > 5000)) {
           this->target_ticks = thoom::Scene::instance->ticks;
           this->target_mouse = new_mouse;
-          this->current_distance = THOOM_DISTANCE_BETWEEN_POINTS(
+          this->current_distance = thoom::distance_between_points(
               this->x, this->y, new_mouse->x, new_mouse->y);
         }
       }

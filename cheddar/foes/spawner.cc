@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "controller.h"
 #include "save_data.h"
 #include "scene.h"
 

@@ -2,8 +2,8 @@
 
 #include "audio.h"
 #include "constants.h"
-#include "controller.h"
 #include "hud.h"
+#include "input.h"
 #include "renderer.h"
 #include "scene.h"
 #include "ui_box.h"
@@ -33,7 +33,7 @@ void Textbox::step() {
   if (this->done) return;
 
   if (this->done_sentence) {
-    if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
+    if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
       this->done_sentence = false;
       this->running_text = "";
     }
@@ -41,7 +41,7 @@ void Textbox::step() {
     return;
   }
 
-  if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
+  if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
     int j;
     for (j = this->i; j < text.size() && text[j] != '\n'; j++) {
       this->running_text += text[j];

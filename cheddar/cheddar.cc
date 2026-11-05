@@ -6,6 +6,7 @@
 #include "feta.h"
 #include "hud.h"
 #include "hurtbox.h"
+#include "input.h"
 #include "items/cheese.h"
 #include "items/item.h"
 #include "items/persister.h"
@@ -109,10 +110,10 @@ void Cheddar::step() {
   // ---- items ----
 
   if (!this->items.empty()) {
-    if (thoom::local_controller.is_hit(thoom::Button::DIGIT)) {
+    if (thoom::Input::instance->world.consume_hit(thoom::Button::DIGIT)) {
       // -1 reserved for no item; 0+ for indexing into this->items
       // (note that the first number key is 1, not 0, hence subtract 2)
-      int new_item = thoom::local_controller.digit - 2;
+      int new_item = thoom::Input::instance->world.digit - 2;
 
       if (new_item >= -1 && new_item < (int)this->items.size()) {
         this->sel_item = new_item;
@@ -142,7 +143,7 @@ void Cheddar::step() {
   float mov_speed = 0.0f;
   int x_dir = 0, y_dir = 0;
 
-  int dancing_animation = thoom::local_controller.cheat_code(1, 2, 3, 4)
+  int dancing_animation = thoom::Input::instance->world.cheat_code(1, 2, 3, 4)
                               ? DANCING2_ANIMATION
                               : DANCING_ANIMATION;
 
@@ -151,7 +152,7 @@ void Cheddar::step() {
 
     case FALSE:
       // dancing
-      if (thoom::local_controller.is_down(thoom::Button::DANCE)) {
+      if (thoom::Input::instance->world.down[thoom::Button::DANCE]) {
         this->sprite->set_animation(dancing_animation);
         this->sprite->update_frame();
         this->sprite->interval_ms = 200;
@@ -164,10 +165,8 @@ void Cheddar::step() {
       }
 
       // move using arrow keys
-      x_dir = int(thoom::local_controller.is_down(thoom::Button::RIGHT)) -
-              int(thoom::local_controller.is_down(thoom::Button::LEFT));
-      y_dir = int(thoom::local_controller.is_down(thoom::Button::DOWN)) -
-              int(thoom::local_controller.is_down(thoom::Button::UP));
+      x_dir = thoom::Input::instance->world.held_dx();
+      y_dir = thoom::Input::instance->world.held_dy();
 
       if (x_dir != 0 || y_dir != 0) {
         this->sprite->set_animation(thoom::direction_from_dirs(x_dir, y_dir));
@@ -190,7 +189,7 @@ void Cheddar::step() {
         mov_speed *= item_info[sel_item_id].speed;
       }
 
-      if (thoom::local_controller.is_hit(thoom::Button::ATTACK)) {
+      if (thoom::Input::instance->world.consume_hit(thoom::Button::ATTACK)) {
         this->busy_ticks = thoom::Scene::instance->ticks;
 
         switch (item_info[sel_item_id].type) {
@@ -272,7 +271,8 @@ void Cheddar::step() {
           default:
             break;
         }
-      } else if (thoom::local_controller.is_hit(thoom::Button::TOSS) &&
+      } else if (thoom::Input::instance->world.consume_hit(
+                     thoom::Button::TOSS) &&
                  sel_item_id != ITEM_NONE && sel_item_id != ITEM_SAVE) {
         this->busy_ticks = thoom::Scene::instance->ticks;
 
@@ -305,10 +305,8 @@ void Cheddar::step() {
 
     case ATTACKING: {
       // move slower using arrow keys
-      x_dir = int(thoom::local_controller.is_down(thoom::Button::RIGHT)) -
-              int(thoom::local_controller.is_down(thoom::Button::LEFT));
-      y_dir = int(thoom::local_controller.is_down(thoom::Button::DOWN)) -
-              int(thoom::local_controller.is_down(thoom::Button::UP));
+      x_dir = thoom::Input::instance->world.held_dx();
+      y_dir = thoom::Input::instance->world.held_dy();
       mov_speed = this->max_mov_speed / 2.0f;
 
       // longer cooldown when actually hit enemy
@@ -346,10 +344,8 @@ void Cheddar::step() {
 
     case THROWING:
       // move slower using arrow keys
-      x_dir = int(thoom::local_controller.is_down(thoom::Button::RIGHT)) -
-              int(thoom::local_controller.is_down(thoom::Button::LEFT));
-      y_dir = int(thoom::local_controller.is_down(thoom::Button::DOWN)) -
-              int(thoom::local_controller.is_down(thoom::Button::UP));
+      x_dir = thoom::Input::instance->world.held_dx();
+      y_dir = thoom::Input::instance->world.held_dy();
       mov_speed = this->max_mov_speed / 2.0f;
 
       this->sprite->interval_ms = 125;
@@ -512,7 +508,16 @@ void Cheddar::step() {
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 22);
 
-  this->which_emote = thoom::local_controller.cheat_last(9, 8, 7);
+  thoom::Controller* world = &thoom::Input::instance->world;
+  int emote = world->digit;
+
+  if (emote != -1 && world->cheat_code(9, 8, 7, emote)) {
+    this->which_emote = emote;
+  } else if (this->which_emote != -1 &&
+             !world->cheat_code(9, 8, 7, this->which_emote)) {
+    this->which_emote = -1;
+  }
+
   this->emote_rect.x = this->dst_rect.x;
   this->emote_rect.y = this->dst_rect.y - 11.0f;
 

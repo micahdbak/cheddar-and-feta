@@ -3,10 +3,10 @@
 #include <vector>
 
 #include "constants.h"
-#include "controller.h"
 #include "font.h"
 #include "hud.h"
 #include "icon.h"
+#include "input.h"
 #include "map.h"
 #include "object.h"
 #include "peer.h"
@@ -207,10 +207,8 @@ Editor::~Editor() {
 void Editor::step() {
   if (!this->user_inputting) {
     // move the selected tile on input
-    this->sel_x += int(thoom::local_controller.is_hit(thoom::Button::RIGHT)) -
-                   int(thoom::local_controller.is_hit(thoom::Button::LEFT));
-    this->sel_y += int(thoom::local_controller.is_hit(thoom::Button::DOWN)) -
-                   int(thoom::local_controller.is_hit(thoom::Button::UP));
+    this->sel_x += thoom::Input::instance->world.consume_hit_dx();
+    this->sel_y += thoom::Input::instance->world.consume_hit_dy();
     this->sel_x = THOOM_CLAMP(this->sel_x, 0, this->map->cols - 1);
     this->sel_y = THOOM_CLAMP(this->sel_y, 0, this->map->rows - 1);
 
@@ -258,7 +256,7 @@ void Editor::step() {
         Hud::instance->ui, MONO_FONT, std::string(status_text), 0,
         THOOM_SCREEN_HEIGHT - 11, 0, kBackground);
 
-    switch (thoom::local_controller.c) {
+    switch (thoom::Input::instance->world.character) {
       case 'h':
         this->map->write(this->map_path.c_str());
         break;
@@ -291,7 +289,6 @@ void Editor::step() {
         break;
       case 'x': {
         std::cout << "exporting map to mapdump.bmp" << std::endl;
-        thoom::local_controller.c = NO_CHAR;
         SDL_Surface* _bg = thoom::Window::instance->read_pixels(
             this->map->layers[thoom::Map::kBackgroundLayer]->texture);
         SDL_SaveBMP(_bg, "mapdump.bmp");
@@ -300,9 +297,9 @@ void Editor::step() {
       default:
         break;
     }
-    thoom::local_controller.c = NO_CHAR;
+    thoom::Input::instance->world.character = '\0';
 
-    if (thoom::local_controller.is_hit(thoom::Button::ATTACK) &&
+    if (thoom::Input::instance->world.consume_hit(thoom::Button::ATTACK) &&
         this->sel_tilesheet >= 0 && this->sel_ts2_x >= 0) {
       if (this->layer != COLLISION) {
         int _x = THOOM_MIN(this->sel_ts_x, this->sel_ts2_x);
@@ -348,7 +345,7 @@ void Editor::step() {
           }
         }
       }
-    } else if (thoom::local_controller.is_hit(thoom::Button::TOSS) &&
+    } else if (thoom::Input::instance->world.consume_hit(thoom::Button::TOSS) &&
                this->sel_tilesheet >= 0 && this->sel_ts2_x >= 0) {
       int _x = THOOM_MIN(this->sel_ts_x, this->sel_ts2_x);
       int _y = THOOM_MIN(this->sel_ts_y, this->sel_ts2_y);
@@ -366,7 +363,7 @@ void Editor::step() {
       object.options = buff;
       this->map->objects.push_back(object);
       this->render_objects();
-    } else if (thoom::local_controller.is_down(thoom::Button::SELECT) &&
+    } else if (thoom::Input::instance->world.down[thoom::Button::SELECT] &&
                this->sel_tilesheet >= 0) {
       if (this->layer == COLLISION) {
         this->map->collider->collision[coord] = this->sel_collider;
@@ -399,7 +396,8 @@ void Editor::step() {
           this->map->render_tile(this->sel_x, this->sel_y);
         }
       }
-    } else if (thoom::local_controller.is_hit(thoom::Button::CANCEL)) {
+    } else if (thoom::Input::instance->world.consume_hit(
+                   thoom::Button::CANCEL)) {
       if (this->layer == COLLISION) {
         this->map->collider->collision[coord] = -1;
         this->render_collision_tile(this->collision_texture, this->sel_x,
@@ -448,8 +446,8 @@ void Editor::step() {
 
 void Editor::input_tile() {
   // end inputting
-  if (thoom::local_controller.is_hit(thoom::Button::SELECT) ||
-      thoom::local_controller.is_hit(thoom::DIGIT)) {
+  if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT) ||
+      thoom::Input::instance->world.consume_hit(thoom::Button::DIGIT)) {
     this->user_inputting = false;
     thoom::Renderer::instance->clear(Hud::instance->ui, thoom::kMask);
     return;
@@ -457,21 +455,15 @@ void Editor::input_tile() {
 
   // update selected collider or tile
   if (this->layer == COLLISION) {
-    this->sel_collider +=
-        int(thoom::local_controller.is_hit(thoom::Button::RIGHT)) -
-        int(thoom::local_controller.is_hit(thoom::Button::LEFT));
-    int y_dir = int(thoom::local_controller.is_hit(thoom::Button::DOWN)) -
-                int(thoom::local_controller.is_hit(thoom::Button::UP));
+    this->sel_collider += thoom::Input::instance->world.consume_hit_dx();
+    int y_dir = thoom::Input::instance->world.consume_hit_dy();
     this->sel_collider += y_dir * 14;
 
     this->sel_collider =
         THOOM_CLAMP(this->sel_collider + 1, 0, thoom::n_MapColliders) - 1;
   } else {
-    this->sel_ts_x +=
-        int(thoom::local_controller.is_hit(thoom::Button::RIGHT)) -
-        int(thoom::local_controller.is_hit(thoom::Button::LEFT));
-    this->sel_ts_y += int(thoom::local_controller.is_hit(thoom::Button::DOWN)) -
-                      int(thoom::local_controller.is_hit(thoom::Button::UP));
+    this->sel_ts_x += thoom::Input::instance->world.consume_hit_dx();
+    this->sel_ts_y += thoom::Input::instance->world.consume_hit_dy();
     this->sel_ts_x =
         THOOM_CLAMP(this->sel_ts_x, 0,
                     this->map->tilesheets[this->sel_tilesheet]->cols - 1);
@@ -479,10 +471,12 @@ void Editor::input_tile() {
         THOOM_CLAMP(this->sel_ts_y, 0,
                     this->map->tilesheets[this->sel_tilesheet]->rows - 1);
 
-    if (thoom::local_controller.is_hit(thoom::Button::ATTACK)) {  // space
+    if (thoom::Input::instance->world.consume_hit(
+            thoom::Button::ATTACK)) {  // space
       this->sel_ts2_x = this->sel_ts_x;
       this->sel_ts2_y = this->sel_ts_y;
-    } else if (thoom::local_controller.is_hit(thoom::Button::TOSS)) {  // c
+    } else if (thoom::Input::instance->world.consume_hit(
+                   thoom::Button::TOSS)) {  // c
       this->sel_ts2_x = this->sel_ts2_y = -1;
     }
   }
@@ -557,7 +551,7 @@ void Editor::input_sheet() {
   int sel_i, nfields;
   nfields = sscanf(this->text.c_str(), "%d", &sel_i);
 
-  if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
+  if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
     if (text.empty()) {
       // close
       this->user_inputting = false;
@@ -568,10 +562,11 @@ void Editor::input_sheet() {
     }
   }
 
-  if (thoom::local_controller.is_hit(thoom::Button::CANCEL) && !text.empty())
+  if (thoom::Input::instance->world.consume_hit(thoom::Button::CANCEL) &&
+      !text.empty())
     this->text.pop_back();
-  else if (thoom::local_controller.c != NO_CHAR)
-    this->text.push_back(thoom::local_controller.c);
+  else if (thoom::Input::instance->world.character != '\0')
+    this->text.push_back(thoom::Input::instance->world.character);
 
   std::string display_text = "Tilesheet: " + this->text +
                              "\n<Return> to select or close (when empty)\n\n";

@@ -1,7 +1,7 @@
 #include "game_over.h"
 
 #include "constants.h"
-#include "controller.h"
+#include "input.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "texture.h"
@@ -28,7 +28,7 @@ void GameOver::step() {
   thoom::Renderer::instance->push_sprite("", this->ui, &this->src, &this->dst,
                                          0);
 
-  if (thoom::local_controller.is_hit(thoom::Button::SELECT)) {
+  if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
     thoom::Scene::instance->request_map("maps/init");
     thoom::save.clear();
   }

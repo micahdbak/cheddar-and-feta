@@ -3,9 +3,9 @@
 
 #include "audio.h"
 #include "constants.h"
-#include "controller.h"
 #include "hud.h"
 #include "icon.h"
+#include "input.h"
 #include "peer.h"
 #include "render_functions.h"
 #include "renderer.h"
@@ -16,9 +16,6 @@
 #include "ui_box.h"
 #include "window.h"
 
-bool thoom::capture_controls = false;
-thoom::Controller thoom::local_controller, thoom::remote_controller,
-    thoom::captured_controller;
 bool game_is_cheddar = false;
 
 void game_init(int argc, char** argv);
@@ -28,6 +25,7 @@ int main(int argc, char** argv) {
   thoom::Renderer::init();
   thoom::Audio::init();
   thoom::Texture::init();
+  thoom::Input::init();
   register_render_functions();
 
   thoom::Scene::init();
@@ -44,10 +42,6 @@ int main(int argc, char** argv) {
   while (running) {
     SDL_Event event;
 
-    thoom::Controller* controller = thoom::capture_controls
-                                        ? &thoom::captured_controller
-                                        : &thoom::local_controller;
-
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
         case SDL_EVENT_WINDOW_RESIZED:
@@ -55,14 +49,8 @@ int main(int argc, char** argv) {
           break;
 
         case SDL_EVENT_KEY_DOWN:
-          if (!event.key.repeat) {
-            controller->handle_key_down(event.key.key);
-            controller->last_input = event.key.key;
-          }
-          break;
-
         case SDL_EVENT_KEY_UP:
-          controller->handle_key_up(event.key.key);
+          thoom::Input::instance->handle_key_event(event);
           break;
 
         case SDL_EVENT_QUIT:
@@ -85,9 +73,7 @@ int main(int argc, char** argv) {
     thoom::Renderer::instance->draw_sprites();
     thoom::Renderer::instance->draw_map_foreground(map);
 
-    if (thoom::local_controller.c == 'p' ||
-        thoom::captured_controller.c == 'p') {
-      thoom::local_controller.c = NO_CHAR;
+    if (thoom::Input::instance->world.character == 'p') {
       thoom::Window::instance->save_screenshot("screenshot.bmp");
     }
 
@@ -98,7 +84,7 @@ int main(int argc, char** argv) {
     thoom::Renderer::instance->draw_texture(thoom::Window::instance->screen,
                                             Hud::instance->overlay, NULL, NULL);
 
-    controller->clear_hits();
+    thoom::Input::instance->clear_hit_input();
 
     thoom::Window::instance->present(bg);
   }
@@ -108,6 +94,7 @@ int main(int argc, char** argv) {
   thoom::Scene::shutdown();
 
   thoom::Peer::shutdown();
+  thoom::Input::shutdown();
   thoom::Texture::shutdown();
   thoom::Audio::shutdown();
 

@@ -1,7 +1,6 @@
 #include "bell.h"
 
 #include "audio.h"
-#include "controller.h"
 #include "mouse.h"
 #include "renderer.h"
 #include "spawner.h"

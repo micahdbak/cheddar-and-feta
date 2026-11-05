@@ -3,10 +3,10 @@
 #include <string>
 
 #include "constants.h"
-#include "controller.h"
 #include "feta.h"
 #include "font.h"
 #include "hud.h"
+#include "input.h"
 #include "item.h"
 #include "peer.h"
 #include "peer_receiver.h"
@@ -114,12 +114,12 @@ void Init::step() {
       static const int rows = 4;
       bool valid_code = this->code.size() == 6;
 
-      int x_dir = thoom::local_controller.is_hit(thoom::Button::RIGHT) -
-                  thoom::local_controller.is_hit(thoom::Button::LEFT);
-      int y_dir = thoom::local_controller.is_hit(thoom::Button::DOWN) -
-                  thoom::local_controller.is_hit(thoom::Button::UP);
-      bool select = thoom::local_controller.is_hit(thoom::Button::SELECT);
-      bool remove = thoom::local_controller.is_hit(thoom::Button::CANCEL);
+      int x_dir = thoom::Input::instance->world.consume_hit_dx();
+      int y_dir = thoom::Input::instance->world.consume_hit_dy();
+      bool select =
+          thoom::Input::instance->world.consume_hit(thoom::Button::SELECT);
+      bool remove =
+          thoom::Input::instance->world.consume_hit(thoom::Button::CANCEL);
 
       this->sel_c += x_dir;
       this->sel_c += y_dir * cols;

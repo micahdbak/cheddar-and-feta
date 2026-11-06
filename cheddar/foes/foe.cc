@@ -2,10 +2,10 @@
 
 #include <vector>
 
-#include "macros.h"
 #include "mouse.h"
 #include "scene.h"
 #include "spawner.h"
+#include "thoom/macros.h"
 #include "utils.h"
 
 std::vector<Foe*> foes;

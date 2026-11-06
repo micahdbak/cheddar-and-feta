@@ -1,6 +1,6 @@
 add_executable(feta
+  main.cc
   feta.cc
-  init.cc
   mouse.cc
   peer_receiver.cc
   peer_sender.cc

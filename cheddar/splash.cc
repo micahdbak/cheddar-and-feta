@@ -9,12 +9,12 @@
 #include "colour.h"
 #include "controller.h"
 #include "input.h"
-#include "macros.h"
 #include "object.h"
 #include "renderer.h"
 #include "scene.h"
 #include "sprite.h"
 #include "texture.h"
+#include "thoom/macros.h"
 #include "window.h"
 
 Splash::Splash() {

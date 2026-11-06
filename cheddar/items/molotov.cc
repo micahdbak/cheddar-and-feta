@@ -7,11 +7,11 @@
 #include "fire.h"
 #include "hitbox.h"
 #include "items/item.h"
-#include "macros.h"
 #include "object.h"
 #include "renderer.h"
 #include "scene.h"
 #include "sprite.h"
+#include "thoom/macros.h"
 #include "utils.h"
 
 ThrownMolotov::ThrownMolotov(float x, float y, int x_dir, int y_dir,

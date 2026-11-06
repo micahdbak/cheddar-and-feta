@@ -1,4 +1,5 @@
 add_executable(cheddar
+  main.cc
   billboard.cc
   cheddar.cc
   credits.cc
@@ -19,7 +20,6 @@ add_executable(cheddar
   game_over.cc
   hitbox.cc
   hurtbox.cc
-  init.cc
   items/cannon_ball.cc
   items/cheese.cc
   items/fire.cc

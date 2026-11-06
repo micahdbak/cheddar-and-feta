@@ -4,9 +4,9 @@
 #include <cstdio>
 #include <string>
 
-#include "macros.h"
 #include "object.h"
 #include "scene.h"
+#include "thoom/macros.h"
 
 #define HITBOX_OBJ "hitbox"
 

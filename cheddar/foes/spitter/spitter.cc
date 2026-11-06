@@ -12,7 +12,6 @@
 #include "icon.h"
 #include "items/fire.h"
 #include "items/item.h"
-#include "macros.h"
 #include "mouse.h"
 #include "object.h"
 #include "renderer.h"
@@ -20,6 +19,7 @@
 #include "scene.h"
 #include "segment.h"
 #include "sprite.h"
+#include "thoom/macros.h"
 #include "utils.h"
 
 Spitter::Spitter(float x, float y, int spawner_id)

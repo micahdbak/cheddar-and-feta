@@ -1,29 +1,120 @@
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
+
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <unordered_map>
 
+#include "audio.h"
 #include "colour.h"
 #include "constants.h"
 #include "controller.h"
 #include "feta.h"
 #include "font.h"
 #include "hud.h"
+#include "icon.h"
 #include "input.h"
 #include "item.h"
-#include "macros.h"
+#include "map.h"
 #include "object.h"
 #include "peer.h"
 #include "peer_receiver.h"
 #include "peer_sender.h"
+#include "render_functions.h"
 #include "renderer.h"
 #include "scene.h"
+#include "sounds.h"
 #include "texture.h"
+#include "thoom/macros.h"
+#include "thoom/thoom.h"
 #include "ui_box.h"
 #include "window.h"
 
 #define INIT_OBJ "load_save"
 
+bool game_is_cheddar = false;
+
 std::unordered_map<std::string, Item> item_info;
+
+bool init(int argc, char** argv);
+
+int main(int argc, char** argv) {
+  if (!thoom_init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
+                  true)) {
+    return 1;
+  }
+
+  register_render_functions();
+
+  if (!thoom::Scene::init()) {
+    thoom_quit();
+    return 1;
+  }
+
+  if (!init(argc, argv)) {
+    thoom::Scene::quit();
+    thoom_quit();
+    return 1;
+  }
+
+  load_ui_box();
+  load_icons();
+  Hud::init();
+
+  load_sounds();
+
+  bool running = true;
+
+  while (running) {
+    bool quit = false;
+    thoom_poll_events(&quit);
+
+    if (quit) {
+      running = false;
+      break;
+    }
+
+    thoom::Audio::instance->step();
+    thoom::Scene::instance->step();
+
+    thoom::Map* map = thoom::Scene::instance->map;
+    thoom::Colour bg = map != nullptr ? map->background : thoom::kBlack;
+    thoom::Window::instance->clear_screen(bg);
+    thoom::Renderer::instance->draw_map_background(map);
+    thoom::Renderer::instance->draw_sprites();
+    thoom::Renderer::instance->draw_map_foreground(map);
+
+    if (thoom::Input::instance->world.character == 'p') {
+      thoom::Window::instance->save_screenshot("screenshot.bmp");
+    }
+
+    Hud::instance->render();
+
+    thoom::Renderer::instance->draw_texture(thoom::Window::instance->screen,
+                                            Hud::instance->ui, NULL, NULL);
+    thoom::Renderer::instance->draw_texture(thoom::Window::instance->screen,
+                                            Hud::instance->overlay, NULL, NULL);
+
+    thoom::Input::instance->clear_hit_input();
+
+    thoom::Window::instance->present(bg);
+  }
+
+  Hud::shutdown();
+
+  thoom::Scene::quit();
+
+  SDL_DestroyTexture(ui_box);
+  ui_box = nullptr;
+
+  SDL_DestroyTexture(icons);
+  icons = nullptr;
+
+  thoom_quit();
+
+  return 0;
+}
 
 class Init : public thoom::Object {
  public:
@@ -62,9 +153,7 @@ static const thoom::Scene::ObjectDef kFetaObjects[] = {
     {nullptr, nullptr},
 };
 
-void game_init(int argc, char** argv) {
-  game_is_cheddar = false;
-
+bool init(int argc, char** argv) {
   thoom::Scene::instance->register_objects(kFetaObjects);
 
   // items
@@ -86,12 +175,11 @@ void game_init(int argc, char** argv) {
 
   thoom::Window::instance->set_title("Playing as Feta");
 
-  thoom::Peer::init(true);
-
   thoom::Scene::instance->create_object(PEER_RECEIVER_OBJ, "");
   thoom::Scene::instance->create_object(PEER_SENDER_OBJ, "");
 
   thoom::Scene::instance->request_map("maps/init");
+  return true;
 }
 
 void Init::step() {

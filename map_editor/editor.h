@@ -5,18 +5,16 @@
 #include <string>
 #include <vector>
 
+#include "editor_ui.h"
 #include "map.h"
+#include "map_layer.h"
 #include "object.h"
 #include "scene.h"
 
-enum EditorSelectedLayer { BACKGROUND, FOREGROUND, COLLISION };
-
-enum EditorInputMode { INPUT_TILE, INPUT_SHEET };
-
 class Editor : public thoom::Object {
  public:
-  Editor(const std::vector<std::string>& args);
-  ~Editor();
+  explicit Editor(const std::vector<std::string>& args);
+  ~Editor() override;
 
   void step() override;
 
@@ -24,28 +22,25 @@ class Editor : public thoom::Object {
                                       const std::string& options);
 
  private:
-  void input_tile();
-  void input_sheet();
-  void render();
-  void render_collision_tile(SDL_Texture* target, int x, int y, int collider);
+  thoom::MapLayer* map_layer() const;
+  void draw_status() const;
+  void handle_placement();
+  void cycle_layer();
+
+  void set_camera(int x, int y);
+  void draw_view();
   void render_objects();
+  void draw_billboard(const thoom::ObjectRequest& object);
+  void draw_object(const thoom::ObjectRequest& object);
 
   std::string map_path;
   thoom::Map* map = nullptr;
-
+  EditorUI ui;
   EditorSelectedLayer layer = BACKGROUND;
-  int sel_x = 0, sel_y = 0;
-  int sel_tilesheet = -1, sel_ts_x = 0, sel_ts_y = 0, sel_ts2_x = -1,
-      sel_ts2_y = -1;
-  int sel_collider = -1;
+  bool objects_dirty = true;
 
-  bool user_inputting = false;
-  EditorInputMode input_mode;
-  std::string text;
-
-  SDL_Texture* texture = nullptr;
-  SDL_FRect src_rect, dst_rect;
-  SDL_Texture* objects = nullptr;
-
-  SDL_Texture *collision_texture = nullptr, *collision_sheet = nullptr;
+  SDL_Texture* view_texture = nullptr;
+  SDL_Texture* objects_texture = nullptr;
+  SDL_FRect viewport;
+  SDL_FRect world_rect;
 };

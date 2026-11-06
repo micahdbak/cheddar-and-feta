@@ -100,11 +100,7 @@ int main(int argc, char** argv) {
     thoom::Scene::instance->step();
 
     thoom::Map* map = thoom::Scene::instance->map;
-    thoom::Colour bg = map != nullptr ? map->background : thoom::kBlack;
-    thoom::Window::instance->clear_screen(bg);
-    thoom::Renderer::instance->draw_map_background(map);
-    thoom::Renderer::instance->draw_sprites();
-    thoom::Renderer::instance->draw_map_foreground(map);
+    thoom::Renderer::instance->draw_world(map);
 
     if (thoom::Input::instance->world.character == 'p') {
       thoom::Window::instance->save_screenshot("screenshot.bmp");
@@ -119,6 +115,7 @@ int main(int argc, char** argv) {
 
     thoom::Input::instance->clear_hit_input();
 
+    thoom::Colour bg = map != nullptr ? map->background : thoom::kBlack;
     thoom::Window::instance->present(bg);
   }
 

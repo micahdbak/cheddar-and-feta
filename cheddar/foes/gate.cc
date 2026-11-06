@@ -49,11 +49,12 @@ FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
    */
 
   for (int i = 0; i < 3; i++) {
-    int coord = this->colliders_offset + this->colliders_x + i;
+    int collider_x = this->colliders_x + i;
+    int collider_y = this->colliders_offset / thoom::Scene::instance->map->cols;
     this->colliders.push_back(
-        thoom::Scene::instance->map->collider->collision[coord]);
-    thoom::Scene::instance->map->collider->collision[coord] =
-        0;  // solid collider
+        thoom::Scene::instance->map->collider->get(collider_x, collider_y));
+    thoom::Scene::instance->map->collider->set(collider_x, collider_y,
+                                               0);  // solid collider
   }
 }
 
@@ -64,12 +65,15 @@ void FoeGate::step() {
     this->synchronized = false;
   } else if (!this->synchronized) {
     for (int i = 0; i < 3; i++) {
+      int collider_x = this->colliders_x + i;
+      int collider_y =
+          this->colliders_offset / thoom::Scene::instance->map->cols;
       int coord = this->colliders_offset + this->colliders_x + i;
       PeerSender::send_message(
           MSG_COLLISION,
           std::to_string(coord) + ',' +
-              std::to_string(
-                  thoom::Scene::instance->map->collider->collision[coord]));
+              std::to_string(thoom::Scene::instance->map->collider->get(
+                  collider_x, collider_y)));
     }
 
     this->synchronized = true;
@@ -79,9 +83,11 @@ void FoeGate::step() {
       spawners[this->spawner_id]->empty) {
     // remove colliders
     for (int i = 0; i < 3; i++) {
-      int coord = this->colliders_offset + this->colliders_x + i;
-      thoom::Scene::instance->map->collider->collision[coord] =
-          this->colliders[i];
+      int collider_x = this->colliders_x + i;
+      int collider_y =
+          this->colliders_offset / thoom::Scene::instance->map->cols;
+      thoom::Scene::instance->map->collider->set(collider_x, collider_y,
+                                                 this->colliders[i]);
     }
 
     this->colliders.clear();

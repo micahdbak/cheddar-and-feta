@@ -127,12 +127,11 @@ void Foe::foe_step() {
 
       int current_x = (int)this->x / thoom::Scene::instance->map->tile_width;
       int current_y = (int)this->y / thoom::Scene::instance->map->tile_height;
-      int coord = (current_y * thoom::Scene::instance->map->cols) + current_x;
-
-      if (coord >= 0 &&
-          coord < thoom::Scene::instance->map->cols *
-                      thoom::Scene::instance->map->rows &&
-          thoom::Scene::instance->map->collider->collision[coord] < 0) {
+      if (current_x >= 0 && current_y >= 0 &&
+          current_x < thoom::Scene::instance->map->cols &&
+          current_y < thoom::Scene::instance->map->rows &&
+          thoom::Scene::instance->map->collider->get(current_x, current_y) <
+              0) {
         this->target_x = current_x;
         this->target_y = current_y;
       } else {
@@ -202,12 +201,11 @@ void Foe::foe_step() {
 
       int current_x = (int)this->x / thoom::Scene::instance->map->tile_width;
       int current_y = (int)this->y / thoom::Scene::instance->map->tile_height;
-      int coord = (current_y * thoom::Scene::instance->map->cols) + current_x;
-
-      if (coord >= 0 &&
-          coord < thoom::Scene::instance->map->cols *
-                      thoom::Scene::instance->map->rows &&
-          thoom::Scene::instance->map->collider->collision[coord] < 0) {
+      if (current_x >= 0 && current_y >= 0 &&
+          current_x < thoom::Scene::instance->map->cols &&
+          current_y < thoom::Scene::instance->map->rows &&
+          thoom::Scene::instance->map->collider->get(current_x, current_y) <
+              0) {
         this->target_x = current_x;
         this->target_y = current_y;
       } else {
@@ -244,12 +242,11 @@ void Foe::foe_step() {
 
       int current_x = (int)this->x / thoom::Scene::instance->map->tile_width;
       int current_y = (int)this->y / thoom::Scene::instance->map->tile_height;
-      int coord = (current_y * thoom::Scene::instance->map->cols) + current_x;
-
-      if (coord >= 0 &&
-          coord < thoom::Scene::instance->map->cols *
-                      thoom::Scene::instance->map->rows &&
-          thoom::Scene::instance->map->collider->collision[coord] < 0) {
+      if (current_x >= 0 && current_y >= 0 &&
+          current_x < thoom::Scene::instance->map->cols &&
+          current_y < thoom::Scene::instance->map->rows &&
+          thoom::Scene::instance->map->collider->get(current_x, current_y) <
+              0) {
         this->target_x = current_x;
         this->target_y = current_y;
       } else {

@@ -10,6 +10,7 @@
 #include "audio.h"
 #include "collider.h"
 #include "feta.h"
+#include "icon.h"
 #include "object.h"
 #include "peer.h"
 #include "renderer.h"
@@ -164,7 +165,12 @@ void PeerReceiver::step() {
           continue;
         }
 
-        sprite.texture = thoom::Texture::instance->load(sprite.tex_id);
+        // Icons are embedded in shared, so they are not on disk.
+        if (sprite.tex_id == "sprites/icons.bmp") {
+          sprite.texture = icons;
+        } else {
+          sprite.texture = thoom::Texture::instance->load(sprite.tex_id);
+        }
 
         if (sprite.texture == nullptr) {
           continue;

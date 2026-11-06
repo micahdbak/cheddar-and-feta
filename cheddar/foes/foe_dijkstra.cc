@@ -19,7 +19,7 @@
   }
 #define COORD(x, y) (((y) * cols) + (x))
 #define COLLISION(x, y) \
-  (thoom::Scene::instance->map->collider->collision[COORD((x), (y))] >= 0)
+  (thoom::Scene::instance->map->collider->get((x), (y)) >= 0)
 #define DIST_ADJACENT 10000
 #define DIST_DIAGONAL 14142
 #define MAX_DISTANCE DIST_ADJACENT * 24  // tiles radius
@@ -303,8 +303,7 @@ void foe_pick_random(int* x, int* y) {
 void foe_move_direction(int* x, int* y, int x_dir, int y_dir) {
   int x_goal = *x + x_dir, y_goal = *y + y_dir;
 
-  if (thoom::Scene::instance->map->collider->collision[COORD(x_goal, y_goal)] <
-      0) {
+  if (thoom::Scene::instance->map->collider->get(x_goal, y_goal) < 0) {
     *x = x_goal;
     *y = y_goal;
   } else {

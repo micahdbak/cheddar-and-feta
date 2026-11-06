@@ -335,7 +335,9 @@ bool PeerReceiver::handle_important_message(const char* arr) {
           coord < thoom::Scene::instance->map->cols *
                       thoom::Scene::instance->map->rows &&
           collider >= 0 && collider < thoom::n_MapColliders) {
-        thoom::Scene::instance->map->collider->collision[coord] = collider;
+        int x = coord % thoom::Scene::instance->map->cols;
+        int y = coord / thoom::Scene::instance->map->cols;
+        thoom::Scene::instance->map->collider->set(x, y, collider);
       }
 
       break;

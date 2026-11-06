@@ -16,12 +16,12 @@
 #include "font.h"
 #include "icon.h"
 #include "input.h"
-#include "macros.h"
 #include "peer.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "scene.h"
 #include "texture.h"
+#include "thoom/macros.h"
 #include "ui_box.h"
 #include "window.h"
 

@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "macros.h"
 #include "peer.h"
 
 #define UI_BOX_CONTAINER 0
@@ -40,7 +39,6 @@ class Hud {
 
   Hud();
   ~Hud();
-  DISALLOW_COPY_AND_MOVE(Hud);
 
   void render();
   void display_notification(std::string text);

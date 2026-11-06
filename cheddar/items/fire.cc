@@ -5,11 +5,11 @@
 #include <string>
 
 #include "hitbox.h"
-#include "macros.h"
 #include "object.h"
 #include "renderer.h"
 #include "scene.h"
 #include "sprite.h"
+#include "thoom/macros.h"
 
 static int fire_counter = 0;
 

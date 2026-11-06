@@ -7,11 +7,11 @@
 #include "foes/spitter/spitter.h"
 #include "hitbox.h"
 #include "hurtbox.h"
-#include "macros.h"
 #include "object.h"
 #include "renderer.h"
 #include "scene.h"
 #include "sprite.h"
+#include "thoom/macros.h"
 #include "utils.h"
 
 SpitterSegment::SpitterSegment(int parent_id, int segment_id)

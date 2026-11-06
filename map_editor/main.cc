@@ -2,38 +2,47 @@
 #include <SDL3/SDL_main.h>
 
 #include <cstddef>
-#include <cstdlib>
+#include <iostream>
+#include <string>
 
 #include "audio.h"
 #include "colour.h"
 #include "constants.h"
+#include "editor.h"
 #include "hud.h"
 #include "icon.h"
 #include "input.h"
 #include "map.h"
-#include "peer.h"
 #include "render_functions.h"
 #include "renderer.h"
 #include "scene.h"
 #include "sounds.h"
-#include "texture.h"
+#include "thoom/thoom.h"
 #include "ui_box.h"
 #include "window.h"
 
 bool game_is_cheddar = false;
 
-void game_init(int argc, char** argv);
+bool init(int argc, char** argv);
 
 int main(int argc, char** argv) {
-  thoom::Window::init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT);
-  thoom::Renderer::init();
-  thoom::Audio::init();
-  thoom::Texture::init();
-  thoom::Input::init();
+  if (!thoom_init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
+                  false)) {
+    return 1;
+  }
+
   register_render_functions();
 
-  thoom::Scene::init();
-  game_init(argc, argv);
+  if (!thoom::Scene::init()) {
+    thoom_quit();
+    return 1;
+  }
+
+  if (!init(argc, argv)) {
+    thoom::Scene::quit();
+    thoom_quit();
+    return 1;
+  }
 
   load_ui_box();
   load_icons();
@@ -44,27 +53,12 @@ int main(int argc, char** argv) {
   bool running = true;
 
   while (running) {
-    SDL_Event event;
+    bool quit = false;
+    thoom_poll_events(&quit);
 
-    while (SDL_PollEvent(&event)) {
-      switch (event.type) {
-        case SDL_EVENT_WINDOW_RESIZED:
-          thoom::Window::instance->update_screen_scale();
-          break;
-
-        case SDL_EVENT_KEY_DOWN:
-        case SDL_EVENT_KEY_UP:
-          thoom::Input::instance->handle_key_event(event);
-          break;
-
-        case SDL_EVENT_QUIT:
-          running = false;
-          break;
-
-        default:
-          // pass
-          break;
-      }
+    if (quit) {
+      running = false;
+      break;
     }
 
     thoom::Audio::instance->step();
@@ -95,12 +89,7 @@ int main(int argc, char** argv) {
 
   Hud::shutdown();
 
-  thoom::Scene::shutdown();
-
-  thoom::Peer::shutdown();
-  thoom::Input::shutdown();
-  thoom::Texture::shutdown();
-  thoom::Audio::shutdown();
+  thoom::Scene::quit();
 
   SDL_DestroyTexture(ui_box);
   ui_box = nullptr;
@@ -108,8 +97,32 @@ int main(int argc, char** argv) {
   SDL_DestroyTexture(icons);
   icons = nullptr;
 
-  thoom::Renderer::shutdown();
-  thoom::Window::shutdown();
+  thoom_quit();
 
-  exit(0);
+  return 0;
+}
+
+bool init(int argc, char** argv) {
+  if (argc < 2) {
+    std::cerr << "Please provide a map to edit via the command line."
+              << std::endl;
+    return false;
+  }
+
+  std::string options;
+  for (int i = 1; i < argc; i++) {
+    if (i > 1) options += '\n';
+    options += argv[i];
+  }
+
+  thoom::Scene::ObjectDef editor;
+  editor.id = "editor";
+  editor.create_object = Editor::create_object;
+  thoom::Scene::instance->register_object(editor);
+  thoom::Scene::instance->create_object("editor", options);
+
+  std::string title = "Map Editor - " + std::string(argv[1]);
+  thoom::Window::instance->set_title(title.c_str());
+
+  return true;
 }

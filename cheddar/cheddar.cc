@@ -20,7 +20,6 @@
 #include "items/persister.h"
 #include "items/save.h"
 #include "items/tossed.h"
-#include "macros.h"
 #include "mouse.h"
 #include "object.h"
 #include "peer.h"
@@ -28,6 +27,7 @@
 #include "save_data.h"
 #include "scene.h"
 #include "sprite.h"
+#include "thoom/macros.h"
 #include "utils.h"
 
 Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,

@@ -6,12 +6,12 @@
 
 #include "hitbox.h"
 #include "item.h"
-#include "macros.h"
 #include "mouse.h"
 #include "object.h"
 #include "renderer.h"
 #include "scene.h"
 #include "sprite.h"
+#include "thoom/macros.h"
 
 ThrownCannonBall::ThrownCannonBall(float x, float y, int x_dir, int y_dir,
                                    int from_id)

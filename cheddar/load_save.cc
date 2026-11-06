@@ -8,12 +8,12 @@
 #include "font.h"
 #include "hud.h"
 #include "input.h"
-#include "macros.h"
 #include "object.h"
 #include "renderer.h"
 #include "save_data.h"
 #include "scene.h"
 #include "textbox.h"
+#include "thoom/macros.h"
 #include "ui_box.h"
 #include "window.h"
 

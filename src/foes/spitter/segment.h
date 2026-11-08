@@ -7,6 +7,7 @@
 #include "object.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/thoom.h"
 
 #define FOE_SPITTER_SEGMENT_OBJ "foe_spitter_segment"
 
@@ -16,7 +17,7 @@ class SpitterSegment : public thoom::Object,
                        public HurtSource,
                        public HitSource {
  public:
-  SpitterSegment(int parent_id, int segment_id);
+  SpitterSegment(thoom_lid parent_lid, int segment_id);
   ~SpitterSegment();
 
   void step() override;
@@ -34,7 +35,7 @@ class SpitterSegment : public thoom::Object,
  private:
   int segment_id, cur_dir, dirs[FRAMES_TO_SET_CUR_DIR], dirs_i;
   float x, y;
-  int parent_id;
+  thoom_lid parent_lid;
   thoom::Sprite* sprite;
   SDL_FRect dst_rect;
 };

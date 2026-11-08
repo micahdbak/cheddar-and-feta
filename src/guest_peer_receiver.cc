@@ -35,11 +35,11 @@ GuestPeerReceiver::~GuestPeerReceiver() {
 
 void GuestPeerReceiver::step() {
   // ensure we are in maps/init if disconnected, and do nothing else
-  if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
+  if (thoom::Peer::instance->get_state() != thoom::Peer::kStateConnected) {
     // if currently in a map other than the init map, reset the peer
     // and go to that
     if (thoom::Scene::instance->map->path != "maps/init") {
-      thoom::Peer::instance->state.store(thoom::Peer::kStateTryReset);
+      thoom::Peer::instance->set_state(thoom::Peer::kStateTryReset);
       thoom::Scene::instance->request_map("maps/init");
       last_frame_ticks = 0;
     }
@@ -60,7 +60,7 @@ void GuestPeerReceiver::step() {
   }
 
   // get all unread messages
-  std::queue<std::string> msgs = thoom::Peer::instance->all_messages();
+  std::queue<std::string> msgs = thoom::Peer::instance->recv_queue.take_all();
 
   // if empty, reuse last frame
   if (msgs.empty()) {
@@ -73,7 +73,7 @@ void GuestPeerReceiver::step() {
     // 5 seconds of no frames; disconnect
     if (thoom::Scene::instance->ticks - last_frame_ticks > 5000 &&
         last_frame_ticks != 0) {
-      thoom::Peer::instance->state.store(thoom::Peer::kStateTryReset);
+      thoom::Peer::instance->set_state(thoom::Peer::kStateTryReset);
       last_frame_ticks = 0;
     }
 

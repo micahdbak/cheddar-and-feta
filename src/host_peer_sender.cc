@@ -16,7 +16,7 @@ HostPeerSender::HostPeerSender() { host_peer_sender = this; }
 HostPeerSender::~HostPeerSender() { host_peer_sender = nullptr; }
 
 void HostPeerSender::step() {
-  if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected)
+  if (thoom::Peer::instance->get_state() != thoom::Peer::kStateConnected)
     return;
 
   std::string frame_msg = MSG_MAP + thoom::Scene::instance->map->path + '\n';
@@ -61,7 +61,7 @@ void HostPeerSender::step() {
 
   this->messages.clear();
 
-  thoom::Peer::instance->send_message(frame_msg);
+  thoom::Peer::instance->send_queue.push(frame_msg);
 }
 
 void HostPeerSender::send_message(char func, const std::string& arg) {
@@ -69,7 +69,7 @@ void HostPeerSender::send_message(char func, const std::string& arg) {
     return;
   }
 
-  if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
+  if (thoom::Peer::instance->get_state() != thoom::Peer::kStateConnected) {
     if (!host_peer_sender->messages.empty()) {
       // don't want a clogged up message queue
       host_peer_sender->messages.clear();

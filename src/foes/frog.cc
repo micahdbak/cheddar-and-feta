@@ -1,5 +1,6 @@
 #include "frog.h"
 
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 
@@ -25,7 +26,7 @@ FoeFrog::FoeFrog(int x, int y, int spawner_id)
   this->icon_offset = 16;
 
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->id, -16, -16, 32, 32));
+      HURTBOX_OBJ, HurtBox::options(this->lid, -16, -16, 32, 32));
 }
 
 FoeFrog::~FoeFrog() {
@@ -48,9 +49,9 @@ void FoeFrog::action(Mouse* mouse) {
   thoom::Audio::instance->play("sfx/cannon.wav", 1.0, this->x, this->y, false);
 
   char options[256];
-  snprintf(options, sizeof(options), "%d,%d,%d,%d,%d",
+  snprintf(options, sizeof(options), "%d,%d,%d,%d,%" PRIu64,
            (int)(this->x + this->off_x), (int)(this->y + this->off_y),
-           this->x_dir, this->y_dir, this->id);
+           this->x_dir, this->y_dir, this->lid);
   thoom::Scene::instance->create_object(std::string(ITEM_CANNON_BALL USE_OBJ),
                                         std::string(options));
 

@@ -5,6 +5,7 @@
 #include "mouse.h"
 #include "object.h"
 #include "scene/scene.h"
+#include "thoom/thoom.h"
 
 #define ITEM_TOOTHPICK "item_toothpick"
 
@@ -30,7 +31,7 @@ class DroppedToothpick : public DroppedItem {
 
 class ThrownToothpick : public thoom::Object, public HitSource {
  public:
-  ThrownToothpick(float x, float y, int x_dir, int y_dir, int from_id);
+  ThrownToothpick(float x, float y, int x_dir, int y_dir, thoom_lid from_lid);
   ~ThrownToothpick();
 
   void step() override;

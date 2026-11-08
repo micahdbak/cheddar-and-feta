@@ -61,7 +61,7 @@ FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
 FoeGate::~FoeGate() { delete this->sprite; }
 
 void FoeGate::step() {
-  if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
+  if (thoom::Peer::instance->get_state() != thoom::Peer::kStateConnected) {
     this->synchronized = false;
   } else if (!this->synchronized) {
     for (int i = 0; i < 3; i++) {

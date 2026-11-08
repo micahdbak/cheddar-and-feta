@@ -1,5 +1,6 @@
 #include "hitbox.h"
 
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -9,12 +10,13 @@
 #include "icon.h"
 #include "object.h"
 #include "scene/scene.h"
+#include "thoom/thoom.h"
 
-HitBox::HitBox(int source_id, int hurtbox_owner_id, int x_off, int y_off, int w,
-               int h, HitBox::Properties props)
+HitBox::HitBox(thoom_lid source_lid, thoom_lid hurtbox_owner_lid, int x_off,
+               int y_off, int w, int h, HitBox::Properties props)
     : bounding_box{0, 0, w, h},
-      source_id(source_id),
-      hurtbox_owner_id(hurtbox_owner_id),
+      source_lid(source_lid),
+      hurtbox_owner_lid(hurtbox_owner_lid),
       x_off(x_off),
       y_off(y_off),
       damage(props.damage),
@@ -29,10 +31,10 @@ HitBox::HitBox(int source_id, int hurtbox_owner_id, int x_off, int y_off, int w,
   // if not from a foe, hit all hurtboxes
   this->from_foe = false;
 
-  if (hurtbox_owner_id != -1) {
+  if (hurtbox_owner_lid != HB_NO_OWNER) {
     // if from a foe, hit only mice
     thoom::Object* owner_obj =
-        thoom::Scene::instance->find_object(hurtbox_owner_id);
+        thoom::Scene::instance->find_object(hurtbox_owner_lid);
     Foe* foe;
     if ((foe = dynamic_cast<Foe*>(owner_obj)) != nullptr) {
       this->from_foe = true;
@@ -46,7 +48,7 @@ HitBox::~HitBox() {
 
 void HitBox::step() {
   thoom::Object* source_object =
-      thoom::Scene::instance->find_object(this->source_id);
+      thoom::Scene::instance->find_object(this->source_lid);
   HitSource* source = dynamic_cast<HitSource*>(source_object);
 
   if (source == nullptr ||
@@ -65,7 +67,7 @@ void HitBox::step() {
       continue;  // don't hit other foes
     }
 
-    if (this->hurtbox_owner_id != hb->owner_id &&
+    if (this->hurtbox_owner_lid != hb->owner_lid &&
         SDL_HasRectIntersection(&this->bounding_box, &hb->bounding_box)) {
       hb->hurt(this->damage, this, this->cooldown_ms);
       source->hitsource_notify();
@@ -90,10 +92,12 @@ void HitBox::step() {
 
 thoom::Object* HitBox::create_object(thoom::Scene* scene,
                                      const std::string& options) {
-  int hitsource_owner_id, hurtbox_owner_id, x_off, y_off, w, h, damage,
-      cooldown_ms, delete_after_ms, shared_cooldowns, shared_id, single_use;
-  if (12 != sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
-                   &hitsource_owner_id, &hurtbox_owner_id, &x_off, &y_off, &w,
+  thoom_lid hitsource_owner_lid, hurtbox_owner_lid;
+  int x_off, y_off, w, h, damage, cooldown_ms, delete_after_ms,
+      shared_cooldowns, shared_id, single_use;
+  if (12 != sscanf(options.c_str(),
+                   "%" SCNu64 ",%" SCNu64 ",%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+                   &hitsource_owner_lid, &hurtbox_owner_lid, &x_off, &y_off, &w,
                    &h, &damage, &cooldown_ms, &delete_after_ms,
                    &shared_cooldowns, &shared_id, &single_use)) {
     // TODO(micahdbak): error
@@ -108,6 +112,6 @@ thoom::Object* HitBox::create_object(thoom::Scene* scene,
   props.shared_id = shared_id;
   props.single_use = single_use == 1;
 
-  return new HitBox(hitsource_owner_id, hurtbox_owner_id, x_off, y_off, w, h,
+  return new HitBox(hitsource_owner_lid, hurtbox_owner_lid, x_off, y_off, w, h,
                     props);
 }

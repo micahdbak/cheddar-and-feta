@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cinttypes>
 #include <cstdio>
 #include <string>
 #include <unordered_map>
@@ -8,6 +9,7 @@
 #include "mouse.h"
 #include "object.h"
 #include "sprite/sprite.h"
+#include "thoom/thoom.h"
 
 #define ITEM_NONE "item_none"
 #define DROPPED_OBJ "_dropped"
@@ -56,9 +58,11 @@ class DroppedItem : public virtual thoom::Object {
 };
 
 namespace UseItem {
-static std::string options(int x, int y, int x_dir, int y_dir, int from_id) {
+static std::string options(int x, int y, int x_dir, int y_dir,
+                           thoom_lid from_lid) {
   char buff[256];
-  snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d", x, y, x_dir, y_dir, from_id);
+  snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%" PRIu64, x, y, x_dir, y_dir,
+           from_lid);
   return std::string(buff);
 }
 }  // namespace UseItem

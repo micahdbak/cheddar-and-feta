@@ -1,5 +1,6 @@
 #include "segment.h"
 
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -12,20 +13,21 @@
 #include "scene/scene.h"
 #include "sprite/sprite.h"
 #include "thoom/macros.h"
+#include "thoom/thoom.h"
 #include "utils/utils.h"
 
-SpitterSegment::SpitterSegment(int parent_id, int segment_id)
-    : parent_id(parent_id) {
+SpitterSegment::SpitterSegment(thoom_lid parent_lid, int segment_id)
+    : parent_lid(parent_lid) {
   this->sprite = new thoom::Sprite("sprites/foe_spitter_segment.bmp", 32, 32,
                                    50 + (segment_id * 50));
   this->sprite->set_frame((segment_id * 2) % 4);
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->id, -12, -12, 24, 24));
+      HURTBOX_OBJ, HurtBox::options(this->lid, -12, -12, 24, 24));
   thoom::Scene::instance->create_object(
       HITBOX_OBJ,
-      HitBox::options(this->id, -1, -8, -8, 16, 16,
+      HitBox::options(this->lid, HB_NO_OWNER, -8, -8, 16, 16,
                       HitBox::Properties{.damage = 2,
                                          .cooldown_ms = 1000,
                                          .shared_cooldowns = true,
@@ -41,7 +43,7 @@ SpitterSegment::~SpitterSegment() { delete this->sprite; }
 
 void SpitterSegment::step() {
   thoom::Object* parent_object =
-      thoom::Scene::instance->find_object(this->parent_id);
+      thoom::Scene::instance->find_object(this->parent_lid);
   Spitter* parent = dynamic_cast<Spitter*>(parent_object);
 
   if (parent == nullptr) {
@@ -94,14 +96,16 @@ void SpitterSegment::step() {
 
 thoom::Object* SpitterSegment::create_object(thoom::Scene* scene,
                                              const std::string& options) {
-  int parent_id, segment_id;
-  if (2 != sscanf(options.c_str(), "%d,%d", &parent_id, &segment_id)) {
+  thoom_lid parent_lid;
+  int segment_id;
+  if (2 !=
+      sscanf(options.c_str(), "%" SCNu64 ",%d", &parent_lid, &segment_id)) {
     // TODO(micahdbak): error
     std::exit(1);
   }
 
-  thoom::Object* obj = scene->find_object(parent_id);
+  thoom::Object* obj = scene->find_object(parent_lid);
   if (obj == nullptr || dynamic_cast<Spitter*>(obj) == nullptr) return nullptr;
 
-  return new SpitterSegment(parent_id, segment_id);
+  return new SpitterSegment(parent_lid, segment_id);
 }

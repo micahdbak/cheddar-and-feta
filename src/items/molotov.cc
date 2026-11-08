@@ -1,5 +1,6 @@
 #include "molotov.h"
 
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 
@@ -12,10 +13,11 @@
 #include "scene/scene.h"
 #include "sprite/sprite.h"
 #include "thoom/macros.h"
+#include "thoom/thoom.h"
 #include "utils/utils.h"
 
 ThrownMolotov::ThrownMolotov(float x, float y, int x_dir, int y_dir,
-                             int from_id)
+                             thoom_lid from_lid)
     : x(x), y(y), x_dir(x_dir), y_dir(y_dir) {
   this->did_hit = false;
   this->sprite =
@@ -24,7 +26,8 @@ ThrownMolotov::ThrownMolotov(float x, float y, int x_dir, int y_dir,
 
   HitBox::Properties props = {1, 1000, 1000};
   thoom::Scene::instance->create_object(
-      HITBOX_OBJ, HitBox::options(this->id, from_id, -16, -16, 32, 32, props));
+      HITBOX_OBJ,
+      HitBox::options(this->lid, from_lid, -16, -16, 32, 32, props));
 }
 
 ThrownMolotov::~ThrownMolotov() { delete this->sprite; }
@@ -87,12 +90,13 @@ thoom::Object* DroppedMolotov::create_object(thoom::Scene* scene,
 
 thoom::Object* ThrownMolotov::create_object(thoom::Scene* scene,
                                             const std::string& options) {
-  int x, y, x_dir = 0, y_dir = 0, from_id = -1;
-  if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
-                  &from_id)) {
+  int x, y, x_dir = 0, y_dir = 0;
+  thoom_lid from_lid;
+  if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%" SCNu64, &x, &y, &x_dir,
+                  &y_dir, &from_lid)) {
     // TODO(micahdbak): error
     std::exit(1);
   }
 
-  return new ThrownMolotov((float)x, (float)y, x_dir, y_dir, from_id);
+  return new ThrownMolotov((float)x, (float)y, x_dir, y_dir, from_lid);
 }

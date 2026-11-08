@@ -20,12 +20,12 @@ void InitJoin::start(SDL_Texture* ui) {
   this->waiting_for_peer = false;
   this->sel_c = 0;
   this->code.clear();
-  this->last_peer_state = thoom::Peer::instance->state.load();
+  this->last_peer_state = thoom::Peer::instance->get_state();
   this->waiting_ticks = 0;
 }
 
 void InitJoin::step() {
-  uint64_t peer_state = thoom::Peer::instance->state.load();
+  uint64_t peer_state = thoom::Peer::instance->get_state();
 
   if (peer_state != this->last_peer_state) this->render = true;
 
@@ -173,7 +173,7 @@ void InitJoin::step() {
 
       // no connection after 15 seconds
       if (thoom::Scene::instance->ticks - this->waiting_ticks > 15000) {
-        thoom::Peer::instance->state.store(thoom::Peer::kStateTryReset);
+        thoom::Peer::instance->set_state(thoom::Peer::kStateTryReset);
         thoom::Hud::instance->display_notification("That code didn't work.");
         this->waiting_ticks = 0;
       }

@@ -2,12 +2,15 @@
 
 #include <SDL3/SDL.h>
 
+#include <cstdint>
+
 #include "audio/audio.h"
 #include "colour.h"
 #include "hud/hud.h"
 #include "icon.h"
 #include "input/input.h"
 #include "map/map.h"
+#include "peer/peer.h"
 #include "render_functions.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
@@ -28,6 +31,10 @@ bool game_run(const GameDef& def, int argc, char** argv) {
     return false;
   }
 
+  if (thoom::Peer::instance != nullptr) {
+    thoom::Scene::instance->local_pid = thoom::Peer::instance->get_pid();
+  }
+
   if (!def.init(argc, argv)) {
     thoom::Scene::quit();
     thoom_quit();
@@ -46,6 +53,8 @@ bool game_run(const GameDef& def, int argc, char** argv) {
     }
 
     thoom::Audio::instance->step();
+
+    uint64_t ticks = thoom::Scene::instance->ticks;
     thoom::Scene::instance->step();
 
     thoom::Map* map = thoom::Scene::instance->map;
@@ -60,7 +69,9 @@ bool game_run(const GameDef& def, int argc, char** argv) {
     thoom::Colour bg = map != nullptr ? map->background : thoom::kBlack;
     thoom::Window::instance->present(bg);
 
-    thoom::Input::instance->clear_hit_input();
+    if (thoom::Scene::instance->ticks != ticks) {
+      thoom::Input::instance->clear_hit_input();
+    }
   }
 
   thoom::Scene::quit();

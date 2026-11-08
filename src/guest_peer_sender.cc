@@ -38,7 +38,7 @@ void GuestPeerSender::step() {
 
   this->messages.clear();
 
-  thoom::Peer::instance->send_message(frame_msg);
+  thoom::Peer::instance->send_queue.push(frame_msg);
 }
 
 void GuestPeerSender::send_message(char func, const std::string& arg) {
@@ -46,7 +46,7 @@ void GuestPeerSender::send_message(char func, const std::string& arg) {
     return;
   }
 
-  if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
+  if (thoom::Peer::instance->get_state() != thoom::Peer::kStateConnected) {
     if (!guest_peer_sender->messages.empty()) {
       guest_peer_sender->messages.clear();
     }

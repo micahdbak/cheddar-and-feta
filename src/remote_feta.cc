@@ -42,13 +42,13 @@ RemoteFeta::RemoteFeta(int x, int y, int animation)
 
   // push hurtbox
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->id, -8, -8, 16, 12));
+      HURTBOX_OBJ, HurtBox::options(this->lid, -8, -8, 16, 12));
 }
 
 RemoteFeta::~RemoteFeta() { remote_feta = nullptr; }
 
 void RemoteFeta::step() {
-  if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
+  if (thoom::Peer::instance->get_state() != thoom::Peer::kStateConnected) {
     this->synchronized = false;
     this->sprite->set_animation(SLEEPING_ANIMATION);
     this->draw();

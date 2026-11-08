@@ -6,6 +6,7 @@
 #include "object.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/thoom.h"
 
 #define ITEM_CANNON_BALL "item_cannon_ball"
 
@@ -29,7 +30,7 @@ class DroppedCannonBall : public DroppedItem {
 
 class ThrownCannonBall : public thoom::Object, public HitSource {
  public:
-  ThrownCannonBall(float x, float y, int x_dir, int y_dir, int from_id);
+  ThrownCannonBall(float x, float y, int x_dir, int y_dir, thoom_lid from_lid);
   ~ThrownCannonBall();
 
   void step() override;

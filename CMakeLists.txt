@@ -24,9 +24,9 @@ if(NOT WIN32)
       $<$<CONFIG:Debug>:-fsanitize=address>)
 endif()
 
+# NOTE: cmake --build build --target thoom_map_editor to build map editor
 add_subdirectory(thoom)
-add_subdirectory(shared)
 
+add_subdirectory(shared)
 add_subdirectory(cheddar)
 add_subdirectory(feta)
-add_subdirectory(map_editor)

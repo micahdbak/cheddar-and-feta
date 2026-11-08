@@ -59,7 +59,7 @@ bool init(int argc, char** argv);
 int main(int argc, char** argv) {
   struct hud_def hud = GameHud::def(true);
 
-  if (!thoom_init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
+  if (!thoom_init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, true,
                   false, kBackground.val, &hud)) {
     return 1;
   }

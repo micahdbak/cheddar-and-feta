@@ -14,7 +14,6 @@
 #include "scene.h"
 #include "textbox.h"
 #include "thoom/macros.h"
-#include "ui_box.h"
 #include "window.h"
 
 #define PADDING 8
@@ -78,12 +77,13 @@ void LoadSave::step() {
   }
 
   if (this->render) {
-    thoom::Renderer::instance->clear(Hud::instance->ui, thoom::kMask);
+    thoom::Renderer::instance->clear(thoom::Hud::instance->ui, thoom::kMask);
 
     const int x = (THOOM_SCREEN_WIDTH - UI_WIDTH) / 2;
     const int y = (THOOM_SCREEN_HEIGHT - UI_HEIGHT) / 2;
     SDL_FRect ui_rect = {float(x), float(y), UI_WIDTH, UI_HEIGHT};
-    draw_ui_box(UI_BOX_CONTAINER, Hud::instance->ui, &ui_rect);
+    thoom::Renderer::instance->draw_ui_box(UI_BOX_CONTAINER,
+                                           thoom::Hud::instance->ui, &ui_rect);
 
     for (int i = save_start; i <= save_end; i++) {
       const int save_y = y + PADDING + (16 * (i - save_start));
@@ -94,25 +94,26 @@ void LoadSave::step() {
       highlight_rect.w = float(4 + UI_WIDTH - (2 * PADDING));
       highlight_rect.h = 14.0f;
 
-      draw_ui_box(this->sel_save == i ? UI_BOX_OUT_SEL : UI_BOX_OUT,
-                  Hud::instance->ui, &highlight_rect);
+      thoom::Renderer::instance->draw_ui_box(
+          this->sel_save == i ? UI_BOX_OUT_SEL : UI_BOX_OUT,
+          thoom::Hud::instance->ui, &highlight_rect);
       std::string save_text =
           i >= this->summaries.size() ? NEW_SAVE_STR : this->summaries[i];
       save_text = std::to_string(i + 1) + ": " + save_text;
-      thoom::Renderer::instance->draw_text(Hud::instance->ui, DEFAULT_FONT,
-                                           save_text, x + PADDING + 2,
-                                           save_y + 3, 0, kBackground);
+      thoom::Renderer::instance->draw_text(
+          thoom::Hud::instance->ui, DEFAULT_FONT, save_text, x + PADDING + 2,
+          save_y + 3, 0, kBackground);
     }
 
     if (save_start > 0) {
-      thoom::Renderer::instance->draw_text(Hud::instance->ui, SMALL_FONT, "^",
-                                           (THOOM_SCREEN_WIDTH / 2) - 3, y + 3,
-                                           0, kBackground);
+      thoom::Renderer::instance->draw_text(thoom::Hud::instance->ui, SMALL_FONT,
+                                           "^", (THOOM_SCREEN_WIDTH / 2) - 3,
+                                           y + 3, 0, kBackground);
     }
 
     if (save_end < this->summaries.size()) {
-      thoom::Renderer::instance->draw_text(Hud::instance->ui, SMALL_FONT, "}",
-                                           (THOOM_SCREEN_WIDTH / 2) - 3,
+      thoom::Renderer::instance->draw_text(thoom::Hud::instance->ui, SMALL_FONT,
+                                           "}", (THOOM_SCREEN_WIDTH / 2) - 3,
                                            y + UI_HEIGHT - 9, 0, kBackground);
     }
 

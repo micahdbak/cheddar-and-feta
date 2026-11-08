@@ -11,7 +11,6 @@
 #include "input.h"
 #include "renderer.h"
 #include "scene.h"
-#include "ui_box.h"
 
 Textbox* textbox;
 
@@ -25,12 +24,13 @@ Textbox::Textbox(const std::string& text, const std::string& owner, int font,
   this->font = font;
   this->interval_ms = interval_ms;
 
-  draw_ui_box(UI_BOX_CONTAINER, Hud::instance->ui, &this->box_rect);
+  thoom::Renderer::instance->draw_ui_box(
+      UI_BOX_CONTAINER, thoom::Hud::instance->ui, &this->box_rect);
 }
 
 Textbox::~Textbox() {
   // clear all ui
-  thoom::Renderer::instance->clear(Hud::instance->ui, thoom::kMask);
+  thoom::Renderer::instance->clear(thoom::Hud::instance->ui, thoom::kMask);
 }
 
 void Textbox::step() {
@@ -51,11 +51,12 @@ void Textbox::step() {
       this->running_text += text[j];
     }
     this->i = j;
-    thoom::Renderer::instance->draw_rect(Hud::instance->ui, &this->text_rect,
-                                         kBackground, SDL_BLENDMODE_NONE);
+    thoom::Renderer::instance->draw_rect(thoom::Hud::instance->ui,
+                                         &this->text_rect, kBackground,
+                                         SDL_BLENDMODE_NONE);
     thoom::Renderer::instance->draw_text(
-        Hud::instance->ui, this->font, this->running_text, this->text_rect.x,
-        this->text_rect.y, this->text_rect.w, kBackground);
+        thoom::Hud::instance->ui, this->font, this->running_text,
+        this->text_rect.x, this->text_rect.y, this->text_rect.w, kBackground);
     return;
   }
 
@@ -85,15 +86,16 @@ void Textbox::step() {
           this->text_rect.x + this->text_rect.w - prompt_src->w,
           this->text_rect.y + this->text_rect.h - prompt_src->h, prompt_src->w,
           prompt_src->h};
-      thoom::Renderer::instance->draw_texture(Hud::instance->ui, font->texture,
-                                              prompt_src, &prompt_dst);
+      thoom::Renderer::instance->draw_texture(
+          thoom::Hud::instance->ui, font->texture, prompt_src, &prompt_dst);
       return;
     }
 
-    thoom::Renderer::instance->draw_rect(Hud::instance->ui, &this->text_rect,
-                                         kBackground, SDL_BLENDMODE_NONE);
+    thoom::Renderer::instance->draw_rect(thoom::Hud::instance->ui,
+                                         &this->text_rect, kBackground,
+                                         SDL_BLENDMODE_NONE);
     thoom::Renderer::instance->draw_text(
-        Hud::instance->ui, this->font, this->running_text, this->text_rect.x,
-        this->text_rect.y, this->text_rect.w, kBackground);
+        thoom::Hud::instance->ui, this->font, this->running_text,
+        this->text_rect.x, this->text_rect.y, this->text_rect.w, kBackground);
   }
 }

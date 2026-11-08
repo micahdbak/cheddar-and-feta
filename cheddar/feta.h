@@ -4,8 +4,8 @@
 #include <utility>
 #include <vector>
 
+#include "game_hud.h"
 #include "hitbox.h"
-#include "hud.h"
 #include "mouse.h"
 #include "object.h"
 #include "scene.h"
@@ -53,5 +53,5 @@ class Feta : public Mouse, public HitSource {
   thoom::Sprite *sprite, *emotes;
   SDL_FRect dst_rect, emote_rect;
 
-  std::vector<Hud::Item> items;
+  std::vector<GameHud::Item> items;
 };

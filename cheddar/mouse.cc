@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "hud.h"
+#include "game_hud.h"
 #include "items/item.h"
 #include "scene.h"
 #include "utils.h"
@@ -23,7 +23,7 @@ bool Mouse::check_collision(float x, float y) {
          thoom::Scene::instance->map->collider->point_in_collider(x, y - 2.0f);
 }
 
-std::string Mouse::encode_items(const std::vector<Hud::Item>& items) {
+std::string Mouse::encode_items(const std::vector<GameHud::Item>& items) {
   std::string items_s = "";
   for (int i = 0; i < items.size(); i++) {
     if (items[i].count <= 0) continue;
@@ -40,8 +40,8 @@ std::string Mouse::encode_items(const std::vector<Hud::Item>& items) {
   return items_s;
 }
 
-std::vector<Hud::Item> Mouse::read_items(const std::string& items_s) {
-  std::vector<Hud::Item> ret;
+std::vector<GameHud::Item> Mouse::read_items(const std::string& items_s) {
+  std::vector<GameHud::Item> ret;
 
   if (!items_s.empty()) {
     const char* arr = items_s.c_str();
@@ -61,7 +61,7 @@ std::vector<Hud::Item> Mouse::read_items(const std::string& items_s) {
         std::exit(1);
       }
 
-      Hud::Item item{item_id, count};
+      GameHud::Item item{item_id, count};
       ret.push_back(item);
 
       while (*arr != '\0' && *arr != ',') arr++;

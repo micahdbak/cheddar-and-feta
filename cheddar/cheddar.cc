@@ -11,8 +11,8 @@
 #include "controller.h"
 #include "feta.h"
 #include "foes/foe.h"
+#include "game_hud.h"
 #include "hitbox.h"
-#include "hud.h"
 #include "hurtbox.h"
 #include "input.h"
 #include "items/cheese.h"
@@ -46,7 +46,7 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
   if (!items_s.empty()) {
     this->items = Mouse::read_items(items_s);
   } else {
-    this->items.push_back(Hud::Item{ITEM_SAVE, 1});
+    this->items.push_back(GameHud::Item{ITEM_SAVE, 1});
   }
 
   int feta_x = 0, feta_y = 0, feta_animation = 0;
@@ -147,8 +147,8 @@ void Cheddar::step() {
     sel_item_count = this->items[this->sel_item].count;
   }
 
-  Hud::instance->draw_items(this->items, this->sel_item, this->health,
-                            this->max_health);
+  GameHud::draw_items(this->items, this->sel_item, this->health,
+                      this->max_health);
 
   // ---- state management ----
 
@@ -607,7 +607,7 @@ void Cheddar::push_item(const std::string& item_id) {
     std::exit(1);
   }
 
-  Hud::Item new_item;
+  GameHud::Item new_item;
   new_item.item_id = item_id;
   new_item.count = 1;
 
@@ -632,7 +632,7 @@ void Cheddar::push_item(const std::string& item_id) {
 }
 
 void Cheddar::push_cheese(int amount) {
-  Hud::Item new_item;
+  GameHud::Item new_item;
   new_item.item_id = ITEM_CHEESE;
   new_item.count = amount;
 

@@ -27,7 +27,7 @@ class ItemSaveUse : public thoom::Object {
     if (cheddar != nullptr) cheddar->push_item(ITEM_SAVE);
 
     thoom::Scene::instance->save_objects();
-    Hud::instance->display_notification(
+    thoom::Hud::instance->display_notification(
         "Saved to file " + std::to_string(thoom::save.geti(SAVE_FILE) + 1) +
         ".");
     thoom::save.write_file(thoom::save.geti(SAVE_FILE));

@@ -12,6 +12,7 @@
 #include "controller.h"
 #include "feta.h"
 #include "font.h"
+#include "game_hud.h"
 #include "hud.h"
 #include "icon.h"
 #include "input.h"
@@ -28,20 +29,19 @@
 #include "texture.h"
 #include "thoom/macros.h"
 #include "thoom/thoom.h"
-#include "ui_box.h"
 #include "window.h"
 
 #define INIT_OBJ "load_save"
-
-bool game_is_cheddar = false;
 
 std::unordered_map<std::string, Item> item_info;
 
 bool init(int argc, char** argv);
 
 int main(int argc, char** argv) {
-  if (!thoom_init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
-                  true)) {
+  struct hud_def hud = GameHud::def(false);
+
+  if (!thoom_init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, true,
+                  kBackground.val, &hud)) {
     return 1;
   }
 
@@ -58,10 +58,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  load_ui_box();
   load_icons();
-  Hud::init();
-
   load_sounds();
 
   bool running = true;
@@ -80,30 +77,20 @@ int main(int argc, char** argv) {
 
     thoom::Map* map = thoom::Scene::instance->map;
     thoom::Renderer::instance->draw_world(map);
+    thoom::Hud::instance->render();
+    thoom::Hud::instance->draw();
 
     if (thoom::Input::instance->world.character == 'p') {
       thoom::Window::instance->save_screenshot("screenshot.bmp");
     }
 
-    Hud::instance->render();
-
-    thoom::Renderer::instance->draw_texture(thoom::Window::instance->screen,
-                                            Hud::instance->ui, NULL, NULL);
-    thoom::Renderer::instance->draw_texture(thoom::Window::instance->screen,
-                                            Hud::instance->overlay, NULL, NULL);
-
-    thoom::Input::instance->clear_hit_input();
-
     thoom::Colour bg = map != nullptr ? map->background : thoom::kBlack;
     thoom::Window::instance->present(bg);
+
+    thoom::Input::instance->clear_hit_input();
   }
 
-  Hud::shutdown();
-
   thoom::Scene::quit();
-
-  SDL_DestroyTexture(ui_box);
-  ui_box = nullptr;
 
   SDL_DestroyTexture(icons);
   icons = nullptr;
@@ -223,7 +210,8 @@ void Init::step() {
         thoom::Renderer::instance->clear(this->ui, thoom::kMask);
 
         SDL_FRect code_ui_box = {80.0f, 64.0f, 160.0f, 32.0f};
-        draw_ui_box(UI_BOX_CONTAINER, this->ui, &code_ui_box);
+        thoom::Renderer::instance->draw_ui_box(UI_BOX_CONTAINER, this->ui,
+                                               &code_ui_box);
 
         std::string prompt = "Please enter the connection code.";
         int prompt_w =
@@ -238,7 +226,8 @@ void Init::step() {
                                              154, 81, 0, kBackground);
 
         SDL_FRect ui_box = {80.0f, 104.0f, 160.0f, 64.0f};
-        draw_ui_box(UI_BOX_CHAR_CONT, this->ui, &ui_box);
+        thoom::Renderer::instance->draw_ui_box(UI_BOX_CHAR_CONT, this->ui,
+                                               &ui_box);
 
         const int start_x = 100;
         const int start_y = 112;
@@ -248,8 +237,9 @@ void Init::step() {
           int y = start_y + (i / cols) * 12;
 
           SDL_FRect box_rect = {(float)x, (float)y, 12.0f, 12.0f};
-          draw_ui_box(i == this->sel_c ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX,
-                      this->ui, &box_rect);
+          thoom::Renderer::instance->draw_ui_box(
+              i == this->sel_c ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX, this->ui,
+              &box_rect);
           char c = code_charset[i];
           SDL_FRect src_rect =
               thoom::Renderer::instance->fonts[CODE_FONT]->src_rect[c - ' '];
@@ -269,8 +259,9 @@ void Init::step() {
 
         if (valid_code) {
           SDL_FRect enter_box = {172.0f, 147.0f, 18.0f, 12.0f};
-          draw_ui_box(36 == this->sel_c ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX,
-                      this->ui, &enter_box);
+          thoom::Renderer::instance->draw_ui_box(
+              36 == this->sel_c ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX, this->ui,
+              &enter_box);
           thoom::Renderer::instance->draw_text(
               this->ui, 36 == this->sel_c ? CODE_FONT : CODE_GRAY_FONT, "OK",
               175, 148, 0, kBackground);
@@ -303,10 +294,12 @@ void Init::step() {
         thoom::Renderer::instance->clear(this->ui, thoom::kMask);
 
         SDL_FRect waiting_box = {76.0f, 100.0f, 168.0f, 40.0f};
-        draw_ui_box(UI_BOX_CHAR_CONT, this->ui, &waiting_box);
+        thoom::Renderer::instance->draw_ui_box(UI_BOX_CHAR_CONT, this->ui,
+                                               &waiting_box);
 
         SDL_FRect waiting_disp_box = {84.0f, 108.0f, 152.0f, 24.0f};
-        draw_ui_box(UI_BOX_CHAR_DISP, this->ui, &waiting_disp_box);
+        thoom::Renderer::instance->draw_ui_box(UI_BOX_CHAR_DISP, this->ui,
+                                               &waiting_disp_box);
 
         std::string waiting = "Connecting with code " + this->code + "...";
         if (peer_state == thoom::Peer::kStateConnected) {
@@ -323,7 +316,7 @@ void Init::step() {
       // no connection after 15 seconds
       if (thoom::Scene::instance->ticks - this->waiting_ticks > 15000) {
         thoom::Peer::instance->state.store(thoom::Peer::kStateTryReset);
-        Hud::instance->display_notification("That code didn't work.");
+        thoom::Hud::instance->display_notification("That code didn't work.");
         this->waiting_ticks = 0;
       }
 

@@ -33,7 +33,7 @@ FoeBug::~FoeBug() {
   this->sprite = nullptr;
 }
 
-void FoeBug::action(Mouse* mouse) {
+void FoeBug::action(IMouse* mouse) {
   if (thoom::Scene::instance->ticks - this->hurt_timer < 500) {
     this->state = Foe::State::FORCE_RANDOM_TILE;
     return;

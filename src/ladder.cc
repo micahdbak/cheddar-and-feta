@@ -26,7 +26,7 @@ Ladder::~Ladder() {
 }
 
 void Ladder::step() {
-  Mouse* mouse = Mouse::closest_mouse(this->x, this->y, 8, true);
+  IMouse* mouse = IMouse::closest_mouse(this->x, this->y, 8, true);
 
   if (mouse != nullptr) {
     thoom::Scene::instance->request_map(this->next_map);

@@ -1,6 +1,7 @@
 #include "guest_feta.h"
 
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -55,13 +56,6 @@ GuestFeta::~GuestFeta() {
 }
 
 void GuestFeta::step() {
-  if (this->mice_locked) {
-    thoom::Renderer::instance->push_sprite(
-        this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
-        &this->dst_rect, 22);
-    return;
-  }
-
   thoom::Audio::instance->set_listener(this->x, this->y);  // for audio
 
   // ---- items ----
@@ -598,7 +592,7 @@ void GuestFeta::remove_item(const std::string& item_id) {
   }
 }
 
-void GuestFeta::force_dance(Uint64 timeout_ms) {
+void GuestFeta::force_dance(uint64_t timeout_ms) {
   this->is_busy = GuestFeta::Busy::FORCED_DANCE;
   this->dance_until = timeout_ms;
 }

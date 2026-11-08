@@ -19,7 +19,7 @@ class DroppedCoffeeBean : public DroppedItem {
 
   void step() override { this->dropped_step(); }
 
-  void take(Mouse* mouse) override { mouse->push_item(ITEM_COFFEE_BEAN); }
+  void take(IMouse* mouse) override { mouse->push_item(ITEM_COFFEE_BEAN); }
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options) {
     int x, y;
@@ -36,13 +36,13 @@ class UsedCoffeeBean : public thoom::Object {
   UsedCoffeeBean(bool is_feta) : is_feta(is_feta) {
     this->timer = thoom::Scene::instance->ticks + 5000;
 
-    Mouse* mouse = is_feta ? remote_feta : cheddar;
+    IMouse* mouse = is_feta ? remote_feta : cheddar;
     if (mouse != nullptr) mouse->set_max_mov_speed(MOUSE_DEFAULT_SPEED * 2.0f);
   }
   ~UsedCoffeeBean() = default;
 
   void step() override {
-    Mouse* mouse = is_feta ? remote_feta : cheddar;
+    IMouse* mouse = is_feta ? remote_feta : cheddar;
 
     if (mouse == nullptr) {
       this->deleted = true;

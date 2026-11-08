@@ -83,8 +83,8 @@ void Foe::attack(int damage) {
 void Foe::foe_step() {
   switch (this->state) {
     case Foe::State::IDLE: {
-      Mouse* new_mouse = Mouse::closest_mouse(this->x, this->y,
-                                              this->stalking_distance, false);
+      IMouse* new_mouse = IMouse::closest_mouse(this->x, this->y,
+                                                this->stalking_distance, false);
 
       if (new_mouse == nullptr) {
         // no more stalking if neither mouse is close enough

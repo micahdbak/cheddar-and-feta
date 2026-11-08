@@ -15,7 +15,7 @@ class FoeFrog : public Foe {
   FoeFrog(int x, int y, int spawner_id);
   ~FoeFrog();
 
-  void action(Mouse* mouse) override;
+  void action(IMouse* mouse) override;
   void attack_internal(int damage) override;
 
   void step() override;

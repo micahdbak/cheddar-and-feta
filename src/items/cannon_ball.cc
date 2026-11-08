@@ -29,8 +29,8 @@ ThrownCannonBall::ThrownCannonBall(float x, float y, int x_dir, int y_dir,
   // this->y += (float)dy;
 
   thoom::Object* obj = thoom::Scene::instance->find_object(from_id);
-  Mouse* mouse;
-  if (obj != nullptr && (mouse = dynamic_cast<Mouse*>(obj)) != nullptr) {
+  IMouse* mouse;
+  if (obj != nullptr && (mouse = dynamic_cast<IMouse*>(obj)) != nullptr) {
     // only drop if thrown by a mouse
     this->drop_item = true;
   } else {

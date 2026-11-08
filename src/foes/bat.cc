@@ -41,7 +41,7 @@ FoeBat::~FoeBat() {
   this->sprite = nullptr;
 }
 
-void FoeBat::action(Mouse* mouse) {
+void FoeBat::action(IMouse* mouse) {
   if (thoom::Scene::instance->ticks - this->timer < 500) {
     this->state = Foe::State::FORCE_RANDOM_TILE;
     return;

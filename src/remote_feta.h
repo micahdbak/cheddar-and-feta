@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
@@ -13,7 +14,7 @@
 
 #define FETA_OBJ "feta"
 
-class RemoteFeta : public Mouse, public HitSource {
+class RemoteFeta : public IMouse, public HitSource {
  public:
   RemoteFeta(int x, int y, int animation);
   ~RemoteFeta();
@@ -22,12 +23,12 @@ class RemoteFeta : public Mouse, public HitSource {
   void step() override;
   void save_data() override;
 
-  // Mouse
+  // IMouse
   void attack(int damage) override;
   void push_item(const std::string& item_id) override;
   void push_cheese(int amount) override;
   void remove_item(const std::string& item_id) override;
-  void force_dance(Uint64 timeout_ms) override;
+  void force_dance(uint64_t timeout_ms) override;
   void set_throw(int throw_x, int throw_y) override;
   void set_max_mov_speed(float max_mov_speed) override;
   void signal_down() override {};
@@ -40,7 +41,7 @@ class RemoteFeta : public Mouse, public HitSource {
   void synchronize();
 
   // directly acted on by HostPeerReceiver
-  // Mouse: x, y, is_down
+  // IMouse: x, y, is_down
   int frame_i = 0, animation = 0, which_emote = -1;
   std::vector<std::pair<std::string, std::string>> new_objects;
   bool synchronized = false;

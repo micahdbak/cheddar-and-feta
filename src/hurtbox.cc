@@ -23,7 +23,7 @@ HurtBox::HurtBox(int owner_id, int x_off, int y_off, int w, int h)
   if (owner == nullptr) return;
 
   HurtSource* source = dynamic_cast<HurtSource*>(owner);
-  Mouse* mouse = dynamic_cast<Mouse*>(owner);
+  IMouse* mouse = dynamic_cast<IMouse*>(owner);
   Foe* foe = dynamic_cast<Foe*>(owner);
 
   if (source != nullptr) {
@@ -81,7 +81,7 @@ void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
 
     switch (this->owner_class) {
       case HurtBox::OwnerClass::MOUSE: {
-        Mouse* mouse = dynamic_cast<Mouse*>(owner);
+        IMouse* mouse = dynamic_cast<IMouse*>(owner);
         if (mouse == nullptr) return;
         mouse->attack(damage);
 
@@ -147,7 +147,7 @@ void HurtBox::step() {
   // update bounding box
   switch (this->owner_class) {
     case HurtBox::OwnerClass::MOUSE: {
-      Mouse* mouse = dynamic_cast<Mouse*>(owner);
+      IMouse* mouse = dynamic_cast<IMouse*>(owner);
       if (mouse == nullptr) {
         this->deleted = true;
         return;

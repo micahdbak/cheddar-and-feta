@@ -79,7 +79,7 @@ void SpitterAbdomen::step() {
     this->cur_dir = this->dirs[0];
   }
 
-  Mouse* mouse = Mouse::closest_mouse(this->x, this->y, 64.0f, true);
+  IMouse* mouse = IMouse::closest_mouse(this->x, this->y, 64.0f, true);
 
   if (mouse == nullptr) {
     parent->abdomen_distance = 256.0f;

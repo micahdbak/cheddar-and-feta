@@ -18,7 +18,7 @@ class DroppedMolotov : public DroppedItem {
 
   void step() override { this->dropped_step(); }
 
-  void take(Mouse* mouse) override { mouse->push_item(ITEM_MOLOTOV); }
+  void take(IMouse* mouse) override { mouse->push_item(ITEM_MOLOTOV); }
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
 };

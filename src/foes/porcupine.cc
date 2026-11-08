@@ -39,7 +39,7 @@ FoePorcupine::~FoePorcupine() {
 #define ATTACK_ANIMATION 8
 #define DEAD_ANIMATION 16
 
-void FoePorcupine::action(Mouse* mouse) {
+void FoePorcupine::action(IMouse* mouse) {
   if (thoom::Scene::instance->ticks - this->hurt_timer < 500) {
     this->state = Foe::State::FORCE_RANDOM_TILE;
     return;

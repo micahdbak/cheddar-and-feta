@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -13,7 +14,6 @@
 #define MOUSE_DEFAULT_SPEED 80.0f
 
 // animations
-#define RUNPREP_ANIMATION 8
 #define ATTACKING_ANIMATION 16
 #define ATTACKED_ANIMATION 24
 #define THROWING_ANIMATION 32
@@ -41,16 +41,15 @@ class GuestFeta : public thoom::Object {
   void push_item(const std::string& item_id);
   void push_cheese(int amount);
   void remove_item(const std::string& item_id);
-  void force_dance(Uint64 timeout_ms);
+  void force_dance(uint64_t timeout_ms);
   void set_throw(int throw_x, int throw_y);
   void set_max_mov_speed(float max_mov_speed);
 
   void set_animation(int animation);
   void set_items(const std::string& items_s);
 
-  float x, y;
+  float x = 0.0f, y = 0.0f;
   bool is_down = false, did_hit = false;
-  bool mice_locked = false;
   thoom::Sprite *sprite, *emotes;
   int which_emote = -1;
   static thoom::Object* create_object(thoom::Scene* scene,

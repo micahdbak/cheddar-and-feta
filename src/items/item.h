@@ -38,7 +38,7 @@ class DroppedItem : public virtual thoom::Object {
 
   void dropped_step();
 
-  virtual void take(Mouse* mouse) = 0;
+  virtual void take(IMouse* mouse) = 0;
 
  protected:
   std::string item_id;

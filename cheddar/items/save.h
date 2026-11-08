@@ -4,11 +4,11 @@
 #include <cstdlib>
 #include <string>
 
-#include "hud.h"
+#include "hud/hud.h"
 #include "mouse.h"
 #include "object.h"
-#include "save_data.h"
-#include "scene.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
 
 #define ITEM_SAVE "item_save"
 

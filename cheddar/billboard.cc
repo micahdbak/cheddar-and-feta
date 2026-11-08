@@ -5,9 +5,9 @@
 #include <string>
 
 #include "object.h"
-#include "renderer.h"
-#include "scene.h"
-#include "sprite.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 Billboard::Billboard(int x, int y, int ts_x, int ts_y, int w, int h, int depth,
                      std::string tilesheet) {

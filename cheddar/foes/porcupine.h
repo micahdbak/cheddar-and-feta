@@ -5,8 +5,8 @@
 #include "foe.h"
 #include "mouse.h"
 #include "object.h"
-#include "scene.h"
-#include "sprite.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 #define FOE_PORCUPINE_OBJ "foe_porc"
 

@@ -5,8 +5,8 @@
 
 #include "game_hud.h"
 #include "object.h"
-#include "scene.h"
-#include "sprite.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 #define FETA_OBJ "feta"
 

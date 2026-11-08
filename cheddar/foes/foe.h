@@ -4,7 +4,7 @@
 
 #include "mouse.h"
 #include "object.h"
-#include "scene.h"
+#include "scene/scene.h"
 
 inline float center_tile_x(float x) {
   return (float)(int)((x * thoom::Scene::instance->map->tile_width) +

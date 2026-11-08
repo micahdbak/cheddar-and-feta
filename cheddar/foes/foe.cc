@@ -3,10 +3,10 @@
 #include <vector>
 
 #include "mouse.h"
-#include "scene.h"
+#include "scene/scene.h"
 #include "spawner.h"
 #include "thoom/macros.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 std::vector<Foe*> foes;
 

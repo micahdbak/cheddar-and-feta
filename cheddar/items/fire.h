@@ -4,8 +4,8 @@
 
 #include "hitbox.h"
 #include "object.h"
-#include "scene.h"
-#include "sprite.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 #define ITEM_FIRE "item_fire"
 

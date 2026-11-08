@@ -3,13 +3,13 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "audio.h"
+#include "audio/audio.h"
 #include "hurtbox.h"
 #include "object.h"
-#include "renderer.h"
-#include "scene.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
 #include "spawner.h"
-#include "sprite.h"
+#include "sprite/sprite.h"
 
 Bell::Bell(int x, int y, int spawner_id) {
   this->x = x;

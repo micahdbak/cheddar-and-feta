@@ -5,7 +5,7 @@
 #include <queue>
 #include <string>
 
-#include "audio.h"
+#include "audio/audio.h"
 #include "feta.h"
 #include "hitbox.h"
 #include "items/cheese.h"
@@ -13,10 +13,10 @@
 #include "items/tossed.h"
 #include "mouse.h"
 #include "object.h"
-#include "peer.h"
-#include "save_data.h"
-#include "scene.h"
-#include "utils.h"
+#include "peer/peer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
+#include "utils/utils.h"
 
 void PeerReceiver::step() {
   std::queue<std::string> msgs = thoom::Peer::instance->all_messages();

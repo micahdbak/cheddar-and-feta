@@ -4,13 +4,13 @@
 #include <string>
 #include <unordered_map>
 
-#include "audio.h"
+#include "audio/audio.h"
 #include "items/persister.h"
 #include "mouse.h"
-#include "renderer.h"
-#include "save_data.h"
-#include "scene.h"
-#include "sprite.h"
+#include "renderer/renderer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 std::unordered_map<std::string, Item> item_info;
 

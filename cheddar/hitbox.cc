@@ -8,7 +8,7 @@
 #include "hurtbox.h"
 #include "icon.h"
 #include "object.h"
-#include "scene.h"
+#include "scene/scene.h"
 
 HitBox::HitBox(int source_id, int hurtbox_owner_id, int x_off, int y_off, int w,
                int h, HitBox::Properties props)

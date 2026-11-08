@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "audio.h"
+#include "audio/audio.h"
 #include "foes/foe.h"
 #include "hurtbox.h"
 #include "icon.h"
@@ -12,10 +12,10 @@
 #include "items/item.h"
 #include "mouse.h"
 #include "object.h"
-#include "renderer.h"
-#include "save_data.h"
-#include "scene.h"
-#include "sprite.h"
+#include "renderer/renderer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 FoeFrog::FoeFrog(int x, int y, int spawner_id)
     : Foe(float(x), float(y), spawner_id, 500, 250, 128.0f, 64.0f) {

@@ -7,14 +7,14 @@
 #include <string>
 #include <vector>
 
-#include "audio.h"
-#include "controller.h"
+#include "audio/audio.h"
 #include "feta.h"
 #include "foes/foe.h"
 #include "game_hud.h"
 #include "hitbox.h"
 #include "hurtbox.h"
-#include "input.h"
+#include "input/controller.h"
+#include "input/input.h"
 #include "items/cheese.h"
 #include "items/item.h"
 #include "items/persister.h"
@@ -22,13 +22,13 @@
 #include "items/tossed.h"
 #include "mouse.h"
 #include "object.h"
-#include "peer.h"
-#include "renderer.h"
-#include "save_data.h"
-#include "scene.h"
-#include "sprite.h"
+#include "peer/peer.h"
+#include "renderer/renderer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 #include "thoom/macros.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
                  std::string options) {

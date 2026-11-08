@@ -7,15 +7,15 @@
 #include <cstdint>
 
 #include "colour.h"
-#include "controller.h"
-#include "input.h"
+#include "input/controller.h"
+#include "input/input.h"
 #include "object.h"
-#include "renderer.h"
-#include "scene.h"
-#include "sprite.h"
-#include "texture.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
+#include "texture/texture.h"
 #include "thoom/macros.h"
-#include "window.h"
+#include "window/window.h"
 
 Splash::Splash() {
   this->overlay = thoom::Texture::instance->create_texture(

@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "object.h"
-#include "save_data.h"
-#include "scene.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
 
 FoeSpawner* spawners[20];
 

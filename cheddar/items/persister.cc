@@ -8,8 +8,8 @@
 
 #include "item.h"
 #include "object.h"
-#include "save_data.h"
-#include "scene.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
 
 ItemPersister* item_persister = nullptr;
 

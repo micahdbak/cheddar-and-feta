@@ -4,17 +4,17 @@
 
 #include "colour.h"
 #include "constants.h"
-#include "controller.h"
-#include "font.h"
-#include "hud.h"
-#include "input.h"
+#include "hud/hud.h"
+#include "input/controller.h"
+#include "input/input.h"
 #include "object.h"
-#include "renderer.h"
-#include "save_data.h"
-#include "scene.h"
+#include "renderer/font.h"
+#include "renderer/renderer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
 #include "textbox.h"
 #include "thoom/macros.h"
-#include "window.h"
+#include "window/window.h"
 
 #define PADDING 8
 #define UI_WIDTH (128 + (2 * PADDING))

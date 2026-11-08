@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "audio.h"
+#include "audio/audio.h"
 #include "foes/foe.h"
 #include "hitbox.h"
 #include "hurtbox.h"
@@ -14,10 +14,10 @@
 #include "items/cheese.h"
 #include "mouse.h"
 #include "object.h"
-#include "renderer.h"
-#include "save_data.h"
-#include "scene.h"
-#include "sprite.h"
+#include "renderer/renderer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 #define CIRCLE_TICKS 2000
 

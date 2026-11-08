@@ -3,7 +3,7 @@
 #include <string>
 
 #include "object.h"
-#include "scene.h"
+#include "scene/scene.h"
 
 #define FREEDOM_OBJ "freedom"
 

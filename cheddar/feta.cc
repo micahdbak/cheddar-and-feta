@@ -11,12 +11,12 @@
 #include "items/item.h"
 #include "mouse.h"
 #include "object.h"
-#include "peer.h"
+#include "peer/peer.h"
 #include "peer_sender.h"
-#include "renderer.h"
-#include "save_data.h"
-#include "scene.h"
-#include "sprite.h"
+#include "renderer/renderer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 Feta::Feta(int x, int y, int animation) {
   if (feta != nullptr) {

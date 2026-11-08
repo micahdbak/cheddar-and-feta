@@ -6,9 +6,9 @@
 
 #include "mouse.h"
 #include "object.h"
-#include "save_data.h"
-#include "scene.h"
-#include "utils.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
+#include "utils/utils.h"
 
 Freedom::Freedom(int x, int y) {
   this->x = x;

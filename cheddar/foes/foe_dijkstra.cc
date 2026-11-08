@@ -7,11 +7,11 @@
 #include "SDL3/SDL_stdinc.h"
 #include "foe.h"
 #include "mouse.h"
-#include "renderer.h"
-#include "scene.h"
-#include "texture.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
+#include "texture/texture.h"
 #include "thoom/macros.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 #define FREE_IF(a) \
   if ((a)) {       \

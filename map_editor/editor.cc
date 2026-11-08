@@ -8,24 +8,22 @@
 #include <string>
 #include <vector>
 
-#include "collider.h"
 #include "colour.h"
-#include "constants.h"
-#include "controller.h"
 #include "editor_ui.h"
-#include "font.h"
-#include "hud.h"
-#include "icon.h"
-#include "input.h"
-#include "map.h"
-#include "map_layer.h"
+#include "hud/hud.h"
+#include "input/controller.h"
+#include "input/input.h"
+#include "map/map.h"
+#include "map/map_collider.h"
+#include "map/map_layer.h"
+#include "map/tilesheet.h"
 #include "object.h"
-#include "renderer.h"
-#include "scene.h"
-#include "texture.h"
+#include "renderer/font.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
+#include "texture/texture.h"
 #include "thoom/macros.h"
-#include "tilesheet.h"
-#include "window.h"
+#include "window/window.h"
 
 static void parse_billboard_options(const std::string& options, int* x, int* y,
                                     int* ts_x, int* ts_y, int* w, int* h,
@@ -236,7 +234,8 @@ void Editor::draw_status() const {
                                        SDL_BLENDMODE_NONE);
   thoom::Renderer::instance->draw_text(
       thoom::Hud::instance->ui, MONO_FONT,
-      " h:write, j:tile, k:sheet, l:layer, x:export  ", 0, 0, 0, kBackground);
+      " h:write, j:tile, k:sheet, l:layer, x:export  ", 0, 0, 0,
+      kBackground);
 
   char status_text[256];
 
@@ -423,7 +422,8 @@ void Editor::draw_object(const thoom::ObjectRequest& object) {
   if (sscanf(object.options.c_str(), "%d,%d", &x, &y) == 2) {
     SDL_FRect dst_rect =
         SDL_FRect{float(x) - 8.0f, float(y) - 8.0f, 16.0f, 16.0f};
-    draw_icon(EDITOR_OBJECT_ICON, this->objects_texture, &dst_rect);
+    thoom::Renderer::instance->draw_outline(this->objects_texture, &dst_rect,
+                                            thoom::kOrange, SDL_BLENDMODE_NONE);
     thoom::Renderer::instance->draw_text(this->objects_texture, SMALL_FONT,
                                          object.id, x + 6, y - 4, 0,
                                          kBackground);

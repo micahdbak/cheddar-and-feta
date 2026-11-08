@@ -8,9 +8,9 @@
 #include "mouse.h"
 #include "object.h"
 #include "render_functions.h"
-#include "renderer.h"
-#include "scene.h"
-#include "texture.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
+#include "texture/texture.h"
 
 Cheese::Cheese(float x, float y, int amount) {
   this->x = x;

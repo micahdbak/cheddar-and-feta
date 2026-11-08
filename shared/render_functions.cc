@@ -6,12 +6,12 @@
 #include <string>
 
 #include "colour.h"
-#include "font.h"
-#include "renderer.h"
-#include "scene.h"
-#include "texture.h"
+#include "renderer/font.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
+#include "texture/texture.h"
 #include "thoom/macros.h"
-#include "window.h"
+#include "window/window.h"
 
 static SDL_Texture* render_cheese(const std::string& args) {
   int amount = 0;

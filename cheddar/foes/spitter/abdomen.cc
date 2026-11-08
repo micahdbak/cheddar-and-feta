@@ -8,10 +8,10 @@
 #include "hurtbox.h"
 #include "mouse.h"
 #include "object.h"
-#include "renderer.h"
-#include "scene.h"
-#include "sprite.h"
-#include "utils.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
+#include "utils/utils.h"
 
 SpitterAbdomen::SpitterAbdomen(int parent_id) : parent_id(parent_id) {
   this->sprite =

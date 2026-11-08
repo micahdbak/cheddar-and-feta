@@ -6,7 +6,7 @@
 #include "item.h"
 #include "mouse.h"
 #include "object.h"
-#include "scene.h"
+#include "scene/scene.h"
 
 #define ITEM_HERMES_BOOT "item_hermes_boot"
 

@@ -7,18 +7,17 @@
 #include <string>
 #include <vector>
 
-#include "audio.h"
-#include "collider.h"
+#include "audio/audio.h"
 #include "feta.h"
 #include "icon.h"
+#include "map/map_collider.h"
 #include "object.h"
-#include "peer.h"
-#include "renderer.h"
-#include "save_data.h"
-#include "scene.h"
-#include "sprite.h"
-#include "texture.h"
-#include "utils.h"
+#include "peer/peer.h"
+#include "renderer/renderer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
+#include "texture/texture.h"
+#include "utils/utils.h"
 
 #define BUFF_SIZE 1024
 

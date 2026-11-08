@@ -6,10 +6,10 @@
 #include <vector>
 
 #include "editor_ui.h"
-#include "map.h"
-#include "map_layer.h"
+#include "map/map.h"
+#include "map/map_layer.h"
 #include "object.h"
-#include "scene.h"
+#include "scene/scene.h"
 
 class Editor : public thoom::Object {
  public:

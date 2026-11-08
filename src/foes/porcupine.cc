@@ -28,7 +28,7 @@ FoePorcupine::FoePorcupine(int x, int y, int spawner_id)
   this->dst_rect.h = 32.0f;
 
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->lid, -6, -8, 12, 16));
+      HURTBOX_OBJ, HurtBox::options(this->gid, -6, -8, 12, 16));
 }
 
 FoePorcupine::~FoePorcupine() {
@@ -87,7 +87,7 @@ void FoePorcupine::step() {
         char buff[256];
         snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%" PRIu64,
                  (int)(this->x + this->off_x), (int)(this->y + this->off_y),
-                 this->spine_x_dir, this->spine_y_dir, this->lid);
+                 this->spine_x_dir, this->spine_y_dir, this->gid);
         thoom::Scene::instance->create_object(ITEM_TOOTHPICK USE_OBJ,
                                               std::string(buff));
         this->spine_x_dir = this->spine_y_dir = 0;

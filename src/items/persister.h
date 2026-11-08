@@ -18,8 +18,8 @@ class ItemPersister : public thoom::Object {
   void step() override;
 
   void remember_item(const std::string& item_id, float x, float y,
-                     thoom_lid lid);
-  void forget_item(thoom_lid lid);
+                     thoom_gid gid);
+  void forget_item(thoom_gid gid);
 
   bool creating_items = false;
   static thoom::Object* create_object(thoom::Scene* scene,
@@ -31,10 +31,10 @@ class ItemPersister : public thoom::Object {
   struct ItemSave {
     std::string item_id;
     float x, y;
-    thoom_lid lid;
+    thoom_gid gid;
   };
 
-  std::unordered_map<thoom_lid, ItemSave> items_to_save;
+  std::unordered_map<thoom_gid, ItemSave> items_to_save;
   std::queue<ItemSave> items_to_spawn;
 };
 

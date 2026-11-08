@@ -74,7 +74,7 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates)
   // push item persister and hurtbox
   thoom::Scene::instance->create_object(ITEM_PERSISTER_OBJ, "");
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->lid, -8, -8, 16, 12));
+      HURTBOX_OBJ, HurtBox::options(this->gid, -8, -8, 16, 12));
 }
 
 Cheddar::~Cheddar() { cheddar = nullptr; }

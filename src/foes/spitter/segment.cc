@@ -16,18 +16,18 @@
 #include "thoom/thoom.h"
 #include "utils/utils.h"
 
-SpitterSegment::SpitterSegment(thoom_lid parent_lid, int segment_id)
-    : parent_lid(parent_lid) {
+SpitterSegment::SpitterSegment(thoom_gid parent_gid, int segment_id)
+    : parent_gid(parent_gid) {
   this->sprite = new thoom::Sprite("sprites/foe_spitter_segment.bmp", 32, 32,
                                    50 + (segment_id * 50));
   this->sprite->set_frame((segment_id * 2) % 4);
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->lid, -12, -12, 24, 24));
+      HURTBOX_OBJ, HurtBox::options(this->gid, -12, -12, 24, 24));
   thoom::Scene::instance->create_object(
       HITBOX_OBJ,
-      HitBox::options(this->lid, HB_NO_OWNER, -8, -8, 16, 16,
+      HitBox::options(this->gid, THOOM_GID_NULL, -8, -8, 16, 16,
                       HitBox::Properties{.damage = 2,
                                          .cooldown_ms = 1000,
                                          .shared_cooldowns = true,
@@ -43,7 +43,7 @@ SpitterSegment::~SpitterSegment() { delete this->sprite; }
 
 void SpitterSegment::step() {
   thoom::Object* parent_object =
-      thoom::Scene::instance->find_object(this->parent_lid);
+      thoom::Scene::instance->find_gid_object(this->parent_gid);
   Spitter* parent = dynamic_cast<Spitter*>(parent_object);
 
   if (parent == nullptr) {
@@ -96,16 +96,16 @@ void SpitterSegment::step() {
 
 thoom::Object* SpitterSegment::create_object(thoom::Scene* scene,
                                              const std::string& options) {
-  thoom_lid parent_lid;
+  thoom_gid parent_gid;
   int segment_id;
   if (2 !=
-      sscanf(options.c_str(), "%" SCNu64 ",%d", &parent_lid, &segment_id)) {
+      sscanf(options.c_str(), "%" SCNu64 ",%d", &parent_gid, &segment_id)) {
     // TODO(micahdbak): error
     std::exit(1);
   }
 
-  thoom::Object* obj = scene->find_object(parent_lid);
+  thoom::Object* obj = scene->find_gid_object(parent_gid);
   if (obj == nullptr || dynamic_cast<Spitter*>(obj) == nullptr) return nullptr;
 
-  return new SpitterSegment(parent_lid, segment_id);
+  return new SpitterSegment(parent_gid, segment_id);
 }

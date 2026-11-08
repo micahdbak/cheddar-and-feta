@@ -14,7 +14,7 @@
 
 class SpitterAbdomen : public thoom::Object, public HurtSource {
  public:
-  SpitterAbdomen(thoom_lid parent_lid);
+  SpitterAbdomen(thoom_gid parent_gid);
   ~SpitterAbdomen();
 
   void step() override;
@@ -29,7 +29,7 @@ class SpitterAbdomen : public thoom::Object, public HurtSource {
  private:
   int cur_dir, dirs[FRAMES_TO_SET_CUR_DIR], dirs_i;
   float x, y;
-  thoom_lid parent_lid;
+  thoom_gid parent_gid;
   thoom::Sprite* sprite;
   SDL_FRect dst_rect;
 };

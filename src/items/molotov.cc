@@ -17,7 +17,7 @@
 #include "utils/utils.h"
 
 ThrownMolotov::ThrownMolotov(float x, float y, int x_dir, int y_dir,
-                             thoom_lid from_lid)
+                             thoom_gid from_gid)
     : x(x), y(y), x_dir(x_dir), y_dir(y_dir) {
   this->did_hit = false;
   this->sprite =
@@ -27,7 +27,7 @@ ThrownMolotov::ThrownMolotov(float x, float y, int x_dir, int y_dir,
   HitBox::Properties props = {1, 1000, 1000};
   thoom::Scene::instance->create_object(
       HITBOX_OBJ,
-      HitBox::options(this->lid, from_lid, -16, -16, 32, 32, props));
+      HitBox::options(this->gid, from_gid, -16, -16, 32, 32, props));
 }
 
 ThrownMolotov::~ThrownMolotov() { delete this->sprite; }
@@ -91,12 +91,12 @@ thoom::Object* DroppedMolotov::create_object(thoom::Scene* scene,
 thoom::Object* ThrownMolotov::create_object(thoom::Scene* scene,
                                             const std::string& options) {
   int x, y, x_dir = 0, y_dir = 0;
-  thoom_lid from_lid;
+  thoom_gid from_gid;
   if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%" SCNu64, &x, &y, &x_dir,
-                  &y_dir, &from_lid)) {
+                  &y_dir, &from_gid)) {
     // TODO(micahdbak): error
     std::exit(1);
   }
 
-  return new ThrownMolotov((float)x, (float)y, x_dir, y_dir, from_lid);
+  return new ThrownMolotov((float)x, (float)y, x_dir, y_dir, from_gid);
 }

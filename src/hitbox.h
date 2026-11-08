@@ -13,10 +13,9 @@
 #define HITBOX_OBJ "hitbox"
 
 // hitbox shared IDs
-#define HB_SHARED_UNKNOWN -1
-#define HB_NO_OWNER ((thoom_lid) - 1)
-#define HB_SHARED_FIRE -2
-#define HB_SHARED_SPITTER -3
+#define HB_SHARED_UNKNOWN THOOM_GID_MAX
+#define HB_SHARED_FIRE (THOOM_GID_MAX - 1)
+#define HB_SHARED_SPITTER (THOOM_GID_MAX - 2)
 
 class HitSource {
  public:
@@ -35,7 +34,7 @@ class HitBox : public thoom::Object {
     int cooldown_ms;
     int delete_after_ms = 0;
     bool shared_cooldowns = false;
-    int shared_id = HB_SHARED_UNKNOWN;
+    thoom_gid shared_id = HB_SHARED_UNKNOWN;
     bool single_use = false;
   };
 
@@ -48,20 +47,20 @@ class HitBox : public thoom::Object {
     *y_off = y_dir * hitbox_distance;
   }
 
-  static std::string options(thoom_lid hitsource_owner_lid,
-                             thoom_lid hurtbox_owner_lid, int x_off, int y_off,
-                             int w, int h, Properties props) {
+  static std::string options(thoom_gid source_gid, thoom_gid hurtbox_owner_gid,
+                             int x_off, int y_off, int w, int h,
+                             Properties props) {
     char buff[256];
     snprintf(buff, sizeof(buff),
-             "%" PRIu64 ",%" PRIu64 ",%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
-             hitsource_owner_lid, hurtbox_owner_lid, x_off, y_off, w, h,
-             props.damage, props.cooldown_ms, props.delete_after_ms,
+             "%" PRIu64 ",%" PRIu64 ",%d,%d,%d,%d,%d,%d,%d,%d,%" PRIu64 ",%d",
+             source_gid, hurtbox_owner_gid, x_off, y_off, w, h, props.damage,
+             props.cooldown_ms, props.delete_after_ms,
              props.shared_cooldowns ? 1 : 0, props.shared_id,
              props.single_use ? 1 : 0);
     return std::string(buff);
   }
 
-  HitBox(thoom_lid source_lid, thoom_lid hurtbox_owner_lid, int x_off,
+  HitBox(thoom_gid source_gid, thoom_gid hurtbox_owner_gid, int x_off,
          int y_off, int w, int h, Properties props);
   ~HitBox();
 
@@ -72,13 +71,13 @@ class HitBox : public thoom::Object {
   bool throw_away = true;
 
   bool shared_cooldowns = false, single_use = false;
-  int shared_id = HB_SHARED_UNKNOWN;
+  thoom_gid shared_id = HB_SHARED_UNKNOWN;
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
 
  private:
   bool from_foe;
-  thoom_lid source_lid, hurtbox_owner_lid;
+  thoom_gid source_gid, hurtbox_owner_gid;
   int x_off, y_off, damage, cooldown_ms, delete_after_ms;
   uint64_t created_ticks;
 

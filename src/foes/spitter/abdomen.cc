@@ -15,13 +15,13 @@
 #include "thoom/thoom.h"
 #include "utils/utils.h"
 
-SpitterAbdomen::SpitterAbdomen(thoom_lid parent_lid) : parent_lid(parent_lid) {
+SpitterAbdomen::SpitterAbdomen(thoom_gid parent_gid) : parent_gid(parent_gid) {
   this->sprite =
       new thoom::Sprite("sprites/foe_spitter_abdomen.bmp", 32, 32, 250);
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->lid, -16, -16, 32, 32));
+      HURTBOX_OBJ, HurtBox::options(this->gid, -16, -16, 32, 32));
 
   this->cur_dir = 0;
   for (int i = 0; i < FRAMES_TO_SET_CUR_DIR; i++) this->dirs[i] = 0;
@@ -32,7 +32,7 @@ SpitterAbdomen::~SpitterAbdomen() { delete this->sprite; }
 
 void SpitterAbdomen::attack(int damage) {
   thoom::Object* parent_object =
-      thoom::Scene::instance->find_object(this->parent_lid);
+      thoom::Scene::instance->find_gid_object(this->parent_gid);
   Spitter* parent = dynamic_cast<Spitter*>(parent_object);
 
   if (parent != nullptr) parent->attack(damage);
@@ -40,7 +40,7 @@ void SpitterAbdomen::attack(int damage) {
 
 void SpitterAbdomen::step() {
   thoom::Object* parent_object =
-      thoom::Scene::instance->find_object(this->parent_lid);
+      thoom::Scene::instance->find_gid_object(this->parent_gid);
   Spitter* parent = dynamic_cast<Spitter*>(parent_object);
 
   if (parent == nullptr) {
@@ -102,14 +102,14 @@ void SpitterAbdomen::step() {
 
 thoom::Object* SpitterAbdomen::create_object(thoom::Scene* scene,
                                              const std::string& options) {
-  thoom_lid parent_lid;
-  if (1 != sscanf(options.c_str(), "%" SCNu64, &parent_lid)) {
+  thoom_gid parent_gid;
+  if (1 != sscanf(options.c_str(), "%" SCNu64, &parent_gid)) {
     // TODO(micahdbak): error
     std::exit(1);
   }
 
-  thoom::Object* obj = scene->find_object(parent_lid);
+  thoom::Object* obj = scene->find_gid_object(parent_gid);
   if (obj == nullptr || dynamic_cast<Spitter*>(obj) == nullptr) return nullptr;
 
-  return new SpitterAbdomen(parent_lid);
+  return new SpitterAbdomen(parent_gid);
 }

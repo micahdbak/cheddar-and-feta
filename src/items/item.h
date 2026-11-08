@@ -59,10 +59,10 @@ class DroppedItem : public virtual thoom::Object {
 
 namespace UseItem {
 static std::string options(int x, int y, int x_dir, int y_dir,
-                           thoom_lid from_lid) {
+                           thoom_gid from_gid) {
   char buff[256];
   snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%" PRIu64, x, y, x_dir, y_dir,
-           from_lid);
+           from_gid);
   return std::string(buff);
 }
 }  // namespace UseItem

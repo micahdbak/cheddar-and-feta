@@ -28,21 +28,21 @@ class HurtSource {
  * Main ideas:
  * - A hurt box represents a fixed-size rectangle, offset from the object that
  * created it
- * - Can be damaged with hurt(damage, hitbox_lid, cooldown_ms) - this is done by
+ * - Can be damaged with hurt(damage, hitbox, cooldown_ms) - this is done by
  * hitboxes
  * - Can only be hurt by a hitbox once within a cooldown
  */
 class HurtBox : public thoom::Object {
  public:
-  static std::string options(thoom_lid owner_lid, int x_off, int y_off, int w,
+  static std::string options(thoom_gid owner_gid, int x_off, int y_off, int w,
                              int h) {
     char buff[256];
-    snprintf(buff, sizeof(buff), "%" PRIu64 ",%d,%d,%d,%d", owner_lid, x_off,
+    snprintf(buff, sizeof(buff), "%" PRIu64 ",%d,%d,%d,%d", owner_gid, x_off,
              y_off, w, h);
     return std::string(buff);
   }
 
-  HurtBox(thoom_lid owner_lid, int x_off, int y_off, int w, int h);
+  HurtBox(thoom_gid owner_gid, int x_off, int y_off, int w, int h);
   ~HurtBox();
 
   void hurt(int damage, HitBox* hitbox, int cooldown_ms);
@@ -51,7 +51,7 @@ class HurtBox : public thoom::Object {
 
   SDL_Rect bounding_box;
 
-  thoom_lid owner_lid;
+  thoom_gid owner_gid;
   enum OwnerClass { MOUSE, FOE, HURTSOURCE } owner_class;
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
@@ -60,7 +60,7 @@ class HurtBox : public thoom::Object {
   int x_off, y_off;
 
   // maps a hitbox id to when it last hit (in ticks)
-  std::map<thoom_lid, uint64_t> previous_hits;
+  std::map<thoom_gid, uint64_t> previous_hits;
 
   SDL_FRect src_rect, dst_rect;
 };
@@ -70,4 +70,4 @@ extern std::vector<HurtBox*> hurtboxes;
 // can be used to check what hitbox attacked a given hurtbox
 // (yes this is ugly, but I don't wanna change all attack() signatures to
 // include the id cuz im lazy)
-extern thoom_lid hurtbox_hitbox_lid;
+extern thoom_gid hurtbox_hitbox_gid;

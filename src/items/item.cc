@@ -49,7 +49,7 @@ DroppedItem::DroppedItem(std::string item_id, float x, float y,
       this->deleted = true;
     }
   } else if (item_persister != nullptr) {
-    item_persister->remember_item(item_id, x, y, this->lid);
+    item_persister->remember_item(item_id, x, y, this->gid);
 
     if (!item_persister->creating_items) {
       thoom::Audio::instance->play("sfx/settle.wav", 0.5f, this->x, this->y,
@@ -62,7 +62,7 @@ DroppedItem::~DroppedItem() {
   if (!(thoom::Scene::instance->state == thoom::Scene::kUnloading) &&
       item_persister != nullptr) {
     // item picked up by player, most likely
-    item_persister->forget_item(this->lid);
+    item_persister->forget_item(this->gid);
     thoom::Audio::instance->play("sfx/pickup.wav", 0.5f, this->x, this->y,
                                  false);
   }

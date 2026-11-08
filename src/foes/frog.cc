@@ -26,7 +26,7 @@ FoeFrog::FoeFrog(int x, int y, int spawner_id)
   this->icon_offset = 16;
 
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->lid, -16, -16, 32, 32));
+      HURTBOX_OBJ, HurtBox::options(this->gid, -16, -16, 32, 32));
 }
 
 FoeFrog::~FoeFrog() {
@@ -51,7 +51,7 @@ void FoeFrog::action(Mouse* mouse) {
   char options[256];
   snprintf(options, sizeof(options), "%d,%d,%d,%d,%" PRIu64,
            (int)(this->x + this->off_x), (int)(this->y + this->off_y),
-           this->x_dir, this->y_dir, this->lid);
+           this->x_dir, this->y_dir, this->gid);
   thoom::Scene::instance->create_object(std::string(ITEM_CANNON_BALL USE_OBJ),
                                         std::string(options));
 

@@ -30,7 +30,7 @@ FoeBat::FoeBat(int x, int y, int spawner_id)
   this->dst_rect.h = 32.0f;
 
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->lid, -8, -8, 16, 16));
+      HURTBOX_OBJ, HurtBox::options(this->gid, -8, -8, 16, 16));
 
   this->base_ticks_offset = SDL_rand(CIRCLE_TICKS + 1);
   this->ticks_offset = base_ticks_offset;
@@ -53,7 +53,7 @@ void FoeBat::action(Mouse* mouse) {
   HitBox::make_offset(x_dir, y_dir, &x_off, &y_off, 8.0f);
   HitBox::Properties props = {1, 500, 250};
   thoom::Scene::instance->create_object(
-      HITBOX_OBJ, HitBox::options(this->lid, this->lid, x_off - 8, y_off - 8,
+      HITBOX_OBJ, HitBox::options(this->gid, this->gid, x_off - 8, y_off - 8,
                                   16, 16, props));
 }
 

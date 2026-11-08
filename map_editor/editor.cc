@@ -234,8 +234,7 @@ void Editor::draw_status() const {
                                        SDL_BLENDMODE_NONE);
   thoom::Renderer::instance->draw_text(
       thoom::Hud::instance->ui, MONO_FONT,
-      " h:write, j:tile, k:sheet, l:layer, x:export  ", 0, 0, 0,
-      kBackground);
+      " h:write, j:tile, k:sheet, l:layer, x:export  ", 0, 0, 0, kBackground);
 
   char status_text[256];
 

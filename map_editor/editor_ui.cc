@@ -296,6 +296,5 @@ void EditorUI::render_sheet_input(const thoom::Map* map) const {
                                        thoom::Colour(0, 0, 0),
                                        SDL_BLENDMODE_NONE);
   thoom::Renderer::instance->draw_text(thoom::Hud::instance->ui, MONO_FONT,
-                                       display_text, 0, 0, 0,
-                                       kBackground);
+                                       display_text, 0, 0, 0, kBackground);
 }

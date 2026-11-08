@@ -51,7 +51,7 @@ void HostPeerReceiver::step() {
           }
 
           std::string options =
-              UseItem::options(x, y, x_dir, y_dir, remote_feta->lid);
+              UseItem::options(x, y, x_dir, y_dir, remote_feta->gid);
           thoom::Scene::instance->create_object(std::string(buff) + USE_OBJ,
                                                 options);
           remote_feta->remove_item(std::string(buff));
@@ -89,7 +89,7 @@ void HostPeerReceiver::step() {
 
           thoom::Scene::instance->create_object(
               HITBOX_OBJ,
-              HitBox::options(remote_feta->lid, remote_feta->lid, x_off - 16,
+              HitBox::options(remote_feta->gid, remote_feta->gid, x_off - 16,
                               y_off - 18, 32, 32, props));
         } break;
 

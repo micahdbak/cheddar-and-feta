@@ -33,4 +33,7 @@ add_executable(cnf
 
 target_include_directories(cnf PRIVATE .)
 target_link_libraries(cnf PRIVATE cnf_foes cnf_items thoom sanitizers)
-#target_compile_definitions(cnf PRIVATE ONSCREEN_DEBUG)
+
+if(CNF_ONSCREEN_DEBUG)
+  target_compile_definitions(cnf PRIVATE ONSCREEN_DEBUG)
+endif()

@@ -30,7 +30,7 @@ class DroppedCannonBall : public DroppedItem {
 
 class ThrownCannonBall : public thoom::Object, public HitSource {
  public:
-  ThrownCannonBall(float x, float y, int x_dir, int y_dir, thoom_lid from_lid);
+  ThrownCannonBall(float x, float y, int x_dir, int y_dir, thoom_gid from_gid);
   ~ThrownCannonBall();
 
   void step() override;

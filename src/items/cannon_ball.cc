@@ -16,7 +16,7 @@
 #include "thoom/thoom.h"
 
 ThrownCannonBall::ThrownCannonBall(float x, float y, int x_dir, int y_dir,
-                                   thoom_lid from_lid)
+                                   thoom_gid from_gid)
     : x(x), y(y), x_dir(x_dir), y_dir(y_dir) {
   // int dx, dy;
   // if (this->x_dir != 0 && this->y_dir != 0) {
@@ -30,7 +30,7 @@ ThrownCannonBall::ThrownCannonBall(float x, float y, int x_dir, int y_dir,
   // this->x += (float)dx;
   // this->y += (float)dy;
 
-  thoom::Object* obj = thoom::Scene::instance->find_object(from_lid);
+  thoom::Object* obj = thoom::Scene::instance->find_gid_object(from_gid);
   Mouse* mouse;
   if (obj != nullptr && (mouse = dynamic_cast<Mouse*>(obj)) != nullptr) {
     // only drop if thrown by a mouse
@@ -50,7 +50,7 @@ ThrownCannonBall::ThrownCannonBall(float x, float y, int x_dir, int y_dir,
   HitBox::Properties props = {2, 1000, 1000};
   props.single_use = true;
   thoom::Scene::instance->create_object(
-      HITBOX_OBJ, HitBox::options(this->lid, from_lid, -8, -8, 16, 16, props));
+      HITBOX_OBJ, HitBox::options(this->gid, from_gid, -8, -8, 16, 16, props));
 }
 
 ThrownCannonBall::~ThrownCannonBall() {
@@ -111,12 +111,12 @@ thoom::Object* DroppedCannonBall::create_object(thoom::Scene* scene,
 thoom::Object* ThrownCannonBall::create_object(thoom::Scene* scene,
                                                const std::string& options) {
   int x, y, x_dir, y_dir;
-  thoom_lid from_lid;
+  thoom_gid from_gid;
   if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%" SCNu64, &x, &y, &x_dir,
-                  &y_dir, &from_lid)) {
+                  &y_dir, &from_gid)) {
     // TODO(micahdbak): error
     std::exit(1);
   }
 
-  return new ThrownCannonBall((float)x, (float)y, x_dir, y_dir, from_lid);
+  return new ThrownCannonBall((float)x, (float)y, x_dir, y_dir, from_gid);
 }

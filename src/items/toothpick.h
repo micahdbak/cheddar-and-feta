@@ -31,7 +31,7 @@ class DroppedToothpick : public DroppedItem {
 
 class ThrownToothpick : public thoom::Object, public HitSource {
  public:
-  ThrownToothpick(float x, float y, int x_dir, int y_dir, thoom_lid from_lid);
+  ThrownToothpick(float x, float y, int x_dir, int y_dir, thoom_gid from_gid);
   ~ThrownToothpick();
 
   void step() override;

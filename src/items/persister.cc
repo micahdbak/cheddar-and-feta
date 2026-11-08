@@ -99,19 +99,19 @@ void ItemPersister::save_items() {
 }
 
 void ItemPersister::remember_item(const std::string& item_id, float x, float y,
-                                  thoom_lid lid) {
+                                  thoom_gid gid) {
   ItemPersister::ItemSave item;
-  item.lid = lid;
+  item.gid = gid;
   item.item_id = item_id;
   item.x = x;
   item.y = y;
 
-  this->items_to_save[lid] = item;
+  this->items_to_save[gid] = item;
   this->save_items();
 }
 
-void ItemPersister::forget_item(thoom_lid lid) {
-  this->items_to_save.erase(lid);
+void ItemPersister::forget_item(thoom_gid gid) {
+  this->items_to_save.erase(gid);
   this->save_items();
 }
 

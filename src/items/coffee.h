@@ -58,12 +58,12 @@ class UsedCoffeeBean : public thoom::Object {
   }
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options) {
-    thoom_lid from_lid;
-    if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%" SCNu64, &from_lid)) {
+    thoom_gid from_gid;
+    if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%" SCNu64, &from_gid)) {
       std::exit(1);
     }
 
-    bool is_feta = remote_feta != nullptr && remote_feta->lid == from_lid;
+    bool is_feta = remote_feta != nullptr && remote_feta->gid == from_gid;
 
     return new UsedCoffeeBean(is_feta);
   }

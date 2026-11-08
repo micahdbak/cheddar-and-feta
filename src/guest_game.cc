@@ -14,10 +14,12 @@
 std::unordered_map<std::string, Item> guest_item_info;
 
 static const thoom::Scene::ObjectDef kGuestObjects[] = {
-    {PEER_RECEIVER_OBJ, GuestPeerReceiver::create_object, thoom::kObjectFirst},
-    {PEER_SENDER_OBJ, GuestPeerSender::create_object, thoom::kObjectLast},
-    {FETA_OBJ, GuestFeta::create_object},
-    {nullptr, nullptr},
+    {PEER_RECEIVER_OBJ, GuestPeerReceiver::create_object, false,
+     thoom::kObjectFirst},
+    {PEER_SENDER_OBJ, GuestPeerSender::create_object, false,
+     thoom::kObjectLast},
+    {FETA_OBJ, GuestFeta::create_object, false, thoom::kObjectNormal},
+    {nullptr, nullptr, false, thoom::kObjectNormal},
 };
 
 bool guest_start() {

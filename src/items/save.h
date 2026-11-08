@@ -39,12 +39,12 @@ class ItemSaveUse : public thoom::Object {
   }
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options) {
-    thoom_lid obj_lid;
-    if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%" SCNu64, &obj_lid)) {
+    thoom_gid obj_gid;
+    if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%" SCNu64, &obj_gid)) {
       std::exit(1);
     }
 
-    bool is_feta = remote_feta != nullptr && remote_feta->lid == obj_lid;
+    bool is_feta = remote_feta != nullptr && remote_feta->gid == obj_gid;
 
     return new ItemSaveUse(is_feta);
   }

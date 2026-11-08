@@ -17,14 +17,14 @@
 #include "utils/utils.h"
 
 std::vector<HurtBox*> hurtboxes;
-thoom_lid hurtbox_hitbox_lid;
+thoom_gid hurtbox_hitbox_gid;
 
-HurtBox::HurtBox(thoom_lid owner_lid, int x_off, int y_off, int w, int h)
-    : owner_lid(owner_lid),
+HurtBox::HurtBox(thoom_gid owner_gid, int x_off, int y_off, int w, int h)
+    : owner_gid(owner_gid),
       x_off(x_off),
       y_off(y_off),
       bounding_box{0, 0, w, h} {
-  thoom::Object* owner = thoom::Scene::instance->find_object(owner_lid);
+  thoom::Object* owner = thoom::Scene::instance->find_gid_object(owner_gid);
   if (owner == nullptr) return;
 
   HurtSource* source = dynamic_cast<HurtSource*>(owner);
@@ -61,29 +61,29 @@ HurtBox::~HurtBox() {
 }
 
 void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
-  thoom::Object* owner = thoom::Scene::instance->find_object(this->owner_lid);
+  thoom::Object* owner =
+      thoom::Scene::instance->find_gid_object(this->owner_gid);
   if (owner == nullptr) return;
 
   bool should_hit = false;
-  thoom_lid hitbox_lid =
-      hitbox->shared_cooldowns ? (thoom_lid)hitbox->shared_id : hitbox->lid;
+  thoom_gid hit_id = hitbox->shared_cooldowns ? hitbox->shared_id : hitbox->gid;
 
-  auto it = this->previous_hits.find(hitbox_lid);
+  auto it = this->previous_hits.find(hit_id);
   if (it != this->previous_hits.end()) {
     uint64_t when_ticks = it->second;
 
     if (thoom::Scene::instance->ticks - when_ticks > cooldown_ms) {
       should_hit = true;
-      this->previous_hits[hitbox_lid] = thoom::Scene::instance->ticks;
+      this->previous_hits[hit_id] = thoom::Scene::instance->ticks;
     }
   } else {
     // hitbox hasn't attacked this yet
-    this->previous_hits[hitbox_lid] = thoom::Scene::instance->ticks;
+    this->previous_hits[hit_id] = thoom::Scene::instance->ticks;
     should_hit = true;
   }
 
   if (should_hit) {
-    hurtbox_hitbox_lid = hitbox_lid;
+    hurtbox_hitbox_gid = hit_id;
 
     switch (this->owner_class) {
       case HurtBox::OwnerClass::MOUSE: {
@@ -143,7 +143,8 @@ void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
 }
 
 void HurtBox::step() {
-  thoom::Object* owner = thoom::Scene::instance->find_object(this->owner_lid);
+  thoom::Object* owner =
+      thoom::Scene::instance->find_gid_object(this->owner_gid);
 
   if (owner == nullptr) {
     this->deleted = true;
@@ -192,13 +193,13 @@ void HurtBox::step() {
 
 thoom::Object* HurtBox::create_object(thoom::Scene* scene,
                                       const std::string& options) {
-  thoom_lid owner_lid;
+  thoom_gid owner_gid;
   int x_off, y_off, w, h;
-  if (5 != sscanf(options.c_str(), "%" SCNu64 ",%d,%d,%d,%d", &owner_lid,
+  if (5 != sscanf(options.c_str(), "%" SCNu64 ",%d,%d,%d,%d", &owner_gid,
                   &x_off, &y_off, &w, &h)) {
     // TODO(micahdbak): error
     std::exit(1);
   }
 
-  return new HurtBox(owner_lid, x_off, y_off, w, h);
+  return new HurtBox(owner_gid, x_off, y_off, w, h);
 }

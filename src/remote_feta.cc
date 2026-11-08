@@ -42,7 +42,7 @@ RemoteFeta::RemoteFeta(int x, int y, int animation)
 
   // push hurtbox
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->lid, -8, -8, 16, 12));
+      HURTBOX_OBJ, HurtBox::options(this->gid, -8, -8, 16, 12));
 }
 
 RemoteFeta::~RemoteFeta() { remote_feta = nullptr; }

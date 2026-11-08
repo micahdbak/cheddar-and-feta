@@ -15,6 +15,7 @@ class Fire : public thoom::Object, public HitSource {
   ~Fire();
 
   void step() override;
+  void render() override;
 
   float hitsource_x() override { return this->x; }
   float hitsource_y() override { return this->y; }

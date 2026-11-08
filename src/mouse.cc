@@ -69,9 +69,6 @@ void Mouse::step() {
 
   std::string sel_item_id = this->selected_item();
 
-  GameHud::draw_items(this->items, this->sel_item, this->health,
-                      this->max_health);
-
   // ---- state management ----
 
   float mov_speed = 0.0f;
@@ -358,15 +355,7 @@ void Mouse::step() {
 
   this->move(x_dir, y_dir, mov_speed);
 
-  // ---- display ----
-
-#ifdef ONSCREEN_DEBUG
-  for (int ty = this->tile_y - 12; ty < this->tile_y + 13; ty++) {
-    for (int tx = this->tile_x - 12; tx < this->tile_x + 13; tx++) {
-      foe_debug_tile(tx, ty);
-    }
-  }
-#endif
+  // ---- emotes ----
 
   thoom::Controller* world = &thoom::Input::instance->world;
   int emote = world->digit;
@@ -377,10 +366,9 @@ void Mouse::step() {
              !world->cheat_code(9, 8, 7, this->which_emote)) {
     this->which_emote = -1;
   }
-
-  thoom::Renderer::instance->set_view(this->x, this->y);
-  this->draw();
 }
+
+void Mouse::render() { this->draw(); }
 
 void Mouse::save_data() {
   thoom::save.putf(this->save_id + MOUSE_X, this->x);

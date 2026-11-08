@@ -66,7 +66,9 @@ void ThrownMolotov::step() {
   this->y = new_y;
 
   this->sprite->update_frame();
+}
 
+void ThrownMolotov::render() {
   this->dst_rect.w = this->sprite->frame_w;
   this->dst_rect.h = this->sprite->frame_h;
   this->dst_rect.x = this->x - (float)(this->sprite->frame_w / 2);

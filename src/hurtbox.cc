@@ -16,6 +16,11 @@
 #include "thoom/thoom.h"
 #include "utils/utils.h"
 
+#ifdef ONSCREEN_DEBUG
+#include "renderer/renderer.h"
+#include "window/window.h"
+#endif
+
 std::vector<HurtBox*> hurtboxes;
 thoom_gid hurtbox_hitbox_gid;
 
@@ -181,7 +186,9 @@ void HurtBox::step() {
       this->bounding_box.y = (int)source->hurtsource_y() + this->y_off;
     } break;
   }
+}
 
+void HurtBox::render() {
 #ifdef ONSCREEN_DEBUG
   this->dst_rect = {(float)this->bounding_box.x, (float)this->bounding_box.y,
                     (float)this->bounding_box.w, (float)this->bounding_box.h};

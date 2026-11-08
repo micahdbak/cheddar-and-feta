@@ -18,6 +18,7 @@ class GuestFeta : public thoom::Object {
   ~GuestFeta();
 
   void step() override;
+  void render() override;
 
   void attack(int damage);
   void push_item(const std::string& item_id);

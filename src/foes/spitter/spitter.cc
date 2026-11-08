@@ -222,9 +222,6 @@ void Spitter::step() {
         return;
       }
 
-      push_icon(SKULL_AND_BONES_ICON, this->x, this->y - 14.0f, &this->icon_src,
-                &this->icon_dst);
-
       break;
 
     default:
@@ -237,12 +234,6 @@ void Spitter::step() {
   }
 
   this->prev_state = this->state;
-
-  if (thoom::Scene::instance->ticks - this->hurt_timer < 500 &&
-      this->state != Foe::State::DEAD) {
-    push_health_bar(this->health, this->max_health, this->x, this->y - 16.0f,
-                    &this->icon_src, &this->icon_dst);
-  }
 
   if (thoom::Scene::instance->ticks - this->direction_timer > 100 &&
       this->displayed_direction != this->direction) {
@@ -278,6 +269,20 @@ void Spitter::step() {
   }
 
   this->sprite->set_animation(this->displayed_direction);
+}
+
+void Spitter::render() {
+  if (this->state == Foe::State::DEAD) {
+    push_icon(SKULL_AND_BONES_ICON, this->x, this->y - 14.0f, &this->icon_src,
+              &this->icon_dst);
+  }
+
+  if (thoom::Scene::instance->ticks - this->hurt_timer < 500 &&
+      this->state != Foe::State::DEAD) {
+    push_health_bar(this->health, this->max_health, this->x, this->y - 16.0f,
+                    &this->icon_src, &this->icon_dst);
+  }
+
   this->dst_rect.x = this->x - 16.0f;
   this->dst_rect.y = this->y - 16.0f;
   thoom::Renderer::instance->push_sprite(

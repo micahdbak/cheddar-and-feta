@@ -99,7 +99,9 @@ void FoeGate::step() {
 
     thoom::Audio::instance->play("sfx/door.wav", 1.0f, this->x, this->y, false);
   }
+}
 
+void FoeGate::render() {
   this->dst_rect.x = this->x;
   this->dst_rect.y = this->y;
   thoom::Renderer::instance->push_sprite(

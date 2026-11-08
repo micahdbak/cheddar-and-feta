@@ -48,7 +48,9 @@ void Bell::step() {
   } else {
     this->sprite->set_frame(0);
   }
+}
 
+void Bell::render() {
   this->dst_rect.x = this->x - 16.0f;
   this->dst_rect.y = this->y - 16.0f;
   thoom::Renderer::instance->push_sprite(

@@ -13,6 +13,7 @@ class GameOver : public thoom::Object {
   ~GameOver();
 
   void step() override;
+  void render() override;
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
 

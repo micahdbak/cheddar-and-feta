@@ -48,6 +48,7 @@ class HurtBox : public thoom::Object {
   void hurt(int damage, HitBox* hitbox, int cooldown_ms);
 
   void step() override;
+  void render() override;
 
   SDL_Rect bounding_box;
 

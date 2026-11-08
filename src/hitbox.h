@@ -65,6 +65,7 @@ class HitBox : public thoom::Object {
   ~HitBox();
 
   void step() override;
+  void render() override;
 
   SDL_Rect bounding_box;
 

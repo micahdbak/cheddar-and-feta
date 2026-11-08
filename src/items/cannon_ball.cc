@@ -82,9 +82,11 @@ void ThrownCannonBall::step() {
 
   this->x = new_x;
   this->y = new_y;
+}
 
-  this->dst_rect.x = float(this->x - 8);
-  this->dst_rect.y = float(this->y - 8);
+void ThrownCannonBall::render() {
+  this->dst_rect.x = this->x - 8.0f;
+  this->dst_rect.y = this->y - 8.0f;
 
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,

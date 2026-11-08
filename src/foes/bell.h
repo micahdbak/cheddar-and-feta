@@ -15,6 +15,7 @@ class Bell : public thoom::Object, public HurtSource {
   ~Bell();
 
   void step() override;
+  void render() override;
 
   float hurtsource_x() override { return this->x; }
   float hurtsource_y() override { return this->y; }

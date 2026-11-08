@@ -20,6 +20,7 @@ class FoeBat : public Foe, public HitSource {
   void attack_internal(int damage) override;
 
   void step() override;
+  void render() override;
 
   float hitsource_x() override { return this->x + this->off_x; }
   float hitsource_y() override { return this->y + this->off_y; }

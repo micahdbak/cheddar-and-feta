@@ -42,8 +42,6 @@ GuestFeta::GuestFeta(float x, float y, int animation,
 
   this->items = items;
 
-  thoom::Renderer::instance->set_view(this->x, this->y);
-
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
   this->emote_rect.w = 32.0f;
@@ -86,9 +84,6 @@ void GuestFeta::step() {
     sel_item_id = this->items[this->sel_item].item_id;
     sel_item_count = this->items[this->sel_item].count;
   }
-
-  GameHud::draw_items(this->items, this->sel_item, this->health,
-                      this->max_health);
 
   // ---- state management ----
 
@@ -441,14 +436,7 @@ void GuestFeta::step() {
     }
   }
 
-  // ---- display ----
-
-  thoom::Renderer::instance->set_view(this->x, this->y);
-  this->dst_rect.x = float(int(this->x)) - 16.0f;
-  this->dst_rect.y = float(int(this->y)) - 24.0f;
-  thoom::Renderer::instance->push_sprite(
-      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
-      &this->dst_rect, 22);
+  // ---- emotes ----
 
   thoom::Controller* world = &thoom::Input::instance->world;
   int emote = world->digit;
@@ -459,6 +447,19 @@ void GuestFeta::step() {
              !world->cheat_code(9, 8, 7, this->which_emote)) {
     this->which_emote = -1;
   }
+}
+
+void GuestFeta::render() {
+  GameHud::draw_items(this->items, this->sel_item, this->health,
+                      this->max_health);
+
+  thoom::Renderer::instance->set_view(this->x, this->y);
+
+  this->dst_rect.x = float(int(this->x)) - 16.0f;
+  this->dst_rect.y = float(int(this->y)) - 24.0f;
+  thoom::Renderer::instance->push_sprite(
+      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
+      &this->dst_rect, 22);
 
   this->emote_rect.x = this->dst_rect.x;
   this->emote_rect.y = this->dst_rect.y - 11.0f;

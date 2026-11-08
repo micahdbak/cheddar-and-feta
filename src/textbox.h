@@ -11,6 +11,7 @@ class Textbox {
   ~Textbox();
 
   void step();
+  void render();
 
   std::string owner;
   bool done_sentence = false, done = false;
@@ -20,6 +21,7 @@ class Textbox {
   int i = 0, font, interval_ms;
   Uint64 last_ticks;
   std::string text, running_text;
+  bool redraw = false;
 };
 
 extern Textbox* textbox;

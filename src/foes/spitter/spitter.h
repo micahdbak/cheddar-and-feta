@@ -27,6 +27,7 @@ class Spitter : public Foe {
   void attack_internal(int damage) override;
 
   void step() override;
+  void render() override;
 
   struct step_t get_pos(int segment_id) {
     return this->get_step(this->steps_size - (segment_id * SEGMENT_DISTANCE));

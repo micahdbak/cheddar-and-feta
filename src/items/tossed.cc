@@ -65,7 +65,9 @@ void TossedItem::step() {
 
   this->x = new_x;
   this->y = new_y;
+}
 
+void TossedItem::render() {
   this->dst_rect.x = this->x - 8.0f;
   this->dst_rect.y = this->y - 8.0f;
 

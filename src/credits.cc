@@ -29,18 +29,18 @@ Credits::Credits() {
 
   this->src_rect = this->dst_rect =
       SDL_FRect{0, 0, THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT};
-
-  thoom::Renderer::instance->reset_view();
 }
 
 void Credits::step() {
-  thoom::Renderer::instance->push_sprite(this->tex_id, this->texture,
-                                         &this->src_rect, &this->dst_rect, 0);
-
   if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
     thoom::Scene::instance->request_map("maps/init");
     thoom::save.clear();
   }
+}
+
+void Credits::render() {
+  thoom::Renderer::instance->push_sprite(this->tex_id, this->texture,
+                                         &this->src_rect, &this->dst_rect, 0);
 }
 
 thoom::Object* Credits::create_object(thoom::Scene* scene,

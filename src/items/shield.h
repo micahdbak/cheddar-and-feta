@@ -17,8 +17,6 @@ class DroppedShield : public DroppedItem {
   }
   ~DroppedShield() = default;
 
-  void step() override { this->dropped_step(); }
-
   void take(Mouse* mouse) override { mouse->push_item(ITEM_SHIELD); }
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options) {

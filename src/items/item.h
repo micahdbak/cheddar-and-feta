@@ -41,7 +41,8 @@ class DroppedItem : public virtual thoom::Object {
               int frame_w, int frame_h, int interval_ms);
   ~DroppedItem();
 
-  void dropped_step();
+  void step() override;
+  void render() override;
 
   virtual void take(Mouse* mouse) = 0;
 

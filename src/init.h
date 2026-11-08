@@ -17,6 +17,7 @@ class Init : public thoom::Object {
   ~Init();
 
   void step() override;
+  void render() override;
 
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
@@ -30,7 +31,7 @@ class Init : public thoom::Object {
   SDL_FRect dst_rect = {0.0f, 0.0f, 320.0f, 240.0f};
   Which which = kChoose;
   int menu_sel = 0;
-  bool render = true;
+  bool redraw = true;
   InitHost init_host;
   InitJoin init_join;
 };

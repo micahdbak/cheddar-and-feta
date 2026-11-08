@@ -120,10 +120,6 @@ void FoePorcupine::step() {
         return;
       }
 
-      push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
-                this->y - 16.0f + this->off_y, &this->icon_src,
-                &this->icon_dst);
-
       break;
 
     default:
@@ -144,14 +140,25 @@ void FoePorcupine::step() {
       this->state != Foe::State::DEAD) {
     this->sprite->set_animation(WALK_ANIMATION);
     this->sprite->set_frame(1);
-    push_health_bar(this->health, this->max_health, this->x + this->off_x,
-                    this->y - 12.0f + this->off_y, &this->icon_src,
-                    &this->icon_dst);
   }
 
   if (this->sprite->update_frame() && this->state == Foe::State::WALKING &&
       (this->sprite->frame_i % 2) == 1) {
     thoom::Audio::instance->play("sfx/step.wav", 1.0f, this->x, this->y, false);
+  }
+}
+
+void FoePorcupine::render() {
+  if (this->state == Foe::State::DEAD) {
+    push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
+              this->y - 16.0f + this->off_y, &this->icon_src, &this->icon_dst);
+  }
+
+  if (thoom::Scene::instance->ticks - this->hurt_timer < 250 &&
+      this->state != Foe::State::DEAD) {
+    push_health_bar(this->health, this->max_health, this->x + this->off_x,
+                    this->y - 12.0f + this->off_y, &this->icon_src,
+                    &this->icon_dst);
   }
 
   this->dst_rect.x = this->x - 16.0f + this->off_x;

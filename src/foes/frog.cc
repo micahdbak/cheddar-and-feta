@@ -140,10 +140,6 @@ void FoeFrog::step() {
         return;
       }
 
-      push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
-                this->y - 24.0f + this->off_y, &this->icon_src,
-                &this->icon_dst);
-
       break;
 
     default:
@@ -156,14 +152,26 @@ void FoeFrog::step() {
       this->state != Foe::State::DEAD) {
     this->sprite->set_animation(ACTION_ANIMATION + this->_displayed_direction);
     this->sprite->set_frame(0);
-    push_health_bar(this->health, this->max_health, this->x + this->off_x,
-                    this->y - 24.0f + this->off_y, &this->icon_src,
-                    &this->icon_dst);
   }
 
   this->prev_state = this->state;
 
   this->sprite->update_frame();
+}
+
+void FoeFrog::render() {
+  if (this->state == Foe::State::DEAD) {
+    push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
+              this->y - 24.0f + this->off_y, &this->icon_src, &this->icon_dst);
+  }
+
+  if (thoom::Scene::instance->ticks - this->hurt_timer < 500 &&
+      this->state != Foe::State::DEAD) {
+    push_health_bar(this->health, this->max_health, this->x + this->off_x,
+                    this->y - 24.0f + this->off_y, &this->icon_src,
+                    &this->icon_dst);
+  }
+
   this->dst_rect.x = this->x - 24.0f + this->off_x;
   this->dst_rect.y = this->y - 24.0f + this->off_y;
   thoom::Renderer::instance->push_sprite(

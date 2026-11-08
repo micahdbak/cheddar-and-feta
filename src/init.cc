@@ -26,7 +26,6 @@ Init::Init() {
       THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
       SDL_SCALEMODE_LINEAR);
   SDL_SetTextureBlendMode(this->ui, SDL_BLENDMODE_BLEND);
-  thoom::Renderer::instance->reset_view();
 }
 
 Init::~Init() { SDL_DestroyTexture(this->ui); }
@@ -71,7 +70,7 @@ void Init::step() {
     int x_dir = thoom::Input::instance->world.consume_hit_dx();
     if (x_dir != 0) {
       this->menu_sel = THOOM_CLAMP(this->menu_sel + x_dir, 0, 1);
-      this->render = true;
+      this->redraw = true;
     }
 
     if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
@@ -90,9 +89,6 @@ void Init::step() {
         this->init_join.start(this->ui);
         this->which = kJoin;
       }
-    } else if (this->render) {
-      this->render = false;
-      this->draw_choice();
     }
   }
 
@@ -100,6 +96,19 @@ void Init::step() {
     this->init_host.step();
   } else if (this->which == kJoin) {
     this->init_join.step();
+  }
+}
+
+void Init::render() {
+  if (this->which == kChoose && this->redraw) {
+    this->redraw = false;
+    this->draw_choice();
+  }
+
+  if (this->which == kHost) {
+    this->init_host.render();
+  } else if (this->which == kJoin) {
+    this->init_join.render();
   }
 
   thoom::Renderer::instance->push_sprite("", this->ui, nullptr, &this->dst_rect,

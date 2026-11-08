@@ -17,8 +17,6 @@ class DroppedHermesBoot : public DroppedItem {
                     16, 100) {}
   ~DroppedHermesBoot() = default;
 
-  void step() override { this->dropped_step(); }
-
   void take(Mouse* mouse) override { mouse->push_item(ITEM_HERMES_BOOT); }
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options) {

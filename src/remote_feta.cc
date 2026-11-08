@@ -51,7 +51,6 @@ void RemoteFeta::step() {
   if (thoom::Peer::instance->get_state() != thoom::Peer::kStateConnected) {
     this->synchronized = false;
     this->sprite->set_animation(SLEEPING_ANIMATION);
-    this->draw();
     return;
   }
 
@@ -61,7 +60,6 @@ void RemoteFeta::step() {
   }
 
   this->update_path();
-  this->draw();
 }
 
 void RemoteFeta::attack(int damage) {

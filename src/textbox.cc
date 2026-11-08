@@ -23,9 +23,7 @@ Textbox::Textbox(const std::string& text, const std::string& owner, int font,
   this->text_rect = {80.0f, 176.0f, 160.0f, 48.0f};
   this->font = font;
   this->interval_ms = interval_ms;
-
-  thoom::Renderer::instance->draw_ui_box(
-      UI_BOX_CONTAINER, thoom::Hud::instance->ui, &this->box_rect);
+  this->redraw = true;
 }
 
 Textbox::~Textbox() {
@@ -51,12 +49,7 @@ void Textbox::step() {
       this->running_text += text[j];
     }
     this->i = j;
-    thoom::Renderer::instance->draw_rect(thoom::Hud::instance->ui,
-                                         &this->text_rect, kBackground,
-                                         SDL_BLENDMODE_NONE);
-    thoom::Renderer::instance->draw_text(
-        thoom::Hud::instance->ui, this->font, this->running_text,
-        this->text_rect.x, this->text_rect.y, this->text_rect.w, kBackground);
+    this->redraw = true;
     return;
   }
 
@@ -76,26 +69,38 @@ void Textbox::step() {
       thoom::Audio::instance->play("sfx/blip.wav", 0.5f, 0.0f, 0.0f, true);
     }
 
-    // display prompt arrow
     if (c == '\n' || c == '\0') {
       this->done = c == '\0';
       this->done_sentence = c == '\n';
-      thoom::Font* font = thoom::Renderer::instance->fonts[this->font];
-      SDL_FRect* prompt_src = font->src_rect + CHAR_TEXTBOX_NEXT - ' ';
-      SDL_FRect prompt_dst = {
-          this->text_rect.x + this->text_rect.w - prompt_src->w,
-          this->text_rect.y + this->text_rect.h - prompt_src->h, prompt_src->w,
-          prompt_src->h};
-      thoom::Renderer::instance->draw_texture(
-          thoom::Hud::instance->ui, font->texture, prompt_src, &prompt_dst);
-      return;
     }
 
-    thoom::Renderer::instance->draw_rect(thoom::Hud::instance->ui,
-                                         &this->text_rect, kBackground,
-                                         SDL_BLENDMODE_NONE);
-    thoom::Renderer::instance->draw_text(
-        thoom::Hud::instance->ui, this->font, this->running_text,
-        this->text_rect.x, this->text_rect.y, this->text_rect.w, kBackground);
+    this->redraw = true;
+  }
+}
+
+void Textbox::render() {
+  if (!this->redraw) return;
+
+  this->redraw = false;
+
+  thoom::Renderer::instance->draw_ui_box(
+      UI_BOX_CONTAINER, thoom::Hud::instance->ui, &this->box_rect);
+  thoom::Renderer::instance->draw_rect(thoom::Hud::instance->ui,
+                                       &this->text_rect, kBackground,
+                                       SDL_BLENDMODE_NONE);
+  thoom::Renderer::instance->draw_text(
+      thoom::Hud::instance->ui, this->font, this->running_text,
+      this->text_rect.x, this->text_rect.y, this->text_rect.w, kBackground);
+
+  // display prompt arrow
+  if (this->done_sentence || this->done) {
+    thoom::Font* font = thoom::Renderer::instance->fonts[this->font];
+    SDL_FRect* prompt_src = font->src_rect + CHAR_TEXTBOX_NEXT - ' ';
+    SDL_FRect prompt_dst = {
+        this->text_rect.x + this->text_rect.w - prompt_src->w,
+        this->text_rect.y + this->text_rect.h - prompt_src->h, prompt_src->w,
+        prompt_src->h};
+    thoom::Renderer::instance->draw_texture(
+        thoom::Hud::instance->ui, font->texture, prompt_src, &prompt_dst);
   }
 }

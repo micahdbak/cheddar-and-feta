@@ -43,6 +43,7 @@ class IMouse : public thoom::Object {
 
   static std::string encode_items(const std::vector<GameHud::Item>& items);
   static std::vector<GameHud::Item> read_items(const std::string& items_s);
+
   static IMouse* closest_mouse(float x, float y, float min_distance,
                                bool forced);
 
@@ -57,6 +58,7 @@ class Mouse : public IMouse {
     int animation;
   };
 
+ protected:
   enum Busy {
     FALSE,
     ATTACKING,
@@ -67,13 +69,12 @@ class Mouse : public IMouse {
     FORCED_DANCE
   };
 
+ public:
   Mouse(const char* sprite_path, bool is_feta);
   ~Mouse();
 
-  // Object
   void step() override;
 
-  // IMouse
   void attack(int damage) override;
   void push_item(const std::string& item_id) override;
   void push_cheese(int amount) override;
@@ -87,7 +88,6 @@ class Mouse : public IMouse {
   static bool check_collision(float x, float y);
 
   thoom::Sprite *sprite, *emotes;
-  SDL_FRect dst_rect, emote_rect;
   int which_emote = -1;
 
   int health = 10, max_health = 10;
@@ -97,19 +97,22 @@ class Mouse : public IMouse {
   int throw_x = 0, throw_y = 0;
   float max_mov_speed = MOUSE_DEFAULT_SPEED;
 
+ protected:
   Busy is_busy = Busy::FALSE;
   uint64_t busy_ticks = 0, is_down_ticks = 0, dance_until = 0;
   bool did_hit = false;
 
- protected:
   virtual void on_down() {}
-
- private:
-  std::string selected_item() const;
-  void move(int x_dir, int y_dir, float mov_speed);
+  void update_path();
   void draw();
 
-  int tile_x = 0, tile_y = 0;
+ private:
+  SDL_FRect dst_rect, emote_rect;
+
+  std::string selected_item() const;
+  void move(int x_dir, int y_dir, float mov_speed);
+
+  int tile_x = -1, tile_y = -1;
 };
 
 extern IMouse *cheddar, *remote_feta;

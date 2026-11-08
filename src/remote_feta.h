@@ -2,19 +2,15 @@
 
 #include <cstdint>
 #include <string>
-#include <utility>
-#include <vector>
 
-#include "game_hud.h"
 #include "hitbox.h"
 #include "mouse.h"
 #include "object.h"
 #include "scene/scene.h"
-#include "sprite/sprite.h"
 
 #define FETA_OBJ "feta"
 
-class RemoteFeta : public IMouse, public HitSource {
+class RemoteFeta : public Mouse, public HitSource {
  public:
   RemoteFeta(int x, int y, int animation);
   ~RemoteFeta();
@@ -31,7 +27,7 @@ class RemoteFeta : public IMouse, public HitSource {
   void force_dance(uint64_t timeout_ms) override;
   void set_throw(int throw_x, int throw_y) override;
   void set_max_mov_speed(float max_mov_speed) override;
-  void signal_down() override {};
+  void signal_down() override {}
 
   // HitSource
   float hitsource_x() override { return this->x; }
@@ -40,19 +36,10 @@ class RemoteFeta : public IMouse, public HitSource {
 
   void synchronize();
 
-  // directly acted on by HostPeerReceiver
-  // IMouse: x, y, is_down
-  int frame_i = 0, animation = 0, which_emote = -1;
-  std::vector<std::pair<std::string, std::string>> new_objects;
-  bool synchronized = false;
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
 
- private:
-  int tile_x, tile_y;
-
-  thoom::Sprite *sprite, *emotes;
-  SDL_FRect dst_rect, emote_rect;
-
-  std::vector<GameHud::Item> items;
+  // directly acted on by HostPeerReceiver
+  // IMouse: x, y, is_down
+  bool synchronized = false;
 };

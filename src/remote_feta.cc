@@ -5,31 +5,22 @@
 #include <cstdlib>
 #include <string>
 
-#include "foes/foe.h"
-#include "game_hud.h"
 #include "host_peer_sender.h"
 #include "hurtbox.h"
-#include "items/cheese.h"
-#include "items/item.h"
 #include "mouse.h"
 #include "object.h"
 #include "peer/peer.h"
-#include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
 
-RemoteFeta::RemoteFeta(int x, int y, int animation) {
+RemoteFeta::RemoteFeta(int x, int y, int animation)
+    : Mouse("sprites/feta.bmp", true) {
   if (remote_feta != nullptr) {
     // TODO(micahdbak): error
     std::exit(1);
   }
   remote_feta = this;
-  this->is_feta = true;
-
-  this->sprite = new thoom::Sprite("sprites/feta.bmp", 32, 32, 250);
-  this->sprite->set_animation(SLEEPING_ANIMATION);
-  this->emotes = new thoom::Sprite("sprites/emotes.bmp", 32, 32, 0);
 
   std::string items_s = thoom::save.value(FETA_OBJ MOUSE_ITEMS);
   if (!items_s.empty()) {
@@ -38,49 +29,27 @@ RemoteFeta::RemoteFeta(int x, int y, int animation) {
 
   // if loading a save, read the location from the save file
   if (thoom::save.geti(LOAD_SAVE) && thoom::save.has(FETA_OBJ MOUSE_X)) {
-    this->x = thoom::save.getf(FETA_OBJ MOUSE_X);
-    this->y = thoom::save.getf(FETA_OBJ MOUSE_Y);
     this->sprite->set_animation(thoom::save.geti(FETA_OBJ MOUSE_ANIMATION));
+    this->place(thoom::save.getf(FETA_OBJ MOUSE_X),
+                thoom::save.getf(FETA_OBJ MOUSE_Y));
   } else {
     // cheddar will have provided the corresponding coordinates and animation
-    this->x = (float)x;
-    this->y = (float)y;
     this->sprite->set_animation(animation);
+    this->place((float)x, (float)y);
   }
-
-  this->tile_x = (int)this->x / thoom::Scene::instance->map->tile_width;
-  this->tile_y = (int)this->y / thoom::Scene::instance->map->tile_height;
-  foe_path_find(this);
-
-  this->dst_rect.w = 32.0f;
-  this->dst_rect.h = 32.0f;
-  this->emote_rect.w = 32.0f;
-  this->emote_rect.h = 32.0f;
 
   // push hurtbox
   thoom::Scene::instance->create_object(
       HURTBOX_OBJ, HurtBox::options(this->id, -8, -8, 16, 12));
-
-  this->is_down = false;
 }
 
-RemoteFeta::~RemoteFeta() {
-  delete this->sprite;
-  delete this->emotes;
-  remote_feta = nullptr;
-}
+RemoteFeta::~RemoteFeta() { remote_feta = nullptr; }
 
 void RemoteFeta::step() {
   if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
     this->synchronized = false;
-
     this->sprite->set_animation(SLEEPING_ANIMATION);
-    this->dst_rect.x = this->x - 16.0f;
-    this->dst_rect.y = this->y - 24.0f;
-    thoom::Renderer::instance->push_sprite(
-        this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
-        &this->dst_rect, 22);
-
+    this->draw();
     return;
   }
 
@@ -89,39 +58,8 @@ void RemoteFeta::step() {
     this->synchronized = true;
   }
 
-  if (!this->new_objects.empty()) {
-    for (int i = 0; i < this->new_objects.size(); i++) {
-      thoom::Scene::instance->create_object(this->new_objects[i].first,
-                                            this->new_objects[i].second);
-    }
-
-    this->new_objects.clear();
-  }
-
-  int new_tile_x = (int)this->x / thoom::Scene::instance->map->tile_width;
-  int new_tile_y = (int)this->y / thoom::Scene::instance->map->tile_height;
-
-  if (this->tile_x != new_tile_x || this->tile_y != new_tile_y) {
-    this->tile_x = new_tile_x;
-    this->tile_y = new_tile_y;
-    foe_path_find(this);
-  }
-
-  this->sprite->set_frame(this->frame_i);
-  this->sprite->set_animation(this->animation);
-  this->dst_rect.x = this->x - 16.0f;
-  this->dst_rect.y = this->y - 24.0f;
-  thoom::Renderer::instance->push_sprite(
-      "", this->sprite->texture, &this->sprite->frame, &this->dst_rect, 22);
-
-  this->emote_rect.x = this->dst_rect.x;
-  this->emote_rect.y = this->dst_rect.y - 11.0f;
-
-  if (this->which_emote != -1) {
-    this->emotes->set_frame(this->which_emote % 8);
-    thoom::Renderer::instance->push_sprite(
-        "", this->emotes->texture, &this->emotes->frame, &this->emote_rect, 34);
-  }
+  this->update_path();
+  this->draw();
 }
 
 void RemoteFeta::save_data() {
@@ -137,73 +75,29 @@ void RemoteFeta::attack(int damage) {
 
 void RemoteFeta::push_item(const std::string& item_id) {
   HostPeerSender::send_message(MSG_PUSH_ITEM, item_id);
-
-  if (item_info.find(item_id) == item_info.end()) {
-    // TODO(micahdbak): error
-    std::exit(1);
-  }
-
-  GameHud::Item new_item;
-  new_item.item_id = item_id;
-  new_item.count = 1;
-
-  if (this->items.empty()) {
-    this->items.push_back(new_item);
-    return;
-  }
-
-  // see if the item is already in inventory, and increment count
-  int i = 0;
-  for (auto it = this->items.begin(); it != this->items.end(); ++it, ++i) {
-    if (it->item_id == item_id) {
-      it->count++;
-      return;
-    }
-  }
-
-  // item not in inventory, push to back
-  this->items.push_back(new_item);
+  Mouse::push_item(item_id);
 }
 
 void RemoteFeta::push_cheese(int amount) {
   HostPeerSender::send_message(MSG_PUSH_CHEESE, std::to_string(amount));
-
-  GameHud::Item new_item;
-  new_item.item_id = ITEM_CHEESE;
-  new_item.count = amount;
-
-  if (this->items.empty()) {
-    this->items.push_back(new_item);
-    return;
-  }
-
-  // see if already has cheese, and increment by amount
-  int i = 0;
-  for (auto it = this->items.begin(); it != this->items.end(); ++it, ++i) {
-    if (it->item_id == ITEM_CHEESE) {
-      it->count += amount;
-      return;
-    }
-  }
-
-  // cheese not in inventory, push to back
-  this->items.push_back(new_item);
+  Mouse::push_cheese(amount);
 }
 
 void RemoteFeta::remove_item(const std::string& item_id) {
-  for (auto it = this->items.begin(); it != this->items.end(); it++) {
-    if (it->item_id == item_id && it->count > 0) {
-      it->count--;
-      if (it->count <= 0) {
-        this->items.erase(it);
-        break;
-      }
-    }
-  }
+  Mouse::remove_item(item_id);
 }
 
 void RemoteFeta::force_dance(uint64_t timeout_ms) {
   HostPeerSender::send_message(MSG_FORCE_DANCE, std::to_string(timeout_ms));
+}
+
+void RemoteFeta::set_throw(int throw_x, int throw_y) {
+  HostPeerSender::send_message(
+      MSG_THROW, std::to_string(throw_x) + ',' + std::to_string(throw_y));
+}
+
+void RemoteFeta::set_max_mov_speed(float max_mov_speed) {
+  HostPeerSender::send_message(MSG_MAX_SPEED, std::to_string(max_mov_speed));
 }
 
 void RemoteFeta::hitsource_notify() {
@@ -219,19 +113,10 @@ void RemoteFeta::synchronize() {
   thoom::float_to_str(this->y, y_str, sizeof(y_str));
   items_s = IMouse::encode_items(this->items);
 
-  snprintf(buff, sizeof(buff), "%s,%s,%d %s", x_str, y_str, this->animation,
-           items_s.c_str());
+  snprintf(buff, sizeof(buff), "%s,%s,%d %s", x_str, y_str,
+           this->sprite->animation, items_s.c_str());
 
   HostPeerSender::send_message(MSG_SYNC, std::string(buff));
-}
-
-void RemoteFeta::set_throw(int throw_x, int throw_y) {
-  HostPeerSender::send_message(
-      MSG_THROW, std::to_string(throw_x) + ',' + std::to_string(throw_y));
-}
-
-void RemoteFeta::set_max_mov_speed(float max_mov_speed) {
-  HostPeerSender::send_message(MSG_MAX_SPEED, std::to_string(max_mov_speed));
 }
 
 thoom::Object* RemoteFeta::create_object(thoom::Scene* scene,

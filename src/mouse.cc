@@ -574,9 +574,7 @@ void Mouse::set_max_mov_speed(float max_mov_speed) {
 void Mouse::place(float x, float y) {
   this->x = x;
   this->y = y;
-  this->tile_x = (int)x / thoom::Scene::instance->map->tile_width;
-  this->tile_y = (int)y / thoom::Scene::instance->map->tile_height;
-  foe_path_find(this);
+  this->update_path();
 }
 
 bool Mouse::check_collision(float x, float y) {
@@ -585,6 +583,34 @@ bool Mouse::check_collision(float x, float y) {
          thoom::Scene::instance->map->collider->point_in_collider(x - 2.0f,
                                                                   y) ||
          thoom::Scene::instance->map->collider->point_in_collider(x, y - 2.0f);
+}
+
+void Mouse::update_path() {
+  int new_tile_x = (int)this->x / thoom::Scene::instance->map->tile_width;
+  int new_tile_y = (int)this->y / thoom::Scene::instance->map->tile_height;
+  if (new_tile_x == this->tile_x && new_tile_y == this->tile_y) return;
+
+  this->tile_x = new_tile_x;
+  this->tile_y = new_tile_y;
+  foe_path_find(this);
+}
+
+void Mouse::draw() {
+  this->dst_rect.x = float(int(this->x)) - 16.0f;
+  this->dst_rect.y = float(int(this->y)) - 24.0f;
+  thoom::Renderer::instance->push_sprite(
+      this->is_feta ? "" : this->sprite->tex_id, this->sprite->texture,
+      &this->sprite->frame, &this->dst_rect, 22);
+
+  this->emote_rect.x = this->dst_rect.x;
+  this->emote_rect.y = this->dst_rect.y - 11.0f;
+
+  if (this->which_emote != -1) {
+    this->emotes->set_frame(this->which_emote % 8);
+    thoom::Renderer::instance->push_sprite(
+        this->is_feta ? "" : this->emotes->tex_id, this->emotes->texture,
+        &this->emotes->frame, &this->emote_rect, 34);
+  }
 }
 
 std::string Mouse::selected_item() const {
@@ -655,29 +681,5 @@ void Mouse::move(int x_dir, int y_dir, float mov_speed) {
   }
 
   // if moved onto a new tile, update the path finding
-  int new_tile_x = (int)this->x / thoom::Scene::instance->map->tile_width;
-  int new_tile_y = (int)this->y / thoom::Scene::instance->map->tile_height;
-  if (new_tile_x != this->tile_x || new_tile_y != this->tile_y) {
-    foe_path_find(this);
-    this->tile_x = new_tile_x;
-    this->tile_y = new_tile_y;
-  }
-}
-
-void Mouse::draw() {
-  this->dst_rect.x = float(int(this->x)) - 16.0f;
-  this->dst_rect.y = float(int(this->y)) - 24.0f;
-  thoom::Renderer::instance->push_sprite(
-      this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
-      &this->dst_rect, 22);
-
-  this->emote_rect.x = this->dst_rect.x;
-  this->emote_rect.y = this->dst_rect.y - 11.0f;
-
-  if (this->which_emote != -1) {
-    this->emotes->set_frame(this->which_emote % 8);
-    thoom::Renderer::instance->push_sprite(
-        this->emotes->tex_id, this->emotes->texture, &this->emotes->frame,
-        &this->emote_rect, 34);
-  }
+  this->update_path();
 }

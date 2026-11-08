@@ -28,7 +28,7 @@ Billboard::Billboard(int x, int y, int ts_x, int ts_y, int w, int h, int depth,
 
 Billboard::~Billboard() { delete this->sprite; }
 
-void Billboard::step() {
+void Billboard::render() {
   this->dst_rect.x = (float)this->x;
   this->dst_rect.y = (float)this->y;
   thoom::Renderer::instance->push_sprite(

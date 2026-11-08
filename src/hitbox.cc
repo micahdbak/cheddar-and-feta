@@ -12,6 +12,11 @@
 #include "scene/scene.h"
 #include "thoom/thoom.h"
 
+#ifdef ONSCREEN_DEBUG
+#include "renderer/renderer.h"
+#include "window/window.h"
+#endif
+
 HitBox::HitBox(thoom_gid source_gid, thoom_gid hurtbox_owner_gid, int x_off,
                int y_off, int w, int h, HitBox::Properties props)
     : bounding_box{0, 0, w, h},
@@ -80,7 +85,9 @@ void HitBox::step() {
       }
     }
   }
+}
 
+void HitBox::render() {
 #ifdef ONSCREEN_DEBUG
   this->dst_rect = {(float)this->bounding_box.x, (float)this->bounding_box.y,
                     (float)this->bounding_box.w, (float)this->bounding_box.h};

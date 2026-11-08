@@ -29,13 +29,15 @@ GameOver::GameOver() {
 GameOver::~GameOver() { SDL_DestroyTexture(this->ui); }
 
 void GameOver::step() {
-  thoom::Renderer::instance->push_sprite("", this->ui, &this->src, &this->dst,
-                                         0);
-
   if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
     thoom::Scene::instance->request_map("maps/init");
     thoom::save.clear();
   }
+}
+
+void GameOver::render() {
+  thoom::Renderer::instance->push_sprite("", this->ui, &this->src, &this->dst,
+                                         0);
 }
 
 thoom::Object* GameOver::create_object(thoom::Scene* scene,

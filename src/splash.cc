@@ -68,8 +68,6 @@ void Splash::step() {
     this->animation = this->animations;
   }
 
-  uint8_t alpha = 0;
-
   if (this->timer >= DISPLAY_FOR) {
     this->timer = 0;
     this->initial_timer = thoom::Scene::instance->ticks;
@@ -81,8 +79,25 @@ void Splash::step() {
     }
 
     this->sprite->set_animation(this->animation);
-    alpha = 255;
-  } else if (this->timer > DISPLAY_FOR - 512) {
+  }
+
+  if (this->animation == 4) {
+    for (int which_ant = 0; which_ant < NUM_ANTS; which_ant++) {
+      this->ant->update_frame();
+      this->ant->set_animation(which_ant % 3);
+    }
+  } else {
+    this->sprite->interval_ms = this->sprite->animation > 2 ? 100 : 250;
+    this->sprite->update_frame();
+  }
+}
+
+void Splash::render() {
+  if (this->animation >= this->animations) return;
+
+  uint8_t alpha = 0;
+
+  if (this->timer > DISPLAY_FOR - 512) {
     alpha = THOOM_CLAMP((this->timer - (DISPLAY_FOR - 512)) / 2, 0, 255);
   } else if (this->timer < 512) {
     alpha = THOOM_CLAMP(256 - (this->timer / 2), 0, 255);
@@ -111,8 +126,6 @@ void Splash::step() {
     float ant_y[] = {-40.0f, 40.0f, -12.0f, 7.0f, -30.0f};
 
     for (int which_ant = 0; which_ant < NUM_ANTS; which_ant++) {
-      this->ant->update_frame();
-      this->ant->set_animation(which_ant % 3);
       this->ant_src[which_ant] = this->ant->frame;
 
       this->ant_dst[which_ant].x = ant_x[which_ant % 3];
@@ -159,9 +172,6 @@ void Splash::step() {
         this->sprite->tex_id, this->sprite->texture, &this->feta_src,
         &this->feta_dst, 32);
   } else {
-    this->sprite->interval_ms = this->sprite->animation > 2 ? 100 : 250;
-    this->sprite->update_frame();
-
     float shake_x = 0.0f, shake_y = 0.0f;
     switch (this->animation) {
       case 3:
@@ -203,6 +213,7 @@ void Splash::step() {
         this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
         &this->dst_rect, 0);
   }
+
   thoom::Renderer::instance->push_sprite("", this->overlay, &this->overlay_rect,
                                          &this->overlay_rect,
                                          2 * THOOM_SCREEN_HEIGHT);

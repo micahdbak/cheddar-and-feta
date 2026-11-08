@@ -14,7 +14,8 @@ class Billboard : public thoom::Object {
             std::string tilesheet);
   ~Billboard();
 
-  void step() override;
+  void step() override {}
+  void render() override;
 
   static void parse_options(const std::string& options, int* x, int* y,
                             int* ts_x, int* ts_y, int* w, int* h, int* depth,

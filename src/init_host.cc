@@ -24,7 +24,7 @@ void InitHost::start(SDL_Texture* ui) {
   this->sel_save = 0;
   this->save_start = 0;
   this->save_end = THOOM_MIN(this->summaries.size(), 2);
-  this->render = true;
+  this->redraw = true;
 }
 
 void InitHost::step() {
@@ -35,7 +35,7 @@ void InitHost::step() {
         thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
       delete textbox;
       textbox = nullptr;
-      this->render = true;
+      this->redraw = true;
     } else
       return;
   } else if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
@@ -75,10 +75,14 @@ void InitHost::step() {
       this->save_end--;
     }
 
-    this->render = true;
+    this->redraw = true;
   }
+}
 
-  if (this->render) {
+void InitHost::render() {
+  if (textbox != nullptr) textbox->render();
+
+  if (this->redraw) {
     thoom::Renderer::instance->clear(this->ui, thoom::kMask);
 
     const int x = (THOOM_SCREEN_WIDTH - UI_WIDTH) / 2;
@@ -119,6 +123,6 @@ void InitHost::step() {
                                            y + UI_HEIGHT - 9, 0, kBackground);
     }
 
-    this->render = false;
+    this->redraw = false;
   }
 }

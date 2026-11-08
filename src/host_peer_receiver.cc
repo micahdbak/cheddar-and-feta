@@ -16,6 +16,7 @@
 #include "remote_feta.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
+#include "sprite/sprite.h"
 #include "utils/utils.h"
 
 void HostPeerReceiver::step() {
@@ -103,8 +104,8 @@ void HostPeerReceiver::step() {
 
           remote_feta->x = thoom::str_to_float(x_str);
           remote_feta->y = thoom::str_to_float(y_str);
-          remote_feta_inst->animation = animation;
-          remote_feta_inst->frame_i = frame_i;
+          remote_feta_inst->sprite->set_animation(animation);
+          remote_feta_inst->sprite->set_frame(frame_i);
           remote_feta_inst->which_emote = which_emote;
         } break;
 

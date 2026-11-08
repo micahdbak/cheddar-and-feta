@@ -16,6 +16,7 @@ class GuestPeerSender : public thoom::Object {
   void step() override;
 
   static void send_message(char func, const std::string& arg);
+  static void send_audio(const char* wav_path, float gain, float x, float y);
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
 

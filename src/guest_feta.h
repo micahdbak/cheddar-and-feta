@@ -1,34 +1,16 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
 #include "game_hud.h"
+#include "mouse.h"
 #include "object.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
 
 #define FETA_OBJ "feta"
-
-#define MOUSE_DEFAULT_SPEED 80.0f
-
-// animations
-#define RUNPREP_ANIMATION 8
-#define ATTACKING_ANIMATION 16
-#define ATTACKED_ANIMATION 24
-#define THROWING_ANIMATION 32
-#define DOWN_ANIMATION 40
-#define EATING_ANIMATION 48
-#define DANCING_ANIMATION 49
-#define DANCING2_ANIMATION 50
-#define SLEEPING_ANIMATION 51
-
-namespace GuestMouse {
-bool check_collision(float x, float y);
-std::string encode_items(const std::vector<GameHud::Item>& items);
-std::vector<GameHud::Item> read_items(const std::string& items_s);
-std::string audio_msg(const char* wav_path, float gain, int x, int y);
-};  // namespace GuestMouse
 
 class GuestFeta : public thoom::Object {
  public:
@@ -41,22 +23,23 @@ class GuestFeta : public thoom::Object {
   void push_item(const std::string& item_id);
   void push_cheese(int amount);
   void remove_item(const std::string& item_id);
-  void force_dance(Uint64 timeout_ms);
+  void force_dance(uint64_t timeout_ms);
   void set_throw(int throw_x, int throw_y);
   void set_max_mov_speed(float max_mov_speed);
 
   void set_animation(int animation);
   void set_items(const std::string& items_s);
 
-  float x, y;
+  float x = 0.0f, y = 0.0f;
   bool is_down = false, did_hit = false;
-  bool mice_locked = false;
   thoom::Sprite *sprite, *emotes;
   int which_emote = -1;
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
 
  private:
+  static bool known_item(const GameHud::Item& item);
+
   int tile_x, tile_y;
 
   SDL_FRect dst_rect, emote_rect;
@@ -77,7 +60,7 @@ class GuestFeta : public thoom::Object {
     DOWNED,
     FORCED_DANCE
   } is_busy = GuestFeta::Busy::FALSE;
-  Uint64 busy_ticks = 0, is_down_ticks = 0, dance_until = 0;
+  uint64_t busy_ticks = 0, is_down_ticks = 0, dance_until = 0;
 };
 
 extern GuestFeta* guest_feta;

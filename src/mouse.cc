@@ -25,30 +25,8 @@
 #include "thoom/macros.h"
 #include "utils/utils.h"
 
-IMouse* cheddar = nullptr;
-IMouse* remote_feta = nullptr;
-
-IMouse* IMouse::closest_mouse(float x, float y, float min_distance,
-                              bool forced) {
-  float distance_cheddar =
-      (cheddar->is_down && !forced)
-          ? FLT_MAX
-          : thoom::distance_between_points(x, y, cheddar->x, cheddar->y);
-  float distance_feta = (remote_feta->is_down && !forced)
-                            ? FLT_MAX
-                            : thoom::distance_between_points(
-                                  x, y, remote_feta->x, remote_feta->y);
-
-  if (distance_cheddar < distance_feta) {
-    if (min_distance < 0.1f || distance_cheddar < min_distance) {
-      return cheddar;
-    }
-  } else if (min_distance < 0.1f || distance_feta < min_distance) {
-    return remote_feta;
-  }
-
-  return nullptr;  // no close-enough mouse
-}
+Mouse* cheddar = nullptr;
+Mouse* remote_feta = nullptr;
 
 Mouse::Mouse(const char* sprite_path, bool is_feta, const char* save_prefix)
     : save_id(save_prefix) {
@@ -574,6 +552,27 @@ std::vector<GameHud::Item> Mouse::read_items(const std::string& items_s,
   }
 
   return ret;
+}
+
+Mouse* Mouse::closest_mouse(float x, float y, float min_distance, bool forced) {
+  float distance_cheddar =
+      (cheddar->is_down && !forced)
+          ? FLT_MAX
+          : thoom::distance_between_points(x, y, cheddar->x, cheddar->y);
+  float distance_feta = (remote_feta->is_down && !forced)
+                            ? FLT_MAX
+                            : thoom::distance_between_points(
+                                  x, y, remote_feta->x, remote_feta->y);
+
+  if (distance_cheddar < distance_feta) {
+    if (min_distance < 0.1f || distance_cheddar < min_distance) {
+      return cheddar;
+    }
+  } else if (min_distance < 0.1f || distance_feta < min_distance) {
+    return remote_feta;
+  }
+
+  return nullptr;  // no close-enough mouse
 }
 
 void Mouse::place(float x, float y) {

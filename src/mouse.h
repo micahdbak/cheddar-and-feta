@@ -27,28 +27,7 @@
 #define DANCING2_ANIMATION 50
 #define SLEEPING_ANIMATION 51
 
-class IMouse : public thoom::Object {
- public:
-  IMouse() = default;
-  ~IMouse() = default;
-
-  virtual void attack(int damage) = 0;
-  virtual void push_item(const std::string& item_id) = 0;
-  virtual void push_cheese(int amount) = 0;
-  virtual void remove_item(const std::string& item_id) = 0;
-  virtual void force_dance(uint64_t timeout_ms) = 0;
-  virtual void set_throw(int throw_x, int throw_y) = 0;
-  virtual void set_max_mov_speed(float max_mov_speed) = 0;
-  virtual void signal_down() = 0;
-
-  static IMouse* closest_mouse(float x, float y, float min_distance,
-                               bool forced);
-
-  float x = 0.0f, y = 0.0f;
-  bool is_down = false, is_feta = false;
-};
-
-class Mouse : public IMouse {
+class Mouse : public thoom::Object {
  public:
   struct SpawnCoord {
     float x, y;
@@ -63,21 +42,28 @@ class Mouse : public IMouse {
   void step() override;
   void save_data() override;
 
-  void attack(int damage) override;
-  void push_item(const std::string& item_id) override;
-  void push_cheese(int amount) override;
-  void remove_item(const std::string& item_id) override;
-  void force_dance(uint64_t timeout_ms) override;
-  void set_throw(int throw_x, int throw_y) override;
-  void set_max_mov_speed(float max_mov_speed) override;
+  virtual void attack(int damage);
+  virtual void push_item(const std::string& item_id);
+  virtual void push_cheese(int amount);
+  virtual void remove_item(const std::string& item_id);
+  virtual void force_dance(uint64_t timeout_ms);
+  virtual void set_throw(int throw_x, int throw_y);
+  virtual void set_max_mov_speed(float max_mov_speed);
+  virtual void signal_down() = 0;
 
   static std::string encode_items(const std::vector<GameHud::Item>& items);
   static std::vector<GameHud::Item> read_items(const std::string& items_s,
                                                ItemFilter keep);
 
+  static Mouse* closest_mouse(float x, float y, float min_distance,
+                              bool forced);
+
   void place(float x, float y);
 
   static bool check_collision(float x, float y);
+
+  float x = 0.0f, y = 0.0f;
+  bool is_down = false, is_feta = false;
 
   std::string save_id;
   thoom::Sprite *sprite, *emotes;
@@ -118,4 +104,4 @@ class Mouse : public IMouse {
   int tile_x = -1, tile_y = -1;
 };
 
-extern IMouse *cheddar, *remote_feta;
+extern Mouse *cheddar, *remote_feta;

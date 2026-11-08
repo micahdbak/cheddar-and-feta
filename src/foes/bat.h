@@ -16,7 +16,7 @@ class FoeBat : public Foe, public HitSource {
   FoeBat(int x, int y, int spawner_id);
   ~FoeBat();
 
-  void action(IMouse* mouse) override;
+  void action(Mouse* mouse) override;
   void attack_internal(int damage) override;
 
   void step() override;

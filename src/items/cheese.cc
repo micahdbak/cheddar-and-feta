@@ -33,7 +33,7 @@ void Cheese::render_cheese() {
 }
 
 void Cheese::step() {
-  IMouse* mouse = IMouse::closest_mouse(this->x, this->y, 8.0f, true);
+  Mouse* mouse = Mouse::closest_mouse(this->x, this->y, 8.0f, true);
   if (mouse != nullptr) {
     mouse->push_cheese(this->amount);
     this->deleted = true;

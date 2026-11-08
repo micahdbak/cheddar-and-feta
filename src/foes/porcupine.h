@@ -15,7 +15,7 @@ class FoePorcupine : public Foe {
   FoePorcupine(int x, int y, int spawner_id);
   ~FoePorcupine();
 
-  void action(IMouse* mouse) override;
+  void action(Mouse* mouse) override;
   void attack_internal(int damage) override;
 
   void step() override;

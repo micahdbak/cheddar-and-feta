@@ -20,10 +20,10 @@ inline float center_tile_y(float y) {
 
 enum FoeStrafe { STRAFE_LEFT, NO_STRAFE, STRAFE_RIGHT };
 
-void foe_path_find(IMouse* mouse);
-bool foe_move_towards(IMouse* mouse, int* x, int* y, FoeStrafe strafe);
-bool foe_move_away(IMouse* mouse, int* x, int* y);
-bool foe_move_circle(IMouse* mouse, int* x, int* y);
+void foe_path_find(Mouse* mouse);
+bool foe_move_towards(Mouse* mouse, int* x, int* y, FoeStrafe strafe);
+bool foe_move_away(Mouse* mouse, int* x, int* y);
+bool foe_move_circle(Mouse* mouse, int* x, int* y);
 void foe_pick_random(int* x, int* y);
 void foe_move_direction(int* x, int* y, int x_dir, int y_dir);
 void foe_debug_tile(int x, int y);
@@ -35,7 +35,7 @@ class Foe : public virtual thoom::Object {
   ~Foe();
 
   // must be implemented per foe
-  virtual void action(IMouse* mouse) = 0;
+  virtual void action(Mouse* mouse) = 0;
   virtual void attack_internal(int damage) = 0;
 
   void attack(int damage);
@@ -64,7 +64,7 @@ class Foe : public virtual thoom::Object {
  protected:
   int icon_offset = 8;
   float current_distance;
-  IMouse* target_mouse = nullptr;
+  Mouse* target_mouse = nullptr;
   int _displayed_direction;
 
  private:

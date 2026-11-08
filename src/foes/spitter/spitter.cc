@@ -47,7 +47,7 @@ Spitter::Spitter(float x, float y, int spawner_id)
 
 Spitter::~Spitter() { delete this->sprite; }
 
-void Spitter::action(IMouse* mouse) {
+void Spitter::action(Mouse* mouse) {
   this->timer = thoom::Scene::instance->ticks;
 }
 
@@ -115,7 +115,7 @@ void Spitter::step() {
         break;
       }
 
-      IMouse* mouse = IMouse::closest_mouse(this->x, this->y, 80.0f, true);
+      Mouse* mouse = Mouse::closest_mouse(this->x, this->y, 80.0f, true);
 
       if (mouse == nullptr) {
         this->state = Foe::State::IDLE;

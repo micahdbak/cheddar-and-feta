@@ -18,7 +18,7 @@ class RemoteFeta : public Mouse, public HitSource {
   // Object
   void step() override;
 
-  // IMouse
+  // Mouse
   void attack(int damage) override;
   void push_item(const std::string& item_id) override;
   void push_cheese(int amount) override;
@@ -39,6 +39,6 @@ class RemoteFeta : public Mouse, public HitSource {
                                       const std::string& options);
 
   // directly acted on by HostPeerReceiver
-  // IMouse: x, y, is_down
+  // Mouse: x, y, is_down
   bool synchronized = false;
 };

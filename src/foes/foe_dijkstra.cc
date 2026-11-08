@@ -76,7 +76,7 @@ static void _neighbours(int x, int y, std::vector<_Neighbour>& neighbours) {
   }
 }
 
-void foe_path_find(IMouse* mouse) {
+void foe_path_find(Mouse* mouse) {
   if (thoom::Scene::instance->map->collider->collision == nullptr) {
     std::cerr << "foe_path_find error: called without "
                  "Scene::instance->map->collider->collision"
@@ -136,7 +136,7 @@ void foe_path_find(IMouse* mouse) {
   // dist and prev are populated; all done
 }
 
-bool foe_move_towards(IMouse* mouse, int* x, int* y, FoeStrafe strafe) {
+bool foe_move_towards(Mouse* mouse, int* x, int* y, FoeStrafe strafe) {
   int* prev = mouse->is_feta ? _feta_prev : _cheddar_prev;
 
   if (prev == nullptr) {
@@ -205,7 +205,7 @@ bool foe_move_towards(IMouse* mouse, int* x, int* y, FoeStrafe strafe) {
   return true;
 }
 
-bool foe_move_away(IMouse* mouse, int* x, int* y) {
+bool foe_move_away(Mouse* mouse, int* x, int* y) {
   int* prev = mouse->is_feta ? _feta_prev : _cheddar_prev;
 
   if (prev == nullptr) {
@@ -243,7 +243,7 @@ bool foe_move_away(IMouse* mouse, int* x, int* y) {
   return true;
 }
 
-bool foe_move_circle(IMouse* mouse, int* x, int* y) {
+bool foe_move_circle(Mouse* mouse, int* x, int* y) {
   int* prev = mouse->is_feta ? _feta_prev : _cheddar_prev;
 
   if (prev == nullptr) {
@@ -335,7 +335,7 @@ void foe_debug_tile(int x, int y) {
                                                cheddar->y);
   float dist2 = thoom::distance_between_points(center_x, center_y,
                                                remote_feta->x, remote_feta->y);
-  IMouse* mouse = nullptr;
+  Mouse* mouse = nullptr;
 
   if (dist1 < dist2) {
     mouse = cheddar;

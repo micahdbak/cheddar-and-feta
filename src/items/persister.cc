@@ -10,6 +10,7 @@
 #include "object.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
+#include "thoom/thoom.h"
 
 ItemPersister* item_persister = nullptr;
 
@@ -98,19 +99,19 @@ void ItemPersister::save_items() {
 }
 
 void ItemPersister::remember_item(const std::string& item_id, float x, float y,
-                                  int id) {
+                                  thoom_lid lid) {
   ItemPersister::ItemSave item;
-  item.id = id;
+  item.lid = lid;
   item.item_id = item_id;
   item.x = x;
   item.y = y;
 
-  this->items_to_save[id] = item;
+  this->items_to_save[lid] = item;
   this->save_items();
 }
 
-void ItemPersister::forget_item(int id) {
-  this->items_to_save.erase(id);
+void ItemPersister::forget_item(thoom_lid lid) {
+  this->items_to_save.erase(lid);
   this->save_items();
 }
 

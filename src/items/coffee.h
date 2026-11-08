@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 
@@ -7,6 +8,7 @@
 #include "mouse.h"
 #include "object.h"
 #include "scene/scene.h"
+#include "thoom/thoom.h"
 
 #define ITEM_COFFEE_BEAN "item_coffee_bean"
 
@@ -56,12 +58,12 @@ class UsedCoffeeBean : public thoom::Object {
   }
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options) {
-    int from_id;
-    if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &from_id)) {
+    thoom_lid from_lid;
+    if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%" SCNu64, &from_lid)) {
       std::exit(1);
     }
 
-    bool is_feta = remote_feta != nullptr && remote_feta->id == from_id;
+    bool is_feta = remote_feta != nullptr && remote_feta->lid == from_lid;
 
     return new UsedCoffeeBean(is_feta);
   }

@@ -1,5 +1,6 @@
 #include "fire.h"
 
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -36,7 +37,7 @@ Fire::Fire(float x, float y, int x_dir, int y_dir)
   // deals 3 damage over 3 seconds
   thoom::Scene::instance->create_object(
       HITBOX_OBJ,
-      HitBox::options(this->id, -1, -8, -8, 16, 16,
+      HitBox::options(this->lid, HB_NO_OWNER, -8, -8, 16, 16,
                       HitBox::Properties{.damage = 1,
                                          .cooldown_ms = 1000,
                                          .delete_after_ms = 4000,
@@ -94,9 +95,9 @@ void Fire::step() {
 
 thoom::Object* Fire::create_object(thoom::Scene* scene,
                                    const std::string& options) {
-  int x, y, x_dir = 0, y_dir = 0, from_id = -1;
-  if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
-                  &from_id)) {
+  int x, y, x_dir = 0, y_dir = 0;
+  if (4 != sscanf(options.c_str(), "%d,%d,%d,%d,%*" SCNu64, &x, &y, &x_dir,
+                  &y_dir)) {
     // TODO(micahdbak): error
     std::exit(1);
   }

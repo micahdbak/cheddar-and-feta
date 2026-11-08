@@ -20,7 +20,7 @@ Bell::Bell(int x, int y, int spawner_id) {
   this->dst_rect.h = 32.0f;
 
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->id, -8, -8, 16, 16));
+      HURTBOX_OBJ, HurtBox::options(this->lid, -8, -8, 16, 16));
 }
 
 Bell::~Bell() { delete this->sprite; }

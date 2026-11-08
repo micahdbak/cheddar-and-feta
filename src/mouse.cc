@@ -1,6 +1,7 @@
 #include "mouse.h"
 
 #include <cfloat>
+#include <cinttypes>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -131,8 +132,8 @@ void Mouse::step() {
           case USEFUL:
           case THROWABLE: {
             char options[256];
-            snprintf(options, sizeof(options), "%d,%d,%d,%d,%d", int(this->x),
-                     int(this->y), x_dir, y_dir, this->id);
+            snprintf(options, sizeof(options), "%d,%d,%d,%d,%" PRIu64,
+                     int(this->x), int(this->y), x_dir, y_dir, this->lid);
             thoom::Scene::instance->create_object(sel_item_id + USE_OBJ,
                                                   std::string(options));
             this->remove_item(sel_item_id);
@@ -191,7 +192,7 @@ void Mouse::step() {
                                         100};
             props.single_use = true;
             thoom::Scene::instance->create_object(
-                HITBOX_OBJ, HitBox::options(this->id, this->id, x_off - 16,
+                HITBOX_OBJ, HitBox::options(this->lid, this->lid, x_off - 16,
                                             y_off - 18, 32, 32, props));
 
             // set animation to attacking

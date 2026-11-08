@@ -6,6 +6,7 @@
 #include "object.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/thoom.h"
 
 #define ITEM_MOLOTOV "item_molotov"
 
@@ -27,7 +28,7 @@ class DroppedMolotov : public DroppedItem {
 
 class ThrownMolotov : public thoom::Object, public HitSource {
  public:
-  ThrownMolotov(float x, float y, int x_dir, int y_dir, int from_id);
+  ThrownMolotov(float x, float y, int x_dir, int y_dir, thoom_lid from_lid);
   ~ThrownMolotov();
 
   void step() override;

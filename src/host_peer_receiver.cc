@@ -20,7 +20,7 @@
 #include "utils/utils.h"
 
 void HostPeerReceiver::step() {
-  std::queue<std::string> msgs = thoom::Peer::instance->all_messages();
+  std::queue<std::string> msgs = thoom::Peer::instance->recv_queue.take_all();
   char buff[1024];
 
   // shouldn't be receiving any messages; ignore
@@ -51,7 +51,7 @@ void HostPeerReceiver::step() {
           }
 
           std::string options =
-              UseItem::options(x, y, x_dir, y_dir, remote_feta->id);
+              UseItem::options(x, y, x_dir, y_dir, remote_feta->lid);
           thoom::Scene::instance->create_object(std::string(buff) + USE_OBJ,
                                                 options);
           remote_feta->remove_item(std::string(buff));
@@ -89,7 +89,7 @@ void HostPeerReceiver::step() {
 
           thoom::Scene::instance->create_object(
               HITBOX_OBJ,
-              HitBox::options(remote_feta->id, remote_feta->id, x_off - 16,
+              HitBox::options(remote_feta->lid, remote_feta->lid, x_off - 16,
                               y_off - 18, 32, 32, props));
         } break;
 

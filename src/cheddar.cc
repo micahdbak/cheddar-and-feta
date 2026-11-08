@@ -74,7 +74,7 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates)
   // push item persister and hurtbox
   thoom::Scene::instance->create_object(ITEM_PERSISTER_OBJ, "");
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->id, -8, -8, 16, 12));
+      HURTBOX_OBJ, HurtBox::options(this->lid, -8, -8, 16, 12));
 }
 
 Cheddar::~Cheddar() { cheddar = nullptr; }
@@ -88,7 +88,7 @@ void Cheddar::signal_down() {
 }
 
 void Cheddar::on_down() {
-  uint64_t peer_state = thoom::Peer::instance->state.load();
+  uint64_t peer_state = thoom::Peer::instance->get_state();
 
   // game over if the remote feta is down or disconnected
   if ((remote_feta != nullptr && remote_feta->is_down) ||

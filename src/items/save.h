@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -9,6 +10,7 @@
 #include "object.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
+#include "thoom/thoom.h"
 
 #define ITEM_SAVE "item_save"
 
@@ -37,12 +39,12 @@ class ItemSaveUse : public thoom::Object {
   }
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options) {
-    int obj_id;
-    if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%d", &obj_id)) {
+    thoom_lid obj_lid;
+    if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%" SCNu64, &obj_lid)) {
       std::exit(1);
     }
 
-    bool is_feta = remote_feta != nullptr && remote_feta->id == obj_id;
+    bool is_feta = remote_feta != nullptr && remote_feta->lid == obj_lid;
 
     return new ItemSaveUse(is_feta);
   }

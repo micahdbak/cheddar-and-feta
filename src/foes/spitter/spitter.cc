@@ -20,6 +20,7 @@
 #include "segment.h"
 #include "sprite/sprite.h"
 #include "thoom/macros.h"
+#include "thoom/thoom.h"
 #include "utils/utils.h"
 
 Spitter::Spitter(float x, float y, int spawner_id)
@@ -28,11 +29,11 @@ Spitter::Spitter(float x, float y, int spawner_id)
   for (int i = 1; i < NUM_SEGMENTS; i++) {
     thoom::Scene::instance->create_object(
         FOE_SPITTER_SEGMENT_OBJ,
-        std::to_string(this->id) + "," + std::to_string(i));
+        std::to_string(this->lid) + "," + std::to_string(i));
   }
 
   thoom::Scene::instance->create_object(FOE_SPITTER_ABDOMEN_OBJ,
-                                        std::to_string(this->id));
+                                        std::to_string(this->lid));
 
   this->off_x = 0.0f;
   this->off_y = 0.0f;
@@ -52,8 +53,8 @@ void Spitter::action(Mouse* mouse) {
 }
 
 void Spitter::attack_internal(int damage) {
-  if (hurtbox_hitbox_id == HB_SHARED_FIRE ||
-      hurtbox_hitbox_id == HB_SHARED_SPITTER) {
+  if (hurtbox_hitbox_lid == (thoom_lid)HB_SHARED_FIRE ||
+      hurtbox_hitbox_lid == (thoom_lid)HB_SHARED_SPITTER) {
     return;  // fire does no damage
   }
 

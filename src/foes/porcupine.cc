@@ -1,5 +1,6 @@
 #include "porcupine.h"
 
+#include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -27,7 +28,7 @@ FoePorcupine::FoePorcupine(int x, int y, int spawner_id)
   this->dst_rect.h = 32.0f;
 
   thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->id, -6, -8, 12, 16));
+      HURTBOX_OBJ, HurtBox::options(this->lid, -6, -8, 12, 16));
 }
 
 FoePorcupine::~FoePorcupine() {
@@ -84,9 +85,9 @@ void FoePorcupine::step() {
       } else if (thoom::Scene::instance->ticks - this->timer > 400 &&
                  (this->spine_x_dir != 0 || this->spine_y_dir != 0)) {
         char buff[256];
-        snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%d",
+        snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%" PRIu64,
                  (int)(this->x + this->off_x), (int)(this->y + this->off_y),
-                 this->spine_x_dir, this->spine_y_dir, this->id);
+                 this->spine_x_dir, this->spine_y_dir, this->lid);
         thoom::Scene::instance->create_object(ITEM_TOOTHPICK USE_OBJ,
                                               std::string(buff));
         this->spine_x_dir = this->spine_y_dir = 0;

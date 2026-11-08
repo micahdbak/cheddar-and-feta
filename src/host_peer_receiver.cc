@@ -30,8 +30,7 @@ void HostPeerReceiver::step() {
 
   RemoteFeta* remote_feta_inst = dynamic_cast<RemoteFeta*>(remote_feta);
 
-  // should not consider messages when not synchronized
-  if (remote_feta_inst == nullptr || !remote_feta_inst->synchronized) {
+  if (remote_feta_inst == nullptr) {
     return;
   }
 
@@ -41,6 +40,12 @@ void HostPeerReceiver::step() {
 
     for (const char* arr = msg.c_str(); *arr != '\0';
          arr = thoom::next_line(arr)) {
+      // The feta info is the guest's acknowledgement of the sync, so it is
+      // the only message read before the guest has a Feta.
+      if (!remote_feta_inst->synchronized && arr[0] != MSG_FETA_INFO) {
+        continue;
+      }
+
       switch (arr[0]) {
         case MSG_USE_ITEM: {
           int x, y, x_dir, y_dir;
@@ -94,12 +99,19 @@ void HostPeerReceiver::step() {
         } break;
 
         case MSG_FETA_INFO: {
+          char map[1024];
           char x_str[256], y_str[256];
           int animation, frame_i, which_emote;
-          if (5 != sscanf(arr + 1, "%[^,],%[^,],%d,%d,%d", x_str, y_str,
-                          &animation, &frame_i, &which_emote)) {
+          if (6 != sscanf(arr + 1, "%1023s %255[^,],%255[^,],%d,%d,%d", map,
+                          x_str, y_str, &animation, &frame_i, &which_emote)) {
             // TODO(micahdbak): error
             std::exit(1);
+          }
+          map[1023] = x_str[255] = y_str[255] = '\0';
+
+          // Feta info from before a map change describes the previous map.
+          if (thoom::Scene::instance->map->path != map) {
+            break;
           }
 
           remote_feta->x = thoom::str_to_float(x_str);
@@ -107,6 +119,9 @@ void HostPeerReceiver::step() {
           remote_feta_inst->sprite->set_animation(animation);
           remote_feta_inst->sprite->set_frame(frame_i);
           remote_feta_inst->which_emote = which_emote;
+          remote_feta_inst->synchronized = true;
+          remote_feta_inst->last_feta_info_ticks =
+              thoom::Scene::instance->ticks;
         } break;
 
         case MSG_EAT_CHEESE:

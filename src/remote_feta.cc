@@ -15,6 +15,9 @@
 #include "scene/scene.h"
 #include "sprite/sprite.h"
 
+#define FETA_SYNC_RETRY_MS 500
+#define FETA_SYNC_TIMEOUT_MS 2000
+
 RemoteFeta::RemoteFeta(int x, int y, int animation)
     : Mouse("sprites/feta.bmp", true, FETA_OBJ) {
   if (remote_feta != nullptr) {
@@ -50,13 +53,25 @@ RemoteFeta::~RemoteFeta() { remote_feta = nullptr; }
 void RemoteFeta::step() {
   if (thoom::Peer::instance->get_state() != thoom::Peer::kStateConnected) {
     this->synchronized = false;
+    this->sync_sent_ticks = 0;
     this->sprite->set_animation(SLEEPING_ANIMATION);
     return;
   }
 
-  if (!this->synchronized) {
+  Uint64 ticks = thoom::Scene::instance->ticks;
+
+  // The guest confirms the sync with its feta info. Resend the sync until it
+  // does, and again if the confirmation stops because the guest lost Feta.
+  if (this->synchronized &&
+      ticks - this->last_feta_info_ticks > FETA_SYNC_TIMEOUT_MS) {
+    this->synchronized = false;
+  }
+
+  if (!this->synchronized &&
+      (this->sync_sent_ticks == 0 ||
+       ticks - this->sync_sent_ticks > FETA_SYNC_RETRY_MS)) {
     this->synchronize();
-    this->synchronized = true;
+    this->sync_sent_ticks = ticks;
   }
 
   this->update_path();
@@ -106,7 +121,8 @@ void RemoteFeta::synchronize() {
   thoom::float_to_str(this->y, y_str, sizeof(y_str));
   items_s = Mouse::encode_items(this->items);
 
-  snprintf(buff, sizeof(buff), "%s,%s,%d %s", x_str, y_str,
+  snprintf(buff, sizeof(buff), "%s %s,%s,%d %s",
+           thoom::Scene::instance->map->path.c_str(), x_str, y_str,
            this->sprite->animation, items_s.c_str());
 
   HostPeerSender::send_message(MSG_SYNC, std::string(buff));

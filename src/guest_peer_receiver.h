@@ -1,5 +1,6 @@
 #pragma once
 
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -22,8 +23,10 @@ class GuestPeerReceiver : public thoom::Object {
  private:
   bool handle_important_message(const char* arr);
   void load_map(const std::string& map, const char* remaining_msgs);
+  void clear_sprites();
 
   std::vector<thoom::SpriteRender> sprites;
+  std::queue<std::string> pending_messages;
   std::string skipped_messages;
   Uint64 last_frame_ticks = 0;
   bool just_pushed_feta = false, just_loaded_map = false;

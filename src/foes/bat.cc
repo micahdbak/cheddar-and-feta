@@ -128,10 +128,6 @@ void FoeBat::step() {
         return;
       }
 
-      push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
-                this->y - 16.0f + this->off_y, &this->icon_src,
-                &this->icon_dst);
-
       break;
 
     default:
@@ -151,9 +147,6 @@ void FoeBat::step() {
   if (thoom::Scene::instance->ticks - this->hurt_timer < 333 &&
       this->state != Foe::State::DEAD) {
     this->sprite->set_animation(HURT_ANIMATION + this->_displayed_direction);
-    push_health_bar(this->health, this->max_health, this->x + this->off_x,
-                    this->y - 16.0f + this->off_y, &this->icon_src,
-                    &this->icon_dst);
   }
 
   if (this->state != Foe::State::HURT && this->state != Foe::State::DEAD) {
@@ -171,6 +164,21 @@ void FoeBat::step() {
   this->prev_state = this->state;
 
   this->sprite->update_frame();
+}
+
+void FoeBat::render() {
+  if (this->state == Foe::State::DEAD) {
+    push_icon(SKULL_AND_BONES_ICON, this->x + this->off_x,
+              this->y - 16.0f + this->off_y, &this->icon_src, &this->icon_dst);
+  }
+
+  if (thoom::Scene::instance->ticks - this->hurt_timer < 333 &&
+      this->state != Foe::State::DEAD) {
+    push_health_bar(this->health, this->max_health, this->x + this->off_x,
+                    this->y - 16.0f + this->off_y, &this->icon_src,
+                    &this->icon_dst);
+  }
+
   this->dst_rect.x = this->x - 16.0f + this->off_x;
   this->dst_rect.y = this->y - 16.0f + this->off_y;
   thoom::Renderer::instance->push_sprite(

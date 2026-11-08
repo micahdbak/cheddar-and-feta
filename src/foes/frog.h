@@ -19,6 +19,7 @@ class FoeFrog : public Foe {
   void attack_internal(int damage) override;
 
   void step() override;
+  void render() override;
 
   Foe::State prev_state = Foe::State::IDLE;
   static thoom::Object* create_object(thoom::Scene* scene,

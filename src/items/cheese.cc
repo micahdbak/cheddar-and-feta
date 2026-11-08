@@ -16,12 +16,12 @@ Cheese::Cheese(float x, float y, int amount) {
   this->x = x;
   this->y = y;
   this->amount = amount;
-  this->render_cheese();
+  this->load_texture();
 }
 
 Cheese::~Cheese() {}
 
-void Cheese::render_cheese() {
+void Cheese::load_texture() {
   char args[256];
   snprintf(args, sizeof(args), "%d", this->amount);
   this->tex_id = RENDER_CHEESE + args;
@@ -39,7 +39,9 @@ void Cheese::step() {
     this->deleted = true;
     return;
   }
+}
 
+void Cheese::render() {
   this->dst_rect.x = float(this->x - 9);
   this->dst_rect.y = float(this->y - this->depth_offset);
   thoom::Renderer::instance->push_sprite(this->tex_id, this->texture, NULL,

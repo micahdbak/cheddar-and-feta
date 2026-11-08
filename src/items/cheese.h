@@ -21,13 +21,14 @@ class Cheese : public thoom::Object {
   ~Cheese();
 
   void step() override;
+  void render() override;
 
   static void drop_cheese(int x, int y, int min_amount, int max_amount);
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
 
  private:
-  void render_cheese();
+  void load_texture();
 
   std::string tex_id;
   SDL_Texture* texture = nullptr;

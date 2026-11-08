@@ -84,11 +84,13 @@ void SpitterSegment::step() {
     this->cur_dir = this->dirs[0];
   }
 
-  this->dst_rect.x = this->x - 16.0f;
-  this->dst_rect.y = this->y - 16.0f;
-
   this->sprite->set_animation(this->cur_dir);
   this->sprite->update_frame();
+}
+
+void SpitterSegment::render() {
+  this->dst_rect.x = this->x - 16.0f;
+  this->dst_rect.y = this->y - 16.0f;
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 16);

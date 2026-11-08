@@ -19,8 +19,6 @@ class DroppedCannonBall : public DroppedItem {
                     16, 0) {}
   ~DroppedCannonBall() = default;
 
-  void step() override { this->dropped_step(); }
-
   void take(Mouse* mouse) override { mouse->push_item(ITEM_CANNON_BALL); }
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
@@ -34,6 +32,7 @@ class ThrownCannonBall : public thoom::Object, public HitSource {
   ~ThrownCannonBall();
 
   void step() override;
+  void render() override;
 
   float hitsource_x() override { return this->x; }
   float hitsource_y() override { return this->y; }

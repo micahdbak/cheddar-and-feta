@@ -19,8 +19,6 @@ class DroppedCoffeeBean : public DroppedItem {
                     16, 0) {}
   ~DroppedCoffeeBean() = default;
 
-  void step() override { this->dropped_step(); }
-
   void take(Mouse* mouse) override { mouse->push_item(ITEM_COFFEE_BEAN); }
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options) {

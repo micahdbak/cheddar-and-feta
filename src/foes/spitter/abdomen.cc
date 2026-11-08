@@ -90,11 +90,13 @@ void SpitterAbdomen::step() {
         thoom::distance_between_points(mouse->x, mouse->y, this->x, this->y);
   }
 
-  this->dst_rect.x = this->x - 16.0f;
-  this->dst_rect.y = this->y - 16.0f;
-
   this->sprite->set_animation(this->cur_dir);
   this->sprite->update_frame();
+}
+
+void SpitterAbdomen::render() {
+  this->dst_rect.x = this->x - 16.0f;
+  this->dst_rect.y = this->y - 16.0f;
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 16);

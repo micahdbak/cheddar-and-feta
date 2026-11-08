@@ -71,7 +71,7 @@ DroppedItem::~DroppedItem() {
   this->sprite = nullptr;
 }
 
-void DroppedItem::dropped_step() {
+void DroppedItem::step() {
   Mouse* mouse = Mouse::closest_mouse(this->x, this->y, 12.0f, true);
   if (mouse != nullptr) {
     this->take(mouse);
@@ -90,7 +90,9 @@ void DroppedItem::dropped_step() {
   }
 
   if (this->sprite->interval_ms > 0) this->sprite->update_frame();
+}
 
+void DroppedItem::render() {
   this->dst_rect.x = this->x - (float)(this->sprite->frame_w / 2);
   this->dst_rect.y = this->y - (float)(this->sprite->frame_h / 2);
   thoom::Renderer::instance->push_sprite(

@@ -18,7 +18,7 @@ class ItemSaveUse : public thoom::Object {
   ~ItemSaveUse() = default;
 
   void step() {
-    // feta shouldnt trigger saves - theyre a remote player, seems insecure
+    // the remote feta should not trigger saves; it is a remote player
     if (this->is_feta) {
       this->deleted = true;
       return;
@@ -42,7 +42,7 @@ class ItemSaveUse : public thoom::Object {
       std::exit(1);
     }
 
-    bool is_feta = feta != nullptr && feta->id == obj_id;
+    bool is_feta = remote_feta != nullptr && remote_feta->id == obj_id;
 
     return new ItemSaveUse(is_feta);
   }

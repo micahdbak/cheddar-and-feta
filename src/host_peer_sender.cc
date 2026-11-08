@@ -1,4 +1,4 @@
-#include "peer_sender.h"
+#include "host_peer_sender.h"
 
 #include <cstdio>
 #include <string>
@@ -9,13 +9,13 @@
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 
-PeerSender* peer_sender = nullptr;
+HostPeerSender* host_peer_sender = nullptr;
 
-PeerSender::PeerSender() { peer_sender = this; }
+HostPeerSender::HostPeerSender() { host_peer_sender = this; }
 
-PeerSender::~PeerSender() { peer_sender = nullptr; }
+HostPeerSender::~HostPeerSender() { host_peer_sender = nullptr; }
 
-void PeerSender::step() {
+void HostPeerSender::step() {
   if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected)
     return;
 
@@ -64,24 +64,24 @@ void PeerSender::step() {
   thoom::Peer::instance->send_message(frame_msg);
 }
 
-void PeerSender::send_message(char func, const std::string& arg) {
-  if (peer_sender == nullptr) {
+void HostPeerSender::send_message(char func, const std::string& arg) {
+  if (host_peer_sender == nullptr) {
     return;
   }
 
   if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
-    if (!peer_sender->messages.empty()) {
+    if (!host_peer_sender->messages.empty()) {
       // don't want a clogged up message queue
-      peer_sender->messages.clear();
+      host_peer_sender->messages.clear();
     }
 
     return;
   }
 
-  peer_sender->messages.push_back(std::string(func + arg + '\n'));
+  host_peer_sender->messages.push_back(std::string(func + arg + '\n'));
 }
 
-thoom::Object* PeerSender::create_object(thoom::Scene* scene,
-                                         const std::string& options) {
-  return new PeerSender();
+thoom::Object* HostPeerSender::create_object(thoom::Scene* scene,
+                                             const std::string& options) {
+  return new HostPeerSender();
 }

@@ -8,8 +8,10 @@
 #include "audio/audio.h"
 #include "colour.h"
 #include "constants.h"
-#include "feta.h"
 #include "game_hud.h"
+#include "guest_feta.h"
+#include "guest_peer_receiver.h"
+#include "guest_peer_sender.h"
 #include "hud/hud.h"
 #include "icon.h"
 #include "input/controller.h"
@@ -18,8 +20,6 @@
 #include "map/map.h"
 #include "object.h"
 #include "peer/peer.h"
-#include "peer_receiver.h"
-#include "peer_sender.h"
 #include "render_functions.h"
 #include "renderer/font.h"
 #include "renderer/renderer.h"
@@ -130,9 +130,9 @@ class Init : public thoom::Object {
 
 static const thoom::Scene::ObjectDef kFetaObjects[] = {
     {INIT_OBJ, Init::create_object},
-    {PEER_RECEIVER_OBJ, PeerReceiver::create_object, thoom::kObjectFirst},
-    {PEER_SENDER_OBJ, PeerSender::create_object, thoom::kObjectLast},
-    {FETA_OBJ, Feta::create_object},
+    {PEER_RECEIVER_OBJ, GuestPeerReceiver::create_object, thoom::kObjectFirst},
+    {PEER_SENDER_OBJ, GuestPeerSender::create_object, thoom::kObjectLast},
+    {FETA_OBJ, GuestFeta::create_object},
     {nullptr, nullptr},
 };
 

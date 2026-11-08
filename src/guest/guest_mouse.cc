@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 
-#include "feta.h"
 #include "game_hud.h"
+#include "guest_feta.h"
 #include "item.h"
 #include "scene/scene.h"
 
-bool Mouse::check_collision(float x, float y) {
+bool GuestMouse::check_collision(float x, float y) {
   return thoom::Scene::instance->map->collider->point_in_collider(x + 2.0f,
                                                                   y) ||
          thoom::Scene::instance->map->collider->point_in_collider(x - 2.0f,
@@ -16,7 +16,7 @@ bool Mouse::check_collision(float x, float y) {
          thoom::Scene::instance->map->collider->point_in_collider(x, y - 2.0f);
 }
 
-std::string Mouse::encode_items(const std::vector<GameHud::Item>& items) {
+std::string GuestMouse::encode_items(const std::vector<GameHud::Item>& items) {
   std::string items_s = "";
   for (int i = 0; i < items.size(); i++) {
     if (items[i].count <= 0) continue;
@@ -33,7 +33,7 @@ std::string Mouse::encode_items(const std::vector<GameHud::Item>& items) {
   return items_s;
 }
 
-std::vector<GameHud::Item> Mouse::read_items(const std::string& items_s) {
+std::vector<GameHud::Item> GuestMouse::read_items(const std::string& items_s) {
   std::vector<GameHud::Item> ret;
 
   if (!items_s.empty()) {
@@ -64,7 +64,8 @@ std::vector<GameHud::Item> Mouse::read_items(const std::string& items_s) {
   return ret;
 }
 
-std::string Mouse::audio_msg(const char* wav_path, float gain, int x, int y) {
+std::string GuestMouse::audio_msg(const char* wav_path, float gain, int x,
+                                  int y) {
   char buff[256];
   snprintf(buff, sizeof(buff), "%s %d,%d,%d\n", wav_path, (int)(10.0f * gain),
            (int)x, (int)y);

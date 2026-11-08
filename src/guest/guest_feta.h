@@ -23,17 +23,17 @@
 #define DANCING2_ANIMATION 50
 #define SLEEPING_ANIMATION 51
 
-namespace Mouse {
+namespace GuestMouse {
 bool check_collision(float x, float y);
 std::string encode_items(const std::vector<GameHud::Item>& items);
 std::vector<GameHud::Item> read_items(const std::string& items_s);
 std::string audio_msg(const char* wav_path, float gain, int x, int y);
-};  // namespace Mouse
+};  // namespace GuestMouse
 
-class Feta : public thoom::Object {
+class GuestFeta : public thoom::Object {
  public:
-  Feta(float x, float y, int animation, std::vector<GameHud::Item> items);
-  ~Feta();
+  GuestFeta(float x, float y, int animation, std::vector<GameHud::Item> items);
+  ~GuestFeta();
 
   void step() override;
 
@@ -76,8 +76,8 @@ class Feta : public thoom::Object {
     EATING,
     DOWNED,
     FORCED_DANCE
-  } is_busy = Feta::Busy::FALSE;
+  } is_busy = GuestFeta::Busy::FALSE;
   Uint64 busy_ticks = 0, is_down_ticks = 0, dance_until = 0;
 };
 
-extern Feta* feta;
+extern GuestFeta* guest_feta;

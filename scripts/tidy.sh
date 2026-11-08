@@ -11,18 +11,18 @@ fi
 
 status=0
 
-git ls-files -z 'cheddar/*.cc' 'feta/*.cc' 'shared/*.cc' |
+git ls-files -z 'src/*.cc' |
   xargs -0 "${CLANG_TIDY}" -p build --quiet --fix || status=1
 
 # clang-tidy reports only on the main file, so headers need their own pass.
 # Headers have no compile command, so supply C++ mode and include paths.
-git ls-files -z 'cheddar/*.h' 'feta/*.h' 'shared/*.h' |
+git ls-files -z 'src/*.h' |
   xargs -0 "${CLANG_TIDY}" -p build --quiet --fix \
     --extra-arg=-xc++ \
     --extra-arg=-std=c++26 \
-    --extra-arg=-I"${PWD}/cheddar" \
-    --extra-arg=-I"${PWD}/feta" \
-    --extra-arg=-I"${PWD}/shared" \
+    --extra-arg=-I"${PWD}/src" \
+    --extra-arg=-I"${PWD}/src/guest" \
+    --extra-arg=-I"${PWD}/src/shared" \
     --extra-arg=-I"${PWD}/thoom/include" \
     --extra-arg=-I"${PWD}/thoom/src" \
     --extra-arg=-I"${PWD}/thoom/deps/libdatachannel/include" \

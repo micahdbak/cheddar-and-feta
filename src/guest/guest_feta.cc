@@ -1,26 +1,17 @@
-#include "cheddar.h"
+#include "guest_feta.h"
 
 #include <cmath>
-#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
 #include <vector>
 
 #include "audio/audio.h"
-#include "feta.h"
-#include "foes/foe.h"
 #include "game_hud.h"
-#include "hitbox.h"
-#include "hurtbox.h"
+#include "guest_peer_sender.h"
 #include "input/controller.h"
 #include "input/input.h"
-#include "items/cheese.h"
-#include "items/item.h"
-#include "items/persister.h"
-#include "items/save.h"
-#include "items/tossed.h"
-#include "mouse.h"
+#include "item.h"
 #include "object.h"
 #include "peer/peer.h"
 #include "renderer/renderer.h"
@@ -30,57 +21,24 @@
 #include "thoom/macros.h"
 #include "utils/utils.h"
 
-Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
-                 std::string options) {
-  if (cheddar != nullptr) {
+GuestFeta* guest_feta = nullptr;
+
+GuestFeta::GuestFeta(float x, float y, int animation,
+                     std::vector<GameHud::Item> items) {
+  if (guest_feta != nullptr) {
     // TODO(micahdbak): error
     std::exit(1);
   }
-  cheddar = this;
-  this->is_feta = false;
+  guest_feta = this;
 
-  this->sprite = new thoom::Sprite("sprites/cheddar.bmp", 32, 32, 250);
+  this->x = x;
+  this->y = y;
+
+  this->sprite = new thoom::Sprite("sprites/feta.bmp", 32, 32, 250);
+  this->sprite->set_animation(animation);
   this->emotes = new thoom::Sprite("sprites/emotes.bmp", 32, 32, 0);
 
-  std::string items_s = thoom::save.value(CHEDDAR_OBJ MOUSE_ITEMS);
-  if (!items_s.empty()) {
-    this->items = Mouse::read_items(items_s);
-  } else {
-    this->items.push_back(GameHud::Item{ITEM_SAVE, 1});
-  }
-
-  int feta_x = 0, feta_y = 0, feta_animation = 0;
-
-  // if loading a save, read the location from the save file
-  if (thoom::save.geti(LOAD_SAVE) && thoom::save.has(CHEDDAR_OBJ MOUSE_X)) {
-    this->x = thoom::save.getf(CHEDDAR_OBJ MOUSE_X);
-    this->y = thoom::save.getf(CHEDDAR_OBJ MOUSE_Y);
-    this->sprite->set_animation(thoom::save.geti(CHEDDAR_OBJ MOUSE_ANIMATION));
-
-    // don't set feta options, as feta will load from save as well
-  } else {
-    // get which coordinate to spawn at
-    int coord = thoom::save.geti(MOUSE_SPAWN_AT);
-    thoom::save.puti(MOUSE_SPAWN_AT, 0);  // unset
-
-    // validate
-    if (coordinates.empty() || coord < 0 || coord >= coordinates.size()) {
-      // TODO(micahdbak): error
-      std::exit(1);
-    }
-
-    this->x = coordinates[coord].x;
-    this->y = coordinates[coord].y;
-    this->sprite->set_animation(coordinates[coord].animation);
-
-    feta_x = coordinates[coord].x;
-    feta_y = coordinates[coord].y;
-    feta_animation = coordinates[coord].animation;
-  }
-
-  this->tile_x = (int)this->x / thoom::Scene::instance->map->tile_width;
-  this->tile_y = (int)this->y / thoom::Scene::instance->map->tile_height;
-  foe_path_find(this);
+  this->items = items;
 
   thoom::Renderer::instance->set_view(this->x, this->y);
 
@@ -88,29 +46,16 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
   this->dst_rect.h = 32.0f;
   this->emote_rect.w = 32.0f;
   this->emote_rect.h = 32.0f;
-
-  // make feta
-  char feta_options[256];
-  snprintf(feta_options, sizeof(feta_options), "%d,%d,%d", feta_x, feta_y,
-           feta_animation);
-  thoom::Scene::instance->create_object(FETA_OBJ, std::string(feta_options));
-
-  // push item persister and hurtbox
-  thoom::Scene::instance->create_object(ITEM_PERSISTER_OBJ, "");
-  thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->id, -8, -8, 16, 12));
-
-  this->is_down = false;
 }
 
-Cheddar::~Cheddar() {
+GuestFeta::~GuestFeta() {
   delete this->sprite;
   delete this->emotes;
-  cheddar = nullptr;
+  guest_feta = nullptr;
 }
 
-void Cheddar::step() {
-  if (mice_locked) {
+void GuestFeta::step() {
+  if (this->mice_locked) {
     thoom::Renderer::instance->push_sprite(
         this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
         &this->dst_rect, 22);
@@ -185,7 +130,10 @@ void Cheddar::step() {
 
         if (this->sprite->update_frame() && (this->sprite->frame_i % 2) == 1) {
           thoom::Audio::instance->play("sfx/step.wav", 0.5, this->x, this->y,
-                                       false);
+                                       true);
+          GuestPeerSender::send_message(
+              MSG_AUDIO,
+              GuestMouse::audio_msg("sfx/step.wav", 0.5, this->x, this->y));
         }
 
         mov_speed = this->max_mov_speed;
@@ -208,12 +156,12 @@ void Cheddar::step() {
             // ---- attack / use item ----
 
           case USEFUL:
-          case THROWABLE:
-            char options[256];
-            snprintf(options, sizeof(options), "%d,%d,%d,%d,%d", int(this->x),
-                     int(this->y), x_dir, y_dir, this->id);
-            thoom::Scene::instance->create_object(sel_item_id + USE_OBJ,
-                                                  std::string(options));
+          case THROWABLE: {
+            char buff[256];
+            snprintf(buff, sizeof(buff), "%d,%d,%d,%d", (int)this->x,
+                     (int)this->y, x_dir, y_dir);
+            GuestPeerSender::send_message(MSG_USE_ITEM,
+                                          sel_item_id + " " + buff);
             this->remove_item(sel_item_id);
 
             if (item_info[sel_item_id].type == THROWABLE) {
@@ -226,10 +174,12 @@ void Cheddar::step() {
               this->sprite->interval_ms = 125;
 
               thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x,
-                                           this->y, false);
+                                           this->y, true);
+              GuestPeerSender::send_message(
+                  MSG_AUDIO, GuestMouse::audio_msg("sfx/throw.wav", 1.0,
+                                                   this->x, this->y));
             }
-
-            break;
+          } break;
 
             // ---- eat cheese ----
 
@@ -237,6 +187,7 @@ void Cheddar::step() {
             if (this->health < this->max_health) {
               this->health++;
               this->remove_item(sel_item_id);
+              GuestPeerSender::send_message(MSG_EAT_CHEESE, std::string());
 
               this->is_busy = EATING;
               this->busy_ticks = thoom::Scene::instance->ticks;
@@ -246,10 +197,16 @@ void Cheddar::step() {
               this->sprite->interval_ms = 75;
 
               thoom::Audio::instance->play("sfx/cheese.wav", 1.0f, this->x,
-                                           this->y, false);
+                                           this->y, true);
+              GuestPeerSender::send_message(
+                  MSG_AUDIO, GuestMouse::audio_msg("sfx/cheese.wav", 1.0,
+                                                   this->x, this->y));
             } else {
               thoom::Audio::instance->play("sfx/full.wav", 1.0f, this->x,
-                                           this->y, false);
+                                           this->y, true);
+              GuestPeerSender::send_message(
+                  MSG_AUDIO,
+                  GuestMouse::audio_msg("sfx/full.wav", 1.0, this->x, this->y));
             }
 
             break;
@@ -263,21 +220,21 @@ void Cheddar::step() {
             }
 
             this->is_busy = ATTACKING;
-            int x_off, y_off;
-            HitBox::make_offset(x_dir, y_dir, &x_off, &y_off, 8.0f);
-            HitBox::Properties props = {item_info[sel_item_id].damage, 200,
-                                        100};
-            props.single_use = true;
-            thoom::Scene::instance->create_object(
-                HITBOX_OBJ, HitBox::options(this->id, this->id, x_off - 16,
-                                            y_off - 18, 32, 32, props));
+
+            char buff[256];
+            snprintf(buff, sizeof(buff), "%s %d,%d", sel_item_id.c_str(), x_dir,
+                     y_dir);
+            GuestPeerSender::send_message(MSG_PUSH_HITBOX, std::string(buff));
 
             // set animation to attacking
             this->sprite->set_animation((this->sprite->animation % 8) +
                                         ATTACKING_ANIMATION);
 
             thoom::Audio::instance->play("sfx/kick.wav", 1.0f, this->x, this->y,
-                                         false);
+                                         true);
+            GuestPeerSender::send_message(
+                MSG_AUDIO,
+                GuestMouse::audio_msg("sfx/kick.wav", 1.0, this->x, this->y));
           } break;
 
           default:
@@ -285,7 +242,7 @@ void Cheddar::step() {
         }
       } else if (thoom::Input::instance->world.consume_hit(
                      thoom::Button::TOSS) &&
-                 sel_item_id != ITEM_NONE && sel_item_id != ITEM_SAVE) {
+                 sel_item_id != ITEM_NONE) {
         this->busy_ticks = thoom::Scene::instance->ticks;
 
         if (x_dir == 0 && y_dir == 0)
@@ -293,9 +250,9 @@ void Cheddar::step() {
                                      &y_dir);
 
         // toss item
-        thoom::Scene::instance->create_object(
-            TOSSED_ITEM_OBJ, TossedItem::options(this->x, this->y, x_dir, y_dir,
-                                                 false, sel_item_id));
+        GuestPeerSender::send_message(
+            MSG_TOSS_ITEM,
+            sel_item_id + " " + UseItem::options(x, y, x_dir, y_dir));
         this->remove_item(sel_item_id);
 
         this->is_busy = THROWING;
@@ -308,7 +265,10 @@ void Cheddar::step() {
         this->sprite->interval_ms = 125;
 
         thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x, this->y,
-                                     false);
+                                     true);
+        GuestPeerSender::send_message(
+            MSG_AUDIO,
+            GuestMouse::audio_msg("sfx/throw.wav", 1.0, this->x, this->y));
       }
 
       break;
@@ -431,6 +391,7 @@ void Cheddar::step() {
   if (this->is_down &&
       thoom::Scene::instance->ticks - this->is_down_ticks > 5000) {
     this->is_down = false;
+    GuestPeerSender::send_message(MSG_IS_DOWN, std::to_string(0));
   }
 
   // ---- move cheddar ----
@@ -453,12 +414,12 @@ void Cheddar::step() {
     bool collision_x = false, collision_y = false;
 
     if (x_dir != 0) {
-      collision_x = Mouse::check_collision(new_x, this->y);
+      collision_x = GuestMouse::check_collision(new_x, this->y);
       if (!collision_x) this->x = new_x;
     }
 
     if (y_dir != 0) {
-      collision_y = Mouse::check_collision(this->x, new_y);
+      collision_y = GuestMouse::check_collision(this->x, new_y);
       if (!collision_y) this->y = new_y;
     }
 
@@ -468,8 +429,8 @@ void Cheddar::step() {
         float new_y1 = this->y + fabs(dx);
         float new_y2 = this->y - fabs(dx);
 
-        bool collision_y1 = Mouse::check_collision(this->x, new_y1);
-        bool collision_y2 = Mouse::check_collision(this->x, new_y2);
+        bool collision_y1 = GuestMouse::check_collision(this->x, new_y1);
+        bool collision_y2 = GuestMouse::check_collision(this->x, new_y2);
 
         if (!collision_y1 && collision_y2) {
           this->y = new_y1;
@@ -482,8 +443,8 @@ void Cheddar::step() {
         float new_x1 = this->x + fabs(dy);
         float new_x2 = this->x - fabs(dy);
 
-        bool collision_x1 = Mouse::check_collision(new_x1, this->y);
-        bool collision_x2 = Mouse::check_collision(new_x2, this->y);
+        bool collision_x1 = GuestMouse::check_collision(new_x1, this->y);
+        bool collision_x2 = GuestMouse::check_collision(new_x2, this->y);
 
         if (!collision_x1 && collision_x2) {
           this->x = new_x1;
@@ -492,26 +453,9 @@ void Cheddar::step() {
         }
       }
     }
-
-    // if moved onto a new tile, update the path finding
-    int new_tile_x = (int)this->x / thoom::Scene::instance->map->tile_width;
-    int new_tile_y = (int)this->y / thoom::Scene::instance->map->tile_height;
-    if (new_tile_x != this->tile_x || new_tile_y != this->tile_y) {
-      foe_path_find(this);
-      this->tile_x = new_tile_x;
-      this->tile_y = new_tile_y;
-    }
   }
 
   // ---- display ----
-
-#ifdef ONSCREEN_DEBUG
-  for (int ty = this->tile_y - 12; ty < this->tile_y + 13; ty++) {
-    for (int tx = this->tile_x - 12; tx < this->tile_x + 13; tx++) {
-      foe_debug_tile(tx, ty);
-    }
-  }
-#endif
 
   thoom::Renderer::instance->set_view(this->x, this->y);
   this->dst_rect.x = float(int(this->x)) - 16.0f;
@@ -541,14 +485,7 @@ void Cheddar::step() {
   }
 }
 
-void Cheddar::save_data() {
-  thoom::save.putf(CHEDDAR_OBJ MOUSE_X, this->x);
-  thoom::save.putf(CHEDDAR_OBJ MOUSE_Y, this->y);
-  thoom::save.puti(CHEDDAR_OBJ MOUSE_ANIMATION, this->sprite->animation);
-  thoom::save.data[CHEDDAR_OBJ MOUSE_ITEMS] = Mouse::encode_items(this->items);
-}
-
-void Cheddar::attack(int damage) {
+void GuestFeta::attack(int damage) {
   // don't get attacked if was already attacked / down
   if (this->is_busy == ATTACKED || this->is_busy == DOWNED ||
       this->is_busy == FORCED_DANCE)
@@ -577,7 +514,9 @@ void Cheddar::attack(int damage) {
   }
 
   this->health -= damage;
-  thoom::Audio::instance->play("sfx/hurt.wav", 1.0f, this->x, this->y, false);
+  thoom::Audio::instance->play("sfx/hurt.wav", 1.0f, this->x, this->y, true);
+  GuestPeerSender::send_message(
+      MSG_AUDIO, GuestMouse::audio_msg("sfx/hurt.wav", 1.0, this->x, this->y));
 
   // if dead, go down
   if (this->health <= 0) {
@@ -589,19 +528,11 @@ void Cheddar::attack(int damage) {
     this->sprite->set_animation((this->sprite->animation % 8) + DOWN_ANIMATION);
 
     this->is_down = true;
-
-    uint64_t peer_state = thoom::Peer::instance->state.load();
-
-    // game over if feta is down or disconnected
-    if ((feta != nullptr && feta->is_down) ||
-        peer_state == thoom::Peer::kStateNoConnection ||
-        peer_state == thoom::Peer::kStateWaitingForPeer) {
-      thoom::Scene::instance->request_map("maps/dead");
-    }
+    GuestPeerSender::send_message(MSG_IS_DOWN, std::to_string(1));
   }
 }
 
-void Cheddar::push_item(const std::string& item_id) {
+void GuestFeta::push_item(const std::string& item_id) {
   if (item_info.find(item_id) == item_info.end()) {
     // TODO(micahdbak): error
     std::exit(1);
@@ -631,7 +562,7 @@ void Cheddar::push_item(const std::string& item_id) {
   this->sel_item = i;
 }
 
-void Cheddar::push_cheese(int amount) {
+void GuestFeta::push_cheese(int amount) {
   GameHud::Item new_item;
   new_item.item_id = ITEM_CHEESE;
   new_item.count = amount;
@@ -654,7 +585,7 @@ void Cheddar::push_cheese(int amount) {
   this->items.push_back(new_item);
 }
 
-void Cheddar::remove_item(const std::string& item_id) {
+void GuestFeta::remove_item(const std::string& item_id) {
   for (auto it = this->items.begin(); it != this->items.end(); it++) {
     if (it->item_id == item_id && it->count > 0) {
       it->count--;
@@ -667,49 +598,46 @@ void Cheddar::remove_item(const std::string& item_id) {
   }
 }
 
-void Cheddar::force_dance(Uint64 timeout_ms) {
-  this->is_busy = Cheddar::Busy::FORCED_DANCE;
+void GuestFeta::force_dance(Uint64 timeout_ms) {
+  this->is_busy = GuestFeta::Busy::FORCED_DANCE;
   this->dance_until = timeout_ms;
 }
 
-void Cheddar::set_throw(int throw_x, int throw_y) {
+void GuestFeta::set_animation(int animation) {
+  this->sprite->set_animation(animation);
+}
+
+void GuestFeta::set_items(const std::string& items_s) {
+  this->items = GuestMouse::read_items(items_s);
+
+  if (this->sel_item >= this->items.size()) {
+    this->sel_item = this->items.size() - 1;
+  }
+}
+
+void GuestFeta::set_throw(int throw_x, int throw_y) {
   this->throw_x = throw_x;
   this->throw_y = throw_y;
 }
 
-void Cheddar::set_max_mov_speed(float max_mov_speed) {
+void GuestFeta::set_max_mov_speed(float max_mov_speed) {
   this->max_mov_speed = max_mov_speed;
 }
 
-void Cheddar::signal_down() {
-  // signal implies that feta is down; check if we are down too
-  if (this->is_down && this->is_busy == DOWNED && feta != nullptr &&
-      feta->is_down) {
-    thoom::Scene::instance->request_map("maps/dead");
+thoom::Object* GuestFeta::create_object(thoom::Scene* scene,
+                                        const std::string& options) {
+  int animation;
+  char x_str[256], y_str[256], items_s[1024];
+  int fields = sscanf(options.c_str(), "%255[^,],%255[^,],%d %1023s", x_str,
+                      y_str, &animation, items_s);
+
+  if (fields == 3) {
+    items_s[0] = '\0';
+  } else if (fields != 4) {
+    // TODO(micahdbak): error
+    std::exit(1);
   }
-}
 
-thoom::Object* Cheddar::create_object(thoom::Scene* scene,
-                                      const std::string& options) {
-  const char* arr = options.c_str();
-  std::vector<Mouse::SpawnCoord> coordinates;
-
-  int i = 0;
-  do {
-    int x = 0, y = 0, animation = 0;
-    if (3 != sscanf(arr, "%d,%d,%d", &x, &y, &animation)) break;
-
-    Mouse::SpawnCoord coord;
-    coord.x = (float)x;
-    coord.y = (float)y;
-    coord.animation = animation;
-    coordinates.push_back(coord);
-
-    while (*arr != '\0' && *arr != ' ') arr++;
-    if (*arr == '\0') break;
-    while (*++arr == ' ') arr++;
-    if (*arr == '\0') break;
-  } while (++i < 10);  // max ten coords, incase something really breaks
-
-  return new Cheddar(coordinates, options);
+  return new GuestFeta(thoom::str_to_float(x_str), thoom::str_to_float(y_str),
+                       animation, GuestMouse::read_items(items_s));
 }

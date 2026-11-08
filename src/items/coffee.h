@@ -36,13 +36,13 @@ class UsedCoffeeBean : public thoom::Object {
   UsedCoffeeBean(bool is_feta) : is_feta(is_feta) {
     this->timer = thoom::Scene::instance->ticks + 5000;
 
-    Mouse* mouse = is_feta ? feta : cheddar;
+    Mouse* mouse = is_feta ? remote_feta : cheddar;
     if (mouse != nullptr) mouse->set_max_mov_speed(MOUSE_DEFAULT_SPEED * 2.0f);
   }
   ~UsedCoffeeBean() = default;
 
   void step() override {
-    Mouse* mouse = is_feta ? feta : cheddar;
+    Mouse* mouse = is_feta ? remote_feta : cheddar;
 
     if (mouse == nullptr) {
       this->deleted = true;
@@ -61,7 +61,7 @@ class UsedCoffeeBean : public thoom::Object {
       std::exit(1);
     }
 
-    bool is_feta = feta != nullptr && feta->id == from_id;
+    bool is_feta = remote_feta != nullptr && remote_feta->id == from_id;
 
     return new UsedCoffeeBean(is_feta);
   }

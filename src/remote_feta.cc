@@ -1,4 +1,4 @@
-#include "feta.h"
+#include "remote_feta.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -6,24 +6,24 @@
 
 #include "foes/foe.h"
 #include "game_hud.h"
+#include "host_peer_sender.h"
 #include "hurtbox.h"
 #include "items/cheese.h"
 #include "items/item.h"
 #include "mouse.h"
 #include "object.h"
 #include "peer/peer.h"
-#include "peer_sender.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
 
-Feta::Feta(int x, int y, int animation) {
-  if (feta != nullptr) {
+RemoteFeta::RemoteFeta(int x, int y, int animation) {
+  if (remote_feta != nullptr) {
     // TODO(micahdbak): error
     std::exit(1);
   }
-  feta = this;
+  remote_feta = this;
   this->is_feta = true;
 
   this->sprite = new thoom::Sprite("sprites/feta.bmp", 32, 32, 250);
@@ -63,13 +63,13 @@ Feta::Feta(int x, int y, int animation) {
   this->is_down = false;
 }
 
-Feta::~Feta() {
+RemoteFeta::~RemoteFeta() {
   delete this->sprite;
   delete this->emotes;
-  feta = nullptr;
+  remote_feta = nullptr;
 }
 
-void Feta::step() {
+void RemoteFeta::step() {
   if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
     this->synchronized = false;
 
@@ -123,19 +123,19 @@ void Feta::step() {
   }
 }
 
-void Feta::save_data() {
+void RemoteFeta::save_data() {
   thoom::save.putf(FETA_OBJ MOUSE_X, this->x);
   thoom::save.putf(FETA_OBJ MOUSE_Y, this->y);
   thoom::save.puti(FETA_OBJ MOUSE_ANIMATION, this->sprite->animation);
   thoom::save.data[FETA_OBJ MOUSE_ITEMS] = Mouse::encode_items(this->items);
 }
 
-void Feta::attack(int damage) {
-  PeerSender::send_message(MSG_ATTACK, std::to_string(damage));
+void RemoteFeta::attack(int damage) {
+  HostPeerSender::send_message(MSG_ATTACK, std::to_string(damage));
 }
 
-void Feta::push_item(const std::string& item_id) {
-  PeerSender::send_message(MSG_PUSH_ITEM, item_id);
+void RemoteFeta::push_item(const std::string& item_id) {
+  HostPeerSender::send_message(MSG_PUSH_ITEM, item_id);
 
   if (item_info.find(item_id) == item_info.end()) {
     // TODO(micahdbak): error
@@ -164,8 +164,8 @@ void Feta::push_item(const std::string& item_id) {
   this->items.push_back(new_item);
 }
 
-void Feta::push_cheese(int amount) {
-  PeerSender::send_message(MSG_PUSH_CHEESE, std::to_string(amount));
+void RemoteFeta::push_cheese(int amount) {
+  HostPeerSender::send_message(MSG_PUSH_CHEESE, std::to_string(amount));
 
   GameHud::Item new_item;
   new_item.item_id = ITEM_CHEESE;
@@ -189,7 +189,7 @@ void Feta::push_cheese(int amount) {
   this->items.push_back(new_item);
 }
 
-void Feta::remove_item(const std::string& item_id) {
+void RemoteFeta::remove_item(const std::string& item_id) {
   for (auto it = this->items.begin(); it != this->items.end(); it++) {
     if (it->item_id == item_id && it->count > 0) {
       it->count--;
@@ -201,15 +201,15 @@ void Feta::remove_item(const std::string& item_id) {
   }
 }
 
-void Feta::force_dance(Uint64 timeout_ms) {
-  PeerSender::send_message(MSG_FORCE_DANCE, std::to_string(timeout_ms));
+void RemoteFeta::force_dance(Uint64 timeout_ms) {
+  HostPeerSender::send_message(MSG_FORCE_DANCE, std::to_string(timeout_ms));
 }
 
-void Feta::hitsource_notify() {
-  PeerSender::send_message(MSG_DID_HIT, std::string());
+void RemoteFeta::hitsource_notify() {
+  HostPeerSender::send_message(MSG_DID_HIT, std::string());
 }
 
-void Feta::synchronize() {
+void RemoteFeta::synchronize() {
   char buff[1024];
   char x_str[256], y_str[256];
   std::string items_s;
@@ -221,25 +221,25 @@ void Feta::synchronize() {
   snprintf(buff, sizeof(buff), "%s,%s,%d %s", x_str, y_str, this->animation,
            items_s.c_str());
 
-  PeerSender::send_message(MSG_SYNC, std::string(buff));
+  HostPeerSender::send_message(MSG_SYNC, std::string(buff));
 }
 
-void Feta::set_throw(int throw_x, int throw_y) {
-  PeerSender::send_message(
+void RemoteFeta::set_throw(int throw_x, int throw_y) {
+  HostPeerSender::send_message(
       MSG_THROW, std::to_string(throw_x) + ',' + std::to_string(throw_y));
 }
 
-void Feta::set_max_mov_speed(float max_mov_speed) {
-  PeerSender::send_message(MSG_MAX_SPEED, std::to_string(max_mov_speed));
+void RemoteFeta::set_max_mov_speed(float max_mov_speed) {
+  HostPeerSender::send_message(MSG_MAX_SPEED, std::to_string(max_mov_speed));
 }
 
-thoom::Object* Feta::create_object(thoom::Scene* scene,
-                                   const std::string& options) {
+thoom::Object* RemoteFeta::create_object(thoom::Scene* scene,
+                                         const std::string& options) {
   int x, y, animation;
   if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &animation)) {
     // TODO(micahdbak): error
     std::exit(1);
   }
 
-  return new Feta(x, y, animation);
+  return new RemoteFeta(x, y, animation);
 }

@@ -18,7 +18,7 @@ Freedom::Freedom(int x, int y) {
 Freedom::~Freedom() {}
 
 void Freedom::step() {
-  if (cheddar == nullptr || feta == nullptr) {
+  if (cheddar == nullptr || remote_feta == nullptr) {
     return;
   }
 
@@ -32,14 +32,14 @@ void Freedom::step() {
 
   float cdist =
       thoom::distance_between_points(this->x, this->y, cheddar->x, cheddar->y);
-  float fdist =
-      thoom::distance_between_points(this->x, this->y, feta->x, feta->y);
+  float fdist = thoom::distance_between_points(this->x, this->y, remote_feta->x,
+                                               remote_feta->y);
 
   // when either mouse goes 64px away from the ladder
   if (cdist > 64.0f || fdist > 64.0f) {
     // eternally dance
     cheddar->force_dance(UINT64_MAX);
-    feta->force_dance(UINT64_MAX);
+    remote_feta->force_dance(UINT64_MAX);
     this->timer_start = thoom::Scene::instance->ticks;
 
     thoom::save.puti(GAME_DONE, 1);

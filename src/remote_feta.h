@@ -13,10 +13,10 @@
 
 #define FETA_OBJ "feta"
 
-class Feta : public Mouse, public HitSource {
+class RemoteFeta : public Mouse, public HitSource {
  public:
-  Feta(int x, int y, int animation);
-  ~Feta();
+  RemoteFeta(int x, int y, int animation);
+  ~RemoteFeta();
 
   // Object
   void step() override;
@@ -39,7 +39,7 @@ class Feta : public Mouse, public HitSource {
 
   void synchronize();
 
-  // directly acted on by peer_receiver
+  // directly acted on by HostPeerReceiver
   // Mouse: x, y, is_down
   int frame_i = 0, animation = 0, which_emote = -1;
   std::vector<std::pair<std::string, std::string>> new_objects;

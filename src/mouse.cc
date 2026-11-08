@@ -12,7 +12,7 @@
 #include "utils/utils.h"
 
 Mouse* cheddar = nullptr;
-Mouse* feta = nullptr;
+Mouse* remote_feta = nullptr;
 bool mice_locked = false;
 
 bool Mouse::check_collision(float x, float y) {
@@ -80,17 +80,17 @@ Mouse* Mouse::closest_mouse(float x, float y, float min_distance, bool forced) {
       (cheddar->is_down && !forced)
           ? FLT_MAX
           : thoom::distance_between_points(x, y, cheddar->x, cheddar->y);
-  float distance_feta =
-      (feta->is_down && !forced)
-          ? FLT_MAX
-          : thoom::distance_between_points(x, y, feta->x, feta->y);
+  float distance_feta = (remote_feta->is_down && !forced)
+                            ? FLT_MAX
+                            : thoom::distance_between_points(
+                                  x, y, remote_feta->x, remote_feta->y);
 
   if (distance_cheddar < distance_feta) {
     if (min_distance < 0.1f || distance_cheddar < min_distance) {
       return cheddar;
     }
   } else if (min_distance < 0.1f || distance_feta < min_distance) {
-    return feta;
+    return remote_feta;
   }
 
   return nullptr;  // no close-enough mouse

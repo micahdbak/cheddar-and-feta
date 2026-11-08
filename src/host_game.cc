@@ -40,12 +40,9 @@
 #include "items/toothpick.h"
 #include "items/tossed.h"
 #include "ladder.h"
-#include "load_save.h"
 #include "remote_feta.h"
-#include "splash.h"
 
 static const thoom::Scene::ObjectDef kHostObjects[] = {
-    {LOAD_SAVE_OBJ, LoadSave::create_object},
     {BELL_OBJ, Bell::create_object},
     {BILLBOARD_OBJ, Billboard::create_object},
     {CHEDDAR_OBJ, Cheddar::create_object},
@@ -79,7 +76,6 @@ static const thoom::Scene::ObjectDef kHostObjects[] = {
     {ITEM_TOOTHPICK USE_OBJ, ThrownToothpick::create_object},
     {LADDER_OBJ, Ladder::create_object},
     {SPAWNER_OBJ, FoeSpawner::create_object},
-    {SPLASH_OBJ, Splash::create_object},
     {TOSSED_ITEM_OBJ, TossedItem::create_object},
     {PEER_RECEIVER_OBJ, HostPeerReceiver::create_object, thoom::kObjectFirst},
     {PEER_SENDER_OBJ, HostPeerSender::create_object, thoom::kObjectLast},
@@ -115,6 +111,5 @@ bool host_start() {
   thoom::Scene::instance->create_object(PEER_RECEIVER_OBJ, "");
   thoom::Scene::instance->create_object(PEER_SENDER_OBJ, "");
 
-  thoom::Scene::instance->request_map("maps/splash");
   return true;
 }

@@ -1,6 +1,8 @@
 add_executable(cnf
   main.cc
-  launch.cc
+  init.cc
+  init_host.cc
+  init_join.cc
   host_game.cc
   billboard.cc
   cheddar.cc
@@ -33,7 +35,6 @@ add_executable(cnf
   items/toothpick.cc
   items/tossed.cc
   ladder.cc
-  load_save.cc
   mouse.cc
   splash.cc
   textbox.cc

@@ -6,4 +6,4 @@ music/menu.wav
 1
 tiles/menu.bmp
 1
-load_save 0
+init 0

@@ -7,17 +7,13 @@
 #include "guest_peer_receiver.h"
 #include "guest_peer_sender.h"
 #include "item.h"
-#include "launch.h"
 #include "object.h"
 #include "scene/scene.h"
 #include "window/window.h"
 
-#define INIT_OBJ "load_save"
-
 std::unordered_map<std::string, Item> guest_item_info;
 
 static const thoom::Scene::ObjectDef kGuestObjects[] = {
-    {INIT_OBJ, Launch::create_object},
     {PEER_RECEIVER_OBJ, GuestPeerReceiver::create_object, thoom::kObjectFirst},
     {PEER_SENDER_OBJ, GuestPeerSender::create_object, thoom::kObjectLast},
     {FETA_OBJ, GuestFeta::create_object},

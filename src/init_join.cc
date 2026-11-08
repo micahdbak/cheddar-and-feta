@@ -1,171 +1,30 @@
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>
+#include "init_join.h"
 
 #include <cstdint>
 #include <string>
-#include <unordered_map>
 
-#include "audio/audio.h"
 #include "colour.h"
 #include "constants.h"
-#include "game_hud.h"
-#include "guest_feta.h"
-#include "guest_peer_receiver.h"
-#include "guest_peer_sender.h"
 #include "hud/hud.h"
-#include "icon.h"
 #include "input/controller.h"
 #include "input/input.h"
-#include "item.h"
-#include "map/map.h"
-#include "object.h"
 #include "peer/peer.h"
-#include "render_functions.h"
 #include "renderer/font.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
-#include "sounds.h"
-#include "texture/texture.h"
 #include "thoom/macros.h"
-#include "thoom/thoom.h"
-#include "window/window.h"
 
-#define INIT_OBJ "load_save"
-
-std::unordered_map<std::string, Item> item_info;
-
-bool init(int argc, char** argv);
-
-int main(int argc, char** argv) {
-  struct hud_def hud = GameHud::def(false);
-
-  if (!thoom_init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, true,
-                  true, kBackground.val, &hud)) {
-    return 1;
-  }
-
-  register_render_functions();
-
-  if (!thoom::Scene::init()) {
-    thoom_quit();
-    return 1;
-  }
-
-  if (!init(argc, argv)) {
-    thoom::Scene::quit();
-    thoom_quit();
-    return 1;
-  }
-
-  load_icons();
-  load_sounds();
-
-  bool running = true;
-
-  while (running) {
-    bool quit = false;
-    thoom_poll_events(&quit);
-
-    if (quit) {
-      running = false;
-      break;
-    }
-
-    thoom::Audio::instance->step();
-    thoom::Scene::instance->step();
-
-    thoom::Map* map = thoom::Scene::instance->map;
-    thoom::Renderer::instance->draw_world(map);
-    thoom::Hud::instance->render();
-    thoom::Hud::instance->draw();
-
-    if (thoom::Input::instance->world.character == 'p') {
-      thoom::Window::instance->save_screenshot("screenshot.bmp");
-    }
-
-    thoom::Colour bg = map != nullptr ? map->background : thoom::kBlack;
-    thoom::Window::instance->present(bg);
-
-    thoom::Input::instance->clear_hit_input();
-  }
-
-  thoom::Scene::quit();
-
-  SDL_DestroyTexture(icons);
-  icons = nullptr;
-
-  thoom_quit();
-
-  return 0;
+void InitJoin::start(SDL_Texture* ui) {
+  this->ui = ui;
+  this->render = true;
+  this->waiting_for_peer = false;
+  this->sel_c = 0;
+  this->code.clear();
+  this->last_peer_state = thoom::Peer::instance->state.load();
+  this->waiting_ticks = 0;
 }
 
-class Init : public thoom::Object {
- public:
-  Init() {
-    this->ui = thoom::Texture::instance->create_texture(
-        THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
-        SDL_SCALEMODE_LINEAR);
-    SDL_SetTextureBlendMode(this->ui, SDL_BLENDMODE_BLEND);
-    thoom::Renderer::instance->reset_view();
-  }
-
-  ~Init() { SDL_DestroyTexture(this->ui); }
-
-  void step();
-
-  static thoom::Object* create_object(thoom::Scene* scene,
-                                      const std::string& options) {
-    return new Init();
-  }
-
- private:
-  bool render = true, waiting_for_peer = false;
-  int sel_c = 0;
-  std::string code;
-  SDL_Texture* ui = nullptr;
-  SDL_FRect dst_rect = {0.0f, 0.0f, 320.0f, 240.0f};
-  uint64_t last_peer_state = thoom::Peer::kStateNoConnection;
-  Uint64 waiting_ticks = 0;
-};
-
-static const thoom::Scene::ObjectDef kFetaObjects[] = {
-    {INIT_OBJ, Init::create_object},
-    {PEER_RECEIVER_OBJ, GuestPeerReceiver::create_object, thoom::kObjectFirst},
-    {PEER_SENDER_OBJ, GuestPeerSender::create_object, thoom::kObjectLast},
-    {FETA_OBJ, GuestFeta::create_object},
-    {nullptr, nullptr},
-};
-
-bool init(int argc, char** argv) {
-  thoom::Scene::instance->register_objects(kFetaObjects);
-
-  // items
-  item_info[ITEM_NONE] = Item{HELD_EFFECT, "Kick"};
-  item_info[ITEM_NONE].damage = 1;
-  item_info[ITEM_NONE].armour = 0;
-  item_info[ITEM_CANNON_BALL] = Item{THROWABLE, "Cannon Ball"};
-  item_info[ITEM_CHEESE] = Item{EDIBLE, "Cheese"};
-  item_info[ITEM_COFFEE_BEAN] = Item{USEFUL, "Coffee Bean"};
-  item_info[ITEM_FIRE] = Item{THROWABLE, "Fire"};
-  item_info[ITEM_HERMES_BOOT] = Item{HELD_EFFECT, "Hermes Boot"};
-  item_info[ITEM_HERMES_BOOT].damage = 0;
-  item_info[ITEM_HERMES_BOOT].speed = 1.75f;
-  item_info[ITEM_MOLOTOV] = Item{THROWABLE, "Molotov Cocktail"};
-  item_info[ITEM_SHIELD] = Item{HELD_EFFECT, "Shield"};
-  item_info[ITEM_SHIELD].damage = 0;
-  item_info[ITEM_SHIELD].armour = 1;
-  item_info[ITEM_TOOTHPICK] = Item{THROWABLE, "Porcu' Pine"};
-
-  thoom::Window::instance->set_title("Playing as Feta");
-
-  thoom::Scene::instance->create_object(PEER_RECEIVER_OBJ, "");
-  thoom::Scene::instance->create_object(PEER_SENDER_OBJ, "");
-
-  thoom::Scene::instance->request_map("maps/init");
-  return true;
-}
-
-void Init::step() {
+void InitJoin::step() {
   uint64_t peer_state = thoom::Peer::instance->state.load();
 
   if (peer_state != this->last_peer_state) this->render = true;
@@ -321,7 +180,4 @@ void Init::step() {
 
       break;
   }
-
-  thoom::Renderer::instance->push_sprite("", this->ui, nullptr, &this->dst_rect,
-                                         0);
 }

@@ -5,7 +5,7 @@
 
 #include "game_hud.h"
 #include "guest_feta.h"
-#include "item.h"
+#include "guest_item.h"
 #include "scene/scene.h"
 
 bool GuestMouse::check_collision(float x, float y) {
@@ -48,7 +48,8 @@ std::vector<GameHud::Item> GuestMouse::read_items(const std::string& items_s) {
       }
 
       // validate item
-      if (item_info.find(item_id) == item_info.end() || count <= 0) continue;
+      if (guest_item_info.find(item_id) == guest_item_info.end() || count <= 0)
+        continue;
 
       GameHud::Item item{item_id, count};
       ret.push_back(item);

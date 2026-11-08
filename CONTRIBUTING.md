@@ -7,7 +7,6 @@ In particular:
 - Each line of code should not exceed 80 characters;
 - Source files are organised by the functionality they implement, so a directory
   includes both the header and source files;
-- All code must be contained in a namespace that matches their target;
 - No importing or aliasing (`using`) of namespace at all;
 - When it comes to integer types, prefer `uint64_t`, `uint32_t`, `uint16_t`,
   `uint8_t`;

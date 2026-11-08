@@ -1,5 +1,7 @@
-add_executable(cheddar
+add_executable(cnf
   main.cc
+  launch.cc
+  host_game.cc
   billboard.cc
   cheddar.cc
   credits.cc
@@ -19,6 +21,8 @@ add_executable(cheddar
   freedom.cc
   game_over.cc
   hitbox.cc
+  host_peer_receiver.cc
+  host_peer_sender.cc
   hurtbox.cc
   items/cannon_ball.cc
   items/cheese.cc
@@ -31,11 +35,19 @@ add_executable(cheddar
   ladder.cc
   load_save.cc
   mouse.cc
-  host_peer_receiver.cc
-  host_peer_sender.cc
   splash.cc
   textbox.cc
+  guest/guest_game.cc
+  guest/guest_feta.cc
+  guest/guest_mouse.cc
+  guest/guest_peer_receiver.cc
+  guest/guest_peer_sender.cc
+  shared/game.cc
+  shared/game_hud.cc
+  shared/icon.cc
+  shared/render_functions.cc
+  shared/sounds.cc
 )
-target_include_directories(cheddar PRIVATE .)
-target_link_libraries(cheddar PRIVATE shared sanitizers)
-#target_compile_definitions(cheddar PRIVATE ONSCREEN_DEBUG)
+target_include_directories(cnf PRIVATE . guest shared)
+target_link_libraries(cnf PRIVATE thoom sanitizers)
+#target_compile_definitions(cnf PRIVATE ONSCREEN_DEBUG)

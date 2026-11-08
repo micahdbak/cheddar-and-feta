@@ -1,12 +1,16 @@
 #include "launch.h"
 
+#include <cstdint>
 #include <string>
 
 #include "colour.h"
 #include "constants.h"
+#include "guest/guest_game.h"
+#include "host_game.h"
 #include "hud/hud.h"
 #include "input/controller.h"
 #include "input/input.h"
+#include "object.h"
 #include "peer/peer.h"
 #include "renderer/font.h"
 #include "renderer/renderer.h"
@@ -14,6 +18,12 @@
 #include "texture/texture.h"
 #include "thoom/macros.h"
 #include "window/window.h"
+
+enum LaunchMode { kLaunchHost, kLaunchJoin };
+
+static LaunchMode launch_mode = kLaunchJoin;
+
+bool launch_show_peer(void* user) { return launch_mode == kLaunchHost; }
 
 Launch::Launch() {
   this->ui = thoom::Texture::instance->create_texture(
@@ -26,6 +36,70 @@ Launch::Launch() {
 Launch::~Launch() { SDL_DestroyTexture(this->ui); }
 
 void Launch::step() {
+  if (this->choose_mode) {
+    int y_dir = thoom::Input::instance->world.consume_hit_dy();
+    if (y_dir != 0) {
+      this->menu_sel = THOOM_CLAMP(this->menu_sel + y_dir, 0, 1);
+      this->render = true;
+    }
+
+    if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
+      if (this->menu_sel == 0) {
+        launch_mode = kLaunchHost;
+        thoom::Peer::instance->set_offerer(false);
+        host_start();
+        this->deleted = true;
+        return;
+      }
+
+      launch_mode = kLaunchJoin;
+      thoom::Peer::instance->set_offerer(true);
+      guest_start();
+      this->choose_mode = false;
+      this->render = true;
+    }
+
+    if (this->render) {
+      this->render = false;
+
+      thoom::Renderer::instance->clear(this->ui, thoom::kMask);
+
+      SDL_FRect menu_box = {96.0f, 88.0f, 128.0f, 64.0f};
+      thoom::Renderer::instance->draw_ui_box(UI_BOX_CHAR_CONT, this->ui,
+                                             &menu_box);
+
+      SDL_FRect host_box = {104.0f, 100.0f, 112.0f, 16.0f};
+      thoom::Renderer::instance->draw_ui_box(
+          this->menu_sel == 0 ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX, this->ui,
+          &host_box);
+      int host_w =
+          thoom::Renderer::instance->fonts[DEFAULT_FONT]->text_width("Host");
+      thoom::Renderer::instance->draw_text(this->ui, DEFAULT_FONT, "Host",
+                                           160 - host_w / 2, 102, 0,
+                                           kBackground);
+
+      SDL_FRect join_box = {104.0f, 124.0f, 112.0f, 16.0f};
+      thoom::Renderer::instance->draw_ui_box(
+          this->menu_sel == 1 ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX, this->ui,
+          &join_box);
+      int join_w =
+          thoom::Renderer::instance->fonts[DEFAULT_FONT]->text_width("Join");
+      thoom::Renderer::instance->draw_text(this->ui, DEFAULT_FONT, "Join",
+                                           160 - join_w / 2, 126, 0,
+                                           kBackground);
+    }
+
+    thoom::Renderer::instance->push_sprite("", this->ui, nullptr,
+                                           &this->dst_rect, 0);
+    return;
+  }
+
+  if (thoom::Scene::instance->map != nullptr &&
+      thoom::Scene::instance->map->path != "maps/init") {
+    this->deleted = true;
+    return;
+  }
+
   uint64_t peer_state = thoom::Peer::instance->state.load();
 
   if (peer_state != this->last_peer_state) this->render = true;

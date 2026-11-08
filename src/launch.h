@@ -20,7 +20,9 @@ class Launch : public thoom::Object {
                                       const std::string& options);
 
  private:
+  bool choose_mode = true;
   bool render = true, waiting_for_peer = false;
+  int menu_sel = 0;
   int sel_c = 0;
   std::string code;
   SDL_Texture* ui = nullptr;
@@ -28,3 +30,5 @@ class Launch : public thoom::Object {
   uint64_t last_peer_state = thoom::Peer::kStateNoConnection;
   Uint64 waiting_ticks = 0;
 };
+
+bool launch_show_peer(void* user);

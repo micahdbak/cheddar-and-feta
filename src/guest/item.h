@@ -35,4 +35,4 @@ static std::string options(int x, int y, int x_dir, int y_dir) {
 }
 }  // namespace UseItem
 
-extern std::unordered_map<std::string, Item> item_info;
+extern std::unordered_map<std::string, Item> guest_item_info;

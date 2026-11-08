@@ -145,14 +145,14 @@ void GuestFeta::step() {
       }
 
       // handle an item which changes top speed
-      if (item_info[sel_item_id].type == HELD_EFFECT) {
-        mov_speed *= item_info[sel_item_id].speed;
+      if (guest_item_info[sel_item_id].type == HELD_EFFECT) {
+        mov_speed *= guest_item_info[sel_item_id].speed;
       }
 
       if (thoom::Input::instance->world.consume_hit(thoom::Button::ATTACK)) {
         this->busy_ticks = thoom::Scene::instance->ticks;
 
-        switch (item_info[sel_item_id].type) {
+        switch (guest_item_info[sel_item_id].type) {
             // ---- attack / use item ----
 
           case USEFUL:
@@ -164,7 +164,7 @@ void GuestFeta::step() {
                                           sel_item_id + " " + buff);
             this->remove_item(sel_item_id);
 
-            if (item_info[sel_item_id].type == THROWABLE) {
+            if (guest_item_info[sel_item_id].type == THROWABLE) {
               this->is_busy = THROWING;
 
               // set animation to throwing
@@ -215,7 +215,7 @@ void GuestFeta::step() {
 
           case HELD_EFFECT: {
             // if item doesn't deal damage, do nothing
-            if (item_info[sel_item_id].damage < 1) {
+            if (guest_item_info[sel_item_id].damage < 1) {
               break;
             }
 
@@ -504,7 +504,7 @@ void GuestFeta::attack(int damage) {
     sel_item_id = this->items[this->sel_item].item_id;
   }
 
-  int armour = item_info[sel_item_id].armour;
+  int armour = guest_item_info[sel_item_id].armour;
 
   damage -= armour;
 
@@ -533,7 +533,7 @@ void GuestFeta::attack(int damage) {
 }
 
 void GuestFeta::push_item(const std::string& item_id) {
-  if (item_info.find(item_id) == item_info.end()) {
+  if (guest_item_info.find(item_id) == guest_item_info.end()) {
     // TODO(micahdbak): error
     std::exit(1);
   }

@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "game_hud.h"
 #include "mouse.h"
 #include "object.h"
 #include "sprite/sprite.h"
@@ -23,6 +24,8 @@ struct Item {
 };
 
 extern std::unordered_map<std::string, Item> item_info;
+
+bool require_item(const GameHud::Item& item);
 
 class DroppedItem : public virtual thoom::Object {
  public:

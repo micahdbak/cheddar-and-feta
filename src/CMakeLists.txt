@@ -11,7 +11,6 @@ add_executable(cnf
   game_over.cc
   guest_feta.cc
   guest_game.cc
-  guest_mouse.cc
   guest_peer_receiver.cc
   guest_peer_sender.cc
   hitbox.cc

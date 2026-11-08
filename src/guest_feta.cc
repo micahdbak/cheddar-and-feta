@@ -13,6 +13,7 @@
 #include "guest_peer_sender.h"
 #include "input/controller.h"
 #include "input/input.h"
+#include "mouse.h"
 #include "object.h"
 #include "peer/peer.h"
 #include "renderer/renderer.h"
@@ -125,9 +126,7 @@ void GuestFeta::step() {
         if (this->sprite->update_frame() && (this->sprite->frame_i % 2) == 1) {
           thoom::Audio::instance->play("sfx/step.wav", 0.5, this->x, this->y,
                                        true);
-          GuestPeerSender::send_message(
-              MSG_AUDIO,
-              GuestMouse::audio_msg("sfx/step.wav", 0.5, this->x, this->y));
+          GuestPeerSender::send_audio("sfx/step.wav", 0.5, this->x, this->y);
         }
 
         mov_speed = this->max_mov_speed;
@@ -169,9 +168,8 @@ void GuestFeta::step() {
 
               thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x,
                                            this->y, true);
-              GuestPeerSender::send_message(
-                  MSG_AUDIO, GuestMouse::audio_msg("sfx/throw.wav", 1.0,
-                                                   this->x, this->y));
+              GuestPeerSender::send_audio("sfx/throw.wav", 1.0, this->x,
+                                          this->y);
             }
           } break;
 
@@ -192,15 +190,13 @@ void GuestFeta::step() {
 
               thoom::Audio::instance->play("sfx/cheese.wav", 1.0f, this->x,
                                            this->y, true);
-              GuestPeerSender::send_message(
-                  MSG_AUDIO, GuestMouse::audio_msg("sfx/cheese.wav", 1.0,
-                                                   this->x, this->y));
+              GuestPeerSender::send_audio("sfx/cheese.wav", 1.0, this->x,
+                                          this->y);
             } else {
               thoom::Audio::instance->play("sfx/full.wav", 1.0f, this->x,
                                            this->y, true);
-              GuestPeerSender::send_message(
-                  MSG_AUDIO,
-                  GuestMouse::audio_msg("sfx/full.wav", 1.0, this->x, this->y));
+              GuestPeerSender::send_audio("sfx/full.wav", 1.0, this->x,
+                                          this->y);
             }
 
             break;
@@ -226,9 +222,7 @@ void GuestFeta::step() {
 
             thoom::Audio::instance->play("sfx/kick.wav", 1.0f, this->x, this->y,
                                          true);
-            GuestPeerSender::send_message(
-                MSG_AUDIO,
-                GuestMouse::audio_msg("sfx/kick.wav", 1.0, this->x, this->y));
+            GuestPeerSender::send_audio("sfx/kick.wav", 1.0, this->x, this->y);
           } break;
 
           default:
@@ -260,9 +254,7 @@ void GuestFeta::step() {
 
         thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x, this->y,
                                      true);
-        GuestPeerSender::send_message(
-            MSG_AUDIO,
-            GuestMouse::audio_msg("sfx/throw.wav", 1.0, this->x, this->y));
+        GuestPeerSender::send_audio("sfx/throw.wav", 1.0, this->x, this->y);
       }
 
       break;
@@ -408,12 +400,12 @@ void GuestFeta::step() {
     bool collision_x = false, collision_y = false;
 
     if (x_dir != 0) {
-      collision_x = GuestMouse::check_collision(new_x, this->y);
+      collision_x = Mouse::check_collision(new_x, this->y);
       if (!collision_x) this->x = new_x;
     }
 
     if (y_dir != 0) {
-      collision_y = GuestMouse::check_collision(this->x, new_y);
+      collision_y = Mouse::check_collision(this->x, new_y);
       if (!collision_y) this->y = new_y;
     }
 
@@ -423,8 +415,8 @@ void GuestFeta::step() {
         float new_y1 = this->y + fabs(dx);
         float new_y2 = this->y - fabs(dx);
 
-        bool collision_y1 = GuestMouse::check_collision(this->x, new_y1);
-        bool collision_y2 = GuestMouse::check_collision(this->x, new_y2);
+        bool collision_y1 = Mouse::check_collision(this->x, new_y1);
+        bool collision_y2 = Mouse::check_collision(this->x, new_y2);
 
         if (!collision_y1 && collision_y2) {
           this->y = new_y1;
@@ -437,8 +429,8 @@ void GuestFeta::step() {
         float new_x1 = this->x + fabs(dy);
         float new_x2 = this->x - fabs(dy);
 
-        bool collision_x1 = GuestMouse::check_collision(new_x1, this->y);
-        bool collision_x2 = GuestMouse::check_collision(new_x2, this->y);
+        bool collision_x1 = Mouse::check_collision(new_x1, this->y);
+        bool collision_x2 = Mouse::check_collision(new_x2, this->y);
 
         if (!collision_x1 && collision_x2) {
           this->x = new_x1;
@@ -509,8 +501,7 @@ void GuestFeta::attack(int damage) {
 
   this->health -= damage;
   thoom::Audio::instance->play("sfx/hurt.wav", 1.0f, this->x, this->y, true);
-  GuestPeerSender::send_message(
-      MSG_AUDIO, GuestMouse::audio_msg("sfx/hurt.wav", 1.0, this->x, this->y));
+  GuestPeerSender::send_audio("sfx/hurt.wav", 1.0, this->x, this->y);
 
   // if dead, go down
   if (this->health <= 0) {
@@ -602,7 +593,7 @@ void GuestFeta::set_animation(int animation) {
 }
 
 void GuestFeta::set_items(const std::string& items_s) {
-  this->items = GuestMouse::read_items(items_s);
+  this->items = Mouse::read_items(items_s, GuestFeta::known_item);
 
   if (this->sel_item >= this->items.size()) {
     this->sel_item = this->items.size() - 1;
@@ -633,5 +624,11 @@ thoom::Object* GuestFeta::create_object(thoom::Scene* scene,
   }
 
   return new GuestFeta(thoom::str_to_float(x_str), thoom::str_to_float(y_str),
-                       animation, GuestMouse::read_items(items_s));
+                       animation,
+                       Mouse::read_items(items_s, GuestFeta::known_item));
+}
+
+bool GuestFeta::known_item(const GameHud::Item& item) {
+  return guest_item_info.find(item.item_id) != guest_item_info.end() &&
+         item.count > 0;
 }

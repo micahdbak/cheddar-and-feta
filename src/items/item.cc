@@ -1,10 +1,12 @@
 #include "items/item.h"
 
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <unordered_map>
 
 #include "audio/audio.h"
+#include "game_hud.h"
 #include "items/persister.h"
 #include "mouse.h"
 #include "renderer/renderer.h"
@@ -13,6 +15,15 @@
 #include "sprite/sprite.h"
 
 std::unordered_map<std::string, Item> item_info;
+
+bool require_item(const GameHud::Item& item) {
+  if (item_info.find(item.item_id) == item_info.end() || item.count <= 0) {
+    // TODO(micahdbak): error
+    std::exit(1);
+  }
+
+  return true;
+}
 
 DroppedItem::DroppedItem(std::string item_id, float x, float y,
                          const char* sprite_path, int frame_w, int frame_h,

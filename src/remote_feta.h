@@ -17,7 +17,6 @@ class RemoteFeta : public Mouse, public HitSource {
 
   // Object
   void step() override;
-  void save_data() override;
 
   // IMouse
   void attack(int damage) override;

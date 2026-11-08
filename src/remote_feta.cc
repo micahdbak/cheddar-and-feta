@@ -7,6 +7,7 @@
 
 #include "host_peer_sender.h"
 #include "hurtbox.h"
+#include "items/item.h"
 #include "mouse.h"
 #include "object.h"
 #include "peer/peer.h"
@@ -15,23 +16,24 @@
 #include "sprite/sprite.h"
 
 RemoteFeta::RemoteFeta(int x, int y, int animation)
-    : Mouse("sprites/feta.bmp", true) {
+    : Mouse("sprites/feta.bmp", true, FETA_OBJ) {
   if (remote_feta != nullptr) {
     // TODO(micahdbak): error
     std::exit(1);
   }
   remote_feta = this;
 
-  std::string items_s = thoom::save.value(FETA_OBJ MOUSE_ITEMS);
+  std::string items_s = thoom::save.value(this->save_id + MOUSE_ITEMS);
   if (!items_s.empty()) {
-    this->items = IMouse::read_items(items_s);
+    this->items = Mouse::read_items(items_s, require_item);
   }
 
   // if loading a save, read the location from the save file
-  if (thoom::save.geti(LOAD_SAVE) && thoom::save.has(FETA_OBJ MOUSE_X)) {
-    this->sprite->set_animation(thoom::save.geti(FETA_OBJ MOUSE_ANIMATION));
-    this->place(thoom::save.getf(FETA_OBJ MOUSE_X),
-                thoom::save.getf(FETA_OBJ MOUSE_Y));
+  if (thoom::save.geti(LOAD_SAVE) && thoom::save.has(this->save_id + MOUSE_X)) {
+    this->sprite->set_animation(
+        thoom::save.geti(this->save_id + MOUSE_ANIMATION));
+    this->place(thoom::save.getf(this->save_id + MOUSE_X),
+                thoom::save.getf(this->save_id + MOUSE_Y));
   } else {
     // cheddar will have provided the corresponding coordinates and animation
     this->sprite->set_animation(animation);
@@ -60,13 +62,6 @@ void RemoteFeta::step() {
 
   this->update_path();
   this->draw();
-}
-
-void RemoteFeta::save_data() {
-  thoom::save.putf(FETA_OBJ MOUSE_X, this->x);
-  thoom::save.putf(FETA_OBJ MOUSE_Y, this->y);
-  thoom::save.puti(FETA_OBJ MOUSE_ANIMATION, this->sprite->animation);
-  thoom::save.data[FETA_OBJ MOUSE_ITEMS] = IMouse::encode_items(this->items);
 }
 
 void RemoteFeta::attack(int damage) {
@@ -111,7 +106,7 @@ void RemoteFeta::synchronize() {
 
   thoom::float_to_str(this->x, x_str, sizeof(x_str));
   thoom::float_to_str(this->y, y_str, sizeof(y_str));
-  items_s = IMouse::encode_items(this->items);
+  items_s = Mouse::encode_items(this->items);
 
   snprintf(buff, sizeof(buff), "%s,%s,%d %s", x_str, y_str,
            this->sprite->animation, items_s.c_str());

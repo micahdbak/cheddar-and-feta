@@ -41,9 +41,6 @@ class IMouse : public thoom::Object {
   virtual void set_max_mov_speed(float max_mov_speed) = 0;
   virtual void signal_down() = 0;
 
-  static std::string encode_items(const std::vector<GameHud::Item>& items);
-  static std::vector<GameHud::Item> read_items(const std::string& items_s);
-
   static IMouse* closest_mouse(float x, float y, float min_distance,
                                bool forced);
 
@@ -58,22 +55,13 @@ class Mouse : public IMouse {
     int animation;
   };
 
- protected:
-  enum Busy {
-    FALSE,
-    ATTACKING,
-    ATTACKED,
-    THROWING,
-    EATING,
-    DOWNED,
-    FORCED_DANCE
-  };
+  typedef bool (*ItemFilter)(const GameHud::Item& item);
 
- public:
-  Mouse(const char* sprite_path, bool is_feta);
+  Mouse(const char* sprite_path, bool is_feta, const char* save_prefix);
   ~Mouse();
 
   void step() override;
+  void save_data() override;
 
   void attack(int damage) override;
   void push_item(const std::string& item_id) override;
@@ -83,10 +71,15 @@ class Mouse : public IMouse {
   void set_throw(int throw_x, int throw_y) override;
   void set_max_mov_speed(float max_mov_speed) override;
 
+  static std::string encode_items(const std::vector<GameHud::Item>& items);
+  static std::vector<GameHud::Item> read_items(const std::string& items_s,
+                                               ItemFilter keep);
+
   void place(float x, float y);
 
   static bool check_collision(float x, float y);
 
+  std::string save_id;
   thoom::Sprite *sprite, *emotes;
   int which_emote = -1;
 
@@ -98,6 +91,16 @@ class Mouse : public IMouse {
   float max_mov_speed = MOUSE_DEFAULT_SPEED;
 
  protected:
+  enum Busy {
+    FALSE,
+    ATTACKING,
+    ATTACKED,
+    THROWING,
+    EATING,
+    DOWNED,
+    FORCED_DANCE
+  };
+
   Busy is_busy = Busy::FALSE;
   uint64_t busy_ticks = 0, is_down_ticks = 0, dance_until = 0;
   bool did_hit = false;

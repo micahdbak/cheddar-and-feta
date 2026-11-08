@@ -19,6 +19,7 @@
 #include "items/save.h"
 #include "items/tossed.h"
 #include "renderer/renderer.h"
+#include "save/save_data.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
 #include "thoom/macros.h"
@@ -26,58 +27,6 @@
 
 IMouse* cheddar = nullptr;
 IMouse* remote_feta = nullptr;
-
-std::string IMouse::encode_items(const std::vector<GameHud::Item>& items) {
-  std::string items_s = "";
-  for (int i = 0; i < items.size(); i++) {
-    if (items[i].count <= 0) continue;
-
-    char item[256];
-    snprintf(item, sizeof(item), "%s*%d", items[i].item_id.c_str(),
-             items[i].count);
-    items_s += item;
-
-    if (i + 1 < items.size()) {
-      items_s += ",";
-    }
-  }
-  return items_s;
-}
-
-std::vector<GameHud::Item> IMouse::read_items(const std::string& items_s) {
-  std::vector<GameHud::Item> ret;
-
-  if (!items_s.empty()) {
-    const char* arr = items_s.c_str();
-    int i = 0;
-    do {
-      char item_id[256];
-      int count;
-      if (2 != sscanf(arr, "%255[^*] * %d", item_id, &count)) {
-        // TODO(micahdbak): error
-        std::exit(1);
-      }
-      item_id[255] = '\0';
-
-      // validate item
-      if (item_info.find(item_id) == item_info.end() || count <= 0) {
-        // TODO(micahdbak): error
-        std::exit(1);
-      }
-
-      GameHud::Item item{item_id, count};
-      ret.push_back(item);
-
-      while (*arr != '\0' && *arr != ',') arr++;
-
-      if (*arr == ',') arr++;
-
-      if (*arr == '\0') break;
-    } while (i++ < 100);
-  }
-
-  return ret;
-}
 
 IMouse* IMouse::closest_mouse(float x, float y, float min_distance,
                               bool forced) {
@@ -101,7 +50,8 @@ IMouse* IMouse::closest_mouse(float x, float y, float min_distance,
   return nullptr;  // no close-enough mouse
 }
 
-Mouse::Mouse(const char* sprite_path, bool is_feta) {
+Mouse::Mouse(const char* sprite_path, bool is_feta, const char* save_prefix)
+    : save_id(save_prefix) {
   this->is_feta = is_feta;
 
   this->sprite = new thoom::Sprite(sprite_path, 32, 32, 250);
@@ -453,6 +403,14 @@ void Mouse::step() {
   this->draw();
 }
 
+void Mouse::save_data() {
+  thoom::save.putf(this->save_id + MOUSE_X, this->x);
+  thoom::save.putf(this->save_id + MOUSE_Y, this->y);
+  thoom::save.puti(this->save_id + MOUSE_ANIMATION, this->sprite->animation);
+  thoom::save.data[this->save_id + MOUSE_ITEMS] =
+      Mouse::encode_items(this->items);
+}
+
 void Mouse::attack(int damage) {
   // don't get attacked if was already attacked / down
   if (this->is_busy == ATTACKED || this->is_busy == DOWNED ||
@@ -569,6 +527,53 @@ void Mouse::set_throw(int throw_x, int throw_y) {
 
 void Mouse::set_max_mov_speed(float max_mov_speed) {
   this->max_mov_speed = max_mov_speed;
+}
+
+std::string Mouse::encode_items(const std::vector<GameHud::Item>& items) {
+  std::string items_s = "";
+  for (int i = 0; i < items.size(); i++) {
+    if (items[i].count <= 0) continue;
+
+    char item[256];
+    snprintf(item, sizeof(item), "%s*%d", items[i].item_id.c_str(),
+             items[i].count);
+    items_s += item;
+
+    if (i + 1 < items.size()) {
+      items_s += ",";
+    }
+  }
+  return items_s;
+}
+
+std::vector<GameHud::Item> Mouse::read_items(const std::string& items_s,
+                                             ItemFilter keep) {
+  std::vector<GameHud::Item> ret;
+
+  if (!items_s.empty()) {
+    const char* arr = items_s.c_str();
+    int i = 0;
+    do {
+      char item_id[256];
+      int count;
+      if (2 != sscanf(arr, "%255[^*] * %d", item_id, &count)) {
+        // TODO(micahdbak): error
+        std::exit(1);
+      }
+      item_id[255] = '\0';
+
+      GameHud::Item item{item_id, count};
+      if (keep(item)) ret.push_back(item);
+
+      while (*arr != '\0' && *arr != ',') arr++;
+
+      if (*arr == ',') arr++;
+
+      if (*arr == '\0') break;
+    } while (i++ < 100);
+  }
+
+  return ret;
 }
 
 void Mouse::place(float x, float y) {

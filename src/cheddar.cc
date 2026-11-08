@@ -8,6 +8,7 @@
 
 #include "game_hud.h"
 #include "hurtbox.h"
+#include "items/item.h"
 #include "items/persister.h"
 #include "items/save.h"
 #include "mouse.h"
@@ -19,16 +20,16 @@
 #include "scene/scene.h"
 
 Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates)
-    : Mouse("sprites/cheddar.bmp", false) {
+    : Mouse("sprites/cheddar.bmp", false, CHEDDAR_OBJ) {
   if (cheddar != nullptr) {
     // TODO(micahdbak): error
     std::exit(1);
   }
   cheddar = this;
 
-  std::string items_s = thoom::save.value(CHEDDAR_OBJ MOUSE_ITEMS);
+  std::string items_s = thoom::save.value(this->save_id + MOUSE_ITEMS);
   if (!items_s.empty()) {
-    this->items = Mouse::read_items(items_s);
+    this->items = Mouse::read_items(items_s, require_item);
   } else {
     this->items.push_back(GameHud::Item{ITEM_SAVE, 1});
   }
@@ -36,10 +37,11 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates)
   int feta_x = 0, feta_y = 0, feta_animation = 0;
 
   // if loading a save, read the location from the save file
-  if (thoom::save.geti(LOAD_SAVE) && thoom::save.has(CHEDDAR_OBJ MOUSE_X)) {
-    this->sprite->set_animation(thoom::save.geti(CHEDDAR_OBJ MOUSE_ANIMATION));
-    this->place(thoom::save.getf(CHEDDAR_OBJ MOUSE_X),
-                thoom::save.getf(CHEDDAR_OBJ MOUSE_Y));
+  if (thoom::save.geti(LOAD_SAVE) && thoom::save.has(this->save_id + MOUSE_X)) {
+    this->sprite->set_animation(
+        thoom::save.geti(this->save_id + MOUSE_ANIMATION));
+    this->place(thoom::save.getf(this->save_id + MOUSE_X),
+                thoom::save.getf(this->save_id + MOUSE_Y));
 
     // don't set remote feta options; it loads from the save file as well
   } else {
@@ -76,13 +78,6 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates)
 }
 
 Cheddar::~Cheddar() { cheddar = nullptr; }
-
-void Cheddar::save_data() {
-  thoom::save.putf(CHEDDAR_OBJ MOUSE_X, this->x);
-  thoom::save.putf(CHEDDAR_OBJ MOUSE_Y, this->y);
-  thoom::save.puti(CHEDDAR_OBJ MOUSE_ANIMATION, this->sprite->animation);
-  thoom::save.data[CHEDDAR_OBJ MOUSE_ITEMS] = Mouse::encode_items(this->items);
-}
 
 void Cheddar::signal_down() {
   // signal implies that the remote feta is down; check if we are down too

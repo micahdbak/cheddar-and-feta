@@ -64,12 +64,6 @@ void GuestPeerReceiver::step() {
 
   // if empty, reuse last frame
   if (msgs.empty()) {
-    for (thoom::SpriteRender& sprite : this->sprites) {
-      thoom::Renderer::instance->push_sprite(sprite.tex_id, sprite.texture,
-                                             sprite.src_rect, sprite.dst_rect,
-                                             sprite.y);
-    }
-
     // 5 seconds of no frames; disconnect
     if (thoom::Scene::instance->ticks - last_frame_ticks > 5000 &&
         last_frame_ticks != 0) {
@@ -183,9 +177,6 @@ void GuestPeerReceiver::step() {
                                     (float)dst_rect.w, (float)dst_rect.h});
         sprite.y = depth_offset;
 
-        thoom::Renderer::instance->push_sprite(sprite.tex_id, sprite.texture,
-                                               sprite.src_rect, sprite.dst_rect,
-                                               sprite.y);
         this->sprites.push_back(sprite);
       } break;
 
@@ -206,6 +197,14 @@ void GuestPeerReceiver::step() {
   }
 
   this->just_loaded_map = false;
+}
+
+void GuestPeerReceiver::render() {
+  for (thoom::SpriteRender& sprite : this->sprites) {
+    thoom::Renderer::instance->push_sprite(sprite.tex_id, sprite.texture,
+                                           sprite.src_rect, sprite.dst_rect,
+                                           sprite.y);
+  }
 }
 
 bool GuestPeerReceiver::handle_important_message(const char* arr) {

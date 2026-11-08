@@ -13,7 +13,8 @@ class HostPeerSender : public thoom::Object {
   HostPeerSender();
   ~HostPeerSender();
 
-  void step() override;
+  void step() override {}
+  void render() override;
 
   static void send_message(char func, const std::string& arg);
   static thoom::Object* create_object(thoom::Scene* scene,

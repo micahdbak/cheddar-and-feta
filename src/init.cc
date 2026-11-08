@@ -26,7 +26,6 @@ Init::Init() {
       THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
       SDL_SCALEMODE_LINEAR);
   SDL_SetTextureBlendMode(this->ui, SDL_BLENDMODE_BLEND);
-  thoom::Renderer::instance->reset_view();
 }
 
 Init::~Init() { SDL_DestroyTexture(this->ui); }

@@ -42,8 +42,6 @@ GuestFeta::GuestFeta(float x, float y, int animation,
 
   this->items = items;
 
-  thoom::Renderer::instance->set_view(this->x, this->y);
-
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
   this->emote_rect.w = 32.0f;

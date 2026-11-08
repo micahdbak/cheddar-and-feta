@@ -22,8 +22,6 @@ GameOver::GameOver() {
                                        0, kBackground);
   this->src = this->dst = {0.0f, 0.0f, (float)THOOM_SCREEN_WIDTH,
                            (float)THOOM_SCREEN_HEIGHT};
-
-  thoom::Renderer::instance->reset_view();
 }
 
 GameOver::~GameOver() { SDL_DestroyTexture(this->ui); }

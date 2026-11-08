@@ -46,8 +46,6 @@ Splash::Splash() {
   this->initial_timer = thoom::Scene::instance->ticks;
 
   this->animations = 7;
-
-  thoom::Renderer::instance->reset_view();
 }
 
 Splash::~Splash() {

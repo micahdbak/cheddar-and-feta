@@ -23,9 +23,7 @@ Textbox::Textbox(const std::string& text, const std::string& owner, int font,
   this->text_rect = {80.0f, 176.0f, 160.0f, 48.0f};
   this->font = font;
   this->interval_ms = interval_ms;
-
-  thoom::Renderer::instance->draw_ui_box(
-      UI_BOX_CONTAINER, thoom::Hud::instance->ui, &this->box_rect);
+  this->redraw = true;
 }
 
 Textbox::~Textbox() {
@@ -85,6 +83,8 @@ void Textbox::render() {
 
   this->redraw = false;
 
+  thoom::Renderer::instance->draw_ui_box(
+      UI_BOX_CONTAINER, thoom::Hud::instance->ui, &this->box_rect);
   thoom::Renderer::instance->draw_rect(thoom::Hud::instance->ui,
                                        &this->text_rect, kBackground,
                                        SDL_BLENDMODE_NONE);

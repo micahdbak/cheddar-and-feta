@@ -15,6 +15,7 @@ class GuestPeerReceiver : public thoom::Object {
   ~GuestPeerReceiver();
 
   void step() override;
+  void render() override;
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
 

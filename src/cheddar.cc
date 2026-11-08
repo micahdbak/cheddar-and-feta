@@ -67,8 +67,6 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates)
     feta_animation = coordinates[coord].animation;
   }
 
-  thoom::Renderer::instance->set_view(this->x, this->y);
-
   // make remote feta
   char feta_options[256];
   snprintf(feta_options, sizeof(feta_options), "%d,%d,%d", feta_x, feta_y,

@@ -29,8 +29,6 @@ Credits::Credits() {
 
   this->src_rect = this->dst_rect =
       SDL_FRect{0, 0, THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT};
-
-  thoom::Renderer::instance->reset_view();
 }
 
 void Credits::step() {

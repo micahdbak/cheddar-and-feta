@@ -63,16 +63,12 @@ int main(int argc, char** argv) {
     thoom::Map* map = thoom::Scene::instance->map;
     thoom::Renderer::instance->draw_world(map);
     thoom::Hud::instance->render();
+    thoom::Hud::instance->draw();
 
     if (thoom::Input::instance->world.character == 'p') {
       thoom::Window::instance->save_screenshot("screenshot.bmp");
     }
 
-    thoom::Renderer::instance->draw_texture(
-        thoom::Window::instance->screen, thoom::Hud::instance->ui, NULL, NULL);
-    thoom::Renderer::instance->draw_texture(thoom::Window::instance->screen,
-                                            thoom::Hud::instance->overlay, NULL,
-                                            NULL);
     thoom::Colour bg = map != nullptr ? map->background : thoom::kBlack;
     thoom::Window::instance->present(bg);
 

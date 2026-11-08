@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "hud.h"
+#include "game_hud.h"
 #include "object.h"
 #include "scene.h"
 #include "sprite.h"
@@ -25,14 +25,14 @@
 
 namespace Mouse {
 bool check_collision(float x, float y);
-std::string encode_items(const std::vector<Hud::Item>& items);
-std::vector<Hud::Item> read_items(const std::string& items_s);
+std::string encode_items(const std::vector<GameHud::Item>& items);
+std::vector<GameHud::Item> read_items(const std::string& items_s);
 std::string audio_msg(const char* wav_path, float gain, int x, int y);
 };  // namespace Mouse
 
 class Feta : public thoom::Object {
  public:
-  Feta(float x, float y, int animation, std::vector<Hud::Item> items);
+  Feta(float x, float y, int animation, std::vector<GameHud::Item> items);
   ~Feta();
 
   void step() override;
@@ -62,7 +62,7 @@ class Feta : public thoom::Object {
   SDL_FRect dst_rect, emote_rect;
 
   int health = 10, max_health = 10;
-  std::vector<Hud::Item> items;
+  std::vector<GameHud::Item> items;
   int sel_item = -1;
 
   int throw_x = 0, throw_y = 0;

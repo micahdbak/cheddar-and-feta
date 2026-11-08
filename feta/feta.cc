@@ -8,7 +8,7 @@
 
 #include "audio.h"
 #include "controller.h"
-#include "hud.h"
+#include "game_hud.h"
 #include "input.h"
 #include "item.h"
 #include "object.h"
@@ -23,7 +23,7 @@
 
 Feta* feta = nullptr;
 
-Feta::Feta(float x, float y, int animation, std::vector<Hud::Item> items) {
+Feta::Feta(float x, float y, int animation, std::vector<GameHud::Item> items) {
   if (feta != nullptr) {
     // TODO(micahdbak): error
     std::exit(1);
@@ -91,8 +91,8 @@ void Feta::step() {
     sel_item_count = this->items[this->sel_item].count;
   }
 
-  Hud::instance->draw_items(this->items, this->sel_item, this->health,
-                            this->max_health);
+  GameHud::draw_items(this->items, this->sel_item, this->health,
+                      this->max_health);
 
   // ---- state management ----
 
@@ -536,7 +536,7 @@ void Feta::push_item(const std::string& item_id) {
     std::exit(1);
   }
 
-  Hud::Item new_item;
+  GameHud::Item new_item;
   new_item.item_id = item_id;
   new_item.count = 1;
 
@@ -561,7 +561,7 @@ void Feta::push_item(const std::string& item_id) {
 }
 
 void Feta::push_cheese(int amount) {
-  Hud::Item new_item;
+  GameHud::Item new_item;
   new_item.item_id = ITEM_CHEESE;
   new_item.count = amount;
 

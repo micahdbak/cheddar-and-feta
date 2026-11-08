@@ -265,10 +265,10 @@ void EditorUI::render_tile_input(SDL_Texture* dst, const thoom::Map* map,
   }
 
   SDL_FRect black_rect = {0.0f, 0.0f, float(THOOM_SCREEN_WIDTH), 11.0f};
-  thoom::Renderer::instance->draw_rect(Hud::instance->ui, &black_rect,
+  thoom::Renderer::instance->draw_rect(thoom::Hud::instance->ui, &black_rect,
                                        thoom::Colour(0, 0, 0),
                                        SDL_BLENDMODE_NONE);
-  thoom::Renderer::instance->draw_text(Hud::instance->ui, MONO_FONT,
+  thoom::Renderer::instance->draw_text(thoom::Hud::instance->ui, MONO_FONT,
                                        "<Return> to place, <0-9> to close", 0,
                                        0, 0, kBackground);
 }
@@ -293,9 +293,9 @@ void EditorUI::render_sheet_input(const thoom::Map* map) const {
 
   SDL_FRect black_rect = {0.0f, 0.0f, float(THOOM_SCREEN_WIDTH),
                           float(THOOM_SCREEN_HEIGHT)};
-  thoom::Renderer::instance->draw_rect(Hud::instance->ui, &black_rect,
+  thoom::Renderer::instance->draw_rect(thoom::Hud::instance->ui, &black_rect,
                                        thoom::Colour(0, 0, 0),
                                        SDL_BLENDMODE_NONE);
-  thoom::Renderer::instance->draw_text(Hud::instance->ui, MONO_FONT,
+  thoom::Renderer::instance->draw_text(thoom::Hud::instance->ui, MONO_FONT,
                                        display_text, 0, 0, 0, kBackground);
 }

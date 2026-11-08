@@ -6,6 +6,7 @@
 #include "audio.h"
 #include "colour.h"
 #include "constants.h"
+#include "game_hud.h"
 #include "hud.h"
 #include "icon.h"
 #include "input.h"
@@ -16,7 +17,6 @@
 #include "scene.h"
 #include "sounds.h"
 #include "thoom/thoom.h"
-#include "ui_box.h"
 #include "window.h"
 
 // objects
@@ -56,13 +56,13 @@
 #include "peer_sender.h"
 #include "splash.h"
 
-bool game_is_cheddar = true;
-
 bool init(int argc, char** argv);
 
 int main(int argc, char** argv) {
+  struct hud_def hud = GameHud::def(true);
+
   if (!thoom_init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
-                  false)) {
+                  false, kBackground.val, &hud)) {
     return 1;
   }
 
@@ -79,10 +79,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  load_ui_box();
   load_icons();
-  Hud::init();
-
   load_sounds();
 
   bool running = true;
@@ -101,30 +98,24 @@ int main(int argc, char** argv) {
 
     thoom::Map* map = thoom::Scene::instance->map;
     thoom::Renderer::instance->draw_world(map);
+    thoom::Hud::instance->render();
 
     if (thoom::Input::instance->world.character == 'p') {
       thoom::Window::instance->save_screenshot("screenshot.bmp");
     }
 
-    Hud::instance->render();
-
+    thoom::Renderer::instance->draw_texture(
+        thoom::Window::instance->screen, thoom::Hud::instance->ui, NULL, NULL);
     thoom::Renderer::instance->draw_texture(thoom::Window::instance->screen,
-                                            Hud::instance->ui, NULL, NULL);
-    thoom::Renderer::instance->draw_texture(thoom::Window::instance->screen,
-                                            Hud::instance->overlay, NULL, NULL);
-
-    thoom::Input::instance->clear_hit_input();
-
+                                            thoom::Hud::instance->overlay, NULL,
+                                            NULL);
     thoom::Colour bg = map != nullptr ? map->background : thoom::kBlack;
     thoom::Window::instance->present(bg);
+
+    thoom::Input::instance->clear_hit_input();
   }
 
-  Hud::shutdown();
-
   thoom::Scene::quit();
-
-  SDL_DestroyTexture(ui_box);
-  ui_box = nullptr;
 
   SDL_DestroyTexture(icons);
   icons = nullptr;

@@ -1,8 +1,7 @@
 add_library(shared
   render_functions.cc
   sounds.cc
-  hud.cc
-  ui_box.cc
+  game_hud.cc
   icon.cc
 )
 

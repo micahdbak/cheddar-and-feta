@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "game_hud.h"
 #include "hitbox.h"
-#include "hud.h"
 #include "mouse.h"
 #include "object.h"
 #include "scene.h"
@@ -46,7 +46,7 @@ class Cheddar : public Mouse, public HitSource {
   int which_emote = -1;
 
   int health = 10, max_health = 10;
-  std::vector<Hud::Item> items;
+  std::vector<GameHud::Item> items;
   int sel_item = -1;
 
   int throw_x = 0, throw_y = 0;

@@ -5,7 +5,7 @@
 #include <string>
 
 #include "foes/foe.h"
-#include "hud.h"
+#include "game_hud.h"
 #include "hurtbox.h"
 #include "items/cheese.h"
 #include "items/item.h"
@@ -142,7 +142,7 @@ void Feta::push_item(const std::string& item_id) {
     std::exit(1);
   }
 
-  Hud::Item new_item;
+  GameHud::Item new_item;
   new_item.item_id = item_id;
   new_item.count = 1;
 
@@ -167,7 +167,7 @@ void Feta::push_item(const std::string& item_id) {
 void Feta::push_cheese(int amount) {
   PeerSender::send_message(MSG_PUSH_CHEESE, std::to_string(amount));
 
-  Hud::Item new_item;
+  GameHud::Item new_item;
   new_item.item_id = ITEM_CHEESE;
   new_item.count = amount;
 

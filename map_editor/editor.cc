@@ -185,7 +185,7 @@ void Editor::step() {
     if (this->ui.inputting) {
       this->ui.render_input(this->view_texture, this->map, this->layer);
     } else {
-      thoom::Renderer::instance->clear(Hud::instance->ui, thoom::kMask);
+      thoom::Renderer::instance->clear(thoom::Hud::instance->ui, thoom::kMask);
     }
   }
 
@@ -231,11 +231,11 @@ void Editor::draw_status() const {
   }
 
   SDL_FRect black_rect = {0.0f, 0.0f, float(THOOM_SCREEN_WIDTH), 11.0f};
-  thoom::Renderer::instance->draw_rect(Hud::instance->ui, &black_rect,
+  thoom::Renderer::instance->draw_rect(thoom::Hud::instance->ui, &black_rect,
                                        thoom::Colour(0, 0, 0),
                                        SDL_BLENDMODE_NONE);
   thoom::Renderer::instance->draw_text(
-      Hud::instance->ui, MONO_FONT,
+      thoom::Hud::instance->ui, MONO_FONT,
       " h:write, j:tile, k:sheet, l:layer, x:export  ", 0, 0, 0, kBackground);
 
   char status_text[256];
@@ -254,11 +254,11 @@ void Editor::draw_status() const {
 
   black_rect = {0.0f, float(THOOM_SCREEN_HEIGHT - 11),
                 float(THOOM_SCREEN_WIDTH), 11.0f};
-  thoom::Renderer::instance->draw_rect(Hud::instance->ui, &black_rect,
+  thoom::Renderer::instance->draw_rect(thoom::Hud::instance->ui, &black_rect,
                                        thoom::Colour(0, 0, 0),
                                        SDL_BLENDMODE_NONE);
   thoom::Renderer::instance->draw_text(
-      Hud::instance->ui, MONO_FONT, std::string(status_text), 0,
+      thoom::Hud::instance->ui, MONO_FONT, std::string(status_text), 0,
       THOOM_SCREEN_HEIGHT - 11, 0, kBackground);
 }
 

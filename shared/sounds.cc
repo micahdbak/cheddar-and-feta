@@ -1,6 +1,6 @@
 #include "sounds.h"
 
-#include "audio.h"
+#include "audio/audio.h"
 
 void load_sounds() {
   thoom::Audio::instance->load("sfx/ant_attack.wav");

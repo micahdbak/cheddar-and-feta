@@ -5,7 +5,7 @@
 #include <string>
 
 #include "object.h"
-#include "scene.h"
+#include "scene/scene.h"
 #include "thoom/macros.h"
 
 #define HITBOX_OBJ "hitbox"

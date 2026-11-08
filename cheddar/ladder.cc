@@ -6,11 +6,11 @@
 #include <ostream>
 #include <string>
 
-#include "audio.h"
+#include "audio/audio.h"
 #include "mouse.h"
 #include "object.h"
-#include "save_data.h"
-#include "scene.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
 
 Ladder::Ladder(int x, int y, std::string next_map, int which_coord) {
   this->x = (float)x;

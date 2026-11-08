@@ -6,20 +6,20 @@
 #include <string>
 #include <vector>
 
-#include "audio.h"
-#include "controller.h"
+#include "audio/audio.h"
 #include "game_hud.h"
-#include "input.h"
+#include "input/controller.h"
+#include "input/input.h"
 #include "item.h"
 #include "object.h"
-#include "peer.h"
+#include "peer/peer.h"
 #include "peer_sender.h"
-#include "renderer.h"
-#include "save_data.h"
-#include "scene.h"
-#include "sprite.h"
+#include "renderer/renderer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 #include "thoom/macros.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 Feta* feta = nullptr;
 

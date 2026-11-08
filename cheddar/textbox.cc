@@ -2,15 +2,15 @@
 
 #include <string>
 
-#include "audio.h"
+#include "audio/audio.h"
 #include "colour.h"
 #include "constants.h"
-#include "controller.h"
-#include "font.h"
-#include "hud.h"
-#include "input.h"
-#include "renderer.h"
-#include "scene.h"
+#include "hud/hud.h"
+#include "input/controller.h"
+#include "input/input.h"
+#include "renderer/font.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
 
 Textbox* textbox;
 

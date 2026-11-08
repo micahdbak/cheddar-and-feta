@@ -1,23 +1,21 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#include <cstddef>
-
-#include "audio.h"
+#include "audio/audio.h"
 #include "colour.h"
 #include "constants.h"
 #include "game_hud.h"
-#include "hud.h"
+#include "hud/hud.h"
 #include "icon.h"
-#include "input.h"
-#include "map.h"
+#include "input/input.h"
+#include "map/map.h"
 #include "object.h"
 #include "render_functions.h"
-#include "renderer.h"
-#include "scene.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
 #include "sounds.h"
 #include "thoom/thoom.h"
-#include "window.h"
+#include "window/window.h"
 
 // objects
 #include "billboard.h"

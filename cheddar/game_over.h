@@ -3,7 +3,7 @@
 #include <string>
 
 #include "object.h"
-#include "scene.h"
+#include "scene/scene.h"
 
 #define GAME_OVER_OBJ "game_over"
 

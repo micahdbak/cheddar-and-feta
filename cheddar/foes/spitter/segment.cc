@@ -8,11 +8,11 @@
 #include "hitbox.h"
 #include "hurtbox.h"
 #include "object.h"
-#include "renderer.h"
-#include "scene.h"
-#include "sprite.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 #include "thoom/macros.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 SpitterSegment::SpitterSegment(int parent_id, int segment_id)
     : parent_id(parent_id) {

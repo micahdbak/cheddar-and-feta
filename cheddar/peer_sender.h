@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "object.h"
-#include "scene.h"
+#include "scene/scene.h"
 
 #define PEER_SENDER_OBJ "peer_sender"
 

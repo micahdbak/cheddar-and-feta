@@ -6,9 +6,9 @@
 
 #include "hitbox.h"
 #include "object.h"
-#include "renderer.h"
-#include "scene.h"
-#include "sprite.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 #include "thoom/macros.h"
 
 static int fire_counter = 0;

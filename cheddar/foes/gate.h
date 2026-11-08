@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "object.h"
-#include "scene.h"
-#include "sprite.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 #define GATE_OBJ "gate"
 

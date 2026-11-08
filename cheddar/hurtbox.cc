@@ -11,8 +11,8 @@
 #include "icon.h"
 #include "mouse.h"
 #include "object.h"
-#include "scene.h"
-#include "utils.h"
+#include "scene/scene.h"
+#include "utils/utils.h"
 
 std::vector<HurtBox*> hurtboxes;
 int hurtbox_hitbox_id;

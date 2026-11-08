@@ -5,9 +5,9 @@
 
 #include "feta.h"
 #include "object.h"
-#include "peer.h"
-#include "save_data.h"
-#include "scene.h"
+#include "peer/peer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
 
 PeerSender* peer_sender;
 

@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 #include "object.h"
-#include "scene.h"
+#include "scene/scene.h"
 
 #define ITEM_PERSISTER_OBJ "item_persister"
 

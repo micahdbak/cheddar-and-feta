@@ -3,12 +3,11 @@
 #include <cstdio>
 #include <string>
 
-#include "audio.h"
+#include "audio/audio.h"
 #include "object.h"
-#include "peer.h"
-#include "renderer.h"
-#include "scene.h"
-#include "sprite.h"
+#include "peer/peer.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
 
 PeerSender* peer_sender = nullptr;
 

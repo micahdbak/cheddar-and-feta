@@ -5,19 +5,18 @@
 #include <cstdio>
 #include <string>
 
-#include "collider.h"
 #include "colour.h"
-#include "constants.h"
-#include "controller.h"
-#include "font.h"
-#include "hud.h"
-#include "input.h"
-#include "map.h"
-#include "renderer.h"
-#include "texture.h"
+#include "hud/hud.h"
+#include "input/controller.h"
+#include "input/input.h"
+#include "map/map.h"
+#include "map/map_collider.h"
+#include "map/tilesheet.h"
+#include "renderer/font.h"
+#include "renderer/renderer.h"
+#include "texture/texture.h"
 #include "thoom/macros.h"
-#include "tilesheet.h"
-#include "window.h"
+#include "window/window.h"
 
 EditorUI::~EditorUI() {
   if (this->collision_sheet != nullptr) {

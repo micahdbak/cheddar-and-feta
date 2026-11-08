@@ -8,8 +8,8 @@
 
 #include "game_hud.h"
 #include "items/item.h"
-#include "scene.h"
-#include "utils.h"
+#include "scene/scene.h"
+#include "utils/utils.h"
 
 Mouse* cheddar = nullptr;
 Mouse* feta = nullptr;

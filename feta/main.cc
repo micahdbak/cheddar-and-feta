@@ -1,35 +1,34 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <unordered_map>
 
-#include "audio.h"
+#include "audio/audio.h"
 #include "colour.h"
 #include "constants.h"
-#include "controller.h"
 #include "feta.h"
-#include "font.h"
 #include "game_hud.h"
-#include "hud.h"
+#include "hud/hud.h"
 #include "icon.h"
-#include "input.h"
+#include "input/controller.h"
+#include "input/input.h"
 #include "item.h"
-#include "map.h"
+#include "map/map.h"
 #include "object.h"
-#include "peer.h"
+#include "peer/peer.h"
 #include "peer_receiver.h"
 #include "peer_sender.h"
 #include "render_functions.h"
-#include "renderer.h"
-#include "scene.h"
+#include "renderer/font.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
 #include "sounds.h"
-#include "texture.h"
+#include "texture/texture.h"
 #include "thoom/macros.h"
 #include "thoom/thoom.h"
-#include "window.h"
+#include "window/window.h"
 
 #define INIT_OBJ "load_save"
 

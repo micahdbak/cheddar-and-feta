@@ -4,7 +4,7 @@
 #include <string>
 
 #include "object.h"
-#include "scene.h"
+#include "scene/scene.h"
 
 #define ITEM_CHEESE "item_cheese"
 

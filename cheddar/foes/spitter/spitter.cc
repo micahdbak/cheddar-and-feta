@@ -5,7 +5,7 @@
 #include <string>
 
 #include "abdomen.h"
-#include "audio.h"
+#include "audio/audio.h"
 #include "foes/foe.h"
 #include "hitbox.h"
 #include "hurtbox.h"
@@ -14,13 +14,13 @@
 #include "items/item.h"
 #include "mouse.h"
 #include "object.h"
-#include "renderer.h"
-#include "save_data.h"
-#include "scene.h"
+#include "renderer/renderer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
 #include "segment.h"
-#include "sprite.h"
+#include "sprite/sprite.h"
 #include "thoom/macros.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 Spitter::Spitter(float x, float y, int spawner_id)
     : Foe(x, y, spawner_id, 200, 250, 256.0f, 80.0f) {

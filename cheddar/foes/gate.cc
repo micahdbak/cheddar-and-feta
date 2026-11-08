@@ -4,15 +4,15 @@
 #include <cstdlib>
 #include <string>
 
-#include "audio.h"
+#include "audio/audio.h"
 #include "object.h"
-#include "peer.h"
+#include "peer/peer.h"
 #include "peer_sender.h"
-#include "renderer.h"
-#include "save_data.h"
-#include "scene.h"
+#include "renderer/renderer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
 #include "spawner.h"
-#include "sprite.h"
+#include "sprite/sprite.h"
 
 FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
     : spawner_id(spawner_id) {

@@ -8,9 +8,9 @@
 #include "item.h"
 #include "mouse.h"
 #include "object.h"
-#include "renderer.h"
-#include "scene.h"
-#include "sprite.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 #include "thoom/macros.h"
 
 ThrownCannonBall::ThrownCannonBall(float x, float y, int x_dir, int y_dir,

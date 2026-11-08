@@ -6,7 +6,7 @@
 
 #include "mouse.h"
 #include "object.h"
-#include "sprite.h"
+#include "sprite/sprite.h"
 
 #define ITEM_NONE "item_none"
 #define DROPPED_OBJ "_dropped"

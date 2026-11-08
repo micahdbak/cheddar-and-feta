@@ -4,8 +4,8 @@
 
 #include "hurtbox.h"
 #include "object.h"
-#include "scene.h"
-#include "sprite.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 #define FOE_SPITTER_ABDOMEN_OBJ "foe_spitter_abdomen"
 

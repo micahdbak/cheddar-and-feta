@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "object.h"
-#include "scene.h"
-#include "sprite.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
 
 #define PEER_RECEIVER_OBJ "peer_receiver"
 

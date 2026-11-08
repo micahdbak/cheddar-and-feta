@@ -4,8 +4,8 @@
 #include <string>
 
 #include "object.h"
-#include "scene.h"
-#include "sprite.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 #define TOSSED_ITEM_OBJ "tossed_item"
 

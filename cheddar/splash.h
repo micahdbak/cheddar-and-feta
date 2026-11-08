@@ -3,8 +3,8 @@
 #include <string>
 
 #include "object.h"
-#include "scene.h"
-#include "sprite.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 #define SPLASH_OBJ "splash"
 

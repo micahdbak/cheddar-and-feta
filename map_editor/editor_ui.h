@@ -4,7 +4,10 @@
 
 #include <string>
 
-#include "map.h"
+#include "colour.h"
+#include "map/map.h"
+
+constexpr thoom::Colour kBackground{0x181818ff};
 
 enum EditorSelectedLayer { BACKGROUND, FOREGROUND, COLLISION };
 enum EditorInputMode { INPUT_TILE, INPUT_SHEET };

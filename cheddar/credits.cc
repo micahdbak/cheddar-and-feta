@@ -1,19 +1,19 @@
 #include "credits.h"
 
-#include "controller.h"
 #include "foes/bat.h"
 #include "foes/bug.h"
 #include "foes/frog.h"
 #include "foes/porcupine.h"
 #include "foes/spitter/spitter.h"
-#include "input.h"
+#include "input/controller.h"
+#include "input/input.h"
 #include "object.h"
 #include "render_functions.h"
-#include "renderer.h"
-#include "save_data.h"
-#include "scene.h"
-#include "texture.h"
-#include "window.h"
+#include "renderer/renderer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
+#include "texture/texture.h"
+#include "window/window.h"
 
 Credits::Credits() {
   int ant_kills = thoom::save.geti(FOE_BUG_OBJ STATS);

@@ -6,8 +6,8 @@
 #include "foes/foe.h"
 #include "mouse.h"
 #include "object.h"
-#include "scene.h"
-#include "sprite.h"
+#include "scene/scene.h"
+#include "sprite/sprite.h"
 
 #define FOE_SPITTER_OBJ "foe_spitter"
 

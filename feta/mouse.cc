@@ -6,7 +6,7 @@
 #include "feta.h"
 #include "game_hud.h"
 #include "item.h"
-#include "scene.h"
+#include "scene/scene.h"
 
 bool Mouse::check_collision(float x, float y) {
   return thoom::Scene::instance->map->collider->point_in_collider(x + 2.0f,

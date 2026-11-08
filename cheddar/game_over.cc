@@ -1,15 +1,15 @@
 #include "game_over.h"
 
 #include "constants.h"
-#include "controller.h"
-#include "font.h"
-#include "input.h"
+#include "input/controller.h"
+#include "input/input.h"
 #include "object.h"
-#include "renderer.h"
-#include "save_data.h"
-#include "scene.h"
-#include "texture.h"
-#include "window.h"
+#include "renderer/font.h"
+#include "renderer/renderer.h"
+#include "save/save_data.h"
+#include "scene/scene.h"
+#include "texture/texture.h"
+#include "window/window.h"
 
 GameOver::GameOver() {
   this->ui = thoom::Texture::instance->create_texture(

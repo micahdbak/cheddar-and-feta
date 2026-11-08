@@ -4,7 +4,7 @@
 #include "items/item.h"
 #include "mouse.h"
 #include "object.h"
-#include "scene.h"
+#include "scene/scene.h"
 
 #define ITEM_TOOTHPICK "item_toothpick"
 

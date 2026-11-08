@@ -1,24 +1,20 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#include <cstddef>
 #include <iostream>
 #include <string>
 
-#include "audio.h"
+#include "audio/audio.h"
 #include "colour.h"
-#include "constants.h"
 #include "editor.h"
-#include "hud.h"
-#include "icon.h"
-#include "input.h"
-#include "map.h"
-#include "render_functions.h"
-#include "renderer.h"
-#include "scene.h"
-#include "sounds.h"
+#include "editor_ui.h"
+#include "hud/hud.h"
+#include "input/input.h"
+#include "map/map.h"
+#include "renderer/renderer.h"
+#include "scene/scene.h"
 #include "thoom/thoom.h"
-#include "window.h"
+#include "window/window.h"
 
 bool init(int argc, char** argv);
 
@@ -30,8 +26,6 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  register_render_functions();
-
   if (!thoom::Scene::init()) {
     thoom_quit();
     return 1;
@@ -42,9 +36,6 @@ int main(int argc, char** argv) {
     thoom_quit();
     return 1;
   }
-
-  load_icons();
-  load_sounds();
 
   bool running = true;
 
@@ -76,9 +67,6 @@ int main(int argc, char** argv) {
   }
 
   thoom::Scene::quit();
-
-  SDL_DestroyTexture(icons);
-  icons = nullptr;
 
   thoom_quit();
 

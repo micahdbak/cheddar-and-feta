@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <queue>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "audio/audio.h"
@@ -23,19 +24,26 @@
 
 char nullbyte = '\0';
 
-GuestPeerReceiver::~GuestPeerReceiver() {
-  if (!this->sprites.empty()) {
-    for (thoom::SpriteRender& sprite : this->sprites) {
-      delete sprite.src_rect;
-      delete sprite.dst_rect;
-    }
-    this->sprites.clear();
+GuestPeerReceiver::~GuestPeerReceiver() { this->clear_sprites(); }
+
+void GuestPeerReceiver::clear_sprites() {
+  for (thoom::SpriteRender& sprite : this->sprites) {
+    delete sprite.src_rect;
+    delete sprite.dst_rect;
   }
+
+  this->sprites.clear();
 }
 
 void GuestPeerReceiver::step() {
   // ensure we are in maps/init if disconnected, and do nothing else
   if (thoom::Peer::instance->get_state() != thoom::Peer::kStateConnected) {
+    // The cached frame belongs to the old map and outlives it, so drop it
+    // instead of drawing it over the init screen.
+    this->clear_sprites();
+    this->pending_messages = {};
+    this->skipped_messages.clear();
+
     // if currently in a map other than the init map, reset the peer
     // and go to that
     if (thoom::Scene::instance->map->path != "maps/init") {
@@ -59,8 +67,17 @@ void GuestPeerReceiver::step() {
     }
   }
 
-  // get all unread messages
-  std::queue<std::string> msgs = thoom::Peer::instance->recv_queue.take_all();
+  // Replay the batch deferred by a map change before this step's frames.
+  std::queue<std::string> msgs;
+  std::swap(msgs, this->pending_messages);
+
+  std::queue<std::string> received =
+      thoom::Peer::instance->recv_queue.take_all();
+
+  while (!received.empty()) {
+    msgs.push(received.front());
+    received.pop();
+  }
 
   // if empty, reuse last frame
   if (msgs.empty()) {
@@ -77,12 +94,7 @@ void GuestPeerReceiver::step() {
   // set this as we have new frame(s) to parse
   last_frame_ticks = thoom::Scene::instance->ticks;
 
-  // free stuff
-  for (thoom::SpriteRender& sprite : this->sprites) {
-    delete sprite.src_rect;
-    delete sprite.dst_rect;
-  }
-  this->sprites.clear();
+  this->clear_sprites();
 
   char buff[1024];
 
@@ -101,6 +113,11 @@ void GuestPeerReceiver::step() {
 
         if (thoom::Scene::instance->map->path != buff) {
           this->load_map(std::string(buff), thoom::next_line(arr));
+
+          // The map load destroys the local Feta. The rest of this batch may
+          // hold its sync, or another map change and its sync, so replay the
+          // batch after the load instead of dropping it with the queue.
+          std::swap(this->pending_messages, msgs);
           return;  // don't read rest of messages
         }
       }
@@ -212,28 +229,40 @@ bool GuestPeerReceiver::handle_important_message(const char* arr) {
 
   switch (arr[0]) {
     case MSG_SYNC: {
-      if (this->just_pushed_feta) {
-        sscanf(arr, "%1023[^\n]\n", buff);
-        buff[1023] = '\0';
-        this->skipped_messages += std::string(buff) + '\n';
-      } else if (guest_feta != nullptr) {
-        int animation;
-        char x_str[256], y_str[256];
-        if (4 != sscanf(arr + 1, "%255[^,],%255[^,],%d %1023[^\n]\n", x_str,
-                        y_str, &animation, buff)) {
-          // TODO(micahdbak): error
-          std::exit(1);
-        }
-        x_str[255] = y_str[255] = buff[1023] = '\0';
+      char map[1024], x_str[256], y_str[256], line[1024];
+      int animation;
 
+      int fields = sscanf(arr + 1, "%1023s %255[^,],%255[^,],%d %1023[^\n]\n",
+                          map, x_str, y_str, &animation, buff);
+      if (fields < 4) {
+        // TODO(micahdbak): error
+        std::exit(1);
+      }
+      map[1023] = x_str[255] = y_str[255] = buff[1023] = '\0';
+      if (fields == 4) buff[0] = '\0';
+
+      // The map message and its sync can arrive in different steps. Replay
+      // the sync once the guest loads the map it was sent for.
+      if (thoom::Scene::instance->map->path != map) {
+        sscanf(arr, "%1023[^\n]\n", line);
+        line[1023] = '\0';
+        this->skipped_messages += std::string(line) + '\n';
+        break;
+      }
+
+      if (this->just_pushed_feta) {
+        sscanf(arr, "%1023[^\n]\n", line);
+        line[1023] = '\0';
+        this->skipped_messages += std::string(line) + '\n';
+      } else if (guest_feta != nullptr) {
         guest_feta->x = thoom::str_to_float(x_str);
         guest_feta->y = thoom::str_to_float(y_str);
         guest_feta->set_animation(animation);
         guest_feta->set_items(std::string(buff));
       } else {
-        sscanf(arr + 1, "%1023[^\n]\n", buff);
-        buff[1023] = '\0';
-        thoom::Scene::instance->create_object(FETA_OBJ, std::string(buff));
+        snprintf(line, sizeof(line), "%s,%s,%d %s", x_str, y_str, animation,
+                 buff);
+        thoom::Scene::instance->create_object(FETA_OBJ, std::string(line));
         this->just_pushed_feta = true;
       }
     } break;
@@ -353,11 +382,7 @@ void GuestPeerReceiver::load_map(const std::string& map,
     this->skipped_messages += remaining_msgs;
   }
 
-  for (thoom::SpriteRender& sprite : this->sprites) {
-    delete sprite.src_rect;
-    delete sprite.dst_rect;
-  }
-  this->sprites.clear();
+  this->clear_sprites();
 
   thoom::Scene::instance->request_map(map, false);
 

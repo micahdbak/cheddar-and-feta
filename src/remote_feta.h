@@ -41,4 +41,5 @@ class RemoteFeta : public Mouse, public HitSource {
   // directly acted on by HostPeerReceiver
   // Mouse: x, y, is_down
   bool synchronized = false;
+  Uint64 last_feta_info_ticks = 0, sync_sent_ticks = 0;
 };

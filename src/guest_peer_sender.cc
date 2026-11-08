@@ -26,8 +26,9 @@ void GuestPeerSender::step() {
   thoom::float_to_str(guest_feta->x, x_str, sizeof(x_str));
   thoom::float_to_str(guest_feta->y, y_str, sizeof(y_str));
 
-  snprintf(buff, sizeof(buff), "%c%s,%s,%d,%d,%d\n", MSG_FETA_INFO, x_str,
-           y_str, guest_feta->sprite->animation, guest_feta->sprite->frame_i,
+  snprintf(buff, sizeof(buff), "%c%s %s,%s,%d,%d,%d\n", MSG_FETA_INFO,
+           thoom::Scene::instance->map->path.c_str(), x_str, y_str,
+           guest_feta->sprite->animation, guest_feta->sprite->frame_i,
            guest_feta->which_emote);
 
   frame_msg += buff;

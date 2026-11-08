@@ -3,13 +3,8 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#include "colour.h"
-#include "constants.h"
-#include "game.h"
-#include "game_hud.h"
 #include "object.h"
 #include "scene/scene.h"
-#include "thoom/thoom.h"
 #include "window/window.h"
 
 // objects

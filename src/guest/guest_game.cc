@@ -8,6 +8,7 @@
 #include "guest_peer_sender.h"
 #include "item.h"
 #include "launch.h"
+#include "object.h"
 #include "scene/scene.h"
 #include "window/window.h"
 

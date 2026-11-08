@@ -1,4 +1,5 @@
 add_library(shared
+  app.cc
   render_functions.cc
   sounds.cc
   game_hud.cc

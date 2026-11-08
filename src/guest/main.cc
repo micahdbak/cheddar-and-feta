@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "audio/audio.h"
+#include "app.h"
 #include "colour.h"
 #include "constants.h"
 #include "game_hud.h"
@@ -13,18 +13,14 @@
 #include "guest_peer_receiver.h"
 #include "guest_peer_sender.h"
 #include "hud/hud.h"
-#include "icon.h"
 #include "input/controller.h"
 #include "input/input.h"
 #include "item.h"
-#include "map/map.h"
 #include "object.h"
 #include "peer/peer.h"
-#include "render_functions.h"
 #include "renderer/font.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
-#include "sounds.h"
 #include "texture/texture.h"
 #include "thoom/macros.h"
 #include "thoom/thoom.h"
@@ -38,65 +34,8 @@ bool init(int argc, char** argv);
 
 int main(int argc, char** argv) {
   struct hud_def hud = GameHud::def(false);
-
-  if (!thoom_init("Thoom Engine", THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, true,
-                  true, kBackground.val, &hud)) {
-    return 1;
-  }
-
-  register_render_functions();
-
-  if (!thoom::Scene::init()) {
-    thoom_quit();
-    return 1;
-  }
-
-  if (!init(argc, argv)) {
-    thoom::Scene::quit();
-    thoom_quit();
-    return 1;
-  }
-
-  load_icons();
-  load_sounds();
-
-  bool running = true;
-
-  while (running) {
-    bool quit = false;
-    thoom_poll_events(&quit);
-
-    if (quit) {
-      running = false;
-      break;
-    }
-
-    thoom::Audio::instance->step();
-    thoom::Scene::instance->step();
-
-    thoom::Map* map = thoom::Scene::instance->map;
-    thoom::Renderer::instance->draw_world(map);
-    thoom::Hud::instance->render();
-    thoom::Hud::instance->draw();
-
-    if (thoom::Input::instance->world.character == 'p') {
-      thoom::Window::instance->save_screenshot("screenshot.bmp");
-    }
-
-    thoom::Colour bg = map != nullptr ? map->background : thoom::kBlack;
-    thoom::Window::instance->present(bg);
-
-    thoom::Input::instance->clear_hit_input();
-  }
-
-  thoom::Scene::quit();
-
-  SDL_DestroyTexture(icons);
-  icons = nullptr;
-
-  thoom_quit();
-
-  return 0;
+  AppDef def = {"Thoom Engine", true, true, kBackground.val, &hud, init};
+  return app_run(def, argc, argv) ? 0 : 1;
 }
 
 class Init : public thoom::Object {

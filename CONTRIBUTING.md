@@ -7,7 +7,10 @@ In particular:
 - Each line of code should not exceed 80 characters;
 - Source files are organised by the functionality they implement, so a directory
   includes both the header and source files;
-- All code must be contained in a namespace that matches their target;
+- The game builds as one `cnf` target from `src/`; engine code lives in
+  `thoom/`;
+- Game code lives in the global namespace. Engine code lives in the `thoom`
+  namespace;
 - No importing or aliasing (`using`) of namespace at all;
 - When it comes to integer types, prefer `uint64_t`, `uint32_t`, `uint16_t`,
   `uint8_t`;

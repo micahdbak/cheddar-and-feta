@@ -6,6 +6,11 @@ Cheddar and Feta is a 2D RPG and corresponding engine built using [SDL3][sdl]
 for cross-platform windowing and graphics, and [libdatachannel][datachannel] for
 WebRTC connectivity.
 
+The game builds as one `cnf` executable. At launch, the player chooses to host
+or join a session. Host game code lives in `src/`, guest client code in
+`src/guest/`, and shared HUD and asset code in `src/shared/`. The engine lives
+in `thoom/`.
+
 ## Copyright and License
 
 Copyright (c) 2026 Micah Baker

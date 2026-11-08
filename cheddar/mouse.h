@@ -57,5 +57,5 @@ class Mouse : public thoom::Object {
   bool is_down = false, is_feta = false;
 };
 
-extern Mouse *cheddar, *feta;
+extern Mouse *cheddar, *remote_feta;
 extern bool mice_locked;

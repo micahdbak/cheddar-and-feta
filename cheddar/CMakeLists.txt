@@ -3,7 +3,7 @@ add_executable(cheddar
   billboard.cc
   cheddar.cc
   credits.cc
-  feta.cc
+  remote_feta.cc
   foes/bat.cc
   foes/bell.cc
   foes/bug.cc
@@ -31,8 +31,8 @@ add_executable(cheddar
   ladder.cc
   load_save.cc
   mouse.cc
-  peer_receiver.cc
-  peer_sender.cc
+  host_peer_receiver.cc
+  host_peer_sender.cc
   splash.cc
   textbox.cc
 )

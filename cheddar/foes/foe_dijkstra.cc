@@ -333,14 +333,14 @@ void foe_debug_tile(int x, int y) {
 
   float dist1 = thoom::distance_between_points(center_x, center_y, cheddar->x,
                                                cheddar->y);
-  float dist2 =
-      thoom::distance_between_points(center_x, center_y, feta->x, feta->y);
+  float dist2 = thoom::distance_between_points(center_x, center_y,
+                                               remote_feta->x, remote_feta->y);
   Mouse* mouse = nullptr;
 
   if (dist1 < dist2) {
     mouse = cheddar;
   } else {
-    mouse = feta;
+    mouse = remote_feta;
   }
 
   int* prev = mouse->is_feta ? _feta_prev : _cheddar_prev;

@@ -9,10 +9,10 @@
 
 #define PEER_RECEIVER_OBJ "peer_receiver"
 
-class PeerReceiver : public thoom::Object {
+class GuestPeerReceiver : public thoom::Object {
  public:
-  PeerReceiver() = default;
-  ~PeerReceiver();
+  GuestPeerReceiver() = default;
+  ~GuestPeerReceiver();
 
   void step() override;
   static thoom::Object* create_object(thoom::Scene* scene,

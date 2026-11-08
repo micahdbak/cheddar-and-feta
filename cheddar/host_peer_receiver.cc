@@ -1,4 +1,4 @@
-#include "peer_receiver.h"
+#include "host_peer_receiver.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -6,7 +6,6 @@
 #include <string>
 
 #include "audio/audio.h"
-#include "feta.h"
 #include "hitbox.h"
 #include "items/cheese.h"
 #include "items/item.h"
@@ -14,23 +13,24 @@
 #include "mouse.h"
 #include "object.h"
 #include "peer/peer.h"
+#include "remote_feta.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "utils/utils.h"
 
-void PeerReceiver::step() {
+void HostPeerReceiver::step() {
   std::queue<std::string> msgs = thoom::Peer::instance->all_messages();
   char buff[1024];
 
   // shouldn't be receiving any messages; ignore
-  if (feta == nullptr) {
+  if (remote_feta == nullptr) {
     return;
   }
 
-  Feta* feta_inst = dynamic_cast<Feta*>(feta);
+  RemoteFeta* remote_feta_inst = dynamic_cast<RemoteFeta*>(remote_feta);
 
   // should not consider messages when not synchronized
-  if (feta_inst == nullptr || !feta_inst->synchronized) {
+  if (remote_feta_inst == nullptr || !remote_feta_inst->synchronized) {
     return;
   }
 
@@ -49,10 +49,11 @@ void PeerReceiver::step() {
             std::exit(1);
           }
 
-          std::string options = UseItem::options(x, y, x_dir, y_dir, feta->id);
+          std::string options =
+              UseItem::options(x, y, x_dir, y_dir, remote_feta->id);
           thoom::Scene::instance->create_object(std::string(buff) + USE_OBJ,
                                                 options);
-          feta->remove_item(std::string(buff));
+          remote_feta->remove_item(std::string(buff));
         } break;
 
         case MSG_TOSS_ITEM: {
@@ -66,7 +67,7 @@ void PeerReceiver::step() {
           std::string options =
               TossedItem::options(x, y, x_dir, y_dir, true, buff);
           thoom::Scene::instance->create_object(TOSSED_ITEM_OBJ, options);
-          feta->remove_item(std::string(buff));
+          remote_feta->remove_item(std::string(buff));
         } break;
 
         case MSG_PUSH_HITBOX: {
@@ -86,8 +87,9 @@ void PeerReceiver::step() {
           props.single_use = true;
 
           thoom::Scene::instance->create_object(
-              HITBOX_OBJ, HitBox::options(feta->id, feta->id, x_off - 16,
-                                          y_off - 18, 32, 32, props));
+              HITBOX_OBJ,
+              HitBox::options(remote_feta->id, remote_feta->id, x_off - 16,
+                              y_off - 18, 32, 32, props));
         } break;
 
         case MSG_FETA_INFO: {
@@ -99,15 +101,15 @@ void PeerReceiver::step() {
             std::exit(1);
           }
 
-          feta->x = thoom::str_to_float(x_str);
-          feta->y = thoom::str_to_float(y_str);
-          feta_inst->animation = animation;
-          feta_inst->frame_i = frame_i;
-          feta_inst->which_emote = which_emote;
+          remote_feta->x = thoom::str_to_float(x_str);
+          remote_feta->y = thoom::str_to_float(y_str);
+          remote_feta_inst->animation = animation;
+          remote_feta_inst->frame_i = frame_i;
+          remote_feta_inst->which_emote = which_emote;
         } break;
 
         case MSG_EAT_CHEESE:
-          feta->remove_item(ITEM_CHEESE);
+          remote_feta->remove_item(ITEM_CHEESE);
           break;
 
         case MSG_AUDIO: {
@@ -126,7 +128,7 @@ void PeerReceiver::step() {
         } break;
 
         case MSG_IS_DOWN:
-          feta->is_down = arr[1] == '1' ? true : false;
+          remote_feta->is_down = arr[1] == '1' ? true : false;
           cheddar->signal_down();
           break;
 
@@ -137,7 +139,7 @@ void PeerReceiver::step() {
   }
 }
 
-thoom::Object* PeerReceiver::create_object(thoom::Scene* scene,
-                                           const std::string& options) {
-  return new PeerReceiver();
+thoom::Object* HostPeerReceiver::create_object(thoom::Scene* scene,
+                                               const std::string& options) {
+  return new HostPeerReceiver();
 }

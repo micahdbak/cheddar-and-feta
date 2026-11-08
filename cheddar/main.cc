@@ -21,7 +21,6 @@
 #include "billboard.h"
 #include "cheddar.h"
 #include "credits.h"
-#include "feta.h"
 #include "foes/bat.h"
 #include "foes/bell.h"
 #include "foes/bug.h"
@@ -35,6 +34,8 @@
 #include "freedom.h"
 #include "game_over.h"
 #include "hitbox.h"
+#include "host_peer_receiver.h"
+#include "host_peer_sender.h"
 #include "hurtbox.h"
 #include "items/cannon_ball.h"
 #include "items/cheese.h"
@@ -50,8 +51,7 @@
 #include "items/tossed.h"
 #include "ladder.h"
 #include "load_save.h"
-#include "peer_receiver.h"
-#include "peer_sender.h"
+#include "remote_feta.h"
 #include "splash.h"
 
 bool init(int argc, char** argv);
@@ -125,7 +125,7 @@ static const thoom::Scene::ObjectDef kCheddarObjects[] = {
     {BILLBOARD_OBJ, Billboard::create_object},
     {CHEDDAR_OBJ, Cheddar::create_object},
     {CREDITS_OBJ, Credits::create_object},
-    {FETA_OBJ, Feta::create_object},
+    {FETA_OBJ, RemoteFeta::create_object},
     {FREEDOM_OBJ, Freedom::create_object},
     {FOE_BAT_OBJ, FoeBat::create_object},
     {FOE_BUG_OBJ, FoeBug::create_object},
@@ -156,8 +156,8 @@ static const thoom::Scene::ObjectDef kCheddarObjects[] = {
     {SPAWNER_OBJ, FoeSpawner::create_object},
     {SPLASH_OBJ, Splash::create_object},
     {TOSSED_ITEM_OBJ, TossedItem::create_object},
-    {PEER_RECEIVER_OBJ, PeerReceiver::create_object, thoom::kObjectFirst},
-    {PEER_SENDER_OBJ, PeerSender::create_object, thoom::kObjectLast},
+    {PEER_RECEIVER_OBJ, HostPeerReceiver::create_object, thoom::kObjectFirst},
+    {PEER_SENDER_OBJ, HostPeerSender::create_object, thoom::kObjectLast},
     {nullptr, nullptr},
 };
 

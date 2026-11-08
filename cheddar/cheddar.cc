@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "audio/audio.h"
-#include "feta.h"
 #include "foes/foe.h"
 #include "game_hud.h"
 #include "hitbox.h"
@@ -23,6 +22,7 @@
 #include "mouse.h"
 #include "object.h"
 #include "peer/peer.h"
+#include "remote_feta.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
@@ -57,7 +57,7 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
     this->y = thoom::save.getf(CHEDDAR_OBJ MOUSE_Y);
     this->sprite->set_animation(thoom::save.geti(CHEDDAR_OBJ MOUSE_ANIMATION));
 
-    // don't set feta options, as feta will load from save as well
+    // don't set remote feta options; it loads from the save file as well
   } else {
     // get which coordinate to spawn at
     int coord = thoom::save.geti(MOUSE_SPAWN_AT);
@@ -89,7 +89,7 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates,
   this->emote_rect.w = 32.0f;
   this->emote_rect.h = 32.0f;
 
-  // make feta
+  // make remote feta
   char feta_options[256];
   snprintf(feta_options, sizeof(feta_options), "%d,%d,%d", feta_x, feta_y,
            feta_animation);
@@ -592,8 +592,8 @@ void Cheddar::attack(int damage) {
 
     uint64_t peer_state = thoom::Peer::instance->state.load();
 
-    // game over if feta is down or disconnected
-    if ((feta != nullptr && feta->is_down) ||
+    // game over if the remote feta is down or disconnected
+    if ((remote_feta != nullptr && remote_feta->is_down) ||
         peer_state == thoom::Peer::kStateNoConnection ||
         peer_state == thoom::Peer::kStateWaitingForPeer) {
       thoom::Scene::instance->request_map("maps/dead");
@@ -682,9 +682,9 @@ void Cheddar::set_max_mov_speed(float max_mov_speed) {
 }
 
 void Cheddar::signal_down() {
-  // signal implies that feta is down; check if we are down too
-  if (this->is_down && this->is_busy == DOWNED && feta != nullptr &&
-      feta->is_down) {
+  // signal implies that the remote feta is down; check if we are down too
+  if (this->is_down && this->is_busy == DOWNED && remote_feta != nullptr &&
+      remote_feta->is_down) {
     thoom::Scene::instance->request_map("maps/dead");
   }
 }

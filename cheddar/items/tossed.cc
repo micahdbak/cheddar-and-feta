@@ -47,8 +47,8 @@ void TossedItem::step() {
     mouse_distance =
         thoom::distance_between_points(new_x, new_y, cheddar->x, cheddar->y);
   } else {
-    mouse_distance =
-        thoom::distance_between_points(new_x, new_y, feta->x, feta->y);
+    mouse_distance = thoom::distance_between_points(
+        new_x, new_y, remote_feta->x, remote_feta->y);
   }
 
   if (thoom::Scene::instance->map->collider->point_in_collider(new_x, new_y) ||

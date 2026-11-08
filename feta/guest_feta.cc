@@ -1,4 +1,4 @@
-#include "feta.h"
+#include "guest_feta.h"
 
 #include <cmath>
 #include <cstdio>
@@ -8,12 +8,12 @@
 
 #include "audio/audio.h"
 #include "game_hud.h"
+#include "guest_peer_sender.h"
 #include "input/controller.h"
 #include "input/input.h"
 #include "item.h"
 #include "object.h"
 #include "peer/peer.h"
-#include "peer_sender.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
@@ -21,14 +21,15 @@
 #include "thoom/macros.h"
 #include "utils/utils.h"
 
-Feta* feta = nullptr;
+GuestFeta* guest_feta = nullptr;
 
-Feta::Feta(float x, float y, int animation, std::vector<GameHud::Item> items) {
-  if (feta != nullptr) {
+GuestFeta::GuestFeta(float x, float y, int animation,
+                     std::vector<GameHud::Item> items) {
+  if (guest_feta != nullptr) {
     // TODO(micahdbak): error
     std::exit(1);
   }
-  feta = this;
+  guest_feta = this;
 
   this->x = x;
   this->y = y;
@@ -47,13 +48,13 @@ Feta::Feta(float x, float y, int animation, std::vector<GameHud::Item> items) {
   this->emote_rect.h = 32.0f;
 }
 
-Feta::~Feta() {
+GuestFeta::~GuestFeta() {
   delete this->sprite;
   delete this->emotes;
-  feta = nullptr;
+  guest_feta = nullptr;
 }
 
-void Feta::step() {
+void GuestFeta::step() {
   if (this->mice_locked) {
     thoom::Renderer::instance->push_sprite(
         this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
@@ -130,9 +131,9 @@ void Feta::step() {
         if (this->sprite->update_frame() && (this->sprite->frame_i % 2) == 1) {
           thoom::Audio::instance->play("sfx/step.wav", 0.5, this->x, this->y,
                                        true);
-          PeerSender::send_message(
+          GuestPeerSender::send_message(
               MSG_AUDIO,
-              Mouse::audio_msg("sfx/step.wav", 0.5, this->x, this->y));
+              GuestMouse::audio_msg("sfx/step.wav", 0.5, this->x, this->y));
         }
 
         mov_speed = this->max_mov_speed;
@@ -159,7 +160,8 @@ void Feta::step() {
             char buff[256];
             snprintf(buff, sizeof(buff), "%d,%d,%d,%d", (int)this->x,
                      (int)this->y, x_dir, y_dir);
-            PeerSender::send_message(MSG_USE_ITEM, sel_item_id + " " + buff);
+            GuestPeerSender::send_message(MSG_USE_ITEM,
+                                          sel_item_id + " " + buff);
             this->remove_item(sel_item_id);
 
             if (item_info[sel_item_id].type == THROWABLE) {
@@ -173,9 +175,9 @@ void Feta::step() {
 
               thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x,
                                            this->y, true);
-              PeerSender::send_message(
-                  MSG_AUDIO,
-                  Mouse::audio_msg("sfx/throw.wav", 1.0, this->x, this->y));
+              GuestPeerSender::send_message(
+                  MSG_AUDIO, GuestMouse::audio_msg("sfx/throw.wav", 1.0,
+                                                   this->x, this->y));
             }
           } break;
 
@@ -185,7 +187,7 @@ void Feta::step() {
             if (this->health < this->max_health) {
               this->health++;
               this->remove_item(sel_item_id);
-              PeerSender::send_message(MSG_EAT_CHEESE, std::string());
+              GuestPeerSender::send_message(MSG_EAT_CHEESE, std::string());
 
               this->is_busy = EATING;
               this->busy_ticks = thoom::Scene::instance->ticks;
@@ -196,15 +198,15 @@ void Feta::step() {
 
               thoom::Audio::instance->play("sfx/cheese.wav", 1.0f, this->x,
                                            this->y, true);
-              PeerSender::send_message(
-                  MSG_AUDIO,
-                  Mouse::audio_msg("sfx/cheese.wav", 1.0, this->x, this->y));
+              GuestPeerSender::send_message(
+                  MSG_AUDIO, GuestMouse::audio_msg("sfx/cheese.wav", 1.0,
+                                                   this->x, this->y));
             } else {
               thoom::Audio::instance->play("sfx/full.wav", 1.0f, this->x,
                                            this->y, true);
-              PeerSender::send_message(
+              GuestPeerSender::send_message(
                   MSG_AUDIO,
-                  Mouse::audio_msg("sfx/full.wav", 1.0, this->x, this->y));
+                  GuestMouse::audio_msg("sfx/full.wav", 1.0, this->x, this->y));
             }
 
             break;
@@ -222,7 +224,7 @@ void Feta::step() {
             char buff[256];
             snprintf(buff, sizeof(buff), "%s %d,%d", sel_item_id.c_str(), x_dir,
                      y_dir);
-            PeerSender::send_message(MSG_PUSH_HITBOX, std::string(buff));
+            GuestPeerSender::send_message(MSG_PUSH_HITBOX, std::string(buff));
 
             // set animation to attacking
             this->sprite->set_animation((this->sprite->animation % 8) +
@@ -230,9 +232,9 @@ void Feta::step() {
 
             thoom::Audio::instance->play("sfx/kick.wav", 1.0f, this->x, this->y,
                                          true);
-            PeerSender::send_message(
+            GuestPeerSender::send_message(
                 MSG_AUDIO,
-                Mouse::audio_msg("sfx/kick.wav", 1.0, this->x, this->y));
+                GuestMouse::audio_msg("sfx/kick.wav", 1.0, this->x, this->y));
           } break;
 
           default:
@@ -248,7 +250,7 @@ void Feta::step() {
                                      &y_dir);
 
         // toss item
-        PeerSender::send_message(
+        GuestPeerSender::send_message(
             MSG_TOSS_ITEM,
             sel_item_id + " " + UseItem::options(x, y, x_dir, y_dir));
         this->remove_item(sel_item_id);
@@ -264,9 +266,9 @@ void Feta::step() {
 
         thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x, this->y,
                                      true);
-        PeerSender::send_message(
+        GuestPeerSender::send_message(
             MSG_AUDIO,
-            Mouse::audio_msg("sfx/throw.wav", 1.0, this->x, this->y));
+            GuestMouse::audio_msg("sfx/throw.wav", 1.0, this->x, this->y));
       }
 
       break;
@@ -389,7 +391,7 @@ void Feta::step() {
   if (this->is_down &&
       thoom::Scene::instance->ticks - this->is_down_ticks > 5000) {
     this->is_down = false;
-    PeerSender::send_message(MSG_IS_DOWN, std::to_string(0));
+    GuestPeerSender::send_message(MSG_IS_DOWN, std::to_string(0));
   }
 
   // ---- move cheddar ----
@@ -412,12 +414,12 @@ void Feta::step() {
     bool collision_x = false, collision_y = false;
 
     if (x_dir != 0) {
-      collision_x = Mouse::check_collision(new_x, this->y);
+      collision_x = GuestMouse::check_collision(new_x, this->y);
       if (!collision_x) this->x = new_x;
     }
 
     if (y_dir != 0) {
-      collision_y = Mouse::check_collision(this->x, new_y);
+      collision_y = GuestMouse::check_collision(this->x, new_y);
       if (!collision_y) this->y = new_y;
     }
 
@@ -427,8 +429,8 @@ void Feta::step() {
         float new_y1 = this->y + fabs(dx);
         float new_y2 = this->y - fabs(dx);
 
-        bool collision_y1 = Mouse::check_collision(this->x, new_y1);
-        bool collision_y2 = Mouse::check_collision(this->x, new_y2);
+        bool collision_y1 = GuestMouse::check_collision(this->x, new_y1);
+        bool collision_y2 = GuestMouse::check_collision(this->x, new_y2);
 
         if (!collision_y1 && collision_y2) {
           this->y = new_y1;
@@ -441,8 +443,8 @@ void Feta::step() {
         float new_x1 = this->x + fabs(dy);
         float new_x2 = this->x - fabs(dy);
 
-        bool collision_x1 = Mouse::check_collision(new_x1, this->y);
-        bool collision_x2 = Mouse::check_collision(new_x2, this->y);
+        bool collision_x1 = GuestMouse::check_collision(new_x1, this->y);
+        bool collision_x2 = GuestMouse::check_collision(new_x2, this->y);
 
         if (!collision_x1 && collision_x2) {
           this->x = new_x1;
@@ -483,7 +485,7 @@ void Feta::step() {
   }
 }
 
-void Feta::attack(int damage) {
+void GuestFeta::attack(int damage) {
   // don't get attacked if was already attacked / down
   if (this->is_busy == ATTACKED || this->is_busy == DOWNED ||
       this->is_busy == FORCED_DANCE)
@@ -513,8 +515,8 @@ void Feta::attack(int damage) {
 
   this->health -= damage;
   thoom::Audio::instance->play("sfx/hurt.wav", 1.0f, this->x, this->y, true);
-  PeerSender::send_message(
-      MSG_AUDIO, Mouse::audio_msg("sfx/hurt.wav", 1.0, this->x, this->y));
+  GuestPeerSender::send_message(
+      MSG_AUDIO, GuestMouse::audio_msg("sfx/hurt.wav", 1.0, this->x, this->y));
 
   // if dead, go down
   if (this->health <= 0) {
@@ -526,11 +528,11 @@ void Feta::attack(int damage) {
     this->sprite->set_animation((this->sprite->animation % 8) + DOWN_ANIMATION);
 
     this->is_down = true;
-    PeerSender::send_message(MSG_IS_DOWN, std::to_string(1));
+    GuestPeerSender::send_message(MSG_IS_DOWN, std::to_string(1));
   }
 }
 
-void Feta::push_item(const std::string& item_id) {
+void GuestFeta::push_item(const std::string& item_id) {
   if (item_info.find(item_id) == item_info.end()) {
     // TODO(micahdbak): error
     std::exit(1);
@@ -560,7 +562,7 @@ void Feta::push_item(const std::string& item_id) {
   this->sel_item = i;
 }
 
-void Feta::push_cheese(int amount) {
+void GuestFeta::push_cheese(int amount) {
   GameHud::Item new_item;
   new_item.item_id = ITEM_CHEESE;
   new_item.count = amount;
@@ -583,7 +585,7 @@ void Feta::push_cheese(int amount) {
   this->items.push_back(new_item);
 }
 
-void Feta::remove_item(const std::string& item_id) {
+void GuestFeta::remove_item(const std::string& item_id) {
   for (auto it = this->items.begin(); it != this->items.end(); it++) {
     if (it->item_id == item_id && it->count > 0) {
       it->count--;
@@ -596,34 +598,34 @@ void Feta::remove_item(const std::string& item_id) {
   }
 }
 
-void Feta::force_dance(Uint64 timeout_ms) {
-  this->is_busy = Feta::Busy::FORCED_DANCE;
+void GuestFeta::force_dance(Uint64 timeout_ms) {
+  this->is_busy = GuestFeta::Busy::FORCED_DANCE;
   this->dance_until = timeout_ms;
 }
 
-void Feta::set_animation(int animation) {
+void GuestFeta::set_animation(int animation) {
   this->sprite->set_animation(animation);
 }
 
-void Feta::set_items(const std::string& items_s) {
-  this->items = Mouse::read_items(items_s);
+void GuestFeta::set_items(const std::string& items_s) {
+  this->items = GuestMouse::read_items(items_s);
 
   if (this->sel_item >= this->items.size()) {
     this->sel_item = this->items.size() - 1;
   }
 }
 
-void Feta::set_throw(int throw_x, int throw_y) {
+void GuestFeta::set_throw(int throw_x, int throw_y) {
   this->throw_x = throw_x;
   this->throw_y = throw_y;
 }
 
-void Feta::set_max_mov_speed(float max_mov_speed) {
+void GuestFeta::set_max_mov_speed(float max_mov_speed) {
   this->max_mov_speed = max_mov_speed;
 }
 
-thoom::Object* Feta::create_object(thoom::Scene* scene,
-                                   const std::string& options) {
+thoom::Object* GuestFeta::create_object(thoom::Scene* scene,
+                                        const std::string& options) {
   int animation;
   char x_str[256], y_str[256], items_s[1024];
   int fields = sscanf(options.c_str(), "%255[^,],%255[^,],%d %1023s", x_str,
@@ -636,6 +638,6 @@ thoom::Object* Feta::create_object(thoom::Scene* scene,
     std::exit(1);
   }
 
-  return new Feta(thoom::str_to_float(x_str), thoom::str_to_float(y_str),
-                  animation, Mouse::read_items(items_s));
+  return new GuestFeta(thoom::str_to_float(x_str), thoom::str_to_float(y_str),
+                       animation, GuestMouse::read_items(items_s));
 }

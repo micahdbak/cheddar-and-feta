@@ -8,10 +8,10 @@
 
 #define PEER_SENDER_OBJ "peer_sender"
 
-class PeerSender : public thoom::Object {
+class GuestPeerSender : public thoom::Object {
  public:
-  PeerSender();
-  ~PeerSender();
+  GuestPeerSender();
+  ~GuestPeerSender();
 
   void step() override;
 
@@ -21,5 +21,4 @@ class PeerSender : public thoom::Object {
 
  private:
   std::vector<std::string> messages;
-  bool was_disconnected = true;
 };

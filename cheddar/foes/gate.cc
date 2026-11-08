@@ -5,9 +5,9 @@
 #include <string>
 
 #include "audio/audio.h"
+#include "host_peer_sender.h"
 #include "object.h"
 #include "peer/peer.h"
-#include "peer_sender.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
@@ -69,7 +69,7 @@ void FoeGate::step() {
       int collider_y =
           this->colliders_offset / thoom::Scene::instance->map->cols;
       int coord = this->colliders_offset + this->colliders_x + i;
-      PeerSender::send_message(
+      HostPeerSender::send_message(
           MSG_COLLISION,
           std::to_string(coord) + ',' +
               std::to_string(thoom::Scene::instance->map->collider->get(

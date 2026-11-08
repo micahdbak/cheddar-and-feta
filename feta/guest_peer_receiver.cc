@@ -1,4 +1,4 @@
-#include "peer_receiver.h"
+#include "guest_peer_receiver.h"
 
 #include <cstddef>
 #include <cstdio>
@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "audio/audio.h"
-#include "feta.h"
+#include "guest_feta.h"
 #include "icon.h"
 #include "map/map_collider.h"
 #include "object.h"
@@ -23,7 +23,7 @@
 
 char nullbyte = '\0';
 
-PeerReceiver::~PeerReceiver() {
+GuestPeerReceiver::~GuestPeerReceiver() {
   if (!this->sprites.empty()) {
     for (thoom::SpriteRender& sprite : this->sprites) {
       delete sprite.src_rect;
@@ -33,7 +33,7 @@ PeerReceiver::~PeerReceiver() {
   }
 }
 
-void PeerReceiver::step() {
+void GuestPeerReceiver::step() {
   // ensure we are in maps/init if disconnected, and do nothing else
   if (thoom::Peer::instance->state.load() != thoom::Peer::kStateConnected) {
     // if currently in a map other than the init map, reset the peer
@@ -208,7 +208,7 @@ void PeerReceiver::step() {
   this->just_loaded_map = false;
 }
 
-bool PeerReceiver::handle_important_message(const char* arr) {
+bool GuestPeerReceiver::handle_important_message(const char* arr) {
   char buff[1024];
 
   switch (arr[0]) {
@@ -217,7 +217,7 @@ bool PeerReceiver::handle_important_message(const char* arr) {
         sscanf(arr, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
         this->skipped_messages += std::string(buff) + '\n';
-      } else if (feta != nullptr) {
+      } else if (guest_feta != nullptr) {
         int animation;
         char x_str[256], y_str[256];
         if (4 != sscanf(arr + 1, "%255[^,],%255[^,],%d %1023[^\n]\n", x_str,
@@ -227,10 +227,10 @@ bool PeerReceiver::handle_important_message(const char* arr) {
         }
         x_str[255] = y_str[255] = buff[1023] = '\0';
 
-        feta->x = thoom::str_to_float(x_str);
-        feta->y = thoom::str_to_float(y_str);
-        feta->set_animation(animation);
-        feta->set_items(std::string(buff));
+        guest_feta->x = thoom::str_to_float(x_str);
+        guest_feta->y = thoom::str_to_float(y_str);
+        guest_feta->set_animation(animation);
+        guest_feta->set_items(std::string(buff));
       } else {
         sscanf(arr + 1, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
@@ -240,8 +240,8 @@ bool PeerReceiver::handle_important_message(const char* arr) {
     } break;
 
     case MSG_ATTACK:
-      if (feta != nullptr) {
-        feta->attack(std::atoi(arr + 1));
+      if (guest_feta != nullptr) {
+        guest_feta->attack(std::atoi(arr + 1));
       } else if (this->just_pushed_feta) {
         sscanf(arr, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
@@ -251,10 +251,10 @@ bool PeerReceiver::handle_important_message(const char* arr) {
       break;
 
     case MSG_PUSH_ITEM:
-      if (feta != nullptr) {
+      if (guest_feta != nullptr) {
         sscanf(arr + 1, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
-        feta->push_item(std::string(buff));
+        guest_feta->push_item(std::string(buff));
       } else if (this->just_pushed_feta) {
         sscanf(arr, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
@@ -264,8 +264,8 @@ bool PeerReceiver::handle_important_message(const char* arr) {
       break;
 
     case MSG_PUSH_CHEESE:
-      if (feta != nullptr) {
-        feta->push_cheese(std::atoi(arr + 1));
+      if (guest_feta != nullptr) {
+        guest_feta->push_cheese(std::atoi(arr + 1));
       } else if (this->just_pushed_feta) {
         sscanf(arr, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
@@ -275,8 +275,8 @@ bool PeerReceiver::handle_important_message(const char* arr) {
       break;
 
     case MSG_FORCE_DANCE:
-      if (feta != nullptr) {
-        feta->force_dance(std::atoi(arr + 1));
+      if (guest_feta != nullptr) {
+        guest_feta->force_dance(std::atoi(arr + 1));
       } else if (this->just_pushed_feta) {
         sscanf(arr, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
@@ -286,8 +286,8 @@ bool PeerReceiver::handle_important_message(const char* arr) {
       break;
 
     case MSG_DID_HIT:
-      if (feta != nullptr) {
-        feta->did_hit = true;
+      if (guest_feta != nullptr) {
+        guest_feta->did_hit = true;
       } else if (this->just_pushed_feta) {
         sscanf(arr, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
@@ -297,13 +297,13 @@ bool PeerReceiver::handle_important_message(const char* arr) {
       break;
 
     case MSG_THROW:
-      if (feta != nullptr) {
+      if (guest_feta != nullptr) {
         int throw_x, throw_y;
         if (2 != sscanf(arr + 1, "%d,%d", &throw_x, &throw_y)) {
           // TODO(micahdbak): error
           std::exit(1);
         }
-        feta->set_throw(throw_x, throw_y);
+        guest_feta->set_throw(throw_x, throw_y);
       } else if (this->just_pushed_feta) {
         sscanf(arr, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
@@ -313,8 +313,8 @@ bool PeerReceiver::handle_important_message(const char* arr) {
       break;
 
     case MSG_MAX_SPEED:
-      if (feta != nullptr) {
-        feta->set_max_mov_speed(std::atoi(arr + 1));
+      if (guest_feta != nullptr) {
+        guest_feta->set_max_mov_speed(std::atoi(arr + 1));
       } else if (this->just_pushed_feta) {
         sscanf(arr, "%1023[^\n]\n", buff);
         buff[1023] = '\0';
@@ -348,8 +348,8 @@ bool PeerReceiver::handle_important_message(const char* arr) {
   return true;
 }
 
-void PeerReceiver::load_map(const std::string& map,
-                            const char* remaining_msgs) {
+void GuestPeerReceiver::load_map(const std::string& map,
+                                 const char* remaining_msgs) {
   if (remaining_msgs != NULL && *remaining_msgs != '\0') {
     this->skipped_messages += remaining_msgs;
   }
@@ -365,7 +365,7 @@ void PeerReceiver::load_map(const std::string& map,
   this->just_loaded_map = true;
 }
 
-thoom::Object* PeerReceiver::create_object(thoom::Scene* scene,
-                                           const std::string& options) {
-  return new PeerReceiver();
+thoom::Object* GuestPeerReceiver::create_object(thoom::Scene* scene,
+                                                const std::string& options) {
+  return new GuestPeerReceiver();
 }

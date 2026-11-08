@@ -1,9 +1,9 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#include "app.h"
 #include "colour.h"
 #include "constants.h"
+#include "game.h"
 #include "game_hud.h"
 #include "object.h"
 #include "scene/scene.h"
@@ -51,8 +51,8 @@ bool init(int argc, char** argv);
 
 int main(int argc, char** argv) {
   struct hud_def hud = GameHud::def(true);
-  AppDef def = {"Thoom Engine", true, false, kBackground.val, &hud, init};
-  return app_run(def, argc, argv) ? 0 : 1;
+  GameDef def = {"Thoom Engine", true, false, kBackground.val, &hud, init};
+  return game_run(def, argc, argv) ? 0 : 1;
 }
 
 static const thoom::Scene::ObjectDef kCheddarObjects[] = {

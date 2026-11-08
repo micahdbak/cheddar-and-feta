@@ -2,7 +2,7 @@
 
 #include "thoom/thoom.h"
 
-struct AppDef {
+struct GameDef {
   const char* title;
   bool peer;
   bool offerer;
@@ -11,4 +11,4 @@ struct AppDef {
   bool (*init)(int argc, char** argv);
 };
 
-bool app_run(const AppDef& def, int argc, char** argv);
+bool game_run(const GameDef& def, int argc, char** argv);

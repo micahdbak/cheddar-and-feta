@@ -1,10 +1,9 @@
-#include "app.h"
+#include "game.h"
 
 #include <SDL3/SDL.h>
 
 #include "audio/audio.h"
 #include "colour.h"
-#include "constants.h"
 #include "hud/hud.h"
 #include "icon.h"
 #include "input/input.h"
@@ -13,9 +12,10 @@
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "sounds.h"
+#include "thoom/thoom.h"
 #include "window/window.h"
 
-bool app_run(const AppDef& def, int argc, char** argv) {
+bool game_run(const GameDef& def, int argc, char** argv) {
   if (!thoom_init(def.title, THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, def.peer,
                   def.offerer, def.background, def.hud)) {
     return false;

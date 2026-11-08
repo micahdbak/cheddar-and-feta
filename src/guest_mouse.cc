@@ -5,7 +5,7 @@
 
 #include "game_hud.h"
 #include "guest_feta.h"
-#include "item.h"
+#include "guest_item.h"
 #include "scene/scene.h"
 
 bool GuestMouse::check_collision(float x, float y) {

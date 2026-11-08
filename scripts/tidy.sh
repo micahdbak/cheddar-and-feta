@@ -21,8 +21,6 @@ git ls-files -z 'src/*.h' |
     --extra-arg=-xc++ \
     --extra-arg=-std=c++26 \
     --extra-arg=-I"${PWD}/src" \
-    --extra-arg=-I"${PWD}/src/guest" \
-    --extra-arg=-I"${PWD}/src/shared" \
     --extra-arg=-I"${PWD}/thoom/include" \
     --extra-arg=-I"${PWD}/thoom/src" \
     --extra-arg=-I"${PWD}/thoom/deps/libdatachannel/include" \

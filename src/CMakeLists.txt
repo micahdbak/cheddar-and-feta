@@ -38,17 +38,17 @@ add_executable(cnf
   mouse.cc
   splash.cc
   textbox.cc
-  guest/guest_game.cc
-  guest/guest_feta.cc
-  guest/guest_mouse.cc
-  guest/guest_peer_receiver.cc
-  guest/guest_peer_sender.cc
-  shared/game.cc
-  shared/game_hud.cc
-  shared/icon.cc
-  shared/render_functions.cc
-  shared/sounds.cc
+  guest_game.cc
+  guest_feta.cc
+  guest_mouse.cc
+  guest_peer_receiver.cc
+  guest_peer_sender.cc
+  game.cc
+  game_hud.cc
+  icon.cc
+  render_functions.cc
+  sounds.cc
 )
-target_include_directories(cnf PRIVATE . guest shared)
+target_include_directories(cnf PRIVATE .)
 target_link_libraries(cnf PRIVATE thoom sanitizers)
 #target_compile_definitions(cnf PRIVATE ONSCREEN_DEBUG)

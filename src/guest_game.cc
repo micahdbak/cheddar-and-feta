@@ -4,9 +4,9 @@
 #include <unordered_map>
 
 #include "guest_feta.h"
+#include "guest_item.h"
 #include "guest_peer_receiver.h"
 #include "guest_peer_sender.h"
-#include "item.h"
 #include "object.h"
 #include "scene/scene.h"
 #include "window/window.h"

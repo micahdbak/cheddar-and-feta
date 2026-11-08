@@ -8,10 +8,10 @@
 
 #include "audio/audio.h"
 #include "game_hud.h"
+#include "guest_item.h"
 #include "guest_peer_sender.h"
 #include "input/controller.h"
 #include "input/input.h"
-#include "item.h"
 #include "object.h"
 #include "peer/peer.h"
 #include "renderer/renderer.h"

@@ -4,7 +4,7 @@
 
 #include "colour.h"
 #include "constants.h"
-#include "guest/guest_game.h"
+#include "guest_game.h"
 #include "host_game.h"
 #include "input/controller.h"
 #include "input/input.h"

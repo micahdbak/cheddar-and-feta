@@ -1,5 +1,6 @@
 #include "init_join.h"
 
+#include <cstdint>
 #include <string>
 
 #include "colour.h"
@@ -12,7 +13,6 @@
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "thoom/macros.h"
-#include "window/window.h"
 
 void InitJoin::start(SDL_Texture* ui) {
   this->ui = ui;

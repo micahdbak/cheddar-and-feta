@@ -37,9 +37,9 @@ Launch::~Launch() { SDL_DestroyTexture(this->ui); }
 
 void Launch::step() {
   if (this->choose_mode) {
-    int y_dir = thoom::Input::instance->world.consume_hit_dy();
-    if (y_dir != 0) {
-      this->menu_sel = THOOM_CLAMP(this->menu_sel + y_dir, 0, 1);
+    int x_dir = thoom::Input::instance->world.consume_hit_dx();
+    if (x_dir != 0) {
+      this->menu_sel = THOOM_CLAMP(this->menu_sel + x_dir, 0, 1);
       this->render = true;
     }
 
@@ -57,41 +57,49 @@ void Launch::step() {
       guest_start();
       this->choose_mode = false;
       this->render = true;
+    } else {
+      if (this->render) {
+        this->render = false;
+
+        thoom::Renderer::instance->clear(this->ui, thoom::kMask);
+
+        int host_w =
+            thoom::Renderer::instance->fonts[DEFAULT_FONT]->text_width("Host");
+        int join_w =
+            thoom::Renderer::instance->fonts[DEFAULT_FONT]->text_width("Join");
+
+        SDL_FRect host_box = {0.0f, 112.0f, (float)(host_w + 8), 16.0f};
+        SDL_FRect join_box = {0.0f, 112.0f, (float)(join_w + 8), 16.0f};
+
+        const float gap = 8.0f;
+        float total_w = host_box.w + gap + join_box.w;
+        host_box.x = 160.0f - total_w / 2.0f;
+        join_box.x = host_box.x + host_box.w + gap;
+
+        SDL_FRect menu_box = {host_box.x - 4.0f, host_box.y - 4.0f,
+                              total_w + 8.0f, 24.0f};
+        thoom::Renderer::instance->draw_ui_box(UI_BOX_CHAR_CONT, this->ui,
+                                               &menu_box);
+
+        thoom::Renderer::instance->draw_ui_box(
+            this->menu_sel == 0 ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX, this->ui,
+            &host_box);
+        thoom::Renderer::instance->draw_text(
+            this->ui, DEFAULT_FONT, "Host", (int)(host_box.x + 4.0f),
+            (int)(host_box.y + 3.0f), 0, kBackground);
+
+        thoom::Renderer::instance->draw_ui_box(
+            this->menu_sel == 1 ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX, this->ui,
+            &join_box);
+        thoom::Renderer::instance->draw_text(
+            this->ui, DEFAULT_FONT, "Join", (int)(join_box.x + 4.0f),
+            (int)(join_box.y + 3.0f), 0, kBackground);
+      }
+
+      thoom::Renderer::instance->push_sprite("", this->ui, nullptr,
+                                             &this->dst_rect, 0);
+      return;
     }
-
-    if (this->render) {
-      this->render = false;
-
-      thoom::Renderer::instance->clear(this->ui, thoom::kMask);
-
-      SDL_FRect menu_box = {96.0f, 88.0f, 128.0f, 64.0f};
-      thoom::Renderer::instance->draw_ui_box(UI_BOX_CHAR_CONT, this->ui,
-                                             &menu_box);
-
-      SDL_FRect host_box = {104.0f, 100.0f, 112.0f, 16.0f};
-      thoom::Renderer::instance->draw_ui_box(
-          this->menu_sel == 0 ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX, this->ui,
-          &host_box);
-      int host_w =
-          thoom::Renderer::instance->fonts[DEFAULT_FONT]->text_width("Host");
-      thoom::Renderer::instance->draw_text(this->ui, DEFAULT_FONT, "Host",
-                                           160 - host_w / 2, 102, 0,
-                                           kBackground);
-
-      SDL_FRect join_box = {104.0f, 124.0f, 112.0f, 16.0f};
-      thoom::Renderer::instance->draw_ui_box(
-          this->menu_sel == 1 ? UI_BOX_CHAR_SEL : UI_BOX_CHAR_BOX, this->ui,
-          &join_box);
-      int join_w =
-          thoom::Renderer::instance->fonts[DEFAULT_FONT]->text_width("Join");
-      thoom::Renderer::instance->draw_text(this->ui, DEFAULT_FONT, "Join",
-                                           160 - join_w / 2, 126, 0,
-                                           kBackground);
-    }
-
-    thoom::Renderer::instance->push_sprite("", this->ui, nullptr,
-                                           &this->dst_rect, 0);
-    return;
   }
 
   if (thoom::Scene::instance->map != nullptr &&

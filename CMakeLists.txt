@@ -28,5 +28,5 @@ endif()
 add_subdirectory(thoom)
 
 add_subdirectory(src/shared)
-add_subdirectory(cheddar)
+add_subdirectory(src)
 add_subdirectory(feta)

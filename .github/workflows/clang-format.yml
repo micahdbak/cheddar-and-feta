@@ -3,9 +3,8 @@ name: clang-format
 on:
   pull_request:
     paths:
-      - "cheddar/**"
+      - "src/**"
       - "feta/**"
-      - "src/shared/**"
 
 permissions:
   contents: read

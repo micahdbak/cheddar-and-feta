@@ -3,8 +3,8 @@ set -euo pipefail
 
 CLANG_FORMAT=${CLANG_FORMAT:-clang-format}
 
-find cheddar feta shared -type f \
+find cheddar feta src/shared -type f \
   \( -name '*.h' -o -name '*.cc' \) -print0 |
   xargs -0 "${CLANG_FORMAT}" -i --style=Google
 
-echo "Formatted cheddar/, feta/, and shared/."
+echo "Formatted cheddar/, feta/, and src/shared/."

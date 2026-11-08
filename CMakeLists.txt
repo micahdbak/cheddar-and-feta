@@ -27,6 +27,6 @@ endif()
 # NOTE: cmake --build build --target thoom_map_editor to build map editor
 add_subdirectory(thoom)
 
-add_subdirectory(shared)
+add_subdirectory(src/shared)
 add_subdirectory(cheddar)
 add_subdirectory(feta)

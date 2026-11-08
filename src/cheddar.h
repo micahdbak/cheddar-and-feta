@@ -15,6 +15,8 @@ class Cheddar : public Mouse, public HitSource {
   explicit Cheddar(std::vector<Mouse::SpawnCoord>& coordinates);
   ~Cheddar();
 
+  void render() override;
+
   // Mouse
   void signal_down() override;
 

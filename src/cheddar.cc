@@ -19,6 +19,10 @@
 #include "save/save_data.h"
 #include "scene/scene.h"
 
+#ifdef ONSCREEN_DEBUG
+#include "foes/foe.h"
+#endif
+
 Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates)
     : Mouse("sprites/cheddar.bmp", false, CHEDDAR_OBJ) {
   if (cheddar != nullptr) {
@@ -78,6 +82,22 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates)
 }
 
 Cheddar::~Cheddar() { cheddar = nullptr; }
+
+void Cheddar::render() {
+  GameHud::draw_items(this->items, this->sel_item, this->health,
+                      this->max_health);
+
+#ifdef ONSCREEN_DEBUG
+  for (int ty = this->tile_y - 12; ty < this->tile_y + 13; ty++) {
+    for (int tx = this->tile_x - 12; tx < this->tile_x + 13; tx++) {
+      foe_debug_tile(tx, ty);
+    }
+  }
+#endif
+
+  thoom::Renderer::instance->set_view(this->x, this->y);
+  Mouse::render();
+}
 
 void Cheddar::signal_down() {
   // signal implies that the remote feta is down; check if we are down too

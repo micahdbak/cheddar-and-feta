@@ -40,6 +40,7 @@ class Mouse : public thoom::Object {
   ~Mouse();
 
   void step() override;
+  void render() override;
   void save_data() override;
 
   virtual void attack(int damage);
@@ -95,13 +96,13 @@ class Mouse : public thoom::Object {
   void update_path();
   void draw();
 
+  int tile_x = -1, tile_y = -1;
+
  private:
   SDL_FRect dst_rect, emote_rect;
 
   std::string selected_item() const;
   void move(int x_dir, int y_dir, float mov_speed);
-
-  int tile_x = -1, tile_y = -1;
 };
 
 extern Mouse *cheddar, *remote_feta;

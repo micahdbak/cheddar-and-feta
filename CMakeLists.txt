@@ -29,4 +29,4 @@ add_subdirectory(thoom)
 
 add_subdirectory(src/shared)
 add_subdirectory(src)
-add_subdirectory(feta)
+add_subdirectory(src/guest)

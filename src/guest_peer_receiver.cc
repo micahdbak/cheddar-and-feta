@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <queue>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "audio/audio.h"
@@ -19,10 +18,6 @@
 #include "scene/scene.h"
 #include "texture/texture.h"
 #include "utils/utils.h"
-
-#define BUFF_SIZE 1024
-
-char nullbyte = '\0';
 
 GuestPeerReceiver::~GuestPeerReceiver() { this->clear_sprites(); }
 
@@ -68,19 +63,16 @@ void GuestPeerReceiver::step() {
   }
 
   // Replay the batch deferred by a map change before this step's frames.
-  std::queue<std::string> msgs;
-  std::swap(msgs, this->pending_messages);
-
   std::queue<std::string> received =
       thoom::Peer::instance->recv_queue.take_all();
 
   while (!received.empty()) {
-    msgs.push(received.front());
+    this->pending_messages.push(received.front());
     received.pop();
   }
 
   // if empty, reuse last frame
-  if (msgs.empty()) {
+  if (this->pending_messages.empty()) {
     // 5 seconds of no frames; disconnect
     if (thoom::Scene::instance->ticks - last_frame_ticks > 5000 &&
         last_frame_ticks != 0) {
@@ -99,11 +91,9 @@ void GuestPeerReceiver::step() {
   char buff[1024];
 
   // read previous feta related messages
-  while (msgs.size() > 1) {
-    std::string msg = msgs.front();
-    msgs.pop();
-
-    const char* arr = msg.c_str();
+  while (this->pending_messages.size() > 1) {
+    std::string msg = this->pending_messages.front();
+    this->pending_messages.pop();
 
     for (const char* arr = msg.c_str(); *arr != '\0';
          arr = thoom::next_line(arr)) {
@@ -115,9 +105,8 @@ void GuestPeerReceiver::step() {
           this->load_map(std::string(buff), thoom::next_line(arr));
 
           // The map load destroys the local Feta. The rest of this batch may
-          // hold its sync, or another map change and its sync, so replay the
-          // batch after the load instead of dropping it with the queue.
-          std::swap(this->pending_messages, msgs);
+          // hold its sync, or another map change and its sync, so keep it
+          // pending and replay it after the load.
           return;  // don't read rest of messages
         }
       }
@@ -127,8 +116,8 @@ void GuestPeerReceiver::step() {
   }
 
   // most recent message
-  std::string msg = msgs.front();
-  msgs.pop();
+  std::string msg = this->pending_messages.front();
+  this->pending_messages.pop();
 
   for (const char* arr = msg.c_str(); *arr != '\0';
        arr = thoom::next_line(arr)) {
@@ -142,10 +131,8 @@ void GuestPeerReceiver::step() {
         buff[1023] = '\0';
 
         if (thoom::Scene::instance->map->path != buff) {
-          if (thoom::Scene::instance->map->path != buff) {
-            this->load_map(std::string(buff), thoom::next_line(arr));
-            return;  // don't read rest of messages
-          }
+          this->load_map(std::string(buff), thoom::next_line(arr));
+          return;  // don't read rest of messages
         }
 
         break;

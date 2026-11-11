@@ -4,9 +4,10 @@
 #include <vector>
 
 #include "object.h"
+#include "peer/peer.h"
 #include "scene/scene.h"
 
-#define PEER_SENDER_OBJ "peer_sender"
+#define GUEST_PEER_SENDER_OBJ "guest_peer_sender"
 
 class GuestPeerSender : public thoom::Object {
  public:
@@ -22,4 +23,6 @@ class GuestPeerSender : public thoom::Object {
 
  private:
   std::vector<std::string> messages;
+
+  thoom::Peer* peer = thoom::Peer::instance;
 };

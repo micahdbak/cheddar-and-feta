@@ -1,3 +1,5 @@
 #pragma once
 
-bool guest_start();
+void register_guest_objects();
+
+void guest_start();

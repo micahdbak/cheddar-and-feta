@@ -10,7 +10,6 @@
 #include "peer/peer.h"
 #include "renderer/font.h"
 #include "renderer/renderer.h"
-#include "scene/scene.h"
 #include "thoom/macros.h"
 
 void InitJoin::start(SDL_Texture* ui) {
@@ -20,11 +19,13 @@ void InitJoin::start(SDL_Texture* ui) {
   this->sel_c = 0;
   this->code.clear();
   this->last_peer_state = thoom::Peer::instance->get_state();
-  this->waiting_ticks = 0;
+  this->wait_steps = 0;
+  this->join_started = false;
 }
 
 #define CODE_CHARSET "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ*"
 #define CODE_COLS 10
+#define JOIN_GRACE_STEPS 2
 
 void InitJoin::step() {
   this->peer_state = thoom::Peer::instance->get_state();
@@ -33,12 +34,23 @@ void InitJoin::step() {
 
   this->last_peer_state = this->peer_state;
 
+  // The switch owns the handshake deadline. This only observes the result:
+  // joining, connected, or back to no connection after a failed attempt.
   if (this->waiting_for_peer) {
-    if (this->peer_state == thoom::Peer::kStateNoConnection)
-      this->peer_state = thoom::Peer::kStateWaitingForPeer;
-    else {
+    this->wait_steps++;
+
+    if (this->peer_state == thoom::Peer::kStateConnected) {
       this->waiting_for_peer = false;
-      this->waiting_ticks = thoom::Scene::instance->ticks;
+      this->wait_steps = 0;
+      this->join_started = false;
+    } else if (this->peer_state == thoom::Peer::kStateWaitingForPeer) {
+      this->join_started = true;
+    } else if (this->join_started || this->wait_steps > JOIN_GRACE_STEPS) {
+      this->waiting_for_peer = false;
+      this->wait_steps = 0;
+      this->join_started = false;
+      thoom::Hud::instance->display_notification("That code didn't work.");
+      this->redraw = true;
     }
   }
 
@@ -65,8 +77,9 @@ void InitJoin::step() {
         if (select && valid_code) {
           thoom::Peer::instance->set_connection_code(this->code);
           this->waiting_for_peer = true;
+          this->wait_steps = 0;
+          this->join_started = false;
           this->peer_state = thoom::Peer::kStateWaitingForPeer;
-          this->waiting_ticks = thoom::Scene::instance->ticks;
           this->redraw = true;
         }
       } else if (select && this->code.size() < 6) {
@@ -80,15 +93,7 @@ void InitJoin::step() {
       }
     } break;
 
-    // WAITING_FOR_PEER, CONNECTION
     default:
-      // no connection after 15 seconds
-      if (thoom::Scene::instance->ticks - this->waiting_ticks > 15000) {
-        thoom::Peer::instance->set_state(thoom::Peer::kStateTryReset);
-        thoom::Hud::instance->display_notification("That code didn't work.");
-        this->waiting_ticks = 0;
-      }
-
       break;
   }
 }

@@ -27,7 +27,7 @@ SpitterSegment::SpitterSegment(thoom_gid parent_gid, int segment_id)
       HURTBOX_OBJ, HurtBox::options(this->gid, -12, -12, 24, 24));
   thoom::Scene::instance->create_object(
       HITBOX_OBJ,
-      HitBox::options(this->gid, THOOM_GID_NULL, -8, -8, 16, 16,
+      HitBox::options(this->gid, THOOM_GID_INVALID, -8, -8, 16, 16,
                       HitBox::Properties{.damage = 2,
                                          .cooldown_ms = 1000,
                                          .shared_cooldowns = true,

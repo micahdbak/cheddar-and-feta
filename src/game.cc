@@ -10,7 +10,6 @@
 #include "icon.h"
 #include "input/input.h"
 #include "map/map.h"
-#include "peer/peer.h"
 #include "render_functions.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
@@ -19,8 +18,8 @@
 #include "window/window.h"
 
 bool game_run(const GameDef& def, int argc, char** argv) {
-  if (!thoom_init(def.title, THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, def.peer,
-                  def.offerer, def.background, def.hud)) {
+  if (!thoom_init(def.title, THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
+                  def.background, def.hud)) {
     return false;
   }
 
@@ -29,10 +28,6 @@ bool game_run(const GameDef& def, int argc, char** argv) {
   if (!thoom::Scene::init()) {
     thoom_quit();
     return false;
-  }
-
-  if (thoom::Peer::instance != nullptr) {
-    thoom::Scene::instance->local_pid = thoom::Peer::instance->get_pid();
   }
 
   if (!def.init(argc, argv)) {

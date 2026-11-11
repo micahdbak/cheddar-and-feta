@@ -14,21 +14,19 @@
 std::unordered_map<std::string, Item> guest_item_info;
 
 static const thoom::Scene::ObjectDef kGuestObjects[] = {
-    {PEER_RECEIVER_OBJ, GuestPeerReceiver::create_object, false,
+    {GUEST_PEER_RECEIVER_OBJ, GuestPeerReceiver::create_object, false,
      thoom::kObjectFirst},
-    {PEER_SENDER_OBJ, GuestPeerSender::create_object, false,
+    {GUEST_PEER_SENDER_OBJ, GuestPeerSender::create_object, false,
      thoom::kObjectLast},
-    {FETA_OBJ, GuestFeta::create_object, false, thoom::kObjectNormal},
+    {GUEST_FETA_OBJ, GuestFeta::create_object, false, thoom::kObjectNormal},
     {nullptr, nullptr, false, thoom::kObjectNormal},
 };
 
-bool guest_start() {
-  static bool started = false;
-  if (started) return true;
-  started = true;
-
+void register_guest_objects() {
   thoom::Scene::instance->register_objects(kGuestObjects);
+}
 
+void guest_start() {
   guest_item_info[ITEM_NONE] = Item{HELD_EFFECT, "Kick"};
   guest_item_info[ITEM_NONE].damage = 1;
   guest_item_info[ITEM_NONE].armour = 0;
@@ -47,8 +45,6 @@ bool guest_start() {
 
   thoom::Window::instance->set_title("Playing as Feta");
 
-  thoom::Scene::instance->create_object(PEER_RECEIVER_OBJ, "");
-  thoom::Scene::instance->create_object(PEER_SENDER_OBJ, "");
-
-  return true;
+  thoom::Scene::instance->create_object(GUEST_PEER_RECEIVER_OBJ, "");
+  thoom::Scene::instance->create_object(GUEST_PEER_SENDER_OBJ, "");
 }

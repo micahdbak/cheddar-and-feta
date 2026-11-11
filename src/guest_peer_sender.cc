@@ -13,9 +13,17 @@ GuestPeerSender* guest_peer_sender;
 
 GuestPeerSender::GuestPeerSender() { guest_peer_sender = this; }
 
-GuestPeerSender::~GuestPeerSender() { guest_peer_sender = nullptr; }
+GuestPeerSender::~GuestPeerSender() {
+  if (guest_peer_sender == this) {
+    guest_peer_sender = nullptr;
+  }
+}
 
 void GuestPeerSender::step() {
+  if (this->peer == nullptr || thoom::Peer::instance != this->peer) {
+    this->deleted = true;
+    return;
+  }
   if (guest_feta == nullptr) {
     return;
   }

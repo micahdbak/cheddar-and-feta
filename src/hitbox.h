@@ -12,10 +12,11 @@
 
 #define HITBOX_OBJ "hitbox"
 
-// hitbox shared IDs
-#define HB_SHARED_UNKNOWN THOOM_GID_MAX
-#define HB_SHARED_FIRE (THOOM_GID_MAX - 1)
-#define HB_SHARED_SPITTER (THOOM_GID_MAX - 2)
+// Cooldown keys, not object ids. They sit in the reserved invalid-pid
+// namespace, above every gid an allocator can issue.
+#define HB_SHARED_NONE ((thoom_gid)UINT64_MAX - 1)
+#define HB_SHARED_FIRE ((thoom_gid)UINT64_MAX - 2)
+#define HB_SHARED_SPITTER ((thoom_gid)UINT64_MAX - 3)
 
 class HitSource {
  public:
@@ -34,7 +35,7 @@ class HitBox : public thoom::Object {
     int cooldown_ms;
     int delete_after_ms = 0;
     bool shared_cooldowns = false;
-    thoom_gid shared_id = HB_SHARED_UNKNOWN;
+    thoom_gid shared_id = HB_SHARED_NONE;
     bool single_use = false;
   };
 
@@ -72,7 +73,7 @@ class HitBox : public thoom::Object {
   bool throw_away = true;
 
   bool shared_cooldowns = false, single_use = false;
-  thoom_gid shared_id = HB_SHARED_UNKNOWN;
+  thoom_gid shared_id = HB_SHARED_NONE;
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
 

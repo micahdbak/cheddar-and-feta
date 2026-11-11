@@ -3,6 +3,8 @@
 #include "constants.h"
 #include "game.h"
 #include "game_hud.h"
+#include "guest_game.h"
+#include "host_game.h"
 #include "init.h"
 #include "object.h"
 #include "scene/scene.h"
@@ -17,6 +19,8 @@ static const thoom::Scene::ObjectDef kInitObjects[] = {
 
 bool init(int argc, char** argv) {
   thoom::Scene::instance->register_objects(kInitObjects);
+  register_host_objects();
+  register_guest_objects();
   thoom::Scene::instance->request_map("maps/splash");
   return true;
 }
@@ -25,6 +29,6 @@ int main(int argc, char** argv) {
   struct hud_def hud = GameHud::def(true);
   hud.show_peer = init_show_peer;
 
-  GameDef def = {"Thoom Engine", true, false, kBackground.val, &hud, init};
+  GameDef def = {"Thoom Engine", kBackground.val, &hud, init};
   return game_run(def, argc, argv) ? 0 : 1;
 }

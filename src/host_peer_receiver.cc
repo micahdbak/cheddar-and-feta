@@ -20,6 +20,10 @@
 #include "utils/utils.h"
 
 void HostPeerReceiver::step() {
+  if (this->peer == nullptr || thoom::Peer::instance != this->peer) {
+    this->deleted = true;
+    return;
+  }
   std::queue<std::string> msgs = thoom::Peer::instance->recv_queue.take_all();
   char buff[1024];
 

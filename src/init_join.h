@@ -17,5 +17,6 @@ class InitJoin {
   int sel_c = 0;
   std::string code;
   uint64_t peer_state = 0, last_peer_state = 0;
-  Uint64 waiting_ticks = 0;
+  uint32_t wait_steps = 0;
+  bool join_started = false;
 };

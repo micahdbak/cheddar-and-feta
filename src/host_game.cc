@@ -99,13 +99,11 @@ static const thoom::Scene::ObjectDef kHostObjects[] = {
     {nullptr, nullptr, false, thoom::kObjectNormal},
 };
 
-bool host_start() {
-  static bool started = false;
-  if (started) return true;
-  started = true;
-
+void register_host_objects() {
   thoom::Scene::instance->register_objects(kHostObjects);
+}
 
+void host_start() {
   item_info[ITEM_NONE] = Item{HELD_EFFECT, "Kick"};
   item_info[ITEM_NONE].damage = 1;
   item_info[ITEM_NONE].armour = 0;
@@ -127,6 +125,4 @@ bool host_start() {
 
   thoom::Scene::instance->create_object(PEER_RECEIVER_OBJ, "");
   thoom::Scene::instance->create_object(PEER_SENDER_OBJ, "");
-
-  return true;
 }

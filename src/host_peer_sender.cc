@@ -13,10 +13,20 @@ HostPeerSender* host_peer_sender = nullptr;
 
 HostPeerSender::HostPeerSender() { host_peer_sender = this; }
 
-HostPeerSender::~HostPeerSender() { host_peer_sender = nullptr; }
+HostPeerSender::~HostPeerSender() {
+  if (host_peer_sender == this) {
+    host_peer_sender = nullptr;
+  }
+}
 
 // The legacy protocol streams the frame's sprite queue to the guest, so it has
 // to run after every object has queued its sprites. That is the render phase.
+void HostPeerSender::step() {
+  if (this->peer == nullptr || thoom::Peer::instance != this->peer) {
+    this->deleted = true;
+  }
+}
+
 void HostPeerSender::render() {
   if (thoom::Peer::instance->get_state() != thoom::Peer::kStateConnected)
     return;

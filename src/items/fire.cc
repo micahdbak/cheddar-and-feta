@@ -38,7 +38,7 @@ Fire::Fire(float x, float y, int x_dir, int y_dir)
   // deals 3 damage over 3 seconds
   thoom::Scene::instance->create_object(
       HITBOX_OBJ,
-      HitBox::options(this->gid, THOOM_GID_NULL, -8, -8, 16, 16,
+      HitBox::options(this->gid, THOOM_GID_INVALID, -8, -8, 16, 16,
                       HitBox::Properties{.damage = 1,
                                          .cooldown_ms = 1000,
                                          .delete_after_ms = 4000,

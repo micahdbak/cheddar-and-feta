@@ -5,10 +5,11 @@
 #include <vector>
 
 #include "object.h"
+#include "peer/peer.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 
-#define PEER_RECEIVER_OBJ "peer_receiver"
+#define GUEST_PEER_RECEIVER_OBJ "guest_peer_receiver"
 
 class GuestPeerReceiver : public thoom::Object {
  public:
@@ -30,4 +31,6 @@ class GuestPeerReceiver : public thoom::Object {
   std::string skipped_messages;
   Uint64 last_frame_ticks = 0;
   bool just_pushed_feta = false, just_loaded_map = false;
+
+  thoom::Peer* peer = thoom::Peer::instance;
 };

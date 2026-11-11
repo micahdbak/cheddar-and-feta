@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "object.h"
+#include "peer/peer.h"
 #include "scene/scene.h"
 
 #define PEER_SENDER_OBJ "peer_sender"
@@ -13,7 +14,7 @@ class HostPeerSender : public thoom::Object {
   HostPeerSender();
   ~HostPeerSender();
 
-  void step() override {}
+  void step() override;
   void render() override;
 
   static void send_message(char func, const std::string& arg);
@@ -23,4 +24,5 @@ class HostPeerSender : public thoom::Object {
  private:
   std::vector<std::string> messages;
   bool was_disconnected = true;
+  thoom::Peer* peer = thoom::Peer::instance;
 };

@@ -15,13 +15,16 @@
 #include "scene/scene.h"
 #include "texture/texture.h"
 #include "thoom/macros.h"
+#include "thoom/thoom.h"
 #include "window/window.h"
 
-static bool host_mode = false;
-
-bool init_show_peer(void* user) { return host_mode; }
+bool init_show_peer(void* user) {
+  return thoom::Peer::instance != nullptr && thoom::Peer::instance->is_host();
+}
 
 Init::Init() {
+  thoom_room_quit();
+
   this->ui = thoom::Texture::instance->create_texture(
       THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
       SDL_SCALEMODE_LINEAR);
@@ -74,17 +77,17 @@ void Init::step() {
     }
 
     if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
-      if (this->menu_sel == 0) {
-        host_mode = true;
-        thoom::Peer::instance->set_offerer(false);
-        thoom::Scene::instance->local_pid = thoom::Peer::instance->get_pid();
+      const bool host = this->menu_sel == 0;
+
+      if (!thoom_room_init(host)) {
+        return;
+      }
+
+      if (host) {
         host_start();
         this->init_host.start(this->ui);
         this->which = kHost;
       } else {
-        host_mode = false;
-        thoom::Peer::instance->set_offerer(true);
-        thoom::Scene::instance->local_pid = thoom::Peer::instance->get_pid();
         guest_start();
         this->init_join.start(this->ui);
         this->which = kJoin;

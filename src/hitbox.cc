@@ -36,7 +36,7 @@ HitBox::HitBox(thoom_gid source_gid, thoom_gid hurtbox_owner_gid, int x_off,
   // if not from a foe, hit all hurtboxes
   this->from_foe = false;
 
-  if (hurtbox_owner_gid != THOOM_GID_NULL) {
+  if (hurtbox_owner_gid != THOOM_GID_INVALID) {
     // if from a foe, hit only mice
     thoom::Object* owner_obj =
         thoom::Scene::instance->find_gid_object(hurtbox_owner_gid);

@@ -31,6 +31,10 @@ void GuestPeerReceiver::clear_sprites() {
 }
 
 void GuestPeerReceiver::step() {
+  if (this->peer == nullptr || thoom::Peer::instance != this->peer) {
+    this->deleted = true;
+    return;
+  }
   // ensure we are in maps/init if disconnected, and do nothing else
   if (thoom::Peer::instance->get_state() != thoom::Peer::kStateConnected) {
     // The cached frame belongs to the old map and outlives it, so drop it
@@ -39,10 +43,9 @@ void GuestPeerReceiver::step() {
     this->pending_messages = {};
     this->skipped_messages.clear();
 
-    // if currently in a map other than the init map, reset the peer
-    // and go to that
+    // If currently in a map other than the init map, return to the menu. The
+    // init menu ends any surviving session when it opens.
     if (thoom::Scene::instance->map->path != "maps/init") {
-      thoom::Peer::instance->set_state(thoom::Peer::kStateTryReset);
       thoom::Scene::instance->request_map("maps/init");
       last_frame_ticks = 0;
     }
@@ -76,7 +79,7 @@ void GuestPeerReceiver::step() {
     // 5 seconds of no frames; disconnect
     if (thoom::Scene::instance->ticks - last_frame_ticks > 5000 &&
         last_frame_ticks != 0) {
-      thoom::Peer::instance->set_state(thoom::Peer::kStateTryReset);
+      thoom::Scene::instance->request_map("maps/init");
       last_frame_ticks = 0;
     }
 
@@ -249,7 +252,8 @@ bool GuestPeerReceiver::handle_important_message(const char* arr) {
       } else {
         snprintf(line, sizeof(line), "%s,%s,%d %s", x_str, y_str, animation,
                  buff);
-        thoom::Scene::instance->create_object(FETA_OBJ, std::string(line));
+        thoom::Scene::instance->create_object(GUEST_FETA_OBJ,
+                                              std::string(line));
         this->just_pushed_feta = true;
       }
     } break;

@@ -10,7 +10,7 @@
 #include "scene/scene.h"
 #include "sprite/sprite.h"
 
-#define FETA_OBJ "feta"
+#define GUEST_FETA_OBJ "guest_feta"
 
 class GuestFeta : public thoom::Object {
  public:

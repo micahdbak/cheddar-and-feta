@@ -3,6 +3,7 @@
 #include <string>
 
 #include "object.h"
+#include "peer/peer.h"
 #include "scene/scene.h"
 
 #define PEER_RECEIVER_OBJ "peer_receiver"
@@ -15,4 +16,7 @@ class HostPeerReceiver : public thoom::Object {
   void step() override;
   static thoom::Object* create_object(thoom::Scene* scene,
                                       const std::string& options);
+
+ private:
+  thoom::Peer* peer = thoom::Peer::instance;
 };

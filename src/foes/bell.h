@@ -1,17 +1,18 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <string>
 
 #include "hurtbox.h"
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 #include "sprite/sprite.h"
 
 #define BELL_OBJ "bell"
 
-class Bell : public thoom::Object, public HurtSource {
+class Bell : public thoom::Entity, public HurtSource {
  public:
-  Bell(int x, int y, int spawner_id);
+  Bell(const thoom::Entity::Context& context, int x, int y, int spawner_id);
   ~Bell();
 
   void step() override;
@@ -21,7 +22,7 @@ class Bell : public thoom::Object, public HurtSource {
   float hurtsource_y() override { return this->y; }
 
   void attack(int damage) override;
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

@@ -1,18 +1,20 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <string>
 
 #include "foe.h"
 #include "mouse.h"
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 #include "sprite/sprite.h"
 
 #define FOE_PORCUPINE_OBJ "foe_porc"
 
 class FoePorcupine : public Foe {
  public:
-  FoePorcupine(int x, int y, int spawner_id);
+  FoePorcupine(const thoom::Entity::Context& context, int x, int y,
+               int spawner_id);
   ~FoePorcupine();
 
   void action(Mouse* mouse) override;
@@ -22,7 +24,7 @@ class FoePorcupine : public Foe {
   void render() override;
 
   Foe::State prev_state = Foe::State::IDLE;
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

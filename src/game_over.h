@@ -1,9 +1,10 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <string>
 
-#include "object.h"
-#include "scene/scene.h"
+#include "object/object.h"
 
 #define GAME_OVER_OBJ "game_over"
 
@@ -14,8 +15,7 @@ class GameOver : public thoom::Object {
 
   void step() override;
   void render() override;
-  static thoom::Object* create_object(thoom::Scene* scene,
-                                      const std::string& options);
+  static thoom::Object* create_object(const std::string& options);
 
  private:
   SDL_Texture* ui;

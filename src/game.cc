@@ -25,7 +25,7 @@ bool game_run(const GameDef& def, int argc, char** argv) {
 
   register_render_functions();
 
-  if (!thoom::Scene::init()) {
+  if (!thoom::Scene::init("", true)) {
     thoom_quit();
     return false;
   }

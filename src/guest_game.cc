@@ -7,19 +7,18 @@
 #include "guest_item.h"
 #include "guest_peer_receiver.h"
 #include "guest_peer_sender.h"
-#include "object.h"
+#include "object/object.h"
 #include "scene/scene.h"
 #include "window/window.h"
 
 std::unordered_map<std::string, Item> guest_item_info;
 
-static const thoom::Scene::ObjectDef kGuestObjects[] = {
-    {GUEST_PEER_RECEIVER_OBJ, GuestPeerReceiver::create_object, false,
+static const thoom::ObjectDef kGuestObjects[] = {
+    {GUEST_PEER_RECEIVER_OBJ, GuestPeerReceiver::create_object,
      thoom::kObjectFirst},
-    {GUEST_PEER_SENDER_OBJ, GuestPeerSender::create_object, false,
-     thoom::kObjectLast},
-    {GUEST_FETA_OBJ, GuestFeta::create_object, false, thoom::kObjectNormal},
-    {nullptr, nullptr, false, thoom::kObjectNormal},
+    {GUEST_PEER_SENDER_OBJ, GuestPeerSender::create_object, thoom::kObjectLast},
+    {GUEST_FETA_OBJ, GuestFeta::create_object, thoom::kObjectNormal},
+    {nullptr, nullptr, thoom::kObjectNormal},
 };
 
 void register_guest_objects() {

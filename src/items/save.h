@@ -7,7 +7,7 @@
 
 #include "hud/hud.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/object.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "thoom/thoom.h"
@@ -16,7 +16,7 @@
 
 class ItemSaveUse : public thoom::Object {
  public:
-  ItemSaveUse(bool is_feta) : is_feta(is_feta) {}
+  ItemSaveUse(bool is_feta) : thoom::Object(nullptr), is_feta(is_feta) {}
   ~ItemSaveUse() = default;
 
   void step() {
@@ -37,8 +37,7 @@ class ItemSaveUse : public thoom::Object {
     // all done
     this->deleted = true;
   }
-  static thoom::Object* create_object(thoom::Scene* scene,
-                                      const std::string& options) {
+  static thoom::Object* create_object(const std::string& options) {
     thoom_gid obj_gid;
     if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%" SCNu64, &obj_gid)) {
       std::exit(1);

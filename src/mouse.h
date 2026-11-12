@@ -1,11 +1,13 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <cstdint>
 #include <string>
 #include <vector>
 
 #include "game_hud.h"
-#include "object.h"
+#include "object/entity.h"
 #include "sprite/sprite.h"
 
 #define MOUSE_DEFAULT_SPEED 80.0f
@@ -27,7 +29,7 @@
 #define DANCING2_ANIMATION 50
 #define SLEEPING_ANIMATION 51
 
-class Mouse : public thoom::Object {
+class Mouse : public thoom::Entity {
  public:
   struct SpawnCoord {
     float x, y;
@@ -36,7 +38,8 @@ class Mouse : public thoom::Object {
 
   typedef bool (*ItemFilter)(const GameHud::Item& item);
 
-  Mouse(const char* sprite_path, bool is_feta, const char* save_prefix);
+  Mouse(const thoom::Entity::Context& context, const char* sprite_path,
+        bool is_feta, const char* save_prefix);
   ~Mouse();
 
   void step() override;

@@ -1,19 +1,20 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <string>
 
 #include "foe.h"
 #include "hitbox.h"
 #include "mouse.h"
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 #include "sprite/sprite.h"
 
 #define FOE_BUG_OBJ "foe_bug"
 
 class FoeBug : public Foe, public HitSource {
  public:
-  FoeBug(int x, int y, int spawner_id);
+  FoeBug(const thoom::Entity::Context& context, int x, int y, int spawner_id);
   ~FoeBug();
 
   void action(Mouse* mouse) override;
@@ -26,7 +27,7 @@ class FoeBug : public Foe, public HitSource {
   float hitsource_y() override { return this->y + this->off_y; }
 
   Foe::State prev_state = Foe::State::IDLE;
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

@@ -1,9 +1,10 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <string>
 
-#include "object.h"
-#include "scene/scene.h"
+#include "object/object.h"
 #include "sprite/sprite.h"
 
 #define SPLASH_OBJ "splash"
@@ -17,8 +18,7 @@ class Splash : public thoom::Object {
 
   void step() override;
   void render() override;
-  static thoom::Object* create_object(thoom::Scene* scene,
-                                      const std::string& options);
+  static thoom::Object* create_object(const std::string& options);
 
  private:
   SDL_Texture *overlay, *tunnel;

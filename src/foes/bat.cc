@@ -13,7 +13,7 @@
 #include "icon.h"
 #include "items/cheese.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
@@ -21,16 +21,16 @@
 
 #define CIRCLE_TICKS 2000
 
-FoeBat::FoeBat(int x, int y, int spawner_id)
-    : Foe(float(x), float(y), spawner_id, 175, 100, 256.0f, 16.0f) {
+FoeBat::FoeBat(const thoom::Entity::Context& context, int x, int y,
+               int spawner_id)
+    : Foe(context, float(x), float(y), spawner_id, 175, 100, 256.0f, 16.0f) {
   this->sprite = new thoom::Sprite("sprites/foe_bat.bmp", 32, 32,
                                    45);  // approx every 3 frames
 
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->gid, -8, -8, 16, 16));
+  new HurtBox(*this, -8, -8, 16, 16);
 
   this->base_ticks_offset = SDL_rand(CIRCLE_TICKS + 1);
   this->ticks_offset = base_ticks_offset;
@@ -52,9 +52,7 @@ void FoeBat::action(Mouse* mouse) {
   int x_off, y_off;
   HitBox::make_offset(x_dir, y_dir, &x_off, &y_off, 8.0f);
   HitBox::Properties props = {1, 500, 250};
-  thoom::Scene::instance->create_object(
-      HITBOX_OBJ, HitBox::options(this->gid, this->gid, x_off - 8, y_off - 8,
-                                  16, 16, props));
+  new HitBox(*this, this, x_off - 8, y_off - 8, 16, 16, props);
 }
 
 void FoeBat::attack_internal(int damage) {
@@ -186,7 +184,7 @@ void FoeBat::render() {
       &this->dst_rect, 26);
 }
 
-thoom::Object* FoeBat::create_object(thoom::Scene* scene,
+thoom::Entity* FoeBat::create_entity(const thoom::Entity::Context& context,
                                      const std::string& options) {
   int x = 0, y = 0, spawner_id = 0;
   if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
@@ -194,5 +192,5 @@ thoom::Object* FoeBat::create_object(thoom::Scene* scene,
     std::exit(1);
   }
 
-  return new FoeBat(x, y, spawner_id);
+  return new FoeBat(context, x, y, spawner_id);
 }

@@ -4,14 +4,16 @@
 #include <string>
 
 #include "audio/audio.h"
-#include "object.h"
+#include "object/object.h"
 #include "peer/peer.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 
 HostPeerSender* host_peer_sender = nullptr;
 
-HostPeerSender::HostPeerSender() { host_peer_sender = this; }
+HostPeerSender::HostPeerSender() : thoom::Object(nullptr) {
+  host_peer_sender = this;
+}
 
 HostPeerSender::~HostPeerSender() {
   if (host_peer_sender == this) {
@@ -93,7 +95,6 @@ void HostPeerSender::send_message(char func, const std::string& arg) {
   host_peer_sender->messages.push_back(std::string(func + arg + '\n'));
 }
 
-thoom::Object* HostPeerSender::create_object(thoom::Scene* scene,
-                                             const std::string& options) {
+thoom::Object* HostPeerSender::create_object(const std::string& options) {
   return new HostPeerSender();
 }

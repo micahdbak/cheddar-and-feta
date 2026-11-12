@@ -3,9 +3,8 @@
 #include <string>
 #include <vector>
 
-#include "object.h"
+#include "object/object.h"
 #include "peer/peer.h"
-#include "scene/scene.h"
 
 #define PEER_SENDER_OBJ "peer_sender"
 
@@ -18,8 +17,7 @@ class HostPeerSender : public thoom::Object {
   void render() override;
 
   static void send_message(char func, const std::string& arg);
-  static thoom::Object* create_object(thoom::Scene* scene,
-                                      const std::string& options);
+  static thoom::Object* create_object(const std::string& options);
 
  private:
   std::vector<std::string> messages;

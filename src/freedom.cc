@@ -5,12 +5,12 @@
 #include <cstdlib>
 
 #include "mouse.h"
-#include "object.h"
+#include "object/object.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "utils/utils.h"
 
-Freedom::Freedom(int x, int y) {
+Freedom::Freedom(int x, int y) : thoom::Object(nullptr) {
   this->x = x;
   this->y = y;
 }
@@ -24,7 +24,7 @@ void Freedom::step() {
 
   if (this->timer_start > 0) {
     if (thoom::Scene::instance->ticks - this->timer_start > 2000) {
-      thoom::Scene::instance->request_map("maps/credits");
+      thoom::Scene::instance->request_map("maps/credits", true);
     }
 
     return;
@@ -47,8 +47,7 @@ void Freedom::step() {
   }
 }
 
-thoom::Object* Freedom::create_object(thoom::Scene* scene,
-                                      const std::string& options) {
+thoom::Object* Freedom::create_object(const std::string& options) {
   int x = 0, y = 0;
   if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
     // TODO(micahdbak): error

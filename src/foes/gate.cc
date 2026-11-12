@@ -6,7 +6,7 @@
 
 #include "audio/audio.h"
 #include "host_peer_sender.h"
-#include "object.h"
+#include "object/entity.h"
 #include "peer/peer.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
@@ -14,8 +14,9 @@
 #include "spawner.h"
 #include "sprite/sprite.h"
 
-FoeGate::FoeGate(int x, int y, int spawner_id, int animation)
-    : spawner_id(spawner_id) {
+FoeGate::FoeGate(const thoom::Entity::Context& context, int x, int y,
+                 int spawner_id, int animation)
+    : thoom::Entity(context), spawner_id(spawner_id) {
   this->sprite = new thoom::Sprite("sprites/gate.bmp", 48, 48, 0);
   this->dst_rect.w = 48.0f;
   this->dst_rect.h = 48.0f;
@@ -109,7 +110,7 @@ void FoeGate::render() {
       &this->dst_rect, 24);
 }
 
-thoom::Object* FoeGate::create_object(thoom::Scene* scene,
+thoom::Entity* FoeGate::create_entity(const thoom::Entity::Context& context,
                                       const std::string& options) {
   int x = 0, y = 0, spawner_id = 0, animation = 0;
   if (4 !=
@@ -118,5 +119,5 @@ thoom::Object* FoeGate::create_object(thoom::Scene* scene,
     std::exit(1);
   }
 
-  return new FoeGate(x, y, spawner_id, animation);
+  return new FoeGate(context, x, y, spawner_id, animation);
 }

@@ -9,7 +9,7 @@
 #include "hurtbox.h"
 #include "items/item.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "peer/peer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
@@ -18,8 +18,9 @@
 #define FETA_SYNC_RETRY_MS 500
 #define FETA_SYNC_TIMEOUT_MS 2000
 
-RemoteFeta::RemoteFeta(int x, int y, int animation)
-    : Mouse("sprites/feta.bmp", true, FETA_OBJ) {
+RemoteFeta::RemoteFeta(const thoom::Entity::Context& context, int x, int y,
+                       int animation)
+    : Mouse(context, "sprites/feta.bmp", true, FETA_OBJ) {
   if (remote_feta != nullptr) {
     // TODO(micahdbak): error
     std::exit(1);
@@ -43,9 +44,7 @@ RemoteFeta::RemoteFeta(int x, int y, int animation)
     this->place((float)x, (float)y);
   }
 
-  // push hurtbox
-  thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->gid, -8, -8, 16, 12));
+  new HurtBox(*this, -8, -8, 16, 12);
 }
 
 RemoteFeta::~RemoteFeta() { remote_feta = nullptr; }
@@ -128,7 +127,7 @@ void RemoteFeta::synchronize() {
   HostPeerSender::send_message(MSG_SYNC, std::string(buff));
 }
 
-thoom::Object* RemoteFeta::create_object(thoom::Scene* scene,
+thoom::Entity* RemoteFeta::create_entity(const thoom::Entity::Context& context,
                                          const std::string& options) {
   int x, y, animation;
   if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &animation)) {
@@ -136,5 +135,5 @@ thoom::Object* RemoteFeta::create_object(thoom::Scene* scene,
     std::exit(1);
   }
 
-  return new RemoteFeta(x, y, animation);
+  return new RemoteFeta(context, x, y, animation);
 }

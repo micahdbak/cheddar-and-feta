@@ -3,7 +3,7 @@
 #include "constants.h"
 #include "input/controller.h"
 #include "input/input.h"
-#include "object.h"
+#include "object/object.h"
 #include "renderer/font.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
@@ -11,7 +11,7 @@
 #include "texture/texture.h"
 #include "window/window.h"
 
-GameOver::GameOver() {
+GameOver::GameOver() : thoom::Object(nullptr) {
   this->ui = thoom::Texture::instance->create_texture(
       THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
       SDL_SCALEMODE_LINEAR);
@@ -28,7 +28,7 @@ GameOver::~GameOver() { SDL_DestroyTexture(this->ui); }
 
 void GameOver::step() {
   if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
-    thoom::Scene::instance->request_map("maps/init");
+    thoom::Scene::instance->request_map("maps/init", true);
     thoom::save.clear();
   }
 }
@@ -38,7 +38,6 @@ void GameOver::render() {
                                          0);
 }
 
-thoom::Object* GameOver::create_object(thoom::Scene* scene,
-                                       const std::string& options) {
+thoom::Object* GameOver::create_object(const std::string& options) {
   return new GameOver();
 }

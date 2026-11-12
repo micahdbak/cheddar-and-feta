@@ -6,16 +6,19 @@
 
 #include "item.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
 #include "thoom/macros.h"
+#include "thoom/thoom.h"
 #include "utils/utils.h"
 
-TossedItem::TossedItem(float x, float y, int x_dir, int y_dir, bool from_feta,
+TossedItem::TossedItem(const thoom::Entity::Context& context, float x, float y,
+                       int x_dir, int y_dir, bool from_feta,
                        std::string item_id)
-    : x(x),
+    : thoom::Entity(context),
+      x(x),
       y(y),
       x_dir(x_dir),
       y_dir(y_dir),
@@ -57,8 +60,9 @@ void TossedItem::step() {
     this->deleted = true;
 
     std::string dropped_obj_id = this->item_id + DROPPED_OBJ;
-    thoom::Scene::instance->create_object(
-        dropped_obj_id, DroppedItem::options(this->x, this->y));
+    thoom::Scene::instance->create_entity(
+        dropped_obj_id, DroppedItem::options(this->x, this->y),
+        {thoom::Entity::Ownership::kRoundRobin, THOOM_PID_INVALID});
 
     return;
   }
@@ -76,7 +80,7 @@ void TossedItem::render() {
       &this->dst_rect, 16);
 }
 
-thoom::Object* TossedItem::create_object(thoom::Scene* scene,
+thoom::Entity* TossedItem::create_entity(const thoom::Entity::Context& context,
                                          const std::string& options) {
   int x, y, x_dir, y_dir, from_feta;
   if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
@@ -92,5 +96,6 @@ thoom::Object* TossedItem::create_object(thoom::Scene* scene,
 
   if (*arr == '\0') return nullptr;
 
-  return new TossedItem(x, y, x_dir, y_dir, from_feta == 1, std::string(arr));
+  return new TossedItem(context, x, y, x_dir, y_dir, from_feta == 1,
+                        std::string(arr));
 }

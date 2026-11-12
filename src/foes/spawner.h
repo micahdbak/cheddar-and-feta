@@ -1,16 +1,18 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <string>
 #include <vector>
 
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 
 #define SPAWNER_OBJ "spawner"
 
-class FoeSpawner : public thoom::Object {
+class FoeSpawner : public thoom::Entity {
  public:
-  FoeSpawner(float x, float y, int spawner_id, int animation,
+  FoeSpawner(const thoom::Entity::Context& context, float x, float y,
+             int spawner_id, int animation,
              const std::vector<std::vector<std::string>>& waves);
   ~FoeSpawner();
 
@@ -21,7 +23,7 @@ class FoeSpawner : public thoom::Object {
   void log_death();
 
   bool empty = false;
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

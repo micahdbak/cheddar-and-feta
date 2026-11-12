@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "mouse.h"
+#include "object/entity.h"
 #include "scene/scene.h"
 #include "spawner.h"
 #include "thoom/macros.h"
@@ -13,9 +14,11 @@ std::vector<Foe*> foes;
 static std::vector<int> speed_offsets = {0, 4, 8, 4, 2, -2, -4, -8, -4};
 static int speed_offsets_i = 0;
 
-Foe::Foe(float x, float y, int spawner_id, int speed, int throw_speed,
-         float stalking_distance, float action_distance)
-    : spawner_id(spawner_id),
+Foe::Foe(const thoom::Entity::Context& context, float x, float y,
+         int spawner_id, int speed, int throw_speed, float stalking_distance,
+         float action_distance)
+    : thoom::Entity(context),
+      spawner_id(spawner_id),
       speed(speed),
       throw_speed(throw_speed),
       stalking_distance(stalking_distance),

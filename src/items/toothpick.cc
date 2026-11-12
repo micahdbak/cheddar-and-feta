@@ -8,7 +8,7 @@
 #include "hitbox.h"
 #include "item.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
@@ -16,10 +16,11 @@
 #include "thoom/thoom.h"
 #include "utils/utils.h"
 
-ThrownToothpick::ThrownToothpick(float x, float y, int x_dir, int y_dir,
+ThrownToothpick::ThrownToothpick(const thoom::Entity::Context& context, float x,
+                                 float y, int x_dir, int y_dir,
                                  thoom_gid from_gid)
-    : x(x), y(y), x_dir(x_dir), y_dir(y_dir) {
-  thoom::Object* obj = thoom::Scene::instance->find_gid_object(from_gid);
+    : thoom::Entity(context), x(x), y(y), x_dir(x_dir), y_dir(y_dir) {
+  thoom::Entity* obj = thoom::Scene::instance->find_entity(from_gid);
   Mouse* mouse;
   if (obj != nullptr && (mouse = dynamic_cast<Mouse*>(obj)) != nullptr) {
     // only drop if thrown by a mouse
@@ -39,8 +40,7 @@ ThrownToothpick::ThrownToothpick(float x, float y, int x_dir, int y_dir,
 
   HitBox::Properties props = {1, 1000, 1000};
   props.single_use = true;
-  thoom::Scene::instance->create_object(
-      HITBOX_OBJ, HitBox::options(this->gid, from_gid, -8, -8, 16, 16, props));
+  new HitBox(*this, obj, -8, -8, 16, 16, props);
 }
 
 ThrownToothpick::~ThrownToothpick() {
@@ -63,8 +63,9 @@ void ThrownToothpick::step() {
     this->deleted = true;
 
     if (this->drop_item) {
-      thoom::Scene::instance->create_object(
-          ITEM_TOOTHPICK DROPPED_OBJ, DroppedItem::options(this->x, this->y));
+      thoom::Scene::instance->create_entity(
+          ITEM_TOOTHPICK DROPPED_OBJ, DroppedItem::options(this->x, this->y),
+          {thoom::Entity::Ownership::kRoundRobin, THOOM_PID_INVALID});
     }
 
     return;
@@ -89,19 +90,19 @@ void ThrownToothpick::hitsource_notify() {
       thoom::Scene::instance->ticks - 750;  // 250ms until dropped
 }
 
-thoom::Object* DroppedToothpick::create_object(thoom::Scene* scene,
-                                               const std::string& options) {
+thoom::Entity* DroppedToothpick::create_entity(
+    const thoom::Entity::Context& context, const std::string& options) {
   int x, y;
   if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
     // TODO(micahdbak): error
     std::exit(1);
   }
 
-  return new DroppedToothpick(float(x), float(y));
+  return new DroppedToothpick(context, float(x), float(y));
 }
 
-thoom::Object* ThrownToothpick::create_object(thoom::Scene* scene,
-                                              const std::string& options) {
+thoom::Entity* ThrownToothpick::create_entity(
+    const thoom::Entity::Context& context, const std::string& options) {
   int x, y, x_dir, y_dir;
   thoom_gid from_gid;
   if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%" SCNu64, &x, &y, &x_dir,
@@ -110,5 +111,6 @@ thoom::Object* ThrownToothpick::create_object(thoom::Scene* scene,
     std::exit(1);
   }
 
-  return new ThrownToothpick((float)x, (float)y, x_dir, y_dir, from_gid);
+  return new ThrownToothpick(context, (float)x, (float)y, x_dir, y_dir,
+                             from_gid);
 }

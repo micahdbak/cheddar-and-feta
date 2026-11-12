@@ -5,13 +5,14 @@
 
 #include "audio/audio.h"
 #include "hurtbox.h"
-#include "object.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "spawner.h"
 #include "sprite/sprite.h"
 
-Bell::Bell(int x, int y, int spawner_id) {
+Bell::Bell(const thoom::Entity::Context& context, int x, int y, int spawner_id)
+    : thoom::Entity(context) {
   this->x = x;
   this->y = y;
   this->spawner_id = spawner_id;
@@ -19,8 +20,7 @@ Bell::Bell(int x, int y, int spawner_id) {
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->gid, -8, -8, 16, 16));
+  new HurtBox(*this, -8, -8, 16, 16);
 }
 
 Bell::~Bell() { delete this->sprite; }
@@ -58,7 +58,7 @@ void Bell::render() {
       &this->dst_rect, 16);
 }
 
-thoom::Object* Bell::create_object(thoom::Scene* scene,
+thoom::Entity* Bell::create_entity(const thoom::Entity::Context& context,
                                    const std::string& options) {
   int x = 0, y = 0, spawner_id = 0;
   if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
@@ -66,5 +66,5 @@ thoom::Object* Bell::create_object(thoom::Scene* scene,
     std::exit(1);
   }
 
-  return new Bell(x, y, spawner_id);
+  return new Bell(context, x, y, spawner_id);
 }

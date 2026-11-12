@@ -1,9 +1,10 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <string>
 
-#include "object.h"
-#include "scene/scene.h"
+#include "object/object.h"
 
 #define FREEDOM_OBJ "freedom"
 
@@ -13,8 +14,7 @@ class Freedom : public thoom::Object {
   ~Freedom();
 
   void step() override;
-  static thoom::Object* create_object(thoom::Scene* scene,
-                                      const std::string& options);
+  static thoom::Object* create_object(const std::string& options);
 
  private:
   int x, y;

@@ -7,14 +7,15 @@
 #include <string>
 
 #include "item.h"
-#include "object.h"
+#include "object/entity.h"
+#include "object/object.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "thoom/thoom.h"
 
 ItemPersister* item_persister = nullptr;
 
-ItemPersister::ItemPersister() {
+ItemPersister::ItemPersister() : thoom::Object(nullptr) {
   if (item_persister != nullptr) {
     std::cerr << "ItemPersister::ItemPersister: another instance exists"
               << std::endl;
@@ -70,8 +71,9 @@ void ItemPersister::step() {
 
     std::string dropped_item_id = item.item_id;
     dropped_item_id += DROPPED_OBJ;
-    thoom::Scene::instance->create_object(
-        dropped_item_id, DroppedItem::options((float)item.x, (float)item.y));
+    thoom::Scene::instance->create_entity(
+        dropped_item_id, DroppedItem::options((float)item.x, (float)item.y),
+        {thoom::Entity::Ownership::kRoundRobin, THOOM_PID_INVALID});
   }
 }
 
@@ -115,7 +117,6 @@ void ItemPersister::forget_item(thoom_gid gid) {
   this->save_items();
 }
 
-thoom::Object* ItemPersister::create_object(thoom::Scene* scene,
-                                            const std::string& options) {
+thoom::Object* ItemPersister::create_object(const std::string& options) {
   return new ItemPersister();
 }

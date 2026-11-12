@@ -4,8 +4,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "object.h"
-#include "scene/scene.h"
+#include "object/object.h"
 #include "thoom/thoom.h"
 
 #define ITEM_PERSISTER_OBJ "item_persister"
@@ -22,8 +21,7 @@ class ItemPersister : public thoom::Object {
   void forget_item(thoom_gid gid);
 
   bool creating_items = false;
-  static thoom::Object* create_object(thoom::Scene* scene,
-                                      const std::string& options);
+  static thoom::Object* create_object(const std::string& options);
 
  private:
   void save_items();

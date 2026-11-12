@@ -6,17 +6,17 @@
 #include <string>
 
 #include "hitbox.h"
-#include "object.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
 #include "thoom/macros.h"
-#include "thoom/thoom.h"
 
 static int fire_counter = 0;
 
-Fire::Fire(float x, float y, int x_dir, int y_dir)
-    : x(x), y(y), x_dir(x_dir), y_dir(y_dir) {
+Fire::Fire(const thoom::Entity::Context& context, float x, float y, int x_dir,
+           int y_dir)
+    : thoom::Entity(context), x(x), y(y), x_dir(x_dir), y_dir(y_dir) {
   this->sprite = new thoom::Sprite("sprites/fire.bmp", 16, 16, 100);
   this->dst_rect.w = this->sprite->frame_w;
   this->dst_rect.h = this->sprite->frame_h;
@@ -36,14 +36,12 @@ Fire::Fire(float x, float y, int x_dir, int y_dir)
   }
 
   // deals 3 damage over 3 seconds
-  thoom::Scene::instance->create_object(
-      HITBOX_OBJ,
-      HitBox::options(this->gid, THOOM_GID_INVALID, -8, -8, 16, 16,
-                      HitBox::Properties{.damage = 1,
-                                         .cooldown_ms = 1000,
-                                         .delete_after_ms = 4000,
-                                         .shared_cooldowns = true,
-                                         .shared_id = HB_SHARED_FIRE}));
+  new HitBox(*this, nullptr, -8, -8, 16, 16,
+             HitBox::Properties{.damage = 1,
+                                .cooldown_ms = 1000,
+                                .delete_after_ms = 4000,
+                                .shared_cooldowns = true,
+                                .shared_id = HB_SHARED_FIRE});
 }
 
 Fire::~Fire() { delete this->sprite; }
@@ -96,7 +94,7 @@ void Fire::render() {
       &this->dst_rect, 12);
 }
 
-thoom::Object* Fire::create_object(thoom::Scene* scene,
+thoom::Entity* Fire::create_entity(const thoom::Entity::Context& context,
                                    const std::string& options) {
   int x, y, x_dir = 0, y_dir = 0;
   if (4 != sscanf(options.c_str(), "%d,%d,%d,%d,%*" SCNu64, &x, &y, &x_dir,
@@ -105,5 +103,5 @@ thoom::Object* Fire::create_object(thoom::Scene* scene,
     std::exit(1);
   }
 
-  return new Fire((float)x, (float)y, x_dir, y_dir);
+  return new Fire(context, (float)x, (float)y, x_dir, y_dir);
 }

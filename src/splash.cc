@@ -9,7 +9,7 @@
 #include "colour.h"
 #include "input/controller.h"
 #include "input/input.h"
-#include "object.h"
+#include "object/object.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
@@ -17,7 +17,7 @@
 #include "thoom/macros.h"
 #include "window/window.h"
 
-Splash::Splash() {
+Splash::Splash() : thoom::Object(nullptr) {
   this->overlay = thoom::Texture::instance->create_texture(
       THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
       SDL_SCALEMODE_LINEAR);
@@ -71,8 +71,8 @@ void Splash::step() {
     this->initial_timer = thoom::Scene::instance->ticks;
 
     if (++this->animation >= this->animations) {
-      thoom::Scene::instance->request_map(
-          "maps/init");  // leave the splash screen
+      thoom::Scene::instance->request_map("maps/init",
+                                          true);  // leave the splash screen
       return;
     }
 
@@ -217,7 +217,6 @@ void Splash::render() {
                                          2 * THOOM_SCREEN_HEIGHT);
 }
 
-thoom::Object* Splash::create_object(thoom::Scene* scene,
-                                     const std::string& options) {
+thoom::Object* Splash::create_object(const std::string& options) {
   return new Splash();
 }

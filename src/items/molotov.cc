@@ -8,7 +8,7 @@
 #include "fire.h"
 #include "hitbox.h"
 #include "items/item.h"
-#include "object.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
@@ -16,18 +16,17 @@
 #include "thoom/thoom.h"
 #include "utils/utils.h"
 
-ThrownMolotov::ThrownMolotov(float x, float y, int x_dir, int y_dir,
-                             thoom_gid from_gid)
-    : x(x), y(y), x_dir(x_dir), y_dir(y_dir) {
+ThrownMolotov::ThrownMolotov(const thoom::Entity::Context& context, float x,
+                             float y, int x_dir, int y_dir, thoom_gid from_gid)
+    : thoom::Entity(context), x(x), y(y), x_dir(x_dir), y_dir(y_dir) {
   this->did_hit = false;
   this->sprite =
       new thoom::Sprite("sprites/item_molotov_thrown.bmp", 24, 24, 100);
   this->timer = thoom::Scene::instance->ticks;
 
   HitBox::Properties props = {1, 1000, 1000};
-  thoom::Scene::instance->create_object(
-      HITBOX_OBJ,
-      HitBox::options(this->gid, from_gid, -16, -16, 32, 32, props));
+  thoom::Entity* instigator = thoom::Scene::instance->find_entity(from_gid);
+  new HitBox(*this, instigator, -16, -16, 32, 32, props);
 }
 
 ThrownMolotov::~ThrownMolotov() { delete this->sprite; }
@@ -47,13 +46,15 @@ void ThrownMolotov::step() {
     for (int i = 0; i < 8; i++) {
       int fire_x_dir, fire_y_dir;
       thoom::dirs_from_direction(i, &fire_x_dir, &fire_y_dir);
-      thoom::Scene::instance->create_object(
+      thoom::Scene::instance->create_entity(
           ITEM_FIRE USE_OBJ,
-          UseItem::options(this->x, this->y, fire_x_dir, fire_y_dir, -1));
+          UseItem::options(this->x, this->y, fire_x_dir, fire_y_dir, -1),
+          {thoom::Entity::Ownership::kFixed, this->owner_pid});
     }
 
-    thoom::Scene::instance->create_object(
-        ITEM_FIRE USE_OBJ, UseItem::options(this->x, this->y, 0, 0, -1));
+    thoom::Scene::instance->create_entity(
+        ITEM_FIRE USE_OBJ, UseItem::options(this->x, this->y, 0, 0, -1),
+        {thoom::Entity::Ownership::kFixed, this->owner_pid});
 
     this->deleted = true;
 
@@ -79,19 +80,19 @@ void ThrownMolotov::render() {
       &this->dst_rect, 8);
 }
 
-thoom::Object* DroppedMolotov::create_object(thoom::Scene* scene,
-                                             const std::string& options) {
+thoom::Entity* DroppedMolotov::create_entity(
+    const thoom::Entity::Context& context, const std::string& options) {
   int x, y;
   if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
     // TODO(micahdbak): error
     std::exit(1);
   }
 
-  return new DroppedMolotov(float(x), float(y));
+  return new DroppedMolotov(context, float(x), float(y));
 }
 
-thoom::Object* ThrownMolotov::create_object(thoom::Scene* scene,
-                                            const std::string& options) {
+thoom::Entity* ThrownMolotov::create_entity(
+    const thoom::Entity::Context& context, const std::string& options) {
   int x, y, x_dir = 0, y_dir = 0;
   thoom_gid from_gid;
   if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%" SCNu64, &x, &y, &x_dir,
@@ -100,5 +101,5 @@ thoom::Object* ThrownMolotov::create_object(thoom::Scene* scene,
     std::exit(1);
   }
 
-  return new ThrownMolotov((float)x, (float)y, x_dir, y_dir, from_gid);
+  return new ThrownMolotov(context, (float)x, (float)y, x_dir, y_dir, from_gid);
 }

@@ -4,13 +4,14 @@
 #include <cstdlib>
 #include <string>
 
-#include "object.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
-#include "scene/scene.h"
 #include "sprite/sprite.h"
 
-Billboard::Billboard(int x, int y, int ts_x, int ts_y, int w, int h, int depth,
-                     std::string tilesheet) {
+Billboard::Billboard(const thoom::Entity::Context& context, int x, int y,
+                     int ts_x, int ts_y, int w, int h, int depth,
+                     std::string tilesheet)
+    : thoom::Entity(context) {
   this->sprite = new thoom::Sprite(tilesheet.c_str(), 16, 16, 1000);
   this->sprite->set_animation(ts_y);
   this->sprite->set_frame(ts_x);
@@ -49,12 +50,12 @@ void Billboard::parse_options(const std::string& options, int* x, int* y,
   tilesheet = buff;
 }
 
-thoom::Object* Billboard::create_object(thoom::Scene* scene,
+thoom::Entity* Billboard::create_entity(const thoom::Entity::Context& context,
                                         const std::string& options) {
   int x, y, ts_x, ts_y, w, h, depth;
   std::string tilesheet;
 
   Billboard::parse_options(options, &x, &y, &ts_x, &ts_y, &w, &h, &depth,
                            tilesheet);
-  return new Billboard(x, y, ts_x, ts_y, w, h, depth, tilesheet);
+  return new Billboard(context, x, y, ts_x, ts_y, w, h, depth, tilesheet);
 }

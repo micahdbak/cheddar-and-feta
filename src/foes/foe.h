@@ -1,9 +1,11 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <vector>
 
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "scene/scene.h"
 
 inline float center_tile_x(float x) {
@@ -28,10 +30,11 @@ void foe_pick_random(int* x, int* y);
 void foe_move_direction(int* x, int* y, int x_dir, int y_dir);
 void foe_debug_tile(int x, int y);
 
-class Foe : public virtual thoom::Object {
+class Foe : public thoom::Entity {
  public:
-  Foe(float x, float y, int spawner_id, int speed, int throw_speed,
-      float stalking_distance, float action_distance);
+  Foe(const thoom::Entity::Context& context, float x, float y, int spawner_id,
+      int speed, int throw_speed, float stalking_distance,
+      float action_distance);
   ~Foe();
 
   // must be implemented per foe

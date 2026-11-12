@@ -1,22 +1,24 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <string>
 #include <vector>
 
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 #include "sprite/sprite.h"
 
 #define GATE_OBJ "gate"
 
-class FoeGate : public thoom::Object {
+class FoeGate : public thoom::Entity {
  public:
-  FoeGate(int x, int y, int spawner_id, int animation);
+  FoeGate(const thoom::Entity::Context& context, int x, int y, int spawner_id,
+          int animation);
   ~FoeGate();
 
   void step() override;
   void render() override;
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

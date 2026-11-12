@@ -8,10 +8,13 @@
 #include "audio/audio.h"
 #include "hitbox.h"
 #include "items/cheese.h"
+#include "items/coffee.h"
 #include "items/item.h"
+#include "items/save.h"
 #include "items/tossed.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
+#include "object/object.h"
 #include "peer/peer.h"
 #include "remote_feta.h"
 #include "save/save_data.h"
@@ -61,8 +64,16 @@ void HostPeerReceiver::step() {
 
           std::string options =
               UseItem::options(x, y, x_dir, y_dir, remote_feta->gid);
-          thoom::Scene::instance->create_object(std::string(buff) + USE_OBJ,
-                                                options);
+          if (std::string(buff) == ITEM_SAVE) {
+            thoom::Scene::instance->create_object(std::string(buff) + USE_OBJ,
+                                                  options);
+          } else if (std::string(buff) == ITEM_COFFEE_BEAN) {
+            new UsedCoffeeBean(*remote_feta);
+          } else {
+            thoom::Scene::instance->create_entity(
+                std::string(buff) + USE_OBJ, options,
+                {thoom::Entity::Ownership::kFixed, remote_feta->owner_pid});
+          }
           remote_feta->remove_item(std::string(buff));
         } break;
 
@@ -76,7 +87,9 @@ void HostPeerReceiver::step() {
 
           std::string options =
               TossedItem::options(x, y, x_dir, y_dir, true, buff);
-          thoom::Scene::instance->create_object(TOSSED_ITEM_OBJ, options);
+          thoom::Scene::instance->create_entity(
+              TOSSED_ITEM_OBJ, options,
+              {thoom::Entity::Ownership::kFixed, remote_feta->owner_pid});
           remote_feta->remove_item(std::string(buff));
         } break;
 
@@ -96,10 +109,8 @@ void HostPeerReceiver::step() {
           HitBox::Properties props = {item_info[sel_item_id].damage, 200, 100};
           props.single_use = true;
 
-          thoom::Scene::instance->create_object(
-              HITBOX_OBJ,
-              HitBox::options(remote_feta->gid, remote_feta->gid, x_off - 16,
-                              y_off - 18, 32, 32, props));
+          new HitBox(*remote_feta, remote_feta, x_off - 16, y_off - 18, 32, 32,
+                     props);
         } break;
 
         case MSG_FETA_INFO: {
@@ -159,7 +170,6 @@ void HostPeerReceiver::step() {
   }
 }
 
-thoom::Object* HostPeerReceiver::create_object(thoom::Scene* scene,
-                                               const std::string& options) {
+thoom::Object* HostPeerReceiver::create_object(const std::string& options) {
   return new HostPeerReceiver();
 }

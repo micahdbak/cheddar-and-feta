@@ -13,22 +13,22 @@
 #include "items/item.h"
 #include "items/toothpick.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
 #include "utils/utils.h"
 
-FoePorcupine::FoePorcupine(int x, int y, int spawner_id)
-    : Foe(float(x), float(y), spawner_id, 250, 100, 256.0f, 64.0f) {
+FoePorcupine::FoePorcupine(const thoom::Entity::Context& context, int x, int y,
+                           int spawner_id)
+    : Foe(context, float(x), float(y), spawner_id, 250, 100, 256.0f, 64.0f) {
   this->sprite = new thoom::Sprite("sprites/foe_porcupine.bmp", 32, 32, 250);
 
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->gid, -6, -8, 12, 16));
+  new HurtBox(*this, -6, -8, 12, 16);
 }
 
 FoePorcupine::~FoePorcupine() {
@@ -88,8 +88,9 @@ void FoePorcupine::step() {
         snprintf(buff, sizeof(buff), "%d,%d,%d,%d,%" PRIu64,
                  (int)(this->x + this->off_x), (int)(this->y + this->off_y),
                  this->spine_x_dir, this->spine_y_dir, this->gid);
-        thoom::Scene::instance->create_object(ITEM_TOOTHPICK USE_OBJ,
-                                              std::string(buff));
+        thoom::Scene::instance->create_entity(
+            ITEM_TOOTHPICK USE_OBJ, std::string(buff),
+            {thoom::Entity::Ownership::kFixed, this->owner_pid});
         this->spine_x_dir = this->spine_y_dir = 0;
         thoom::Audio::instance->play("sfx/throw.wav", 1.0f, this->x, this->y,
                                      false);
@@ -168,13 +169,13 @@ void FoePorcupine::render() {
       &this->dst_rect, 22);
 }
 
-thoom::Object* FoePorcupine::create_object(thoom::Scene* scene,
-                                           const std::string& options) {
+thoom::Entity* FoePorcupine::create_entity(
+    const thoom::Entity::Context& context, const std::string& options) {
   int x = 0, y = 0, spawner_id = 0;
   if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
     // TODO(micahdbak): error
     std::exit(1);
   }
 
-  return new FoePorcupine(x, y, spawner_id);
+  return new FoePorcupine(context, x, y, spawner_id);
 }

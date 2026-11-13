@@ -24,7 +24,7 @@ ThrownMolotov::ThrownMolotov(const thoom::Entity::Context& context, float x,
       new thoom::Sprite("sprites/item_molotov_thrown.bmp", 24, 24, 100);
   this->timer = thoom::Scene::instance->ticks;
 
-  HitBox::Properties props = {1, 1000, 1000};
+  HitBox::Properties props = {1, 60, 60};
   thoom::Entity* instigator = thoom::Scene::instance->find_entity(from_gid);
   new HitBox(*this, instigator, -16, -16, 32, 32, props);
 }

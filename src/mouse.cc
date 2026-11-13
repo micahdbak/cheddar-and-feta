@@ -196,8 +196,7 @@ void Mouse::step() {
             this->is_busy = ATTACKING;
             int x_off, y_off;
             HitBox::make_offset(x_dir, y_dir, &x_off, &y_off, 8.0f);
-            HitBox::Properties props = {item_info[sel_item_id].damage, 200,
-                                        100};
+            HitBox::Properties props = {item_info[sel_item_id].damage, 12, 6};
             props.single_use = true;
             new HitBox(*this, this, x_off - 16, y_off - 18, 32, 32, props);
 
@@ -427,6 +426,21 @@ void Mouse::attack(int damage) {
   }
 }
 
+void Mouse::receive_hit(const Hit& hit) {
+  this->attack(hit.damage);
+
+  int throw_x, throw_y;
+  if (hit.throw_away) {
+    thoom::dir_to_point(hit.contact_x, hit.contact_y, this->x, this->y,
+                        &throw_x, &throw_y);
+  } else {
+    thoom::dir_to_point(this->x, this->y, hit.contact_x, hit.contact_y,
+                        &throw_x, &throw_y);
+  }
+
+  this->set_throw(throw_x, throw_y);
+}
+
 void Mouse::push_item(const std::string& item_id) {
   if (item_info.find(item_id) == item_info.end()) {
     thoom_log_fatal("Mouse: unknown item '%s'", item_id.c_str());
@@ -554,24 +568,31 @@ std::vector<GameHud::Item> Mouse::read_items(const std::string& items_s,
 }
 
 Mouse* Mouse::closest_mouse(float x, float y, float min_distance, bool forced) {
-  float distance_cheddar =
-      (cheddar->is_down && !forced)
-          ? FLT_MAX
-          : thoom::distance_between_points(x, y, cheddar->x, cheddar->y);
-  float distance_feta = (remote_feta->is_down && !forced)
-                            ? FLT_MAX
-                            : thoom::distance_between_points(
-                                  x, y, remote_feta->x, remote_feta->y);
+  Mouse* closest = nullptr;
+  float closest_distance = FLT_MAX;
 
-  if (distance_cheddar < distance_feta) {
-    if (min_distance < 0.1f || distance_cheddar < min_distance) {
-      return cheddar;
+  const std::vector<thoom::Entity*> entities =
+      thoom::Scene::instance->find_entities(
+          thoom::Entity::AuthorityScope::kAll);
+  for (thoom::Entity* entity : entities) {
+    Mouse* mouse = dynamic_cast<Mouse*>(entity);
+    if (mouse == nullptr || (mouse->is_down && !forced)) {
+      continue;
     }
-  } else if (min_distance < 0.1f || distance_feta < min_distance) {
-    return remote_feta;
+
+    const float distance =
+        thoom::distance_between_points(x, y, mouse->x, mouse->y);
+    if (distance < closest_distance) {
+      closest = mouse;
+      closest_distance = distance;
+    }
   }
 
-  return nullptr;  // no close-enough mouse
+  if (min_distance >= 0.1f && closest_distance >= min_distance) {
+    return nullptr;
+  }
+
+  return closest;
 }
 
 void Mouse::place(float x, float y) {

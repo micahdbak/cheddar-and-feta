@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "foes/spitter/spitter.h"
+#include "hitbox.h"
 #include "hurtbox.h"
 #include "mouse.h"
 #include "object/entity.h"
@@ -11,12 +12,12 @@
 #include "utils/utils.h"
 
 SpitterAbdomen::SpitterAbdomen(Spitter& spitter)
-    : thoom::Entity::Node(spitter, std::nullopt), spitter(spitter) {
+    : thoom::Entity::Node(spitter, kAbdomenNid), spitter(spitter) {
   this->sprite =
       new thoom::Sprite("sprites/foe_spitter_abdomen.bmp", 32, 32, 250);
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
-  new HurtBox(*this, -16, -16, 32, 32);
+  new HurtBox(*this, kAbdomenHurtboxNid, HURT_GROUP_FOE, -16, -16, 32, 32);
 
   this->cur_dir = 0;
   for (int i = 0; i < FRAMES_TO_SET_CUR_DIR; i++) this->dirs[i] = 0;
@@ -25,7 +26,9 @@ SpitterAbdomen::SpitterAbdomen(Spitter& spitter)
 
 SpitterAbdomen::~SpitterAbdomen() { delete this->sprite; }
 
-void SpitterAbdomen::attack(int damage) { this->spitter.attack(damage); }
+void SpitterAbdomen::receive_hit(const Hit& hit) {
+  this->spitter.receive_hit(hit);
+}
 
 void SpitterAbdomen::step() {
   Spitter::step_t p2 = this->spitter.get_pos(NUM_SEGMENTS);

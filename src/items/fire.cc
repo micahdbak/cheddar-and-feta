@@ -38,10 +38,10 @@ Fire::Fire(const thoom::Entity::Context& context, float x, float y, int x_dir,
   // deals 3 damage over 3 seconds
   new HitBox(*this, nullptr, -8, -8, 16, 16,
              HitBox::Properties{.damage = 1,
-                                .cooldown_ms = 1000,
-                                .delete_after_ms = 4000,
-                                .shared_cooldowns = true,
-                                .shared_id = HB_SHARED_FIRE});
+                                .cooldown_ticks = 60,
+                                .lifetime_ticks = 240,
+                                .type = HitType::kFire,
+                                .cooldown_group = kSharedCooldownGroup});
 }
 
 Fire::~Fire() { delete this->sprite; }

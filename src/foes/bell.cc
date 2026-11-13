@@ -3,6 +3,7 @@
 #include <cstdio>
 
 #include "audio/audio.h"
+#include "hitbox.h"
 #include "hurtbox.h"
 #include "object/entity.h"
 #include "renderer/renderer.h"
@@ -20,10 +21,12 @@ Bell::Bell(const thoom::Entity::Context& context, int x, int y, int spawner_id)
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  new HurtBox(*this, -8, -8, 16, 16);
+  new HurtBox(*this, kBodyHurtboxNid, HURT_GROUP_WORLD, -8, -8, 16, 16);
 }
 
 Bell::~Bell() { delete this->sprite; }
+
+void Bell::receive_hit(const Hit& hit) { this->attack(hit.damage); }
 
 void Bell::attack(int damage) {
   FoeSpawner* spawner = spawners[this->spawner_id];

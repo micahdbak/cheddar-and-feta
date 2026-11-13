@@ -25,7 +25,7 @@ FoeBug::FoeBug(const thoom::Entity::Context& context, int x, int y,
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  new HurtBox(*this, -8, -8, 16, 16);
+  new HurtBox(*this, kBodyHurtboxNid, HURT_GROUP_FOE, -8, -8, 16, 16);
 }
 
 FoeBug::~FoeBug() {
@@ -44,7 +44,7 @@ void FoeBug::action(Mouse* mouse) {
 
   int x_off, y_off;
   HitBox::make_offset(x_dir, y_dir, &x_off, &y_off, 8.0f);
-  HitBox::Properties props = {1, 500, 250};
+  HitBox::Properties props = {1, 30, 15};
   new HitBox(*this, this, x_off - 8, y_off - 8, 16, 16, props);
 }
 
@@ -54,7 +54,6 @@ void FoeBug::attack_internal(int damage) {
   if (this->health <= 0) {
     this->health = 0;
     this->state = Foe::State::DEAD;
-    this->remove_from_foes();
 
     int kills = thoom::save.geti(FOE_BUG_OBJ STATS) + 1;
     thoom::save.puti(FOE_BUG_OBJ STATS, kills);

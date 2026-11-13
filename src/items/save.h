@@ -44,9 +44,10 @@ class ItemSaveUse : public thoom::Object {
       return nullptr;
     }
 
-    bool is_feta = remote_feta != nullptr && remote_feta->gid == obj_gid;
+    Mouse* mouse =
+        dynamic_cast<Mouse*>(thoom::Scene::instance->find_entity(obj_gid));
 
-    return new ItemSaveUse(is_feta);
+    return new ItemSaveUse(mouse != nullptr && mouse->is_feta);
   }
 
  private:

@@ -48,7 +48,7 @@ ThrownCannonBall::ThrownCannonBall(const thoom::Entity::Context& context,
 
   this->spawned_ticks = thoom::Scene::instance->ticks;
 
-  HitBox::Properties props = {2, 1000, 1000};
+  HitBox::Properties props = {2, 60, 60};
   props.single_use = true;
   new HitBox(*this, obj, -8, -8, 16, 16, props);
 }

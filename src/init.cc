@@ -8,11 +8,10 @@
 #include "host_game.h"
 #include "input/controller.h"
 #include "input/input.h"
-#include "object.h"
+#include "object/object.h"
 #include "peer/peer.h"
 #include "renderer/font.h"
 #include "renderer/renderer.h"
-#include "scene/scene.h"
 #include "texture/texture.h"
 #include "thoom/macros.h"
 #include "thoom/thoom.h"
@@ -22,7 +21,7 @@ bool init_show_peer(void* user) {
   return thoom::Peer::instance != nullptr && thoom::Peer::instance->is_host();
 }
 
-Init::Init() {
+Init::Init() : thoom::Object(nullptr) {
   thoom_room_quit();
 
   this->ui = thoom::Texture::instance->create_texture(
@@ -118,7 +117,6 @@ void Init::render() {
                                          0);
 }
 
-thoom::Object* Init::create_object(thoom::Scene* scene,
-                                   const std::string& options) {
+thoom::Object* Init::create_object(const std::string& options) {
   return new Init();
 }

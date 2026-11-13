@@ -1,22 +1,16 @@
 #pragma once
 
-#include <cinttypes>
+#include <SDL3/SDL.h>
+
 #include <cstdint>
-#include <cstdio>
-#include <string>
 
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
+#include "object/object.h"
 #include "thoom/macros.h"
-#include "thoom/thoom.h"
 
-#define HITBOX_OBJ "hitbox"
-
-// Cooldown keys, not object ids. They sit in the reserved invalid-pid
-// namespace, above every gid an allocator can issue.
-#define HB_SHARED_NONE ((thoom_gid)UINT64_MAX - 1)
-#define HB_SHARED_FIRE ((thoom_gid)UINT64_MAX - 2)
-#define HB_SHARED_SPITTER ((thoom_gid)UINT64_MAX - 3)
+#define HB_SHARED_NONE (UINT64_MAX - 1)
+#define HB_SHARED_FIRE (UINT64_MAX - 2)
+#define HB_SHARED_SPITTER (UINT64_MAX - 3)
 
 class HitSource {
  public:
@@ -28,14 +22,14 @@ class HitSource {
   virtual void hitsource_notify() {};
 };
 
-class HitBox : public thoom::Object {
+class HitBox : public thoom::Entity::Node {
  public:
   struct Properties {
     int damage;
     int cooldown_ms;
     int delete_after_ms = 0;
     bool shared_cooldowns = false;
-    thoom_gid shared_id = HB_SHARED_NONE;
+    uint64_t shared_id = HB_SHARED_NONE;
     bool single_use = false;
   };
 
@@ -48,38 +42,25 @@ class HitBox : public thoom::Object {
     *y_off = y_dir * hitbox_distance;
   }
 
-  static std::string options(thoom_gid source_gid, thoom_gid hurtbox_owner_gid,
-                             int x_off, int y_off, int w, int h,
-                             Properties props) {
-    char buff[256];
-    snprintf(buff, sizeof(buff),
-             "%" PRIu64 ",%" PRIu64 ",%d,%d,%d,%d,%d,%d,%d,%d,%" PRIu64 ",%d",
-             source_gid, hurtbox_owner_gid, x_off, y_off, w, h, props.damage,
-             props.cooldown_ms, props.delete_after_ms,
-             props.shared_cooldowns ? 1 : 0, props.shared_id,
-             props.single_use ? 1 : 0);
-    return std::string(buff);
-  }
-
-  HitBox(thoom_gid source_gid, thoom_gid hurtbox_owner_gid, int x_off,
-         int y_off, int w, int h, Properties props);
-  ~HitBox();
+  HitBox(thoom::Object& source, thoom::Entity* instigator, int x_off, int y_off,
+         int w, int h, Properties props);
+  ~HitBox() = default;
 
   void step() override;
   void render() override;
+  uint64_t cooldown_key() const;
 
   SDL_Rect bounding_box;
 
   bool throw_away = true;
 
   bool shared_cooldowns = false, single_use = false;
-  thoom_gid shared_id = HB_SHARED_NONE;
-  static thoom::Object* create_object(thoom::Scene* scene,
-                                      const std::string& options);
+  uint64_t shared_id = HB_SHARED_NONE;
 
  private:
-  bool from_foe;
-  thoom_gid source_gid, hurtbox_owner_gid;
+  HitSource* source = nullptr;
+  thoom::Entity* instigator = nullptr;
+  bool from_foe = false;
   int x_off, y_off, damage, cooldown_ms, delete_after_ms;
   uint64_t created_ticks;
 

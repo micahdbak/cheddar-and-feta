@@ -4,14 +4,16 @@
 #include <string>
 
 #include "guest_feta.h"
-#include "object.h"
+#include "object/object.h"
 #include "peer/peer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
 
 GuestPeerSender* guest_peer_sender;
 
-GuestPeerSender::GuestPeerSender() { guest_peer_sender = this; }
+GuestPeerSender::GuestPeerSender() : thoom::Object(nullptr) {
+  guest_peer_sender = this;
+}
 
 GuestPeerSender::~GuestPeerSender() {
   if (guest_peer_sender == this) {
@@ -74,7 +76,6 @@ void GuestPeerSender::send_audio(const char* wav_path, float gain, float x,
   GuestPeerSender::send_message(MSG_AUDIO, std::string(buff));
 }
 
-thoom::Object* GuestPeerSender::create_object(thoom::Scene* scene,
-                                              const std::string& options) {
+thoom::Object* GuestPeerSender::create_object(const std::string& options) {
   return new GuestPeerSender();
 }

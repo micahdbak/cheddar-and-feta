@@ -7,7 +7,7 @@
 #include "foes/spitter/spitter.h"
 #include "input/controller.h"
 #include "input/input.h"
-#include "object.h"
+#include "object/object.h"
 #include "render_functions.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
@@ -15,7 +15,7 @@
 #include "texture/texture.h"
 #include "window/window.h"
 
-Credits::Credits() {
+Credits::Credits() : thoom::Object(nullptr) {
   int ant_kills = thoom::save.geti(FOE_BUG_OBJ STATS);
   int drone_kills = thoom::save.geti(FOE_BAT_OBJ STATS);
   int tank_kills = thoom::save.geti(FOE_FROG_OBJ STATS);
@@ -33,7 +33,7 @@ Credits::Credits() {
 
 void Credits::step() {
   if (thoom::Input::instance->world.consume_hit(thoom::Button::SELECT)) {
-    thoom::Scene::instance->request_map("maps/init");
+    thoom::Scene::instance->request_map("maps/init", true);
     thoom::save.clear();
   }
 }
@@ -43,7 +43,6 @@ void Credits::render() {
                                          &this->src_rect, &this->dst_rect, 0);
 }
 
-thoom::Object* Credits::create_object(thoom::Scene* scene,
-                                      const std::string& options) {
+thoom::Object* Credits::create_object(const std::string& options) {
   return new Credits();
 }

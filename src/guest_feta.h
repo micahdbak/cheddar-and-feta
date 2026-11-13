@@ -1,13 +1,14 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <cstdint>
 #include <string>
 #include <vector>
 
 #include "game_hud.h"
 #include "mouse.h"
-#include "object.h"
-#include "scene/scene.h"
+#include "object/object.h"
 #include "sprite/sprite.h"
 
 #define GUEST_FETA_OBJ "guest_feta"
@@ -35,8 +36,7 @@ class GuestFeta : public thoom::Object {
   bool is_down = false, did_hit = false;
   thoom::Sprite *sprite, *emotes;
   int which_emote = -1;
-  static thoom::Object* create_object(thoom::Scene* scene,
-                                      const std::string& options);
+  static thoom::Object* create_object(const std::string& options);
 
  private:
   static bool known_item(const GameHud::Item& item);

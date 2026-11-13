@@ -1,19 +1,16 @@
 #include "hurtbox.h"
 
-#include <cinttypes>
 #include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <string>
+#include <optional>
 #include <vector>
 
 #include "foes/foe.h"
 #include "hitbox.h"
 #include "icon.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
+#include "object/object.h"
 #include "scene/scene.h"
-#include "thoom/thoom.h"
 #include "utils/utils.h"
 
 #ifdef ONSCREEN_DEBUG
@@ -22,33 +19,22 @@
 #endif
 
 std::vector<HurtBox*> hurtboxes;
-thoom_gid hurtbox_hitbox_gid;
+uint64_t hurtbox_hitbox_key;
 
-HurtBox::HurtBox(thoom_gid owner_gid, int x_off, int y_off, int w, int h)
-    : owner_gid(owner_gid),
+HurtBox::HurtBox(thoom::Object& owner, int x_off, int y_off, int w, int h)
+    : thoom::Entity::Node(owner, std::nullopt),
+      owner(owner),
       x_off(x_off),
       y_off(y_off),
       bounding_box{0, 0, w, h} {
-  thoom::Object* owner = thoom::Scene::instance->find_gid_object(owner_gid);
-  if (owner == nullptr) return;
-
-  HurtSource* source = dynamic_cast<HurtSource*>(owner);
-  Mouse* mouse = dynamic_cast<Mouse*>(owner);
-  Foe* foe = dynamic_cast<Foe*>(owner);
-
-  if (source != nullptr) {
+  if (dynamic_cast<HurtSource*>(&owner) != nullptr) {
     this->owner_class = HurtBox::OwnerClass::HURTSOURCE;
-    this->bounding_box.x = (int)source->hurtsource_y() + x_off;
-    this->bounding_box.y = (int)source->hurtsource_x() + y_off;
-  } else if (mouse != nullptr) {
+  } else if (dynamic_cast<Mouse*>(&owner) != nullptr) {
     this->owner_class = HurtBox::OwnerClass::MOUSE;
-    this->bounding_box.x = (int)mouse->x + x_off;
-    this->bounding_box.y = (int)mouse->y + y_off;
-  } else if (foe != nullptr) {
+  } else if (dynamic_cast<Foe*>(&owner) != nullptr) {
     this->owner_class = HurtBox::OwnerClass::FOE;
-    this->bounding_box.x = (int)foe->x + x_off;
-    this->bounding_box.y = (int)foe->y + y_off;
   } else {
+    this->deleted = true;
     return;
   }
 
@@ -65,130 +51,114 @@ HurtBox::~HurtBox() {
   }
 }
 
-void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
-  thoom::Object* owner =
-      thoom::Scene::instance->find_gid_object(this->owner_gid);
-  if (owner == nullptr) return;
-
-  bool should_hit = false;
-  thoom_gid hit_id = hitbox->shared_cooldowns ? hitbox->shared_id : hitbox->gid;
-
-  auto it = this->previous_hits.find(hit_id);
-  if (it != this->previous_hits.end()) {
-    uint64_t when_ticks = it->second;
-
-    if (thoom::Scene::instance->ticks - when_ticks > cooldown_ms) {
-      should_hit = true;
-      this->previous_hits[hit_id] = thoom::Scene::instance->ticks;
-    }
-  } else {
-    // hitbox hasn't attacked this yet
-    this->previous_hits[hit_id] = thoom::Scene::instance->ticks;
-    should_hit = true;
-  }
-
-  if (should_hit) {
-    hurtbox_hitbox_gid = hit_id;
-
-    switch (this->owner_class) {
-      case HurtBox::OwnerClass::MOUSE: {
-        Mouse* mouse = dynamic_cast<Mouse*>(owner);
-        if (mouse == nullptr) return;
-        mouse->attack(damage);
-
-        // throw mouse away from source
-        int throw_x, throw_y;
-        float hitbox_x =
-            (float)(hitbox->bounding_box.x + hitbox->bounding_box.w / 2);
-        float hitbox_y =
-            (float)(hitbox->bounding_box.y + hitbox->bounding_box.h / 2);
-
-        if (hitbox->throw_away) {
-          // throws away from hitbox
-          thoom::dir_to_point(hitbox_x, hitbox_y, mouse->x, mouse->y, &throw_x,
-                              &throw_y);
-        } else {
-          // pulls toward hitbox
-          thoom::dir_to_point(mouse->x, mouse->y, hitbox_x, hitbox_y, &throw_x,
-                              &throw_y);
-        }
-
-        mouse->set_throw(throw_x, throw_y);
-      } break;
-
-      case HurtBox::OwnerClass::FOE: {
-        Foe* foe = dynamic_cast<Foe*>(owner);
-        if (foe == nullptr) return;
-        foe->attack(damage);
-
-        // throw mouse away from source
-        float hitbox_x =
-            (float)(hitbox->bounding_box.x + hitbox->bounding_box.w / 2);
-        float hitbox_y =
-            (float)(hitbox->bounding_box.y + hitbox->bounding_box.h / 2);
-
-        if (hitbox->throw_away) {
-          // throws away from hitbox
-          thoom::dir_to_point(hitbox_x, hitbox_y, foe->x, foe->y, &foe->throw_x,
-                              &foe->throw_y);
-        } else {
-          // pulls toward hitbox
-          thoom::dir_to_point(foe->x, foe->y, hitbox_x, hitbox_y, &foe->throw_x,
-                              &foe->throw_y);
-        }
-      } break;
-
-      case HurtBox::OwnerClass::HURTSOURCE: {
-        HurtSource* source = dynamic_cast<HurtSource*>(owner);
-        if (source == nullptr) return;
-        source->attack(damage);
-      } break;
-    }
-  }
-}
-
-void HurtBox::step() {
-  thoom::Object* owner =
-      thoom::Scene::instance->find_gid_object(this->owner_gid);
-
-  if (owner == nullptr) {
-    this->deleted = true;
-    return;
-  }
-
-  // update bounding box
+bool HurtBox::update() {
   switch (this->owner_class) {
     case HurtBox::OwnerClass::MOUSE: {
-      Mouse* mouse = dynamic_cast<Mouse*>(owner);
+      Mouse* mouse = dynamic_cast<Mouse*>(&this->owner);
       if (mouse == nullptr) {
-        this->deleted = true;
-        return;
+        return false;
       }
       this->bounding_box.x = (int)mouse->x + this->x_off;
       this->bounding_box.y = (int)mouse->y + this->y_off;
     } break;
+
     case HurtBox::OwnerClass::FOE: {
-      Foe* foe = dynamic_cast<Foe*>(owner);
+      Foe* foe = dynamic_cast<Foe*>(&this->owner);
       if (foe == nullptr || foe->state == Foe::State::DEAD) {
-        this->deleted = true;
-        return;
+        return false;
       }
       this->bounding_box.x = (int)foe->x + (int)foe->off_x + this->x_off;
       this->bounding_box.y = (int)foe->y + (int)foe->off_y + this->y_off;
     } break;
+
     case HurtBox::OwnerClass::HURTSOURCE: {
-      HurtSource* source = dynamic_cast<HurtSource*>(owner);
+      HurtSource* source = dynamic_cast<HurtSource*>(&this->owner);
       if (source == nullptr) {
-        this->deleted = true;
-        return;
+        return false;
       }
       this->bounding_box.x = (int)source->hurtsource_x() + this->x_off;
       this->bounding_box.y = (int)source->hurtsource_y() + this->y_off;
     } break;
   }
+
+  return true;
+}
+
+void HurtBox::hurt(int damage, HitBox* hitbox, int cooldown_ms) {
+  bool should_hit = false;
+  const uint64_t key = hitbox->cooldown_key();
+
+  auto it = this->previous_hits.find(key);
+  if (it == this->previous_hits.end()) {
+    this->previous_hits[key] = thoom::Scene::instance->ticks;
+    should_hit = true;
+  } else if (thoom::Scene::instance->ticks - it->second > cooldown_ms) {
+    this->previous_hits[key] = thoom::Scene::instance->ticks;
+    should_hit = true;
+  }
+
+  if (!should_hit) {
+    return;
+  }
+
+  hurtbox_hitbox_key = key;
+
+  switch (this->owner_class) {
+    case HurtBox::OwnerClass::MOUSE: {
+      Mouse* mouse = dynamic_cast<Mouse*>(&this->owner);
+      if (mouse == nullptr) return;
+      mouse->attack(damage);
+
+      int throw_x, throw_y;
+      float hitbox_x =
+          (float)(hitbox->bounding_box.x + hitbox->bounding_box.w / 2);
+      float hitbox_y =
+          (float)(hitbox->bounding_box.y + hitbox->bounding_box.h / 2);
+
+      if (hitbox->throw_away) {
+        thoom::dir_to_point(hitbox_x, hitbox_y, mouse->x, mouse->y, &throw_x,
+                            &throw_y);
+      } else {
+        thoom::dir_to_point(mouse->x, mouse->y, hitbox_x, hitbox_y, &throw_x,
+                            &throw_y);
+      }
+
+      mouse->set_throw(throw_x, throw_y);
+    } break;
+
+    case HurtBox::OwnerClass::FOE: {
+      Foe* foe = dynamic_cast<Foe*>(&this->owner);
+      if (foe == nullptr) return;
+      foe->attack(damage);
+
+      float hitbox_x =
+          (float)(hitbox->bounding_box.x + hitbox->bounding_box.w / 2);
+      float hitbox_y =
+          (float)(hitbox->bounding_box.y + hitbox->bounding_box.h / 2);
+
+      if (hitbox->throw_away) {
+        thoom::dir_to_point(hitbox_x, hitbox_y, foe->x, foe->y, &foe->throw_x,
+                            &foe->throw_y);
+      } else {
+        thoom::dir_to_point(foe->x, foe->y, hitbox_x, hitbox_y, &foe->throw_x,
+                            &foe->throw_y);
+      }
+    } break;
+
+    case HurtBox::OwnerClass::HURTSOURCE: {
+      HurtSource* source = dynamic_cast<HurtSource*>(&this->owner);
+      if (source != nullptr) {
+        source->attack(damage);
+      }
+    } break;
+  }
 }
 
 void HurtBox::render() {
+  if (!this->update()) {
+    return;
+  }
+
 #ifdef ONSCREEN_DEBUG
   this->dst_rect = {(float)this->bounding_box.x, (float)this->bounding_box.y,
                     (float)this->bounding_box.w, (float)this->bounding_box.h};
@@ -196,17 +166,4 @@ void HurtBox::render() {
                                          &this->src_rect, &this->dst_rect,
                                          THOOM_SCREEN_HEIGHT);
 #endif
-}
-
-thoom::Object* HurtBox::create_object(thoom::Scene* scene,
-                                      const std::string& options) {
-  thoom_gid owner_gid;
-  int x_off, y_off, w, h;
-  if (5 != sscanf(options.c_str(), "%" SCNu64 ",%d,%d,%d,%d", &owner_gid,
-                  &x_off, &y_off, &w, &h)) {
-    // TODO(micahdbak): error
-    std::exit(1);
-  }
-
-  return new HurtBox(owner_gid, x_off, y_off, w, h);
 }

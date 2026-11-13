@@ -10,22 +10,22 @@
 #include "icon.h"
 #include "items/cheese.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
 
-FoeBug::FoeBug(int x, int y, int spawner_id)
-    : Foe(float(x), float(y), spawner_id, spawner_id == -2 ? 1000 : 500, 100,
-          256.0f, 16.0f) {
+FoeBug::FoeBug(const thoom::Entity::Context& context, int x, int y,
+               int spawner_id)
+    : Foe(context, float(x), float(y), spawner_id,
+          spawner_id == -2 ? 1000 : 500, 100, 256.0f, 16.0f) {
   this->sprite = new thoom::Sprite("sprites/foe_bug.bmp", 32, 32, 100);
 
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->gid, -8, -8, 16, 16));
+  new HurtBox(*this, -8, -8, 16, 16);
 }
 
 FoeBug::~FoeBug() {
@@ -45,9 +45,7 @@ void FoeBug::action(Mouse* mouse) {
   int x_off, y_off;
   HitBox::make_offset(x_dir, y_dir, &x_off, &y_off, 8.0f);
   HitBox::Properties props = {1, 500, 250};
-  thoom::Scene::instance->create_object(
-      HITBOX_OBJ, HitBox::options(this->gid, this->gid, x_off - 8, y_off - 8,
-                                  16, 16, props));
+  new HitBox(*this, this, x_off - 8, y_off - 8, 16, 16, props);
 }
 
 void FoeBug::attack_internal(int damage) {
@@ -177,7 +175,7 @@ void FoeBug::render() {
       &this->dst_rect, 18);
 }
 
-thoom::Object* FoeBug::create_object(thoom::Scene* scene,
+thoom::Entity* FoeBug::create_entity(const thoom::Entity::Context& context,
                                      const std::string& options) {
   int x = 0, y = 0, spawner_id = 0;
   if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
@@ -185,5 +183,5 @@ thoom::Object* FoeBug::create_object(thoom::Scene* scene,
     std::exit(1);
   }
 
-  return new FoeBug(x, y, spawner_id);
+  return new FoeBug(context, x, y, spawner_id);
 }

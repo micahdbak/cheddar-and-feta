@@ -1,10 +1,11 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include "hitbox.h"
 #include "item.h"
 #include "mouse.h"
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 #include "sprite/sprite.h"
 #include "thoom/thoom.h"
 
@@ -12,21 +13,22 @@
 
 class DroppedMolotov : public DroppedItem {
  public:
-  DroppedMolotov(float x, float y)
-      : DroppedItem(ITEM_MOLOTOV, x, y, "sprites/item_molotov.bmp", 16, 16,
-                    100) {}
+  DroppedMolotov(const thoom::Entity::Context& context, float x, float y)
+      : DroppedItem(context, ITEM_MOLOTOV, x, y, "sprites/item_molotov.bmp", 16,
+                    16, 100) {}
   ~DroppedMolotov() = default;
 
   void take(Mouse* mouse) override { mouse->push_item(ITEM_MOLOTOV); }
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 };
 
 // ----
 
-class ThrownMolotov : public thoom::Object, public HitSource {
+class ThrownMolotov : public thoom::Entity, public HitSource {
  public:
-  ThrownMolotov(float x, float y, int x_dir, int y_dir, thoom_gid from_gid);
+  ThrownMolotov(const thoom::Entity::Context& context, float x, float y,
+                int x_dir, int y_dir, thoom_gid from_gid);
   ~ThrownMolotov();
 
   void step() override;
@@ -36,7 +38,7 @@ class ThrownMolotov : public thoom::Object, public HitSource {
   float hitsource_y() override { return this->y; }
 
   void hitsource_notify() override { this->did_hit = true; }
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

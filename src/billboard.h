@@ -1,17 +1,18 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <string>
 
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 #include "sprite/sprite.h"
 
 #define BILLBOARD_OBJ "billboard"
 
-class Billboard : public thoom::Object {
+class Billboard : public thoom::Entity {
  public:
-  Billboard(int x, int y, int ts_x, int ts_y, int w, int h, int depth,
-            std::string tilesheet);
+  Billboard(const thoom::Entity::Context& context, int x, int y, int ts_x,
+            int ts_y, int w, int h, int depth, std::string tilesheet);
   ~Billboard();
 
   void step() override {}
@@ -20,7 +21,7 @@ class Billboard : public thoom::Object {
   static void parse_options(const std::string& options, int* x, int* y,
                             int* ts_x, int* ts_y, int* w, int* h, int* depth,
                             std::string& tilesheet);
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

@@ -5,14 +5,14 @@
 
 #include "hitbox.h"
 #include "mouse.h"
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 
 #define CHEDDAR_OBJ "cheddar"
 
 class Cheddar : public Mouse, public HitSource {
  public:
-  explicit Cheddar(std::vector<Mouse::SpawnCoord>& coordinates);
+  explicit Cheddar(const thoom::Entity::Context& context,
+                   std::vector<Mouse::SpawnCoord>& coordinates);
   ~Cheddar();
 
   void render() override;
@@ -24,7 +24,7 @@ class Cheddar : public Mouse, public HitSource {
   float hitsource_x() override { return this->x; }
   float hitsource_y() override { return this->y; }
   void hitsource_notify() override { this->did_hit = true; }
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  protected:

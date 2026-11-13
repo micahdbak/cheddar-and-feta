@@ -1,27 +1,22 @@
 #include "abdomen.h"
 
-#include <cinttypes>
-#include <cstdio>
-#include <cstdlib>
-#include <string>
+#include <optional>
 
 #include "foes/spitter/spitter.h"
 #include "hurtbox.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
-#include "scene/scene.h"
 #include "sprite/sprite.h"
-#include "thoom/thoom.h"
 #include "utils/utils.h"
 
-SpitterAbdomen::SpitterAbdomen(thoom_gid parent_gid) : parent_gid(parent_gid) {
+SpitterAbdomen::SpitterAbdomen(Spitter& spitter)
+    : thoom::Entity::Node(spitter, std::nullopt), spitter(spitter) {
   this->sprite =
       new thoom::Sprite("sprites/foe_spitter_abdomen.bmp", 32, 32, 250);
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
-  thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->gid, -16, -16, 32, 32));
+  new HurtBox(*this, -16, -16, 32, 32);
 
   this->cur_dir = 0;
   for (int i = 0; i < FRAMES_TO_SET_CUR_DIR; i++) this->dirs[i] = 0;
@@ -30,63 +25,44 @@ SpitterAbdomen::SpitterAbdomen(thoom_gid parent_gid) : parent_gid(parent_gid) {
 
 SpitterAbdomen::~SpitterAbdomen() { delete this->sprite; }
 
-void SpitterAbdomen::attack(int damage) {
-  thoom::Object* parent_object =
-      thoom::Scene::instance->find_gid_object(this->parent_gid);
-  Spitter* parent = dynamic_cast<Spitter*>(parent_object);
-
-  if (parent != nullptr) parent->attack(damage);
-}
+void SpitterAbdomen::attack(int damage) { this->spitter.attack(damage); }
 
 void SpitterAbdomen::step() {
-  thoom::Object* parent_object =
-      thoom::Scene::instance->find_gid_object(this->parent_gid);
-  Spitter* parent = dynamic_cast<Spitter*>(parent_object);
-
-  if (parent == nullptr) {
-    this->deleted = true;
-    return;
-  }
-
-  struct Spitter::step_t p2, p3, p4;
-  int direction;
-
-  // p1, not used
-  p2 = parent->get_pos(NUM_SEGMENTS);
-  p3 = parent->get_pos(NUM_SEGMENTS - 1);
-  p4 = parent->get_pos(NUM_SEGMENTS - 2);
+  Spitter::step_t p2 = this->spitter.get_pos(NUM_SEGMENTS);
+  Spitter::step_t p3 = this->spitter.get_pos(NUM_SEGMENTS - 1);
+  Spitter::step_t p4 = this->spitter.get_pos(NUM_SEGMENTS - 2);
 
   if (p2.x == 0 || p3.x == 0 || p4.x == 0) return;
 
-  int this_x = p2.x;
-  int this_y = p2.y;
-  int next_x = (p2.x + p4.x) >> 1;
-  int next_y = (p2.y + p4.y) >> 1;
+  const int this_x = p2.x;
+  const int this_y = p2.y;
+  const int next_x = (p2.x + p4.x) >> 1;
+  const int next_y = (p2.y + p4.y) >> 1;
 
   this->x = (float)this_x;
   this->y = (float)this_y;
 
   int x_dir, y_dir;
   thoom::dir_to_point(this_x, this_y, next_x, next_y, &x_dir, &y_dir);
-  direction = thoom::direction_from_dirs(x_dir, y_dir);
+  int direction = thoom::direction_from_dirs(x_dir, y_dir);
 
   this->dirs[this->dirs_i] = direction;
   this->dirs_i = (++this->dirs_i) % FRAMES_TO_SET_CUR_DIR;
   int sum = 0;
 
-  for (int i = 1; i < FRAMES_TO_SET_CUR_DIR; i++)
+  for (int i = 1; i < FRAMES_TO_SET_CUR_DIR; i++) {
     sum += this->dirs[i - 1] == this->dirs[i] ? 1 : 0;
+  }
 
   if (sum >= FRAMES_TO_SET_CUR_DIR - 1) {
     this->cur_dir = this->dirs[0];
   }
 
   Mouse* mouse = Mouse::closest_mouse(this->x, this->y, 64.0f, true);
-
   if (mouse == nullptr) {
-    parent->abdomen_distance = 256.0f;
+    this->spitter.abdomen_distance = 256.0f;
   } else {
-    parent->abdomen_distance =
+    this->spitter.abdomen_distance =
         thoom::distance_between_points(mouse->x, mouse->y, this->x, this->y);
   }
 
@@ -100,18 +76,4 @@ void SpitterAbdomen::render() {
   thoom::Renderer::instance->push_sprite(
       this->sprite->tex_id, this->sprite->texture, &this->sprite->frame,
       &this->dst_rect, 16);
-}
-
-thoom::Object* SpitterAbdomen::create_object(thoom::Scene* scene,
-                                             const std::string& options) {
-  thoom_gid parent_gid;
-  if (1 != sscanf(options.c_str(), "%" SCNu64, &parent_gid)) {
-    // TODO(micahdbak): error
-    std::exit(1);
-  }
-
-  thoom::Object* obj = scene->find_gid_object(parent_gid);
-  if (obj == nullptr || dynamic_cast<Spitter*>(obj) == nullptr) return nullptr;
-
-  return new SpitterAbdomen(parent_gid);
 }

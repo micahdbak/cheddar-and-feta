@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <cinttypes>
 #include <cstdio>
 #include <string>
@@ -7,7 +9,7 @@
 
 #include "game_hud.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "sprite/sprite.h"
 #include "thoom/thoom.h"
 
@@ -29,7 +31,7 @@ extern std::unordered_map<std::string, Item> item_info;
 
 bool require_item(const GameHud::Item& item);
 
-class DroppedItem : public virtual thoom::Object {
+class DroppedItem : public thoom::Entity {
  public:
   static std::string options(int x, int y) {
     char buff[256];
@@ -37,8 +39,9 @@ class DroppedItem : public virtual thoom::Object {
     return std::string(buff);
   }
 
-  DroppedItem(std::string item_id, float x, float y, const char* sprite_path,
-              int frame_w, int frame_h, int interval_ms);
+  DroppedItem(const thoom::Entity::Context& context, std::string item_id,
+              float x, float y, const char* sprite_path, int frame_w,
+              int frame_h, int interval_ms);
   ~DroppedItem();
 
   void step() override;

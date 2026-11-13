@@ -14,7 +14,7 @@
 #include "input/controller.h"
 #include "input/input.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/object.h"
 #include "peer/peer.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
@@ -26,7 +26,8 @@
 GuestFeta* guest_feta = nullptr;
 
 GuestFeta::GuestFeta(float x, float y, int animation,
-                     std::vector<GameHud::Item> items) {
+                     std::vector<GameHud::Item> items)
+    : thoom::Object(nullptr) {
   if (guest_feta != nullptr) {
     // TODO(micahdbak): error
     std::exit(1);
@@ -610,8 +611,7 @@ void GuestFeta::set_max_mov_speed(float max_mov_speed) {
   this->max_mov_speed = max_mov_speed;
 }
 
-thoom::Object* GuestFeta::create_object(thoom::Scene* scene,
-                                        const std::string& options) {
+thoom::Object* GuestFeta::create_object(const std::string& options) {
   int animation;
   char x_str[256], y_str[256], items_s[1024];
   int fields = sscanf(options.c_str(), "%255[^,],%255[^,],%d %1023s", x_str,

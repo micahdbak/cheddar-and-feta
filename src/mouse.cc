@@ -16,9 +16,11 @@
 #include "input/controller.h"
 #include "input/input.h"
 #include "items/cheese.h"
+#include "items/coffee.h"
 #include "items/item.h"
 #include "items/save.h"
 #include "items/tossed.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
@@ -29,8 +31,9 @@
 Mouse* cheddar = nullptr;
 Mouse* remote_feta = nullptr;
 
-Mouse::Mouse(const char* sprite_path, bool is_feta, const char* save_prefix)
-    : save_id(save_prefix) {
+Mouse::Mouse(const thoom::Entity::Context& context, const char* sprite_path,
+             bool is_feta, const char* save_prefix)
+    : thoom::Entity(context), save_id(save_prefix) {
   this->is_feta = is_feta;
 
   this->sprite = new thoom::Sprite(sprite_path, 32, 32, 250);
@@ -131,8 +134,16 @@ void Mouse::step() {
             char options[256];
             snprintf(options, sizeof(options), "%d,%d,%d,%d,%" PRIu64,
                      int(this->x), int(this->y), x_dir, y_dir, this->gid);
-            thoom::Scene::instance->create_object(sel_item_id + USE_OBJ,
-                                                  std::string(options));
+            if (sel_item_id == ITEM_SAVE) {
+              thoom::Scene::instance->create_object(sel_item_id + USE_OBJ,
+                                                    std::string(options));
+            } else if (sel_item_id == ITEM_COFFEE_BEAN) {
+              new UsedCoffeeBean(*this);
+            } else {
+              thoom::Scene::instance->create_entity(
+                  sel_item_id + USE_OBJ, std::string(options),
+                  {thoom::Entity::Ownership::kFixed, this->owner_pid});
+            }
             this->remove_item(sel_item_id);
 
             if (item_info[sel_item_id].type == THROWABLE) {
@@ -188,9 +199,7 @@ void Mouse::step() {
             HitBox::Properties props = {item_info[sel_item_id].damage, 200,
                                         100};
             props.single_use = true;
-            thoom::Scene::instance->create_object(
-                HITBOX_OBJ, HitBox::options(this->gid, this->gid, x_off - 16,
-                                            y_off - 18, 32, 32, props));
+            new HitBox(*this, this, x_off - 16, y_off - 18, 32, 32, props);
 
             // set animation to attacking
             this->sprite->set_animation((this->sprite->animation % 8) +
@@ -213,9 +222,11 @@ void Mouse::step() {
                                      &y_dir);
 
         // toss item
-        thoom::Scene::instance->create_object(
-            TOSSED_ITEM_OBJ, TossedItem::options(this->x, this->y, x_dir, y_dir,
-                                                 false, sel_item_id));
+        thoom::Scene::instance->create_entity(
+            TOSSED_ITEM_OBJ,
+            TossedItem::options(this->x, this->y, x_dir, y_dir, false,
+                                sel_item_id),
+            {thoom::Entity::Ownership::kFixed, this->owner_pid});
         this->remove_item(sel_item_id);
 
         this->is_busy = THROWING;

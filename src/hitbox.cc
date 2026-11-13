@@ -1,62 +1,46 @@
 #include "hitbox.h"
 
-#include <cinttypes>
-#include <cstdio>
-#include <cstdlib>
-#include <string>
+#include <cstdint>
+#include <optional>
 
 #include "foes/foe.h"
 #include "hurtbox.h"
 #include "icon.h"
-#include "object.h"
+#include "object/entity.h"
+#include "object/object.h"
 #include "scene/scene.h"
-#include "thoom/thoom.h"
 
 #ifdef ONSCREEN_DEBUG
 #include "renderer/renderer.h"
 #include "window/window.h"
 #endif
 
-HitBox::HitBox(thoom_gid source_gid, thoom_gid hurtbox_owner_gid, int x_off,
+HitBox::HitBox(thoom::Object& source, thoom::Entity* instigator, int x_off,
                int y_off, int w, int h, HitBox::Properties props)
-    : bounding_box{0, 0, w, h},
-      source_gid(source_gid),
-      hurtbox_owner_gid(hurtbox_owner_gid),
+    : thoom::Entity::Node(source, std::nullopt),
+      bounding_box{0, 0, w, h},
+      shared_cooldowns(props.shared_cooldowns),
+      single_use(props.single_use),
+      shared_id(props.shared_id),
+      source(dynamic_cast<HitSource*>(&source)),
+      instigator(instigator),
+      from_foe(dynamic_cast<Foe*>(instigator) != nullptr),
       x_off(x_off),
       y_off(y_off),
       damage(props.damage),
       cooldown_ms(props.cooldown_ms),
-      delete_after_ms(props.delete_after_ms),
-      shared_cooldowns(props.shared_cooldowns),
-      shared_id(props.shared_id),
-      single_use(props.single_use) {
+      delete_after_ms(props.delete_after_ms) {
+  if (this->source == nullptr) {
+    this->deleted = true;
+    return;
+  }
+
   this->created_ticks = thoom::Scene::instance->ticks;
   this->src_rect = DEBUG_HITBOX_ICON;
-
-  // if not from a foe, hit all hurtboxes
-  this->from_foe = false;
-
-  if (hurtbox_owner_gid != THOOM_GID_INVALID) {
-    // if from a foe, hit only mice
-    thoom::Object* owner_obj =
-        thoom::Scene::instance->find_gid_object(hurtbox_owner_gid);
-    Foe* foe;
-    if ((foe = dynamic_cast<Foe*>(owner_obj)) != nullptr) {
-      this->from_foe = true;
-    }
-  }
-}
-
-HitBox::~HitBox() {
-  // do nothing
 }
 
 void HitBox::step() {
-  thoom::Object* source_object =
-      thoom::Scene::instance->find_gid_object(this->source_gid);
-  HitSource* source = dynamic_cast<HitSource*>(source_object);
-
-  if (source == nullptr ||
+  if (this->source == nullptr ||
       (this->delete_after_ms > 0 &&
        thoom::Scene::instance->ticks - this->created_ticks >
            this->delete_after_ms)) {
@@ -69,22 +53,25 @@ void HitBox::step() {
 
   for (HurtBox* hb : hurtboxes) {
     if (this->from_foe && hb->owner_class == HurtBox::OwnerClass::FOE) {
-      continue;  // don't hit other foes
+      continue;
     }
 
-    if (this->hurtbox_owner_gid != hb->owner_gid &&
+    if (this->instigator != &hb->entity && hb->update() &&
         SDL_HasRectIntersection(&this->bounding_box, &hb->bounding_box)) {
       hb->hurt(this->damage, this, this->cooldown_ms);
-      source->hitsource_notify();
+      this->source->hitsource_notify();
 
       if (this->single_use) {
-        // will be deleted on next loop
         this->created_ticks =
             thoom::Scene::instance->ticks - (this->delete_after_ms + 1000);
-        break;  // end for loop
+        break;
       }
     }
   }
+}
+
+uint64_t HitBox::cooldown_key() const {
+  return this->shared_cooldowns ? this->shared_id : this->lid;
 }
 
 void HitBox::render() {
@@ -95,30 +82,4 @@ void HitBox::render() {
                                          &this->src_rect, &this->dst_rect,
                                          THOOM_SCREEN_HEIGHT);
 #endif
-}
-
-thoom::Object* HitBox::create_object(thoom::Scene* scene,
-                                     const std::string& options) {
-  thoom_gid source_gid, hurtbox_owner_gid, shared_id;
-  int x_off, y_off, w, h, damage, cooldown_ms, delete_after_ms,
-      shared_cooldowns, single_use;
-  if (12 != sscanf(options.c_str(),
-                   "%" SCNu64 ",%" SCNu64 ",%d,%d,%d,%d,%d,%d,%d,%d,%" SCNu64
-                   ",%d",
-                   &source_gid, &hurtbox_owner_gid, &x_off, &y_off, &w, &h,
-                   &damage, &cooldown_ms, &delete_after_ms, &shared_cooldowns,
-                   &shared_id, &single_use)) {
-    // TODO(micahdbak): error
-    std::exit(1);
-  }
-
-  HitBox::Properties props;
-  props.damage = damage;
-  props.cooldown_ms = cooldown_ms;
-  props.delete_after_ms = delete_after_ms;
-  props.shared_cooldowns = shared_cooldowns == 1;
-  props.shared_id = shared_id;
-  props.single_use = single_use == 1;
-
-  return new HitBox(source_gid, hurtbox_owner_gid, x_off, y_off, w, h, props);
 }

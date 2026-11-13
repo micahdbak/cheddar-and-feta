@@ -58,7 +58,7 @@ void InitHost::step() {
 
     if (!thoom::save.has(LOAD_MAP)) thoom::save.data[LOAD_MAP] = "maps/demo00";
 
-    thoom::Scene::instance->request_map(thoom::save.data[LOAD_MAP]);
+    thoom::Scene::instance->request_map(thoom::save.data[LOAD_MAP], true);
     return;
   }
 

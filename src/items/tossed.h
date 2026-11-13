@@ -1,15 +1,16 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <cstdio>
 #include <string>
 
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 #include "sprite/sprite.h"
 
 #define TOSSED_ITEM_OBJ "tossed_item"
 
-class TossedItem : public thoom::Object {
+class TossedItem : public thoom::Entity {
  public:
   static std::string options(int x, int y, int x_dir, int y_dir, bool from_feta,
                              std::string item_id) {
@@ -19,13 +20,13 @@ class TossedItem : public thoom::Object {
     return std::string(buff);
   }
 
-  TossedItem(float x, float y, int x_dir, int y_dir, bool from_feta,
-             std::string item_id);
+  TossedItem(const thoom::Entity::Context& context, float x, float y, int x_dir,
+             int y_dir, bool from_feta, std::string item_id);
   ~TossedItem();
 
   void step() override;
   void render() override;
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

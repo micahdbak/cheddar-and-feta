@@ -9,6 +9,7 @@
 #include "game_hud.h"
 #include "items/persister.h"
 #include "mouse.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
@@ -25,9 +26,11 @@ bool require_item(const GameHud::Item& item) {
   return true;
 }
 
-DroppedItem::DroppedItem(std::string item_id, float x, float y,
+DroppedItem::DroppedItem(const thoom::Entity::Context& context,
+                         std::string item_id, float x, float y,
                          const char* sprite_path, int frame_w, int frame_h,
-                         int interval_ms) {
+                         int interval_ms)
+    : thoom::Entity(context) {
   this->item_id = item_id;
   this->x = x;
   this->y = y;

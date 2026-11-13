@@ -1,12 +1,13 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <cstddef>
 #include <string>
 
 #include "foes/foe.h"
 #include "mouse.h"
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 #include "sprite/sprite.h"
 
 #define FOE_SPITTER_OBJ "foe_spitter"
@@ -20,7 +21,8 @@ class Spitter : public Foe {
     int x, y, direction;
   };
 
-  Spitter(float x, float y, int spawner_id);
+  Spitter(const thoom::Entity::Context& context, float x, float y,
+          int spawner_id);
   ~Spitter();
 
   void action(Mouse* mouse) override;
@@ -37,7 +39,7 @@ class Spitter : public Foe {
   float abdomen_distance = 256.0f;
 
   Foe::State prev_state = Foe::State::IDLE;
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

@@ -113,6 +113,6 @@ bool GameHud::show_hud(void* user) {
 }
 
 void GameHud::exit_to_main_menu(void* user) {
-  thoom::Scene::instance->request_map("maps/init");
+  thoom::Scene::instance->request_map("maps/init", true);
   thoom::save.clear();
 }

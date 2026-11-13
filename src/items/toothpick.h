@@ -1,10 +1,11 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include "hitbox.h"
 #include "items/item.h"
 #include "mouse.h"
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 #include "thoom/thoom.h"
 
 #define ITEM_TOOTHPICK "item_toothpick"
@@ -13,23 +14,24 @@
 
 class DroppedToothpick : public DroppedItem {
  public:
-  DroppedToothpick(float x, float y)
-      : DroppedItem(ITEM_TOOTHPICK, x, y, "sprites/item_toothpick.bmp", 16, 16,
-                    0) {
+  DroppedToothpick(const thoom::Entity::Context& context, float x, float y)
+      : DroppedItem(context, ITEM_TOOTHPICK, x, y, "sprites/item_toothpick.bmp",
+                    16, 16, 0) {
     this->sprite->set_animation(1);
   }
   ~DroppedToothpick() = default;
 
   void take(Mouse* mouse) override { mouse->push_item(ITEM_TOOTHPICK); }
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 };
 
 // ---- thrown toothpick ----
 
-class ThrownToothpick : public thoom::Object, public HitSource {
+class ThrownToothpick : public thoom::Entity, public HitSource {
  public:
-  ThrownToothpick(float x, float y, int x_dir, int y_dir, thoom_gid from_gid);
+  ThrownToothpick(const thoom::Entity::Context& context, float x, float y,
+                  int x_dir, int y_dir, thoom_gid from_gid);
   ~ThrownToothpick();
 
   void step() override;
@@ -39,7 +41,7 @@ class ThrownToothpick : public thoom::Object, public HitSource {
   float hitsource_y() override { return this->y; }
 
   void hitsource_notify() override;
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

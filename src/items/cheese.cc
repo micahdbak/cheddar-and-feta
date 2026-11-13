@@ -6,13 +6,16 @@
 
 #include "items/item.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "render_functions.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "texture/texture.h"
+#include "thoom/thoom.h"
 
-Cheese::Cheese(float x, float y, int amount) {
+Cheese::Cheese(const thoom::Entity::Context& context, float x, float y,
+               int amount)
+    : thoom::Entity(context) {
   this->x = x;
   this->y = y;
   this->amount = amount;
@@ -61,11 +64,12 @@ void Cheese::drop_cheese(int x, int y, int min_amount, int max_amount) {
       min_amount +
       ((max_amount - min_amount) > 0 ? SDL_rand(max_amount - min_amount) : 0);
   char cheese_opt[256];
-  thoom::Scene::instance->create_object(ITEM_CHEESE DROPPED_OBJ,
-                                        Cheese::options(x, y, amount));
+  thoom::Scene::instance->create_entity(
+      ITEM_CHEESE DROPPED_OBJ, Cheese::options(x, y, amount),
+      {thoom::Entity::Ownership::kRoundRobin, THOOM_PID_INVALID});
 }
 
-thoom::Object* Cheese::create_object(thoom::Scene* scene,
+thoom::Entity* Cheese::create_entity(const thoom::Entity::Context& context,
                                      const std::string& options) {
   int x, y, amount;
   int fields = sscanf(options.c_str(), "%d,%d,%d", &x, &y, &amount);
@@ -77,5 +81,5 @@ thoom::Object* Cheese::create_object(thoom::Scene* scene,
     std::exit(1);
   }
 
-  return new Cheese(float(x), float(y), amount);
+  return new Cheese(context, float(x), float(y), amount);
 }

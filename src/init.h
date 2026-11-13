@@ -6,8 +6,7 @@
 
 #include "init_host.h"
 #include "init_join.h"
-#include "object.h"
-#include "scene/scene.h"
+#include "object/object.h"
 
 #define INIT_OBJ "init"
 
@@ -19,8 +18,7 @@ class Init : public thoom::Object {
   void step() override;
   void render() override;
 
-  static thoom::Object* create_object(thoom::Scene* scene,
-                                      const std::string& options);
+  static thoom::Object* create_object(const std::string& options);
 
  private:
   enum Which { kChoose, kHost, kJoin };

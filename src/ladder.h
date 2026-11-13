@@ -2,18 +2,18 @@
 
 #include <string>
 
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 
 #define LADDER_OBJ "ladder"
 
-class Ladder : public thoom::Object {
+class Ladder : public thoom::Entity {
  public:
-  Ladder(int x, int y, std::string next_map, int which_coord);
+  Ladder(const thoom::Entity::Context& context, int x, int y,
+         std::string next_map, int which_coord);
   ~Ladder();
 
   void step() override;
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

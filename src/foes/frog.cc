@@ -12,21 +12,22 @@
 #include "items/cheese.h"
 #include "items/item.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/thoom.h"
 
-FoeFrog::FoeFrog(int x, int y, int spawner_id)
-    : Foe(float(x), float(y), spawner_id, 500, 250, 128.0f, 64.0f) {
+FoeFrog::FoeFrog(const thoom::Entity::Context& context, int x, int y,
+                 int spawner_id)
+    : Foe(context, float(x), float(y), spawner_id, 500, 250, 128.0f, 64.0f) {
   this->sprite = new thoom::Sprite("sprites/foe_frog.bmp", 48, 48, 125);
   this->dst_rect.w = 48.0f;
   this->dst_rect.h = 48.0f;
   this->icon_offset = 16;
 
-  thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->gid, -16, -16, 32, 32));
+  new HurtBox(*this, -16, -16, 32, 32);
 }
 
 FoeFrog::~FoeFrog() {
@@ -52,8 +53,9 @@ void FoeFrog::action(Mouse* mouse) {
   snprintf(options, sizeof(options), "%d,%d,%d,%d,%" PRIu64,
            (int)(this->x + this->off_x), (int)(this->y + this->off_y),
            this->x_dir, this->y_dir, this->gid);
-  thoom::Scene::instance->create_object(std::string(ITEM_CANNON_BALL USE_OBJ),
-                                        std::string(options));
+  thoom::Scene::instance->create_entity(
+      std::string(ITEM_CANNON_BALL USE_OBJ), std::string(options),
+      {thoom::Entity::Ownership::kFixed, this->owner_pid});
 
   // for action animation
   this->sprite->set_frame(0);
@@ -134,8 +136,9 @@ void FoeFrog::step() {
         char options[256];
         snprintf(options, sizeof(options), "%d,%d", int(this->x + this->off_x),
                  int(this->y + this->off_y));
-        thoom::Scene::instance->create_object(
-            std::string(ITEM_CANNON_BALL DROPPED_OBJ), std::string(options));
+        thoom::Scene::instance->create_entity(
+            std::string(ITEM_CANNON_BALL DROPPED_OBJ), std::string(options),
+            {thoom::Entity::Ownership::kRoundRobin, THOOM_PID_INVALID});
 
         return;
       }
@@ -179,7 +182,7 @@ void FoeFrog::render() {
       &this->dst_rect, 32);
 }
 
-thoom::Object* FoeFrog::create_object(thoom::Scene* scene,
+thoom::Entity* FoeFrog::create_entity(const thoom::Entity::Context& context,
                                       const std::string& options) {
   int x = 0, y = 0, spawner_id = 0;
   if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
@@ -187,5 +190,5 @@ thoom::Object* FoeFrog::create_object(thoom::Scene* scene,
     std::exit(1);
   }
 
-  return new FoeFrog(x, y, spawner_id);
+  return new FoeFrog(context, x, y, spawner_id);
 }

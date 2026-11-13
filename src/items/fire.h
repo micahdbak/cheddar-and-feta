@@ -1,17 +1,19 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <string>
 
 #include "hitbox.h"
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 #include "sprite/sprite.h"
 
 #define ITEM_FIRE "item_fire"
 
-class Fire : public thoom::Object, public HitSource {
+class Fire : public thoom::Entity, public HitSource {
  public:
-  Fire(float x, float y, int x_dir, int y_dir);
+  Fire(const thoom::Entity::Context& context, float x, float y, int x_dir,
+       int y_dir);
   ~Fire();
 
   void step() override;
@@ -19,7 +21,7 @@ class Fire : public thoom::Object, public HitSource {
 
   float hitsource_x() override { return this->x; }
   float hitsource_y() override { return this->y; }
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

@@ -11,7 +11,7 @@
 #include "guest_feta.h"
 #include "icon.h"
 #include "map/map_collider.h"
-#include "object.h"
+#include "object/object.h"
 #include "peer/peer.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
@@ -46,7 +46,7 @@ void GuestPeerReceiver::step() {
     // If currently in a map other than the init map, return to the menu. The
     // init menu ends any surviving session when it opens.
     if (thoom::Scene::instance->map->path != "maps/init") {
-      thoom::Scene::instance->request_map("maps/init");
+      thoom::Scene::instance->request_map("maps/init", true);
       last_frame_ticks = 0;
     }
 
@@ -79,7 +79,7 @@ void GuestPeerReceiver::step() {
     // 5 seconds of no frames; disconnect
     if (thoom::Scene::instance->ticks - last_frame_ticks > 5000 &&
         last_frame_ticks != 0) {
-      thoom::Scene::instance->request_map("maps/init");
+      thoom::Scene::instance->request_map("maps/init", true);
       last_frame_ticks = 0;
     }
 
@@ -380,7 +380,6 @@ void GuestPeerReceiver::load_map(const std::string& map,
   this->just_loaded_map = true;
 }
 
-thoom::Object* GuestPeerReceiver::create_object(thoom::Scene* scene,
-                                                const std::string& options) {
+thoom::Object* GuestPeerReceiver::create_object(const std::string& options) {
   return new GuestPeerReceiver();
 }

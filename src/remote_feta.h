@@ -1,18 +1,20 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <cstdint>
 #include <string>
 
 #include "hitbox.h"
 #include "mouse.h"
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 
 #define FETA_OBJ "feta"
 
 class RemoteFeta : public Mouse, public HitSource {
  public:
-  RemoteFeta(int x, int y, int animation);
+  RemoteFeta(const thoom::Entity::Context& context, int x, int y,
+             int animation);
   ~RemoteFeta();
 
   // Object
@@ -35,7 +37,7 @@ class RemoteFeta : public Mouse, public HitSource {
 
   void synchronize();
 
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
   // directly acted on by HostPeerReceiver

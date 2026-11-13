@@ -13,7 +13,7 @@
 #include "items/fire.h"
 #include "items/item.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
@@ -22,17 +22,13 @@
 #include "thoom/macros.h"
 #include "utils/utils.h"
 
-Spitter::Spitter(float x, float y, int spawner_id)
-    : Foe(x, y, spawner_id, 200, 250, 256.0f, 80.0f) {
-  // make NUM_SEGMENTS-1 segments (the NUM_SEGMENTS'th segment is the abdomen)
+Spitter::Spitter(const thoom::Entity::Context& context, float x, float y,
+                 int spawner_id)
+    : Foe(context, x, y, spawner_id, 200, 250, 256.0f, 80.0f) {
   for (int i = 1; i < NUM_SEGMENTS; i++) {
-    thoom::Scene::instance->create_object(
-        FOE_SPITTER_SEGMENT_OBJ,
-        std::to_string(this->gid) + "," + std::to_string(i));
+    new SpitterSegment(*this, i);
   }
-
-  thoom::Scene::instance->create_object(FOE_SPITTER_ABDOMEN_OBJ,
-                                        std::to_string(this->gid));
+  new SpitterAbdomen(*this);
 
   this->off_x = 0.0f;
   this->off_y = 0.0f;
@@ -52,8 +48,8 @@ void Spitter::action(Mouse* mouse) {
 }
 
 void Spitter::attack_internal(int damage) {
-  if (hurtbox_hitbox_gid == HB_SHARED_FIRE ||
-      hurtbox_hitbox_gid == HB_SHARED_SPITTER) {
+  if (hurtbox_hitbox_key == HB_SHARED_FIRE ||
+      hurtbox_hitbox_key == HB_SHARED_SPITTER) {
     return;  // fire does no damage
   }
 
@@ -184,9 +180,11 @@ void Spitter::step() {
 
         int fire_x_dir, fire_y_dir;
         thoom::dirs_from_direction(this->direction, &fire_x_dir, &fire_y_dir);
-        thoom::Scene::instance->create_object(
-            ITEM_FIRE USE_OBJ, UseItem::options(fire_x, fire_y, fire_x_dir * 2,
-                                                fire_y_dir * 2, -1));
+        thoom::Scene::instance->create_entity(
+            ITEM_FIRE USE_OBJ,
+            UseItem::options(fire_x, fire_y, fire_x_dir * 2, fire_y_dir * 2,
+                             -1),
+            {thoom::Entity::Ownership::kFixed, this->owner_pid});
 
         if (SDL_rand(2)) {
           thoom::Audio::instance->play("sfx/fire_short1.wav", 1.0f, this->x,
@@ -290,7 +288,7 @@ void Spitter::render() {
       &this->dst_rect, 16);
 }
 
-thoom::Object* Spitter::create_object(thoom::Scene* scene,
+thoom::Entity* Spitter::create_entity(const thoom::Entity::Context& context,
                                       const std::string& options) {
   int x, y, spawner_id;
   if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
@@ -298,5 +296,5 @@ thoom::Object* Spitter::create_object(thoom::Scene* scene,
     std::exit(1);
   }
 
-  return new Spitter(x, y, spawner_id);
+  return new Spitter(context, x, y, spawner_id);
 }

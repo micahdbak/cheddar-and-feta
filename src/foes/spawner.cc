@@ -5,15 +5,17 @@
 #include <string>
 #include <vector>
 
-#include "object.h"
+#include "object/entity.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
+#include "thoom/thoom.h"
 
 FoeSpawner* spawners[20];
 
-FoeSpawner::FoeSpawner(float x, float y, int spawner_id, int animation,
+FoeSpawner::FoeSpawner(const thoom::Entity::Context& context, float x, float y,
+                       int spawner_id, int animation,
                        const std::vector<std::vector<std::string>>& waves)
-    : x(x), y(y), spawner_id(spawner_id), waves(waves) {
+    : thoom::Entity(context), x(x), y(y), spawner_id(spawner_id), waves(waves) {
   char key[256];
   snprintf(key, sizeof(key), "spawner_%d", this->spawner_id);
   if (thoom::save.geti(key) == 1) {
@@ -37,7 +39,8 @@ void FoeSpawner::step() {
     char buff[256];
     snprintf(buff, sizeof(buff), "%d,%d,%d", (int)this->x, (int)this->y,
              this->spawner_id);
-    thoom::Scene::instance->create_object(obj, buff);
+    thoom::Scene::instance->create_entity(
+        obj, buff, {thoom::Entity::Ownership::kRoundRobin, THOOM_PID_INVALID});
   }
 }
 
@@ -65,7 +68,7 @@ void FoeSpawner::log_death() {
   }
 }
 
-thoom::Object* FoeSpawner::create_object(thoom::Scene* scene,
+thoom::Entity* FoeSpawner::create_entity(const thoom::Entity::Context& context,
                                          const std::string& options) {
   const char* arr = options.c_str();
 
@@ -102,5 +105,5 @@ thoom::Object* FoeSpawner::create_object(thoom::Scene* scene,
     if (*arr != '\0') arr++;
   }
 
-  return new FoeSpawner(x, y, spawner_id, animation, waves);
+  return new FoeSpawner(context, x, y, spawner_id, animation, waves);
 }

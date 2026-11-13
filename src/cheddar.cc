@@ -12,7 +12,7 @@
 #include "items/persister.h"
 #include "items/save.h"
 #include "mouse.h"
-#include "object.h"
+#include "object/entity.h"
 #include "peer/peer.h"
 #include "remote_feta.h"
 #include "renderer/renderer.h"
@@ -23,8 +23,9 @@
 #include "foes/foe.h"
 #endif
 
-Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates)
-    : Mouse("sprites/cheddar.bmp", false, CHEDDAR_OBJ) {
+Cheddar::Cheddar(const thoom::Entity::Context& context,
+                 std::vector<Mouse::SpawnCoord>& coordinates)
+    : Mouse(context, "sprites/cheddar.bmp", false, CHEDDAR_OBJ) {
   if (cheddar != nullptr) {
     // TODO(micahdbak): error
     std::exit(1);
@@ -71,12 +72,12 @@ Cheddar::Cheddar(std::vector<Mouse::SpawnCoord>& coordinates)
   char feta_options[256];
   snprintf(feta_options, sizeof(feta_options), "%d,%d,%d", feta_x, feta_y,
            feta_animation);
-  thoom::Scene::instance->create_object(FETA_OBJ, std::string(feta_options));
+  thoom::Scene::instance->create_entity(
+      FETA_OBJ, std::string(feta_options),
+      {thoom::Entity::Ownership::kFixed, this->owner_pid});
 
-  // push item persister and hurtbox
   thoom::Scene::instance->create_object(ITEM_PERSISTER_OBJ, "");
-  thoom::Scene::instance->create_object(
-      HURTBOX_OBJ, HurtBox::options(this->gid, -8, -8, 16, 12));
+  new HurtBox(*this, -8, -8, 16, 12);
 }
 
 Cheddar::~Cheddar() { cheddar = nullptr; }
@@ -101,7 +102,7 @@ void Cheddar::signal_down() {
   // signal implies that the remote feta is down; check if we are down too
   if (this->is_down && this->is_busy == DOWNED && remote_feta != nullptr &&
       remote_feta->is_down) {
-    thoom::Scene::instance->request_map("maps/dead");
+    thoom::Scene::instance->request_map("maps/dead", true);
   }
 }
 
@@ -112,11 +113,11 @@ void Cheddar::on_down() {
   if ((remote_feta != nullptr && remote_feta->is_down) ||
       peer_state == thoom::Peer::kStateNoConnection ||
       peer_state == thoom::Peer::kStateWaitingForPeer) {
-    thoom::Scene::instance->request_map("maps/dead");
+    thoom::Scene::instance->request_map("maps/dead", true);
   }
 }
 
-thoom::Object* Cheddar::create_object(thoom::Scene* scene,
+thoom::Entity* Cheddar::create_entity(const thoom::Entity::Context& context,
                                       const std::string& options) {
   const char* arr = options.c_str();
   std::vector<Mouse::SpawnCoord> coordinates;
@@ -138,5 +139,5 @@ thoom::Object* Cheddar::create_object(thoom::Scene* scene,
     if (*arr == '\0') break;
   } while (++i < 10);  // max ten coords, incase something really breaks
 
-  return new Cheddar(coordinates);
+  return new Cheddar(context, coordinates);
 }

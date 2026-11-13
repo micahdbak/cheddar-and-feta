@@ -1,15 +1,16 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <cstdio>
 #include <string>
 
-#include "object.h"
-#include "scene/scene.h"
+#include "object/entity.h"
 
 #define ITEM_CHEESE "item_cheese"
 
 // dropped cheese
-class Cheese : public thoom::Object {
+class Cheese : public thoom::Entity {
  public:
   static std::string options(int x, int y, int amount) {
     char buff[256];
@@ -17,14 +18,14 @@ class Cheese : public thoom::Object {
     return std::string(buff);
   }
 
-  Cheese(float x, float y, int amount);
+  Cheese(const thoom::Entity::Context& context, float x, float y, int amount);
   ~Cheese();
 
   void step() override;
   void render() override;
 
   static void drop_cheese(int x, int y, int min_amount, int max_amount);
-  static thoom::Object* create_object(thoom::Scene* scene,
+  static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 
  private:

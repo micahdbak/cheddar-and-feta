@@ -4,13 +4,14 @@
 
 #include <string>
 
+#include "hitbox.h"
 #include "hurtbox.h"
 #include "object/entity.h"
 #include "sprite/sprite.h"
 
 #define BELL_OBJ "bell"
 
-class Bell : public thoom::Entity, public HurtSource {
+class Bell : public thoom::Entity, public HitReceiver {
  public:
   Bell(const thoom::Entity::Context& context, int x, int y, int spawner_id);
   ~Bell();
@@ -18,10 +19,11 @@ class Bell : public thoom::Entity, public HurtSource {
   void step() override;
   void render() override;
 
-  float hurtsource_x() override { return this->x; }
-  float hurtsource_y() override { return this->y; }
+  float hurt_x() const override { return this->x; }
+  float hurt_y() const override { return this->y; }
 
-  void attack(int damage) override;
+  void receive_hit(const Hit& hit) override;
+  void attack(int damage);
   static thoom::Entity* create_entity(const thoom::Entity::Context& context,
                                       const std::string& options);
 

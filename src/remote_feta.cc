@@ -43,7 +43,7 @@ RemoteFeta::RemoteFeta(const thoom::Entity::Context& context, int x, int y,
     this->place((float)x, (float)y);
   }
 
-  new HurtBox(*this, -8, -8, 16, 12);
+  new HurtBox(*this, kBodyHurtboxNid, HURT_GROUP_MOUSE, -8, -8, 16, 12);
 }
 
 RemoteFeta::~RemoteFeta() { remote_feta = nullptr; }

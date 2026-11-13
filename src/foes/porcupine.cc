@@ -28,7 +28,7 @@ FoePorcupine::FoePorcupine(const thoom::Entity::Context& context, int x, int y,
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  new HurtBox(*this, -6, -8, 12, 16);
+  new HurtBox(*this, kBodyHurtboxNid, HURT_GROUP_FOE, -6, -8, 12, 16);
 }
 
 FoePorcupine::~FoePorcupine() {
@@ -61,7 +61,6 @@ void FoePorcupine::attack_internal(int damage) {
   if (this->health <= 0) {
     this->health = 0;
     this->state = Foe::State::DEAD;
-    this->remove_from_foes();
 
     int kills = thoom::save.geti(FOE_PORCUPINE_OBJ STATS) + 1;
     thoom::save.puti(FOE_PORCUPINE_OBJ STATS, kills);

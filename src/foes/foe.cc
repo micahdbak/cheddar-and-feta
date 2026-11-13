@@ -2,14 +2,13 @@
 
 #include <vector>
 
+#include "hitbox.h"
 #include "mouse.h"
 #include "object/entity.h"
 #include "scene/scene.h"
 #include "spawner.h"
 #include "thoom/macros.h"
 #include "utils/utils.h"
-
-std::vector<Foe*> foes;
 
 static std::vector<int> speed_offsets = {0, 4, 8, 4, 2, -2, -4, -8, -4};
 static int speed_offsets_i = 0;
@@ -31,8 +30,6 @@ Foe::Foe(const thoom::Entity::Context& context, float x, float y,
   this->y = center_tile_y(this->target_y);
 
   this->state = Foe::State::IDLE;
-
-  foes.push_back(this);
 
   this->speed += speed_offsets[speed_offsets_i];
   speed_offsets_i++;
@@ -56,20 +53,8 @@ Foe::Foe(const thoom::Entity::Context& context, float x, float y,
 }
 
 Foe::~Foe() {
-  this->remove_from_foes();
-
   if (this->spawner_id >= 0 && spawners[this->spawner_id] != nullptr) {
     spawners[this->spawner_id]->log_death();
-  }
-}
-
-void Foe::remove_from_foes() {
-  // remove this foe from the foes list
-  for (auto it = foes.begin(); it != foes.end(); it++) {
-    if (*it == this) {
-      foes.erase(it);
-      break;
-    }
   }
 }
 
@@ -82,6 +67,20 @@ void Foe::attack(int damage) {
   this->attack_internal(damage);
   this->walk_offset = thoom::Scene::instance->ticks - this->start_ticks;
 }
+
+void Foe::receive_hit(const Hit& hit) {
+  this->attack(hit.damage);
+
+  if (hit.throw_away) {
+    thoom::dir_to_point(hit.contact_x, hit.contact_y, this->x, this->y,
+                        &this->throw_x, &this->throw_y);
+  } else {
+    thoom::dir_to_point(this->x, this->y, hit.contact_x, hit.contact_y,
+                        &this->throw_x, &this->throw_y);
+  }
+}
+
+bool Foe::hittable() const { return this->state != Foe::State::DEAD; }
 
 void Foe::foe_step() {
   switch (this->state) {

@@ -6,9 +6,7 @@
 #include "SDL3/SDL_stdinc.h"
 #include "foe.h"
 #include "mouse.h"
-#include "renderer/renderer.h"
 #include "scene/scene.h"
-#include "texture/texture.h"
 #include "thoom/log.h"
 #include "thoom/macros.h"
 #include "utils/utils.h"
@@ -306,67 +304,4 @@ void foe_move_direction(int* x, int* y, int x_dir, int y_dir) {
   } else {
     foe_pick_random(x, y);
   }
-}
-
-static SDL_FRect debug_src_rect[] = {
-    SDL_FRect{0.0f, 0.0f, 16.0f, 16.0f},  SDL_FRect{16.0f, 0.0f, 16.0f, 16.0f},
-    SDL_FRect{32.0f, 0.0f, 16.0f, 16.0f}, SDL_FRect{48.0f, 0.0f, 16.0f, 16.0f},
-    SDL_FRect{64.0f, 0.0f, 16.0f, 16.0f}, SDL_FRect{80.0f, 0.0f, 16.0f, 16.0f},
-    SDL_FRect{96.0f, 0.0f, 16.0f, 16.0f}, SDL_FRect{112.0f, 0.0f, 16.0f, 16.0f},
-    SDL_FRect{128.0f, 0.0f, 16.0f, 16.0f}};
-
-SDL_FRect* debug_dst_rect = nullptr;
-SDL_Texture* debug_tiles_texture = nullptr;
-
-void foe_debug_tile(int x, int y) {
-  if (debug_dst_rect == nullptr) {
-    debug_dst_rect = (SDL_FRect*)malloc(sizeof(SDL_FRect) * rows * cols);
-    debug_tiles_texture =
-        thoom::Texture::instance->load("sprites/foe_debug.bmp");
-  }
-
-  float center_x = center_tile_x(x);
-  float center_y = center_tile_y(y);
-
-  float dist1 = thoom::distance_between_points(center_x, center_y, cheddar->x,
-                                               cheddar->y);
-  float dist2 = thoom::distance_between_points(center_x, center_y,
-                                               remote_feta->x, remote_feta->y);
-  Mouse* mouse = nullptr;
-
-  if (dist1 < dist2) {
-    mouse = cheddar;
-  } else {
-    mouse = remote_feta;
-  }
-
-  int* prev = mouse->is_feta ? _feta_prev : _cheddar_prev;
-
-  if (x < 0 || x >= cols || y < 0 || y >= rows) {
-    return;
-  }
-
-  SDL_FRect *src_rect, *dst_rect;
-
-  int prev_tile = prev[COORD(x, y)];
-  if (prev_tile >= 0) {
-    int px = prev_tile % cols;
-    int py = prev_tile / rows;
-
-    int x_dir = px - x;
-    int y_dir = py - y;
-    int direction = thoom::direction_from_dirs(x_dir, y_dir);
-
-    src_rect = &debug_src_rect[direction];
-  } else {
-    src_rect = &debug_src_rect[8];
-  }
-
-  debug_dst_rect[COORD(x, y)] = SDL_FRect{
-      (float)(x * thoom::Scene::instance->map->tile_width),
-      (float)(y * thoom::Scene::instance->map->tile_height), 16.0f, 16.0f};
-  dst_rect = &debug_dst_rect[COORD(x, y)];
-
-  thoom::Renderer::instance->push_sprite(
-      "sprites/foe_debug.bmp", debug_tiles_texture, src_rect, dst_rect, 0);
 }

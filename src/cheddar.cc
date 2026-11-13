@@ -17,11 +17,7 @@
 #include "renderer/renderer.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
-
-#ifdef ONSCREEN_DEBUG
-#include "foes/foe.h"
 #include "thoom/log.h"
-#endif
 
 Cheddar::Cheddar(const thoom::Entity::Context& context,
                  std::vector<Mouse::SpawnCoord>& coordinates)
@@ -75,7 +71,7 @@ Cheddar::Cheddar(const thoom::Entity::Context& context,
       {thoom::Entity::Ownership::kFixed, this->owner_pid});
 
   thoom::Scene::instance->create_object(ITEM_PERSISTER_OBJ, "");
-  new HurtBox(*this, -8, -8, 16, 12);
+  new HurtBox(*this, kBodyHurtboxNid, HURT_GROUP_MOUSE, -8, -8, 16, 12);
 }
 
 Cheddar::~Cheddar() { cheddar = nullptr; }
@@ -83,14 +79,6 @@ Cheddar::~Cheddar() { cheddar = nullptr; }
 void Cheddar::render() {
   GameHud::draw_items(this->items, this->sel_item, this->health,
                       this->max_health);
-
-#ifdef ONSCREEN_DEBUG
-  for (int ty = this->tile_y - 12; ty < this->tile_y + 13; ty++) {
-    for (int tx = this->tile_x - 12; tx < this->tile_x + 13; tx++) {
-      foe_debug_tile(tx, ty);
-    }
-  }
-#endif
 
   thoom::Renderer::instance->set_view(this->x, this->y);
   Mouse::render();

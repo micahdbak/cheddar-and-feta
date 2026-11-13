@@ -38,7 +38,7 @@ ThrownToothpick::ThrownToothpick(const thoom::Entity::Context& context, float x,
 
   this->spawned_ticks = thoom::Scene::instance->ticks;
 
-  HitBox::Properties props = {1, 1000, 1000};
+  HitBox::Properties props = {1, 60, 60};
   props.single_use = true;
   new HitBox(*this, obj, -8, -8, 16, 16, props);
 }

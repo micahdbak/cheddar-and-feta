@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <string>
+#include <vector>
 
 #include "item.h"
 #include "mouse.h"
@@ -46,12 +47,18 @@ void TossedItem::step() {
   float new_y = this->y + dy;
 
   float mouse_distance = 32.0f;
-  if (from_feta) {
-    mouse_distance =
-        thoom::distance_between_points(new_x, new_y, cheddar->x, cheddar->y);
-  } else {
-    mouse_distance = thoom::distance_between_points(
-        new_x, new_y, remote_feta->x, remote_feta->y);
+  const std::vector<thoom::Entity*> entities =
+      thoom::Scene::instance->find_entities(
+          thoom::Entity::AuthorityScope::kAll);
+  for (thoom::Entity* entity : entities) {
+    Mouse* mouse = dynamic_cast<Mouse*>(entity);
+    if (mouse == nullptr || mouse->is_feta == this->from_feta) {
+      continue;
+    }
+
+    const float distance =
+        thoom::distance_between_points(new_x, new_y, mouse->x, mouse->y);
+    mouse_distance = THOOM_MIN(mouse_distance, distance);
   }
 
   if (thoom::Scene::instance->map->collider->point_in_collider(new_x, new_y) ||

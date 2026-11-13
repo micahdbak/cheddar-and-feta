@@ -71,7 +71,7 @@ void GuestPeerSender::send_message(char func, const std::string& arg) {
 void GuestPeerSender::send_audio(const char* wav_path, float gain, float x,
                                  float y) {
   char buff[256];
-  snprintf(buff, sizeof(buff), "%s %d,%d,%d\n", wav_path, (int)(10.0f * gain),
+  snprintf(buff, sizeof(buff), "%s %d,%d,%d", wav_path, (int)(10.0f * gain),
            (int)x, (int)y);
   GuestPeerSender::send_message(MSG_AUDIO, std::string(buff));
 }

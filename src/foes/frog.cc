@@ -27,7 +27,7 @@ FoeFrog::FoeFrog(const thoom::Entity::Context& context, int x, int y,
   this->dst_rect.h = 48.0f;
   this->icon_offset = 16;
 
-  new HurtBox(*this, -16, -16, 32, 32);
+  new HurtBox(*this, kBodyHurtboxNid, HURT_GROUP_FOE, -16, -16, 32, 32);
 }
 
 FoeFrog::~FoeFrog() {
@@ -67,7 +67,6 @@ void FoeFrog::attack_internal(int damage) {
   if (this->health <= 0) {
     this->health = 0;
     this->state = Foe::State::DEAD;
-    this->remove_from_foes();
 
     int kills = thoom::save.geti(FOE_FROG_OBJ STATS) + 1;
     thoom::save.puti(FOE_FROG_OBJ STATS, kills);

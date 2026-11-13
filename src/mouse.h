@@ -7,6 +7,8 @@
 #include <vector>
 
 #include "game_hud.h"
+#include "hitbox.h"
+#include "hurtbox.h"
 #include "object/entity.h"
 #include "sprite/sprite.h"
 
@@ -29,7 +31,7 @@
 #define DANCING2_ANIMATION 50
 #define SLEEPING_ANIMATION 51
 
-class Mouse : public thoom::Entity {
+class Mouse : public thoom::Entity, public HitReceiver {
  public:
   struct SpawnCoord {
     float x, y;
@@ -47,6 +49,11 @@ class Mouse : public thoom::Entity {
   void save_data() override;
 
   virtual void attack(int damage);
+  void receive_hit(const Hit& hit) override;
+
+  float hurt_x() const override { return this->x; }
+  float hurt_y() const override { return this->y; }
+
   virtual void push_item(const std::string& item_id);
   virtual void push_cheese(int amount);
   virtual void remove_item(const std::string& item_id);

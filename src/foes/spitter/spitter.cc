@@ -7,7 +7,6 @@
 #include "audio/audio.h"
 #include "foes/foe.h"
 #include "hitbox.h"
-#include "hurtbox.h"
 #include "icon.h"
 #include "items/fire.h"
 #include "items/item.h"
@@ -47,18 +46,20 @@ void Spitter::action(Mouse* mouse) {
   this->timer = thoom::Scene::instance->ticks;
 }
 
-void Spitter::attack_internal(int damage) {
-  if (hurtbox_hitbox_key == HB_SHARED_FIRE ||
-      hurtbox_hitbox_key == HB_SHARED_SPITTER) {
-    return;  // fire does no damage
+void Spitter::receive_hit(const Hit& hit) {
+  if (hit.type == HitType::kFire || hit.type == HitType::kSpitter) {
+    return;
   }
 
+  Foe::receive_hit(hit);
+}
+
+void Spitter::attack_internal(int damage) {
   this->health -= damage;
 
   if (this->health <= 0) {
     this->health = 0;
     this->state = Foe::State::DEAD;
-    this->remove_from_foes();
 
     thoom::save.puti(FOE_SPITTER_OBJ STATS,
                      thoom::Scene::instance->ticks - this->start_timer);

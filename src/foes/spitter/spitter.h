@@ -6,6 +6,7 @@
 #include <string>
 
 #include "foes/foe.h"
+#include "hitbox.h"
 #include "mouse.h"
 #include "object/entity.h"
 #include "sprite/sprite.h"
@@ -27,6 +28,7 @@ class Spitter : public Foe {
 
   void action(Mouse* mouse) override;
   void attack_internal(int damage) override;
+  void receive_hit(const Hit& hit) override;
 
   void step() override;
   void render() override;

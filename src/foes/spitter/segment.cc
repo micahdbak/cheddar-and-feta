@@ -12,7 +12,7 @@
 #include "utils/utils.h"
 
 SpitterSegment::SpitterSegment(Spitter& spitter, int segment_id)
-    : thoom::Entity::Node(spitter, std::nullopt),
+    : thoom::Entity::Node(spitter, spitter_segment_nid(segment_id)),
       spitter(spitter),
       segment_id(segment_id) {
   this->sprite = new thoom::Sprite("sprites/foe_spitter_segment.bmp", 32, 32,
@@ -21,12 +21,14 @@ SpitterSegment::SpitterSegment(Spitter& spitter, int segment_id)
   this->dst_rect.w = 32.0f;
   this->dst_rect.h = 32.0f;
 
-  new HurtBox(*this, -12, -12, 24, 24);
+  new HurtBox(*this, spitter_segment_hurtbox_nid(segment_id), HURT_GROUP_FOE,
+              -12, -12, 24, 24);
   new HitBox(*this, nullptr, -8, -8, 16, 16,
              HitBox::Properties{.damage = 2,
-                                .cooldown_ms = 1000,
-                                .shared_cooldowns = true,
-                                .shared_id = HB_SHARED_SPITTER});
+                                .cooldown_ticks = 60,
+                                .type = HitType::kSpitter,
+                                .cooldown_scope = this->entity.gid,
+                                .cooldown_group = kSharedCooldownGroup});
 
   this->cur_dir = 0;
   for (int i = 0; i < FRAMES_TO_SET_CUR_DIR; i++) this->dirs[i] = 0;

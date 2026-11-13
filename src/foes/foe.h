@@ -2,8 +2,8 @@
 
 #include <SDL3/SDL.h>
 
-#include <vector>
-
+#include "hitbox.h"
+#include "hurtbox.h"
 #include "mouse.h"
 #include "object/entity.h"
 #include "scene/scene.h"
@@ -28,9 +28,8 @@ bool foe_move_away(Mouse* mouse, int* x, int* y);
 bool foe_move_circle(Mouse* mouse, int* x, int* y);
 void foe_pick_random(int* x, int* y);
 void foe_move_direction(int* x, int* y, int x_dir, int y_dir);
-void foe_debug_tile(int x, int y);
 
-class Foe : public thoom::Entity {
+class Foe : public thoom::Entity, public HitReceiver {
  public:
   Foe(const thoom::Entity::Context& context, float x, float y, int spawner_id,
       int speed, int throw_speed, float stalking_distance,
@@ -42,9 +41,12 @@ class Foe : public thoom::Entity {
   virtual void attack_internal(int damage) = 0;
 
   void attack(int damage);
+  void receive_hit(const Hit& hit) override;
 
-  // manages state and movement
-  void remove_from_foes();
+  float hurt_x() const override { return this->x + this->off_x; }
+  float hurt_y() const override { return this->y + this->off_y; }
+  bool hittable() const override;
+
   void foe_step();
 
   enum State {
@@ -83,5 +85,3 @@ class Foe : public thoom::Entity {
 
   FoeStrafe strafe;
 };
-
-extern std::vector<Foe*> foes;

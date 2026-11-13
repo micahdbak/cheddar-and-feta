@@ -106,7 +106,7 @@ void HostPeerReceiver::step() {
           }
 
           HitBox::make_offset(x_dir, y_dir, &x_off, &y_off, 8.0f);
-          HitBox::Properties props = {item_info[sel_item_id].damage, 200, 100};
+          HitBox::Properties props = {item_info[sel_item_id].damage, 12, 6};
           props.single_use = true;
 
           new HitBox(*remote_feta, remote_feta, x_off - 16, y_off - 18, 32, 32,

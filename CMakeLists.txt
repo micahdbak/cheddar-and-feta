@@ -15,7 +15,7 @@ endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-option(CNF_ONSCREEN_DEBUG "Draw hitbox, hurtbox, and pathing overlays" OFF)
+option(CNF_ONSCREEN_DEBUG "Draw hitbox and hurtbox overlays" OFF)
 
 if(NOT WIN32)
   add_library(sanitizers INTERFACE)

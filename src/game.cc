@@ -14,23 +14,27 @@
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "sounds.h"
+#include "thoom/log.h"
 #include "thoom/thoom.h"
 #include "window/window.h"
 
 bool game_run(const GameDef& def, int argc, char** argv) {
   if (!thoom_init(def.title, THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT,
                   def.background, def.hud)) {
+    thoom_log_error("game_run: could not initialize thoom");
     return false;
   }
 
   register_render_functions();
 
   if (!thoom::Scene::init("", true)) {
+    thoom_log_error("game_run: could not initialize the scene");
     thoom_quit();
     return false;
   }
 
   if (!def.init(argc, argv)) {
+    thoom_log_error("game_run: game init failed");
     thoom::Scene::quit();
     thoom_quit();
     return false;

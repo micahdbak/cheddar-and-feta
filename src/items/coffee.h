@@ -3,13 +3,13 @@
 #include <SDL3/SDL.h>
 
 #include <cstdio>
-#include <cstdlib>
 #include <optional>
 
 #include "item.h"
 #include "mouse.h"
 #include "object/entity.h"
 #include "scene/scene.h"
+#include "thoom/log.h"
 
 #define ITEM_COFFEE_BEAN "item_coffee_bean"
 
@@ -25,7 +25,8 @@ class DroppedCoffeeBean : public DroppedItem {
                                       const std::string& options) {
     int x, y;
     if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
-      std::exit(1);
+      thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+      return nullptr;
     }
 
     return new DroppedCoffeeBean(context, float(x), float(y));

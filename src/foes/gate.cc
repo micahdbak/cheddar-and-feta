@@ -1,7 +1,6 @@
 #include "gate.h"
 
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 
 #include "audio/audio.h"
@@ -13,6 +12,7 @@
 #include "scene/scene.h"
 #include "spawner.h"
 #include "sprite/sprite.h"
+#include "thoom/log.h"
 
 FoeGate::FoeGate(const thoom::Entity::Context& context, int x, int y,
                  int spawner_id, int animation)
@@ -115,8 +115,8 @@ thoom::Entity* FoeGate::create_entity(const thoom::Entity::Context& context,
   int x = 0, y = 0, spawner_id = 0, animation = 0;
   if (4 !=
       sscanf(options.c_str(), "%d,%d,%d,%d", &x, &y, &spawner_id, &animation)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+    return nullptr;
   }
 
   return new FoeGate(context, x, y, spawner_id, animation);

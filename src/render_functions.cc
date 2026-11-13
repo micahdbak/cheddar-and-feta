@@ -1,8 +1,6 @@
 #include "render_functions.h"
 
 #include <cstdio>
-#include <cstdlib>
-#include <iostream>
 #include <string>
 
 #include "colour.h"
@@ -10,14 +8,15 @@
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "texture/texture.h"
+#include "thoom/log.h"
 #include "thoom/macros.h"
 #include "window/window.h"
 
 static SDL_Texture* render_cheese(const std::string& args) {
   int amount = 0;
   if (1 != sscanf(args.c_str(), "%d", &amount)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("render_cheese: bad options '%s'", args.c_str());
+    return nullptr;
   }
 
   SDL_Texture* cheese_texture =
@@ -30,8 +29,9 @@ static SDL_Texture* render_cheese(const std::string& args) {
       w, h, SDL_PIXELFORMAT_RGBA8888, SDL_SCALEMODE_PIXELART);
 
   if (texture == nullptr) {
-    std::cerr << "render_cheese error: " << SDL_GetError() << std::endl;
-    exit(1);
+    thoom_log_fatal("render_cheese: could not create texture: %s",
+                    SDL_GetError());
+    return nullptr;
   }
 
   thoom::Renderer::instance->clear(texture, thoom::kMask);
@@ -63,16 +63,17 @@ static SDL_Texture* render_credits(const std::string& args) {
   int ants = 0, drones = 0, tanks = 0, agents = 0, queen_time = 0;
   if (5 != sscanf(args.c_str(), "%d.%d.%d.%d.%d", &ants, &drones, &tanks,
                   &agents, &queen_time)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("render_credits: bad options '%s'", args.c_str());
+    return nullptr;
   }
 
   SDL_Texture* texture = thoom::Texture::instance->create_texture(
       THOOM_SCREEN_WIDTH, THOOM_SCREEN_HEIGHT, SDL_PIXELFORMAT_RGBA8888,
       SDL_SCALEMODE_PIXELART);
   if (texture == nullptr) {
-    std::cerr << "render_credits error: " << SDL_GetError() << std::endl;
-    exit(1);
+    thoom_log_fatal("render_credits: could not create texture: %s",
+                    SDL_GetError());
+    return nullptr;
   }
 
   thoom::Renderer::instance->clear(texture, thoom::kMask);

@@ -1,5 +1,4 @@
 #include <cstdlib>
-#include <iostream>
 #include <queue>
 #include <utility>
 #include <vector>
@@ -10,6 +9,7 @@
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "texture/texture.h"
+#include "thoom/log.h"
 #include "thoom/macros.h"
 #include "utils/utils.h"
 
@@ -78,10 +78,7 @@ static void _neighbours(int x, int y, std::vector<_Neighbour>& neighbours) {
 
 void foe_path_find(Mouse* mouse) {
   if (thoom::Scene::instance->map->collider->collision == nullptr) {
-    std::cerr << "foe_path_find error: called without "
-                 "Scene::instance->map->collider->collision"
-              << std::endl;
-    std::exit(1);
+    thoom_log_fatal("foe_path_find: map has no collision grid");
   }
 
   if (thoom::Scene::instance->map->rows != rows) {

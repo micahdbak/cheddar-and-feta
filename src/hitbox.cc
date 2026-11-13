@@ -12,6 +12,7 @@
 
 #ifdef ONSCREEN_DEBUG
 #include "renderer/renderer.h"
+#include "thoom/log.h"
 #include "window/window.h"
 #endif
 
@@ -31,6 +32,7 @@ HitBox::HitBox(thoom::Object& source, thoom::Entity* instigator, int x_off,
       cooldown_ms(props.cooldown_ms),
       delete_after_ms(props.delete_after_ms) {
   if (this->source == nullptr) {
+    thoom_log_warn("HitBox: parent is not a HitSource");
     this->deleted = true;
     return;
   }

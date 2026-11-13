@@ -2,7 +2,6 @@
 
 #include <cinttypes>
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 
 #include "hitbox.h"
@@ -12,6 +11,7 @@
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/log.h"
 #include "thoom/macros.h"
 #include "thoom/thoom.h"
 #include "utils/utils.h"
@@ -94,8 +94,8 @@ thoom::Entity* DroppedToothpick::create_entity(
     const thoom::Entity::Context& context, const std::string& options) {
   int x, y;
   if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+    return nullptr;
   }
 
   return new DroppedToothpick(context, float(x), float(y));
@@ -107,8 +107,8 @@ thoom::Entity* ThrownToothpick::create_entity(
   thoom_gid from_gid;
   if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%" SCNu64, &x, &y, &x_dir,
                   &y_dir, &from_gid)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+    return nullptr;
   }
 
   return new ThrownToothpick(context, (float)x, (float)y, x_dir, y_dir,

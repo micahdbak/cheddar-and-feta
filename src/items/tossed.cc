@@ -1,7 +1,6 @@
 #include "tossed.h"
 
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 
 #include "item.h"
@@ -10,6 +9,7 @@
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/log.h"
 #include "thoom/macros.h"
 #include "thoom/thoom.h"
 #include "utils/utils.h"
@@ -85,8 +85,8 @@ thoom::Entity* TossedItem::create_entity(const thoom::Entity::Context& context,
   int x, y, x_dir, y_dir, from_feta;
   if (5 != sscanf(options.c_str(), "%d,%d,%d,%d,%d", &x, &y, &x_dir, &y_dir,
                   &from_feta)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+    return nullptr;
   }
 
   const char* arr = options.c_str();
@@ -94,7 +94,11 @@ thoom::Entity* TossedItem::create_entity(const thoom::Entity::Context& context,
 
   if (*arr == ' ') arr++;
 
-  if (*arr == '\0') return nullptr;
+  if (*arr == '\0') {
+    thoom_log_warn("TossedItem: missing item id in options '%s'",
+                   options.c_str());
+    return nullptr;
+  }
 
   return new TossedItem(context, x, y, x_dir, y_dir, from_feta == 1,
                         std::string(arr));

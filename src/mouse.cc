@@ -5,7 +5,6 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 #include <vector>
 
@@ -25,6 +24,7 @@
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/log.h"
 #include "thoom/macros.h"
 #include "utils/utils.h"
 
@@ -429,8 +429,7 @@ void Mouse::attack(int damage) {
 
 void Mouse::push_item(const std::string& item_id) {
   if (item_info.find(item_id) == item_info.end()) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("Mouse: unknown item '%s'", item_id.c_str());
   }
 
   GameHud::Item new_item;
@@ -535,8 +534,8 @@ std::vector<GameHud::Item> Mouse::read_items(const std::string& items_s,
       char item_id[256];
       int count;
       if (2 != sscanf(arr, "%255[^*] * %d", item_id, &count)) {
-        // TODO(micahdbak): error
-        std::exit(1);
+        thoom_log_fatal("Mouse::read_items: bad item entry '%s'", arr);
+        return ret;
       }
       item_id[255] = '\0';
 

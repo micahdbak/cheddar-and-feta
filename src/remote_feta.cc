@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 
 #include "host_peer_sender.h"
@@ -14,6 +13,7 @@
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/log.h"
 
 #define FETA_SYNC_RETRY_MS 500
 #define FETA_SYNC_TIMEOUT_MS 2000
@@ -22,8 +22,7 @@ RemoteFeta::RemoteFeta(const thoom::Entity::Context& context, int x, int y,
                        int animation)
     : Mouse(context, "sprites/feta.bmp", true, FETA_OBJ) {
   if (remote_feta != nullptr) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("RemoteFeta: another instance exists");
   }
   remote_feta = this;
 
@@ -131,8 +130,8 @@ thoom::Entity* RemoteFeta::create_entity(const thoom::Entity::Context& context,
                                          const std::string& options) {
   int x, y, animation;
   if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &animation)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("RemoteFeta: bad options '%s'", options.c_str());
+    return nullptr;
   }
 
   return new RemoteFeta(context, x, y, animation);

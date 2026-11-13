@@ -1,9 +1,7 @@
 #include "persister.h"
 
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
-#include <iostream>
 #include <string>
 
 #include "item.h"
@@ -11,15 +9,14 @@
 #include "object/object.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
+#include "thoom/log.h"
 #include "thoom/thoom.h"
 
 ItemPersister* item_persister = nullptr;
 
 ItemPersister::ItemPersister() : thoom::Object(nullptr) {
   if (item_persister != nullptr) {
-    std::cerr << "ItemPersister::ItemPersister: another instance exists"
-              << std::endl;
-    std::exit(1);
+    thoom_log_fatal("ItemPersister: another instance exists");
   }
 
   item_persister = this;
@@ -42,8 +39,8 @@ ItemPersister::ItemPersister() : thoom::Object(nullptr) {
       char item_id[128];
       int item_x, item_y;
       if (3 != sscanf(buff, "%127[^,],%d,%d", item_id, &item_x, &item_y)) {
-        // TODO(micahdbak): error
-        std::exit(1);
+        thoom_log_error("ItemPersister: bad save entry '%s'", buff);
+        continue;
       }
 
       item_id[127] = '\0';

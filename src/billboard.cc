@@ -1,12 +1,12 @@
 #include "billboard.h"
 
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 
 #include "object/entity.h"
 #include "renderer/renderer.h"
 #include "sprite/sprite.h"
+#include "thoom/log.h"
 
 Billboard::Billboard(const thoom::Entity::Context& context, int x, int y,
                      int ts_x, int ts_y, int w, int h, int depth,
@@ -43,8 +43,8 @@ void Billboard::parse_options(const std::string& options, int* x, int* y,
   char buff[1024];
   if (8 != sscanf(options.c_str(), "%d,%d,%d,%d,%d,%d,%d,%1023[^\n]", x, y,
                   ts_x, ts_y, w, h, depth, buff)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+    return;
   }
 
   tilesheet = buff;

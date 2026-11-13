@@ -11,6 +11,7 @@
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "texture/texture.h"
+#include "thoom/log.h"
 #include "thoom/thoom.h"
 
 Cheese::Cheese(const thoom::Entity::Context& context, float x, float y,
@@ -29,6 +30,10 @@ void Cheese::load_texture() {
   snprintf(args, sizeof(args), "%d", this->amount);
   this->tex_id = RENDER_CHEESE + args;
   this->texture = thoom::Texture::instance->load(this->tex_id);
+  if (this->texture == nullptr) {
+    thoom_log_fatal("Cheese: could not load texture '%s'",
+                    this->tex_id.c_str());
+  }
 
   this->depth_offset = this->texture->h - 2;
   this->dst_rect.w = float(this->texture->w);
@@ -77,8 +82,8 @@ thoom::Entity* Cheese::create_entity(const thoom::Entity::Context& context,
   if (fields == 2) {
     amount = 1;
   } else if (fields != 3) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+    return nullptr;
   }
 
   return new Cheese(context, float(x), float(y), amount);

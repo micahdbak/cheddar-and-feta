@@ -15,6 +15,7 @@
 
 #ifdef ONSCREEN_DEBUG
 #include "renderer/renderer.h"
+#include "thoom/log.h"
 #include "window/window.h"
 #endif
 
@@ -34,6 +35,7 @@ HurtBox::HurtBox(thoom::Object& owner, int x_off, int y_off, int w, int h)
   } else if (dynamic_cast<Foe*>(&owner) != nullptr) {
     this->owner_class = HurtBox::OwnerClass::FOE;
   } else {
+    thoom_log_warn("HurtBox: owner is not a mouse, foe, or hurt source");
     this->deleted = true;
     return;
   }

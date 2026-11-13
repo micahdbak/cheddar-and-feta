@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 #include <vector>
 
@@ -21,14 +20,14 @@
 
 #ifdef ONSCREEN_DEBUG
 #include "foes/foe.h"
+#include "thoom/log.h"
 #endif
 
 Cheddar::Cheddar(const thoom::Entity::Context& context,
                  std::vector<Mouse::SpawnCoord>& coordinates)
     : Mouse(context, "sprites/cheddar.bmp", false, CHEDDAR_OBJ) {
   if (cheddar != nullptr) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("Cheddar: another instance exists");
   }
   cheddar = this;
 
@@ -56,8 +55,7 @@ Cheddar::Cheddar(const thoom::Entity::Context& context,
 
     // validate
     if (coordinates.empty() || coord < 0 || coord >= coordinates.size()) {
-      // TODO(micahdbak): error
-      std::exit(1);
+      thoom_log_fatal("Cheddar: spawn coordinate %d is invalid", coord);
     }
 
     this->sprite->set_animation(coordinates[coord].animation);

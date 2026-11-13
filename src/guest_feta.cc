@@ -3,7 +3,6 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 #include <vector>
 
@@ -20,6 +19,7 @@
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/log.h"
 #include "thoom/macros.h"
 #include "utils/utils.h"
 
@@ -29,8 +29,7 @@ GuestFeta::GuestFeta(float x, float y, int animation,
                      std::vector<GameHud::Item> items)
     : thoom::Object(nullptr) {
   if (guest_feta != nullptr) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("GuestFeta: another instance exists");
   }
   guest_feta = this;
 
@@ -521,8 +520,7 @@ void GuestFeta::attack(int damage) {
 
 void GuestFeta::push_item(const std::string& item_id) {
   if (guest_item_info.find(item_id) == guest_item_info.end()) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("GuestFeta: unknown item '%s'", item_id.c_str());
   }
 
   GameHud::Item new_item;
@@ -620,8 +618,8 @@ thoom::Object* GuestFeta::create_object(const std::string& options) {
   if (fields == 3) {
     items_s[0] = '\0';
   } else if (fields != 4) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("GuestFeta: bad options '%s'", options.c_str());
+    return nullptr;
   }
 
   return new GuestFeta(thoom::str_to_float(x_str), thoom::str_to_float(y_str),

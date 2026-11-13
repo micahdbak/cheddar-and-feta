@@ -1,11 +1,11 @@
 #pragma once
 
 #include <cstdio>
-#include <cstdlib>
 
 #include "item.h"
 #include "mouse.h"
 #include "object/entity.h"
+#include "thoom/log.h"
 
 #define ITEM_SHIELD "item_shield"
 
@@ -21,7 +21,8 @@ class DroppedShield : public DroppedItem {
                                       const std::string& options) {
     int x, y;
     if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
-      std::exit(1);
+      thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+      return nullptr;
     }
 
     return new DroppedShield(context, float(x), float(y));

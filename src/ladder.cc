@@ -1,9 +1,6 @@
 #include "ladder.h"
 
 #include <cstdio>
-#include <cstdlib>
-#include <iostream>
-#include <ostream>
 #include <string>
 
 #include "audio/audio.h"
@@ -11,6 +8,7 @@
 #include "object/entity.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
+#include "thoom/log.h"
 
 Ladder::Ladder(const thoom::Entity::Context& context, int x, int y,
                std::string next_map, int which_coord)
@@ -42,8 +40,8 @@ thoom::Entity* Ladder::create_entity(const thoom::Entity::Context& context,
                                      const std::string& options) {
   int x, y, which_coord;
   if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &which_coord)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("Ladder: bad options '%s'", options.c_str());
+    return nullptr;
   }
 
   const char* map = options.c_str();
@@ -52,9 +50,8 @@ thoom::Entity* Ladder::create_entity(const thoom::Entity::Context& context,
   if (*map == ' ') map++;  // don't want the last space
 
   if (*map == '\0') {
-    // empty map
-    std::cerr << "Ladder::create_object: no map provided" << std::endl;
-    std::exit(1);
+    thoom_log_fatal("Ladder: no map provided in options '%s'", options.c_str());
+    return nullptr;
   }
 
   return new Ladder(context, x, y, std::string(map), which_coord);

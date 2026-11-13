@@ -1,13 +1,13 @@
 #include "spawner.h"
 
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 #include <vector>
 
 #include "object/entity.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
+#include "thoom/log.h"
 #include "thoom/thoom.h"
 
 FoeSpawner* spawners[20];
@@ -74,8 +74,8 @@ thoom::Entity* FoeSpawner::create_entity(const thoom::Entity::Context& context,
 
   int x = 0, y = 0, spawner_id = 0, animation = 0;
   if (4 != sscanf(arr, "%d,%d,%d,%d", &x, &y, &spawner_id, &animation)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+    return nullptr;
   }
 
   // skip until null byte or space

@@ -1,7 +1,6 @@
 #include "items/item.h"
 
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 #include <unordered_map>
 
@@ -14,13 +13,14 @@
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/log.h"
 
 std::unordered_map<std::string, Item> item_info;
 
 bool require_item(const GameHud::Item& item) {
   if (item_info.find(item.item_id) == item_info.end() || item.count <= 0) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("require_item: bad item '%s'", item.item_id.c_str());
+    return false;
   }
 
   return true;

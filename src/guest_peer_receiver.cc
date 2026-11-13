@@ -17,6 +17,7 @@
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "texture/texture.h"
+#include "thoom/log.h"
 #include "utils/utils.h"
 
 GuestPeerReceiver::~GuestPeerReceiver() { this->clear_sprites(); }
@@ -152,8 +153,8 @@ void GuestPeerReceiver::step() {
                          &src_rect.x, &src_rect.y, &src_rect.w, &src_rect.h,
                          &dst_rect.x, &dst_rect.y, &dst_rect.w, &dst_rect.h,
                          &depth_offset)) {
-          // TODO(micahdbak): error
-          std::exit(1);
+          thoom_log_warn("GuestPeerReceiver: bad sprite message");
+          break;
         }
         buff[1023] = '\0';
 
@@ -173,6 +174,8 @@ void GuestPeerReceiver::step() {
         }
 
         if (sprite.texture == nullptr) {
+          thoom_log_warn("GuestPeerReceiver: could not load texture '%s'",
+                         sprite.tex_id.c_str());
           continue;
         }
 
@@ -192,8 +195,8 @@ void GuestPeerReceiver::step() {
         float gain;
 
         if (4 != sscanf(arr + 1, "%1023s %d,%d,%d", buff, &gain_i, &x, &y)) {
-          // TODO(micahdbak): error
-          std::exit(1);
+          thoom_log_warn("GuestPeerReceiver: bad audio message");
+          break;
         }
         gain = (float)gain_i / 10.0f;
 
@@ -225,8 +228,8 @@ bool GuestPeerReceiver::handle_important_message(const char* arr) {
       int fields = sscanf(arr + 1, "%1023s %255[^,],%255[^,],%d %1023[^\n]\n",
                           map, x_str, y_str, &animation, buff);
       if (fields < 4) {
-        // TODO(micahdbak): error
-        std::exit(1);
+        thoom_log_warn("GuestPeerReceiver: bad sync message");
+        break;
       }
       map[1023] = x_str[255] = y_str[255] = buff[1023] = '\0';
       if (fields == 4) buff[0] = '\0';
@@ -319,8 +322,8 @@ bool GuestPeerReceiver::handle_important_message(const char* arr) {
       if (guest_feta != nullptr) {
         int throw_x, throw_y;
         if (2 != sscanf(arr + 1, "%d,%d", &throw_x, &throw_y)) {
-          // TODO(micahdbak): error
-          std::exit(1);
+          thoom_log_warn("GuestPeerReceiver: bad throw message");
+          break;
         }
         guest_feta->set_throw(throw_x, throw_y);
       } else if (this->just_pushed_feta) {
@@ -345,8 +348,8 @@ bool GuestPeerReceiver::handle_important_message(const char* arr) {
     case MSG_COLLISION:
       int coord, collider;
       if (2 != sscanf(arr + 1, "%d,%d", &coord, &collider)) {
-        // TODO(micahdbak): error
-        std::exit(1);
+        thoom_log_warn("GuestPeerReceiver: bad collision message");
+        break;
       }
 
       if (coord >= 0 &&

@@ -2,12 +2,12 @@
 
 #include <cstdint>
 #include <cstdio>
-#include <cstdlib>
 
 #include "mouse.h"
 #include "object/object.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
+#include "thoom/log.h"
 #include "utils/utils.h"
 
 Freedom::Freedom(int x, int y) : thoom::Object(nullptr) {
@@ -50,8 +50,8 @@ void Freedom::step() {
 thoom::Object* Freedom::create_object(const std::string& options) {
   int x = 0, y = 0;
   if (2 != sscanf(options.c_str(), "%d,%d", &x, &y)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+    return nullptr;
   }
 
   return new Freedom(x, y);

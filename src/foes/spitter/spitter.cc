@@ -1,7 +1,6 @@
 #include "spitter.h"
 
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 
 #include "abdomen.h"
@@ -19,6 +18,7 @@
 #include "scene/scene.h"
 #include "segment.h"
 #include "sprite/sprite.h"
+#include "thoom/log.h"
 #include "thoom/macros.h"
 #include "utils/utils.h"
 
@@ -292,8 +292,8 @@ thoom::Entity* Spitter::create_entity(const thoom::Entity::Context& context,
                                       const std::string& options) {
   int x, y, spawner_id;
   if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+    return nullptr;
   }
 
   return new Spitter(context, x, y, spawner_id);

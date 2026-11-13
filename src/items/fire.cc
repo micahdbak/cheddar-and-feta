@@ -2,7 +2,6 @@
 
 #include <cinttypes>
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 
 #include "hitbox.h"
@@ -10,6 +9,7 @@
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/log.h"
 #include "thoom/macros.h"
 
 static int fire_counter = 0;
@@ -99,8 +99,8 @@ thoom::Entity* Fire::create_entity(const thoom::Entity::Context& context,
   int x, y, x_dir = 0, y_dir = 0;
   if (4 != sscanf(options.c_str(), "%d,%d,%d,%d,%*" SCNu64, &x, &y, &x_dir,
                   &y_dir)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+    return nullptr;
   }
 
   return new Fire(context, (float)x, (float)y, x_dir, y_dir);

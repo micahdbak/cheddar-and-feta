@@ -2,7 +2,6 @@
 
 #include <cinttypes>
 #include <cstdio>
-#include <cstdlib>
 
 #include "audio/audio.h"
 #include "foes/foe.h"
@@ -17,6 +16,7 @@
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/log.h"
 #include "thoom/thoom.h"
 
 FoeFrog::FoeFrog(const thoom::Entity::Context& context, int x, int y,
@@ -186,8 +186,8 @@ thoom::Entity* FoeFrog::create_entity(const thoom::Entity::Context& context,
                                       const std::string& options) {
   int x = 0, y = 0, spawner_id = 0;
   if (3 != sscanf(options.c_str(), "%d,%d,%d", &x, &y, &spawner_id)) {
-    // TODO(micahdbak): error
-    std::exit(1);
+    thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+    return nullptr;
   }
 
   return new FoeFrog(context, x, y, spawner_id);

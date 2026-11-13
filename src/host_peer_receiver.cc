@@ -1,7 +1,6 @@
 #include "host_peer_receiver.h"
 
 #include <cstdio>
-#include <cstdlib>
 #include <queue>
 #include <string>
 
@@ -20,6 +19,7 @@
 #include "save/save_data.h"
 #include "scene/scene.h"
 #include "sprite/sprite.h"
+#include "thoom/log.h"
 #include "utils/utils.h"
 
 void HostPeerReceiver::step() {
@@ -58,8 +58,8 @@ void HostPeerReceiver::step() {
           int x, y, x_dir, y_dir;
           if (5 != sscanf(arr + 1, "%1023s %d,%d,%d,%d", buff, &x, &y, &x_dir,
                           &y_dir)) {
-            // TODO(micahdbak): error
-            std::exit(1);
+            thoom_log_warn("HostPeerReceiver: bad use-item message");
+            break;
           }
 
           std::string options =
@@ -81,8 +81,8 @@ void HostPeerReceiver::step() {
           int x, y, x_dir, y_dir;
           if (5 != sscanf(arr + 1, "%1023s %d,%d,%d,%d", buff, &x, &y, &x_dir,
                           &y_dir)) {
-            // TODO(micahdbak): error
-            std::exit(1);
+            thoom_log_warn("HostPeerReceiver: bad toss-item message");
+            break;
           }
 
           std::string options =
@@ -96,8 +96,8 @@ void HostPeerReceiver::step() {
         case MSG_PUSH_HITBOX: {
           int x_dir, y_dir, x_off, y_off;
           if (3 != sscanf(arr + 1, "%1023s %d,%d", buff, &x_dir, &y_dir)) {
-            // TODO(micahdbak): error
-            std::exit(1);
+            thoom_log_warn("HostPeerReceiver: bad hitbox message");
+            break;
           }
 
           std::string sel_item_id = ITEM_NONE;
@@ -119,8 +119,8 @@ void HostPeerReceiver::step() {
           int animation, frame_i, which_emote;
           if (6 != sscanf(arr + 1, "%1023s %255[^,],%255[^,],%d,%d,%d", map,
                           x_str, y_str, &animation, &frame_i, &which_emote)) {
-            // TODO(micahdbak): error
-            std::exit(1);
+            thoom_log_warn("HostPeerReceiver: bad feta-info message");
+            break;
           }
           map[1023] = x_str[255] = y_str[255] = '\0';
 
@@ -148,8 +148,8 @@ void HostPeerReceiver::step() {
           float gain;
 
           if (4 != sscanf(arr + 1, "%1023s %d,%d,%d", buff, &gain_i, &x, &y)) {
-            // TODO(micahdbak): error
-            std::exit(1);
+            thoom_log_warn("HostPeerReceiver: bad audio message");
+            break;
           }
 
           gain = (float)gain_i / 10.0f;
@@ -164,6 +164,7 @@ void HostPeerReceiver::step() {
           break;
 
         default:
+          thoom_log_warn("HostPeerReceiver: unknown message '%c'", arr[0]);
           break;
       }
     }

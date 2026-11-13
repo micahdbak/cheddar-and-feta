@@ -2,7 +2,6 @@
 
 #include <cinttypes>
 #include <cstdio>
-#include <cstdlib>
 #include <string>
 
 #include "hud/hud.h"
@@ -10,6 +9,7 @@
 #include "object/object.h"
 #include "save/save_data.h"
 #include "scene/scene.h"
+#include "thoom/log.h"
 #include "thoom/thoom.h"
 
 #define ITEM_SAVE "item_save"
@@ -40,7 +40,8 @@ class ItemSaveUse : public thoom::Object {
   static thoom::Object* create_object(const std::string& options) {
     thoom_gid obj_gid;
     if (1 != sscanf(options.c_str(), "%*d,%*d,%*d,%*d,%" SCNu64, &obj_gid)) {
-      std::exit(1);
+      thoom_log_fatal("%s: bad options '%s'", __func__, options.c_str());
+      return nullptr;
     }
 
     bool is_feta = remote_feta != nullptr && remote_feta->gid == obj_gid;

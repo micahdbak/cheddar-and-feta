@@ -2,10 +2,9 @@
 
 #include <SDL3/SDL.h>
 
-#include <cstdlib>
-
 #include "renderer/renderer.h"
 #include "texture/texture.h"
+#include "thoom/log.h"
 #include "window/window.h"
 
 SDL_Texture* icons = nullptr;
@@ -17,7 +16,9 @@ static const unsigned char icons_bmp[] = {
 void load_icons() {
   icons = thoom::Texture::instance->create_texture_from_bmp_memory(
       icons_bmp, sizeof(icons_bmp), SDL_SCALEMODE_NEAREST);
-  if (icons == nullptr) std::exit(1);
+  if (icons == nullptr) {
+    thoom_log_fatal("load_icons: could not load icons: %s", SDL_GetError());
+  }
 }
 
 void draw_icon(SDL_FRect icon, SDL_Texture* dst, SDL_FRect* dst_rect) {
